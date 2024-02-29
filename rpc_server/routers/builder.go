@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// buildRouters 构建路由表
+// buildRouters Build Routers
 func buildRouters(router *gin.Engine) {
 
 	for _, routerMap := range RouterMaps {

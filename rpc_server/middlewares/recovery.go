@@ -10,11 +10,10 @@ import (
 	"strings"
 )
 
-// GenericRecovery 通用错误 (panic) 拦截中间件、对可能发生的错误进行拦截、统一记录
+// GenericRecovery represents the generic error(panic) process
 func GenericRecovery() gin.HandlerFunc {
 	DefaultErrorWriter := &PanicExceptionRecord{}
 	return gin.RecoveryWithWriter(DefaultErrorWriter, func(c *gin.Context, err interface{}) {
-		// 这里针对发生的panic等异常进行统一响应即
 		errStr := ""
 		if conf.Environment.Debugger {
 			errStr = fmt.Sprintf("%v", err)
@@ -23,7 +22,7 @@ func GenericRecovery() gin.HandlerFunc {
 	})
 }
 
-// PanicExceptionRecord  panic等异常记录
+// PanicExceptionRecord represents the record of panic exception
 type PanicExceptionRecord struct{}
 
 func (p *PanicExceptionRecord) Write(b []byte) (n int, err error) {

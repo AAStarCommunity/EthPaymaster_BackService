@@ -9,7 +9,7 @@ import (
 
 var aPort = flag.String("port", "", "端口")
 
-// runMode 获取运行模式
+// runMode running mode
 // @string: 端口
 func runMode() string {
 	// 优先读取命令行参数，其次使用go env，最后使用默认值

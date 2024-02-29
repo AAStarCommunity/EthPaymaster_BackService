@@ -57,14 +57,14 @@ type Response struct {
 	Result   *Result
 }
 
-// Fail 错误返回
+// Fail represents 5XX error
 func (r *Response) Fail(ctx *gin.Context) *Response {
 	r.SetCode(http.StatusInternalServerError)
 	r.json(ctx)
 	return r
 }
 
-// FailCode 自定义错误码返回
+// FailCode customer error codes
 func (r *Response) FailCode(ctx *gin.Context, code int, msg ...string) *Response {
 	r.SetCode(code)
 	if msg != nil {
@@ -74,14 +74,14 @@ func (r *Response) FailCode(ctx *gin.Context, code int, msg ...string) *Response
 	return r
 }
 
-// Success 正确返回
+// Success represents the success response
 func (r *Response) Success(ctx *gin.Context) *Response {
 	r.SetCode(http.StatusOK)
 	r.json(ctx)
 	return r
 }
 
-// WithDataSuccess 成功后需要返回值
+// WithDataSuccess return success with data
 func (r *Response) WithDataSuccess(ctx *gin.Context, data interface{}) *Response {
 	r.SetCode(http.StatusOK)
 	r.WithData(data)
@@ -98,13 +98,13 @@ func (r *Response) withDataAndHttpCode(code int, ctx *gin.Context, data interfac
 	return r
 }
 
-// SetCode 设置返回code码
+// SetCode set business code
 func (r *Response) SetCode(code int) *Response {
 	r.Result.Code = code
 	return r
 }
 
-// SetHttpCode 设置http状态码
+// SetHttpCode set http status code
 func (r *Response) SetHttpCode(code int) *Response {
 	r.httpCode = code
 	return r
@@ -114,7 +114,7 @@ type defaultRes struct {
 	Result any `json:"result"`
 }
 
-// WithData 设置返回data数据
+// WithData represents response with data
 func (r *Response) WithData(data interface{}) *Response {
 	switch data.(type) {
 	case string, int, bool:
@@ -125,13 +125,13 @@ func (r *Response) WithData(data interface{}) *Response {
 	return r
 }
 
-// WithMessage 设置返回自定义错误消息
+// WithMessage represents returns response with message
 func (r *Response) WithMessage(message string) *Response {
 	r.Result.Message = message
 	return r
 }
 
-// json 返回 gin 框架的 HandlerFunc
+// json returns HandlerFunc
 func (r *Response) json(ctx *gin.Context) {
 	r.Result.Cost = time.Since(ctx.GetTime("requestStartTime")).String()
 	ctx.AbortWithStatusJSON(r.httpCode, r.Result)

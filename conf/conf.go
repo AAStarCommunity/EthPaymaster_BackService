@@ -14,9 +14,7 @@ type Conf struct {
 
 var conf *Conf
 
-// getConf 读取配置
-// 默认从配置文件取，如果配置文件中的db节点内容为空，则从环境变量取
-// 如果配置文件不存在，则db从环境变量取，其他值使用默认值
+// getConf read conf from file
 func getConf() *Conf {
 	once.Do(func() {
 		if conf == nil {
@@ -27,8 +25,7 @@ func getConf() *Conf {
 	return conf
 }
 
-// getConfiguration 读取配置
-// 从配置文件读取，如果环境变量存在对应值，则取环境变量值
+// getConfiguration
 func getConfiguration(filePath *string) *Conf {
 	if file, err := os.ReadFile(*filePath); err != nil {
 		return mappingEnvToConf(nil)
