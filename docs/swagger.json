@@ -1,0 +1,40 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/api/v1/sponsor-user-operation": {
+            "post": {
+                "description": "sponsor the userOp",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sponsor"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/validate-user-operation": {
+            "post": {
+                "description": "validate the userOp for sponsor",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sponsor"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    }
+}

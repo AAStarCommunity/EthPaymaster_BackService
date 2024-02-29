@@ -1,0 +1,24 @@
+info:
+  contact: {}
+paths:
+  /api/v1/sponsor-user-operation:
+    post:
+      consumes:
+      - application/json
+      description: sponsor the userOp
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Sponsor
+  /api/v1/validate-user-operation:
+    post:
+      consumes:
+      - application/json
+      description: validate the userOp for sponsor
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Sponsor
+swagger: "2.0"

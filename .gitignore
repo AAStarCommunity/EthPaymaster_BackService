@@ -24,3 +24,5 @@ go.work
 .vscode/
 build/
 config/*.json
+
+conf/appsettings.*.yaml
