@@ -21,7 +21,7 @@ func BadRequest(ctx *gin.Context, data ...any) {
 	GetResponse().withDataAndHttpCode(http.StatusBadRequest, ctx, data)
 }
 
-// Success 业务成功响应
+// Success represents response success
 func Success(ctx *gin.Context, data ...any) {
 	if data != nil {
 		GetResponse().WithDataSuccess(ctx, data[0])
@@ -30,7 +30,7 @@ func Success(ctx *gin.Context, data ...any) {
 	GetResponse().Success(ctx)
 }
 
-// Fail 业务失败响应
+// Fail represents response failed
 func Fail(ctx *gin.Context, code int, message *string, data ...any) {
 	var msg string
 	if message == nil {
