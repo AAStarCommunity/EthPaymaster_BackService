@@ -1,18 +1,36 @@
 package main
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/router"
-	"fmt"
+	"AAStarCommunity/EthPaymaster_BackService/rpc_server/routers"
+	"flag"
+	"os"
+	"strings"
 )
 
-func init() {
-	//init global variables when service start
+var aPort = flag.String("port", "", "端口")
 
+// runMode 获取运行模式
+// @string: 端口
+func runMode() string {
+	// 优先读取命令行参数，其次使用go env，最后使用默认值
+	flag.Parse()
+
+	if len(*aPort) == 0 {
+		*aPort = os.Getenv("port")
+	}
+
+	if len(*aPort) == 0 {
+		*aPort = ":80"
+	}
+
+	if !strings.HasPrefix(*aPort, ":") {
+		*aPort = ":" + *aPort
+	}
+
+	return *aPort
 }
 
 func main() {
-	//use InitRouter
-	router.InitRouter()
-	fmt.Printf("Server now running on 0.0.0.0:%d", 8080)
-	router.Engine.Run(":8080")
+	port := runMode()
+	_ = routers.SetRouters().Run(port)
 }
