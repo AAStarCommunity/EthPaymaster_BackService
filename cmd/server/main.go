@@ -7,12 +7,11 @@ import (
 	"strings"
 )
 
-var aPort = flag.String("port", "", "端口")
+var aPort = flag.String("port", "", "Port")
 
 // runMode running mode
-// @string: 端口
+// @string: Port
 func runMode() string {
-	// 优先读取命令行参数，其次使用go env，最后使用默认值
 	flag.Parse()
 
 	if len(*aPort) == 0 {

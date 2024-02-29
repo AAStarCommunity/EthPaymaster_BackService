@@ -7,8 +7,8 @@ import (
 )
 
 type Env struct {
-	Name     string // 	环境名称
-	Debugger bool   // 是否调试模式
+	Name     string // env Name, like `prod`, `dev` and etc.,
+	Debugger bool   // whether to use debugger
 }
 
 func (env *Env) IsDevelopment() bool {
