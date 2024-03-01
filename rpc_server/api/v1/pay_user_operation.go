@@ -4,14 +4,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SponsorUserOperation
+// TryPayUserOperation
 // @Tags Sponsor
 // @Description sponsor the userOp
 // @Accept json
 // @Product json
-// @Router /api/v1/sponsor-user-operation [post]
+// @Router /api/v1/try-pay-user-operation [post]
 // @Success 200
-func SponsorUserOperation(c *gin.Context) {
+func TryPayUserOperation(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"status": "ok",
 	})

@@ -7,5 +7,5 @@ var RouterMaps []RouterMap
 func init() {
 	RouterMaps = make([]RouterMap, 0)
 
-	RouterMaps = append(RouterMaps, RouterMap{"api/v1/tryPayUserOperation", []RestfulMethod{POST}, v1.TryPayUserOperation})
+	RouterMaps = append(RouterMaps, RouterMap{"api/v1/try-pay-user-operation", []RestfulMethod{POST}, v1.TryPayUserOperation})
 }
