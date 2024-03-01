@@ -8,17 +8,17 @@ import (
 	"net/http"
 )
 
-// TryPayUserOperation
+// GetSupportStrategy
 // @Tags Sponsor
-// @Description sponsor the userOp
+// @Description get the support strategy
 // @Accept json
-// @Product json
-// @Router /api/v1/try-pay-user-operation [post]
-// @Success 200
-func TryPayUserOperation(c *gin.Context) {
+// @Produce json
+// @Success 200 {object} gin.H
+// @Router /api/v1/get_support_strategy [get]
+func GetSupportStrategy(c *gin.Context) {
 	//1.TODO API validate
 	//2. recall service
-	result, err := service.TryPayUserOpExecute()
+	result, err := service.GetSupportStrategyExecute()
 	response := models.GetResponse()
 	if err != nil {
 		errStr := fmt.Sprintf("%v", err)
