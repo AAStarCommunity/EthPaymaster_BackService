@@ -19,3 +19,10 @@ swag init -g ./cmd/server/main.go
 ```
 
 > FAQ: [Unknown LeftDelim and RightDelim in swag.Spec](https://github.com/swaggo/swag/issues/1568)
+
+### 1。3 run
+
+```shell
+go mod tidy
+go run ./cmd/server/main.go
+```

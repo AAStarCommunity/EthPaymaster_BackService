@@ -13,7 +13,7 @@ import (
 // @Description get the support entrypoint
 // @Accept json
 // @Product json
-// @Router /api/v1/get_support_entrypoint [get]
+// @Router /api/v1/get-support-entrypoint [get]
 // @Success 200 {object} gin.H
 func GetSupportEntrypoint(c *gin.Context) {
 	//1.TODO API validate

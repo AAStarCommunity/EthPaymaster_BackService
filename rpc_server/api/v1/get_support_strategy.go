@@ -14,7 +14,7 @@ import (
 // @Accept json
 // @Produce json
 // @Success 200 {object} gin.H
-// @Router /api/v1/get_support_strategy [get]
+// @Router /api/v1/get-support-strategy [get]
 func GetSupportStrategy(c *gin.Context) {
 	//1.TODO API validate
 	//2. recall service
