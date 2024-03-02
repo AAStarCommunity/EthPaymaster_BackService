@@ -25,6 +25,11 @@ func AuthHandler() gin.HandlerFunc {
 		MaxRefresh:  time.Hour / 2,
 		IdentityKey: "jti",
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
+			if v, ok := data.(string); ok {
+				return jwt.MapClaims{
+					"jti": v,
+				}
+			}
 			return jwt.MapClaims{}
 		},
 		Authenticator: func(c *gin.Context) (interface{}, error) {
