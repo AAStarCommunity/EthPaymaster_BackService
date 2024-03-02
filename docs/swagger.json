@@ -4,9 +4,9 @@
         "contact": {}
     },
     "paths": {
-        "/api/v1/sponsor-user-operation": {
-            "post": {
-                "description": "sponsor the userOp",
+        "/api/v1/get-support-entrypoint": {
+            "get": {
+                "description": "get the support entrypoint",
                 "consumes": [
                     "application/json"
                 ],
@@ -20,9 +20,28 @@
                 }
             }
         },
-        "/api/v1/validate-user-operation": {
+        "/api/v1/get-support-strategy": {
+            "get": {
+                "description": "get the support strategy",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sponsor"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/try-pay-user-operation": {
             "post": {
-                "description": "validate the userOp for sponsor",
+                "description": "sponsor the userOp",
                 "consumes": [
                     "application/json"
                 ],

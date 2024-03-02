@@ -1,21 +1,33 @@
 info:
   contact: {}
 paths:
-  /api/v1/sponsor-user-operation:
-    post:
+  /api/v1/get-support-entrypoint:
+    get:
       consumes:
       - application/json
-      description: sponsor the userOp
+      description: get the support entrypoint
       responses:
         "200":
           description: OK
       tags:
       - Sponsor
-  /api/v1/validate-user-operation:
+  /api/v1/get-support-strategy:
+    get:
+      consumes:
+      - application/json
+      description: get the support strategy
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Sponsor
+  /api/v1/try-pay-user-operation:
     post:
       consumes:
       - application/json
-      description: validate the userOp for sponsor
+      description: sponsor the userOp
       responses:
         "200":
           description: OK
