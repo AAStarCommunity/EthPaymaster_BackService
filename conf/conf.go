@@ -9,7 +9,7 @@ import (
 var once sync.Once
 
 type Conf struct {
-	// TODO: Add Conf Structure Here
+	Jwt JWT
 }
 
 var conf *Conf

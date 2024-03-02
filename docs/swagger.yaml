@@ -1,6 +1,31 @@
+definitions:
+  models.ClientCredential:
+    properties:
+      apiKey:
+        type: string
+    type: object
 info:
-  contact: {}
+  contact:
+    name: AAStar Support
+    url: https://aastar.xyz
 paths:
+  /api/auth:
+    post:
+      consumes:
+      - application/json
+      description: Get AccessToken By ApiKey
+      parameters:
+      - description: AccessToken Model
+        in: body
+        name: credential
+        required: true
+        schema:
+          $ref: '#/definitions/models.ClientCredential'
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Auth
   /api/v1/get-support-entrypoint:
     get:
       consumes:
@@ -9,6 +34,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - JWT: []
       tags:
       - Sponsor
   /api/v1/get-support-strategy:
@@ -21,6 +48,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - JWT: []
       tags:
       - Sponsor
   /api/v1/try-pay-user-operation:
@@ -31,6 +60,14 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - JWT: []
       tags:
       - Sponsor
+securityDefinitions:
+  JWT:
+    description: Type 'Bearer \<TOKEN\>' to correctly set the AccessToken
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

@@ -13,8 +13,9 @@ import (
 // @Description get the support entrypoint
 // @Accept json
 // @Product json
-// @Router /api/v1/get-support-entrypoint [get]
+// @Router /api/v1/get-support-entrypoint [GET]
 // @Success 200
+// @Security JWT
 func GetSupportEntrypoint(c *gin.Context) {
 	//1.TODO API validate
 	//2. recall service

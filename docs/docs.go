@@ -10,14 +10,49 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "contact": {
+            "name": "AAStar Support",
+            "url": "https://aastar.xyz"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/auth": {
+            "post": {
+                "description": "Get AccessToken By ApiKey",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "parameters": [
+                    {
+                        "description": "AccessToken Model",
+                        "name": "credential",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ClientCredential"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/v1/get-support-entrypoint": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "get the support entrypoint",
                 "consumes": [
                     "application/json"
@@ -34,6 +69,11 @@ const docTemplate = `{
         },
         "/api/v1/get-support-strategy": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "get the support strategy",
                 "consumes": [
                     "application/json"
@@ -53,6 +93,11 @@ const docTemplate = `{
         },
         "/api/v1/try-pay-user-operation": {
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "sponsor the userOp",
                 "consumes": [
                     "application/json"
@@ -66,6 +111,24 @@ const docTemplate = `{
                     }
                 }
             }
+        }
+    },
+    "definitions": {
+        "models.ClientCredential": {
+            "type": "object",
+            "properties": {
+                "apiKey": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "JWT": {
+            "description": "Type 'Bearer \\\u003cTOKEN\\\u003e' to correctly set the AccessToken",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
