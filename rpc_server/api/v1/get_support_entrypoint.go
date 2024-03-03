@@ -14,7 +14,7 @@ import (
 // @Accept json
 // @Product json
 // @Router /api/v1/get-support-entrypoint [get]
-// @Success 200 {object} gin.H
+// @Success 200
 func GetSupportEntrypoint(c *gin.Context) {
 	//1.TODO API validate
 	//2. recall service

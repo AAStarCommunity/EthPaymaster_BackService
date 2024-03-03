@@ -13,7 +13,7 @@ import (
 // @Description get the support strategy
 // @Accept json
 // @Produce json
-// @Success 200 {object} gin.H
+// @Success 200
 // @Router /api/v1/get-support-strategy [get]
 func GetSupportStrategy(c *gin.Context) {
 	//1.TODO API validate
