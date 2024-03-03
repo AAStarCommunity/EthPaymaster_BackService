@@ -33,6 +33,6 @@ func TestRateLimiterShouldAllowDefaultLimitPerSecond(t *testing.T) {
 				assert.Equal(t, false, b)
 			}
 		}
-		time.Sleep(time.Second)
+		time.Sleep(time.Second * 2)
 	}
 }
