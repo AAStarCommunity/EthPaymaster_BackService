@@ -25,4 +25,6 @@ go.work
 build/
 config/*.json
 
+vendor
+
 conf/appsettings.*.yaml

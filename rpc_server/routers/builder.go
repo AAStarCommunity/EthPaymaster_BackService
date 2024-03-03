@@ -13,6 +13,8 @@ func buildRouters(router *gin.Engine) {
 
 	router.Use(middlewares.AuthHandler())
 	{
+		router.Use(middlewares.RateLimiterByApiKey())
+
 		for _, routerMap := range RouterMaps {
 			for _, method := range routerMap.Methods {
 				if method == GET {
