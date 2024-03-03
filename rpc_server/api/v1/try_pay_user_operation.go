@@ -13,8 +13,9 @@ import (
 // @Description sponsor the userOp
 // @Accept json
 // @Product json
-// @Router /api/v1/try-pay-user-operation [post]
+// @Router /api/v1/try-pay-user-operation [POST]
 // @Success 200
+// @Security JWT
 func TryPayUserOperation(c *gin.Context) {
 	//1.TODO API validate
 	//2. recall service

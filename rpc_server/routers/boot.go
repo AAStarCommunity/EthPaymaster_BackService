@@ -39,7 +39,8 @@ func SetRouters() (routers *gin.Engine) {
 	// use middlewares
 	routers.Use(handlers...)
 
-	buildRouters(routers) // build http routers
+	// build http routers
+	buildRouters(routers)
 
 	routers.NoRoute(func(ctx *gin.Context) {
 		models.GetResponse().SetHttpCode(http.StatusNotFound).FailCode(ctx, http.StatusNotFound)

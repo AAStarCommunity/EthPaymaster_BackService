@@ -14,7 +14,8 @@ import (
 // @Accept json
 // @Produce json
 // @Success 200
-// @Router /api/v1/get-support-strategy [get]
+// @Router /api/v1/get-support-strategy [GET]
+// @Security JWT
 func GetSupportStrategy(c *gin.Context) {
 	//1.TODO API validate
 	//2. recall service

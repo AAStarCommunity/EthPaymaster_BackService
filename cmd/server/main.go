@@ -29,6 +29,13 @@ func runMode() string {
 	return *aPort
 }
 
+// @contact.name   AAStar Support
+// @contact.url    https://aastar.xyz
+// @securityDefinitions.apikey JWT
+// @in header
+// @name Authorization
+// @description Type 'Bearer \<TOKEN\>' to correctly set the AccessToken
+// @BasePath /api
 func main() {
 	port := runMode()
 	_ = routers.SetRouters().Run(port)

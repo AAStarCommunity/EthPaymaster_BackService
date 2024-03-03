@@ -8,6 +8,6 @@ func init() {
 	RouterMaps = make([]RouterMap, 0)
 
 	RouterMaps = append(RouterMaps, RouterMap{"api/v1/try-pay-user-operation", []RestfulMethod{POST}, v1.TryPayUserOperation})
-	RouterMaps = append(RouterMaps, RouterMap{"api/v1/get-support-strategy", []RestfulMethod{POST}, v1.GetSupportStrategy})
-	RouterMaps = append(RouterMaps, RouterMap{"api/v1/get-support-entrypoint", []RestfulMethod{POST}, v1.GetSupportEntrypoint})
+	RouterMaps = append(RouterMaps, RouterMap{"api/v1/get-support-strategy", []RestfulMethod{GET}, v1.GetSupportStrategy})
+	RouterMaps = append(RouterMaps, RouterMap{"api/v1/get-support-entrypoint", []RestfulMethod{GET}, v1.GetSupportEntrypoint})
 }
