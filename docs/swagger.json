@@ -34,6 +34,19 @@
                 }
             }
         },
+        "/api/healthz": {
+            "get": {
+                "description": "Get Healthz",
+                "tags": [
+                    "Healthz"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/v1/get-support-entrypoint": {
             "get": {
                 "security": [
