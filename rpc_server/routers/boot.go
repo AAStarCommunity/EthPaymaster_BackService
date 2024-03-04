@@ -16,22 +16,9 @@ import (
 func SetRouters() (routers *gin.Engine) {
 	routers = gin.New()
 
-	// prod mode
-	if conf.Environment.IsProduction() {
-		gin.SetMode(gin.ReleaseMode)
-		gin.DefaultWriter = io.Discard // disable gin log
-	}
-
-	// dev mod
-	if conf.Environment.IsDevelopment() {
-		gin.SetMode(gin.DebugMode)
-		buildSwagger(routers)
-	}
-
-	// use middlewares
-	handlers := generateHandlers()
-	routers.Use(handlers...)
-
+	buildMod(routers)
+	// pre build handlers
+	buildHandlers(routers)
 	// build http routers
 	buildRouters(routers)
 
@@ -42,6 +29,28 @@ func SetRouters() (routers *gin.Engine) {
 	return
 }
 
+func buildMod(routers *gin.Engine) {
+
+	// prod mode
+	if conf.Environment.IsProduction() {
+		gin.SetMode(gin.ReleaseMode)
+		gin.DefaultWriter = io.Discard // disable gin log
+		return
+	}
+
+	// dev mod
+	if conf.Environment.IsDevelopment() {
+		gin.SetMode(gin.DebugMode)
+		buildSwagger(routers)
+		return
+	}
+}
+func buildHandlers(routers *gin.Engine) {
+	// use middlewares
+	handlers := generateHandlers()
+	routers.Use(handlers...)
+
+}
 func generateHandlers() []gin.HandlerFunc {
 	// middlewares
 	handlers := make([]gin.HandlerFunc, 0)
