@@ -60,7 +60,7 @@ func generateHandlers() []gin.HandlerFunc {
 	}
 	handlers = append(handlers, middlewares.CorsHandler())
 	handlers = append(handlers, middlewares.AuthHandler())
-	handlers = append(handlers, middlewares.RateLimiterByApiKeyByHandler())
+	handlers = append(handlers, middlewares.RateLimiterByApiKeyHandler())
 	return handlers
 }
 
