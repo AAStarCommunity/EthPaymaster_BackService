@@ -1,20 +1,12 @@
 package routers
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/rpc_server/api"
-	"AAStarCommunity/EthPaymaster_BackService/rpc_server/middlewares"
 	"github.com/gin-gonic/gin"
 )
 
 // buildRouters Build Routers
 func buildRouters(router *gin.Engine) {
-
-	router.POST("api/auth", api.Auth)
-
-	router.Use(middlewares.AuthHandler())
 	{
-		router.Use(middlewares.RateLimiterByApiKey())
-
 		for _, routerMap := range RouterMaps {
 			for _, method := range routerMap.Methods {
 				if method == GET {

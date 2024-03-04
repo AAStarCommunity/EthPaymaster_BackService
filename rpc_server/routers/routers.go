@@ -1,14 +1,28 @@
 package routers
 
-import v1 "AAStarCommunity/EthPaymaster_BackService/rpc_server/api/v1"
+import (
+	"AAStarCommunity/EthPaymaster_BackService/rpc_server/api"
+	v1 "AAStarCommunity/EthPaymaster_BackService/rpc_server/api/v1"
+)
 
 var RouterMaps []RouterMap
 
 func init() {
 	RouterMaps = make([]RouterMap, 0)
 
-	RouterMaps = append(RouterMaps, RouterMap{"api/v1/try-pay-user-operation", []RestfulMethod{POST}, v1.TryPayUserOperation})
-	RouterMaps = append(RouterMaps, RouterMap{"api/v1/get-support-strategy", []RestfulMethod{GET}, v1.GetSupportStrategy})
-	RouterMaps = append(RouterMaps, RouterMap{"api/v1/get-support-entrypoint", []RestfulMethod{GET}, v1.GetSupportEntrypoint})
-	RouterMaps = append(RouterMaps, RouterMap{"health", []RestfulMethod{GET}, v1.Hello})
+	RouterMaps = append(RouterMaps, RouterMap{string(TryPayUserOperation), []RestfulMethod{POST}, v1.TryPayUserOperation})
+	RouterMaps = append(RouterMaps, RouterMap{string(GetSupportStrategy), []RestfulMethod{GET}, v1.GetSupportStrategy})
+	RouterMaps = append(RouterMaps, RouterMap{string(GetSupportEntrypoint), []RestfulMethod{GET}, v1.GetSupportEntrypoint})
+	RouterMaps = append(RouterMaps, RouterMap{string(Auth), []RestfulMethod{POST}, api.Auth})
+	RouterMaps = append(RouterMaps, RouterMap{string(Health), []RestfulMethod{GET}, api.Health})
 }
+
+type Path string
+
+const (
+	TryPayUserOperation  Path = "api/v1/try-pay-user-operation"
+	GetSupportStrategy   Path = "api/v1/get-support-strategy"
+	GetSupportEntrypoint Path = "api/v1/get-support-entrypoint"
+	Auth                 Path = "api/auth"
+	Health               Path = "api/health"
+)

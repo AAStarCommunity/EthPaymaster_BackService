@@ -16,14 +16,6 @@ import (
 func SetRouters() (routers *gin.Engine) {
 	routers = gin.New()
 
-	// middlewares
-	handlers := make([]gin.HandlerFunc, 0)
-	handlers = append(handlers, middlewares.GenericRecovery())
-	if conf.Environment.IsDevelopment() {
-		handlers = append(handlers, gin.Logger())
-	}
-	handlers = append(handlers, middlewares.CorsHandler())
-
 	// prod mode
 	if conf.Environment.IsProduction() {
 		gin.SetMode(gin.ReleaseMode)
@@ -37,6 +29,7 @@ func SetRouters() (routers *gin.Engine) {
 	}
 
 	// use middlewares
+	handlers := generateHandlers()
 	routers.Use(handlers...)
 
 	// build http routers
@@ -47,6 +40,19 @@ func SetRouters() (routers *gin.Engine) {
 	})
 
 	return
+}
+
+func generateHandlers() []gin.HandlerFunc {
+	// middlewares
+	handlers := make([]gin.HandlerFunc, 0)
+	handlers = append(handlers, middlewares.GenericRecoveryHandler())
+	if conf.Environment.IsDevelopment() {
+		handlers = append(handlers, middlewares.LogHandler())
+	}
+	handlers = append(handlers, middlewares.CorsHandler())
+	handlers = append(handlers, middlewares.AuthHandler())
+	handlers = append(handlers, middlewares.RateLimiterByApiKeyByHandler())
+	return handlers
 }
 
 // buildSwagger build swagger

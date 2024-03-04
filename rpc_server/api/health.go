@@ -1,4 +1,4 @@
-package v1
+package api
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/conf"
@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func Hello(c *gin.Context) {
+func Health(c *gin.Context) {
 	response := models.GetResponse()
 	response.WithDataSuccess(c, gin.H{
 		"hello":       "Eth Paymaster",
