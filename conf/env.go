@@ -6,17 +6,21 @@ import (
 	"strings"
 )
 
+const envKey = "Env"
+const ProdEnv = "prod"
+const DevEnv = "dev"
+
 type Env struct {
 	Name     string // env Name, like `prod`, `dev` and etc.,
 	Debugger bool   // whether to use debugger
 }
 
 func (env *Env) IsDevelopment() bool {
-	return strings.EqualFold("dev", env.Name)
+	return strings.EqualFold(DevEnv, env.Name)
 }
 
 func (env *Env) IsProduction() bool {
-	return strings.EqualFold("prod", env.Name)
+	return strings.EqualFold(ProdEnv, env.Name)
 }
 
 func (env *Env) GetEnvName() *string {
@@ -34,14 +38,14 @@ func getConfFilePath() *string {
 var Environment *Env
 
 func init() {
-	envName := "prod"
-	if len(os.Getenv("Env")) > 0 {
-		envName = os.Getenv("Env")
+	envName := ProdEnv
+	if len(os.Getenv(envKey)) > 0 {
+		envName = os.Getenv(envKey)
 	}
 	Environment = &Env{
 		Name: envName,
 		Debugger: func() bool {
-			return envName != "prod"
+			return envName != ProdEnv
 		}(),
 	}
 }

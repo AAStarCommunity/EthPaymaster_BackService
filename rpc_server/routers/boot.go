@@ -16,37 +16,44 @@ import (
 func SetRouters() (routers *gin.Engine) {
 	routers = gin.New()
 
-	// middlewares
-	handlers := make([]gin.HandlerFunc, 0)
-	handlers = append(handlers, middlewares.GenericRecovery())
+	buildMod(routers)
+	buildRoute(routers)
+	routers.NoRoute(func(ctx *gin.Context) {
+		models.GetResponse().SetHttpCode(http.StatusNotFound).FailCode(ctx, http.StatusNotFound)
+	})
+
+	return
+}
+func buildRoute(routers *gin.Engine) {
+	// build http routers and middleware
+	routers.Use(middlewares.GenericRecoveryHandler())
 	if conf.Environment.IsDevelopment() {
-		handlers = append(handlers, gin.Logger())
+		routers.Use(middlewares.LogHandler())
 	}
-	handlers = append(handlers, middlewares.CorsHandler())
+	routers.Use(middlewares.CorsHandler())
+	//build the routers not need api access like auth or Traffic limit
+	buildRouters(routers, PublicRouterMaps)
+
+	routers.Use(middlewares.AuthHandler())
+	routers.Use(middlewares.RateLimiterByApiKeyHandler())
+	buildRouters(routers, PrivateRouterMaps)
+}
+
+func buildMod(routers *gin.Engine) {
 
 	// prod mode
 	if conf.Environment.IsProduction() {
 		gin.SetMode(gin.ReleaseMode)
 		gin.DefaultWriter = io.Discard // disable gin log
+		return
 	}
 
 	// dev mod
 	if conf.Environment.IsDevelopment() {
 		gin.SetMode(gin.DebugMode)
 		buildSwagger(routers)
+		return
 	}
-
-	// use middlewares
-	routers.Use(handlers...)
-
-	// build http routers
-	buildRouters(routers)
-
-	routers.NoRoute(func(ctx *gin.Context) {
-		models.GetResponse().SetHttpCode(http.StatusNotFound).FailCode(ctx, http.StatusNotFound)
-	})
-
-	return
 }
 
 // buildSwagger build swagger

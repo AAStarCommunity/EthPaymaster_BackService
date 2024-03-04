@@ -15,8 +15,8 @@ const (
 
 var limiter map[string]*rate.Limiter
 
-// RateLimiterByApiKey represents the rate limit by each ApiKey for each api calling
-func RateLimiterByApiKey() gin.HandlerFunc {
+// RateLimiterByApiKeyHandler represents the rate limit by each ApiKey for each api calling
+func RateLimiterByApiKeyHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		if exists, current := utils.CurrentUser(ctx); exists {
 

@@ -10,8 +10,8 @@ import (
 	"strings"
 )
 
-// GenericRecovery represents the generic error(panic) process
-func GenericRecovery() gin.HandlerFunc {
+// GenericRecoveryHandler represents the generic error(panic) process
+func GenericRecoveryHandler() gin.HandlerFunc {
 	DefaultErrorWriter := &PanicExceptionRecord{}
 	return gin.RecoveryWithWriter(DefaultErrorWriter, func(c *gin.Context, err interface{}) {
 		errStr := ""
