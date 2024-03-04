@@ -44,6 +44,15 @@ func mappingEnvToConf(conf *Conf) *Conf {
 
 	// TODO: read from env
 	// e.g. if dummy := os.Getenv("dummy"); len(dummy) > 0 {conf.Dummy = dummy}
+	if jwt__security := os.Getenv("jwt__security"); len(jwt__security) > 0 {
+		conf.Jwt.Security = jwt__security
+	}
+	if jwt__realm := os.Getenv("jwt__realm"); len(jwt__realm) > 0 {
+		conf.Jwt.Security = jwt__realm
+	}
+	if jwt__idkey := os.Getenv("jwt__idkey"); len(jwt__idkey) > 0 {
+		conf.Jwt.Security = jwt__idkey
+	}
 
 	return conf
 }
