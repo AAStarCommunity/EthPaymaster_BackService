@@ -7,9 +7,9 @@ ADD . /go/src/app
 
 WORKDIR /go/src/app
 
-RUN go env -w GO111MODULE=on \
-    && go mod tidy \
-    && go build -o relay
+RUN go env -w GO111MODULE=on
+RUN go mod tidy
+RUN go build -o relay
 
 ## run
 FROM alpine:3.19
