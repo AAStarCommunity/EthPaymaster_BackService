@@ -7,7 +7,15 @@ import (
 	"time"
 )
 
-func Health(c *gin.Context) {
+// Healthz
+// @Tags Healthz
+// @Description Get Healthz
+// @Accept json
+// @Product json
+// @Param
+// @Router /api/health [post,get,put,delete]
+// @Success 200
+func Healthz(c *gin.Context) {
 	response := models.GetResponse()
 	response.WithDataSuccess(c, gin.H{
 		"hello":       "Eth Paymaster",
