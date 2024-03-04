@@ -28,7 +28,11 @@ func getConf() *Conf {
 // getConfiguration
 func getConfiguration(filePath *string) *Conf {
 	if file, err := os.ReadFile(*filePath); err != nil {
-		return mappingEnvToConf(nil)
+		return mappingEnvToConf(
+			&Conf{
+				Jwt: JWT{},
+			},
+		)
 	} else {
 		c := Conf{}
 		err := yaml.Unmarshal(file, &c)
