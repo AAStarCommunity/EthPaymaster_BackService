@@ -16,11 +16,11 @@ type Env struct {
 }
 
 func (env *Env) IsDevelopment() bool {
-	return strings.EqualFold("dev", env.Name)
+	return strings.EqualFold(DevEnv, env.Name)
 }
 
 func (env *Env) IsProduction() bool {
-	return strings.EqualFold("prod", env.Name)
+	return strings.EqualFold(ProdEnv, env.Name)
 }
 
 func (env *Env) GetEnvName() *string {

@@ -32,11 +32,11 @@ func buildRoute(routers *gin.Engine) {
 	}
 	routers.Use(middlewares.CorsHandler())
 	//build the routers not need api access like auth or Traffic limit
-	buildRouters(routers, RouterNotAPIAccessMaps)
+	buildRouters(routers, PublicRouterMaps)
 
 	routers.Use(middlewares.AuthHandler())
 	routers.Use(middlewares.RateLimiterByApiKeyHandler())
-	buildRouters(routers, RouterMaps)
+	buildRouters(routers, PrivateRouterMaps)
 }
 
 func buildMod(routers *gin.Engine) {
