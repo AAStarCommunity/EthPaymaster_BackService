@@ -26,6 +26,14 @@ paths:
           description: OK
       tags:
       - Auth
+  /api/healthz:
+    get:
+      description: Get Healthz
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Healthz
   /api/v1/get-support-entrypoint:
     get:
       consumes:
