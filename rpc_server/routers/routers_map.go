@@ -15,7 +15,7 @@ func init() {
 	PrivateRouterMaps = append(PrivateRouterMaps, RouterMap{string(GetSupportStrategy), []RestfulMethod{GET}, v1.GetSupportStrategy})
 	PrivateRouterMaps = append(PrivateRouterMaps, RouterMap{string(GetSupportEntrypoint), []RestfulMethod{GET}, v1.GetSupportEntrypoint})
 	PublicRouterMaps = append(PublicRouterMaps, RouterMap{string(Auth), []RestfulMethod{POST}, api.Auth})
-	PublicRouterMaps = append(PublicRouterMaps, RouterMap{string(Healthz), []RestfulMethod{GET, POST, PUT, DELETE}, api.Healthz})
+	PublicRouterMaps = append(PublicRouterMaps, RouterMap{string(Healthz), []RestfulMethod{GET, HEAD, OPTIONS}, api.Healthz})
 }
 
 type Path string
