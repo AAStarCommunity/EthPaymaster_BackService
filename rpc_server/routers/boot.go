@@ -17,16 +17,26 @@ func SetRouters() (routers *gin.Engine) {
 	routers = gin.New()
 
 	buildMod(routers)
-	// pre build handlers
-	buildHandlers(routers)
-	// build http routers
-	buildRouters(routers)
-
+	buildRoute(routers)
 	routers.NoRoute(func(ctx *gin.Context) {
 		models.GetResponse().SetHttpCode(http.StatusNotFound).FailCode(ctx, http.StatusNotFound)
 	})
 
 	return
+}
+func buildRoute(routers *gin.Engine) {
+	// build http routers and middleware
+	routers.Use(middlewares.GenericRecoveryHandler())
+	if conf.Environment.IsDevelopment() {
+		routers.Use(middlewares.LogHandler())
+	}
+	routers.Use(middlewares.CorsHandler())
+	//build the routers not need api access like auth or Traffic limit
+	buildRouters(routers, RouterNotAPIAccessMaps)
+
+	routers.Use(middlewares.AuthHandler())
+	routers.Use(middlewares.RateLimiterByApiKeyHandler())
+	buildRouters(routers, RouterMaps)
 }
 
 func buildMod(routers *gin.Engine) {
@@ -44,24 +54,6 @@ func buildMod(routers *gin.Engine) {
 		buildSwagger(routers)
 		return
 	}
-}
-func buildHandlers(routers *gin.Engine) {
-	// use middlewares
-	handlers := generateHandlers()
-	routers.Use(handlers...)
-
-}
-func generateHandlers() []gin.HandlerFunc {
-	// middlewares
-	handlers := make([]gin.HandlerFunc, 0)
-	handlers = append(handlers, middlewares.GenericRecoveryHandler())
-	if conf.Environment.IsDevelopment() {
-		handlers = append(handlers, middlewares.LogHandler())
-	}
-	handlers = append(handlers, middlewares.CorsHandler())
-	handlers = append(handlers, middlewares.AuthHandler())
-	handlers = append(handlers, middlewares.RateLimiterByApiKeyHandler())
-	return handlers
 }
 
 // buildSwagger build swagger

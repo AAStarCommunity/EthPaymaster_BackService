@@ -6,6 +6,7 @@ import (
 )
 
 var RouterMaps []RouterMap
+var RouterNotAPIAccessMaps []RouterMap
 
 func init() {
 	RouterMaps = make([]RouterMap, 0)
@@ -13,8 +14,8 @@ func init() {
 	RouterMaps = append(RouterMaps, RouterMap{string(TryPayUserOperation), []RestfulMethod{POST}, v1.TryPayUserOperation})
 	RouterMaps = append(RouterMaps, RouterMap{string(GetSupportStrategy), []RestfulMethod{GET}, v1.GetSupportStrategy})
 	RouterMaps = append(RouterMaps, RouterMap{string(GetSupportEntrypoint), []RestfulMethod{GET}, v1.GetSupportEntrypoint})
-	RouterMaps = append(RouterMaps, RouterMap{string(Auth), []RestfulMethod{POST}, api.Auth})
-	RouterMaps = append(RouterMaps, RouterMap{string(Health), []RestfulMethod{GET}, api.Health})
+	RouterNotAPIAccessMaps = append(RouterMaps, RouterMap{string(Auth), []RestfulMethod{POST}, api.Auth})
+	RouterNotAPIAccessMaps = append(RouterMaps, RouterMap{string(Health), []RestfulMethod{GET}, api.Health})
 }
 
 type Path string

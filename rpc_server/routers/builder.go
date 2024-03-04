@@ -5,9 +5,9 @@ import (
 )
 
 // buildRouters Build Routers
-func buildRouters(router *gin.Engine) {
+func buildRouters(router *gin.Engine, routerMaps []RouterMap) {
 	{
-		for _, routerMap := range RouterMaps {
+		for _, routerMap := range routerMaps {
 			for _, method := range routerMap.Methods {
 				if method == GET {
 					router.GET(routerMap.Url, routerMap.Func)
