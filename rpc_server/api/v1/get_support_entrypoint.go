@@ -2,8 +2,7 @@ package v1
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/rpc_server/api/utils"
-	"AAStarCommunity/EthPaymaster_BackService/service/executor"
+	"AAStarCommunity/EthPaymaster_BackService/service/operator"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -18,19 +17,24 @@ import (
 // @Success 200
 // @Security JWT
 func GetSupportEntrypoint(c *gin.Context) {
+	request := model.GetSupportEntrypointRequest{}
 	response := model.GetResponse()
-	if ok, apiKey := utils.CurrentUser(c); ok {
-		_ = apiKey
-
-		//1.TODO API validate
-		//2. recall service
-		result, err := executor.GetSupportEntrypointExecute()
-		if err != nil {
-			errStr := fmt.Sprintf("%v", err)
-			response.SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)
-		}
-		response.WithData(result).Success(c)
-	} else {
-		response.SetHttpCode(http.StatusUnauthorized)
+	//1. API validate
+	if err := c.ShouldBindJSON(&request); err != nil {
+		errStr := fmt.Sprintf("Request Error [%v]", err)
+		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
 	}
+	if err := request.Validate(); err != nil {
+		errStr := fmt.Sprintf("Request Error [%v]", err)
+		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
+	}
+
+	//2. recall service
+	result, err := operator.GetSupportEntrypointExecute(request)
+	if err != nil {
+		errStr := fmt.Sprintf("%v", err)
+		response.SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)
+	}
+	response.WithData(result).Success(c)
+
 }

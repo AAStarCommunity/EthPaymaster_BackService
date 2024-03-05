@@ -25,3 +25,17 @@ func (sender *TryPayUserOpRequest) Validate() error {
 
 	return nil
 }
+
+type GetSupportEntrypointRequest struct {
+}
+
+func (request *GetSupportEntrypointRequest) Validate() error {
+	return nil
+}
+
+type GetSupportStrategyRequest struct {
+}
+
+func (request *GetSupportStrategyRequest) Validate() error {
+	return nil
+}
