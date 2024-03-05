@@ -24,17 +24,20 @@ func TryPayUserOperation(c *gin.Context) {
 	if err := c.ShouldBindJSON(&request); err != nil {
 		errStr := fmt.Sprintf("Request Error [%v]", err)
 		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
+		return
 	}
 
 	if err := request.Validate(); err != nil {
 		errStr := fmt.Sprintf("Request Error [%v]", err)
 		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
+		return
 	}
 	//2. recall service
 	result, err := operator.TryPayUserOpExecute(request)
 	if err != nil {
 		errStr := fmt.Sprintf("TryPayUserOpExecute ERROR [%v]", err)
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)
+		return
 	}
 	response.WithData(result).Success(c)
 }

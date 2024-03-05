@@ -25,15 +25,18 @@ func GetSupportStrategy(c *gin.Context) {
 	if err := c.ShouldBindJSON(&request); err != nil {
 		errStr := fmt.Sprintf("Request Error [%v]", err)
 		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
+		return
 	}
 	if err := request.Validate(); err != nil {
 		errStr := fmt.Sprintf("Request Error [%v]", err)
 		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
+		return
 	}
 	result, err := operator.GetSupportStrategyExecute(request)
 	if err != nil {
 		errStr := fmt.Sprintf("%v", err)
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)
+		return
 	}
 	response.WithData(result).Success(c)
 }

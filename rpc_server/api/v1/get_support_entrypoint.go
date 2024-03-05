@@ -23,10 +23,12 @@ func GetSupportEntrypoint(c *gin.Context) {
 	if err := c.ShouldBindJSON(&request); err != nil {
 		errStr := fmt.Sprintf("Request Error [%v]", err)
 		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
+		return
 	}
 	if err := request.Validate(); err != nil {
 		errStr := fmt.Sprintf("Request Error [%v]", err)
 		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
+		return
 	}
 
 	//2. recall service
@@ -34,6 +36,7 @@ func GetSupportEntrypoint(c *gin.Context) {
 	if err != nil {
 		errStr := fmt.Sprintf("%v", err)
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)
+		return
 	}
 	response.WithData(result).Success(c)
 
