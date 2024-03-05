@@ -12,8 +12,7 @@ import (
 // @Description Get Healthz
 // @Accept json
 // @Product json
-// @Param
-// @Router /api/health [post,get,put,delete]
+// @Router /api/health [get]
 // @Success 200
 func Healthz(c *gin.Context) {
 	response := model.GetResponse()
