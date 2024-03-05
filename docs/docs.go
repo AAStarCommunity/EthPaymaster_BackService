@@ -151,9 +151,6 @@ const docTemplate = `{
         "model.TryPayUserOpRequest": {
             "type": "object",
             "properties": {
-                "apikey": {
-                    "type": "string"
-                },
                 "extra": {},
                 "force_entry_point_address": {
                     "type": "string"
@@ -161,10 +158,10 @@ const docTemplate = `{
                 "force_network": {
                     "type": "string"
                 },
-                "force_tokens": {
+                "force_strategy_id": {
                     "type": "string"
                 },
-                "strategy_id": {
+                "force_tokens": {
                     "type": "string"
                 },
                 "user_operation": {
@@ -176,13 +173,11 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "call_gas_limit",
-                "init_code",
                 "max_fee_per_gas",
                 "max_priority_fee_per_gas",
                 "nonce",
                 "per_verification_gas",
                 "sender",
-                "signature",
                 "verification_gas_list"
             ],
             "properties": {

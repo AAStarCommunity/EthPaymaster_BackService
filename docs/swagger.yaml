@@ -6,16 +6,14 @@ definitions:
     type: object
   model.TryPayUserOpRequest:
     properties:
-      apikey:
-        type: string
       extra: {}
       force_entry_point_address:
         type: string
       force_network:
         type: string
-      force_tokens:
+      force_strategy_id:
         type: string
-      strategy_id:
+      force_tokens:
         type: string
       user_operation:
         $ref: '#/definitions/model.UserOperationItem'
@@ -42,13 +40,11 @@ definitions:
         type: string
     required:
     - call_gas_limit
-    - init_code
     - max_fee_per_gas
     - max_priority_fee_per_gas
     - nonce
     - per_verification_gas
     - sender
-    - signature
     - verification_gas_list
     type: object
 info:
