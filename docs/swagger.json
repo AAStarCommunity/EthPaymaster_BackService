@@ -34,7 +34,7 @@
                 }
             }
         },
-        "/api/health": {
+        "/api/healthz": {
             "get": {
                 "description": "Get Healthz",
                 "consumes": [

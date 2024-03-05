@@ -48,6 +48,9 @@ const docTemplate = `{
         "/api/healthz": {
             "get": {
                 "description": "Get Healthz",
+                "consumes": [
+                    "application/json"
+                ],
                 "tags": [
                     "Healthz"
                 ],

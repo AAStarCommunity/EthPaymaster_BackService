@@ -10,7 +10,7 @@ func GetResponse() *Response {
 	return &Response{
 		httpCode: http.StatusOK,
 		Result: &Result{
-			Code:    0,
+			Code:    200,
 			Message: "",
 			Data:    nil,
 			Cost:    "",

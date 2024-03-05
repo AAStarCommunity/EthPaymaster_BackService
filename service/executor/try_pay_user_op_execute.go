@@ -49,7 +49,7 @@ func TryPayUserOpExecute(request model.TryPayUserOpRequest) (model.Result, error
 	}
 
 	return model.Result{
-		Code:    0,
+		Code:    200,
 		Data:    result,
 		Message: "message",
 		Cost:    "cost",
