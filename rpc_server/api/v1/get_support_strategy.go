@@ -32,7 +32,7 @@ func GetSupportStrategy(c *gin.Context) {
 		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
 		return
 	}
-	result, err := operator.GetSupportStrategyExecute(request)
+	result, err := operator.GetSupportStrategyExecute(&request)
 	if err != nil {
 		errStr := fmt.Sprintf("%v", err)
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)
