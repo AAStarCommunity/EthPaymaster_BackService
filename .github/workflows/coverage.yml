@@ -27,7 +27,7 @@ jobs:
           swag init -g ./cmd/server/main.go
           git config user.name devops
           git config suer.email devops@aastar.xyz
-          git add .
+          git add ./docs
           git commit -m "swagger updated"
           git push
 
