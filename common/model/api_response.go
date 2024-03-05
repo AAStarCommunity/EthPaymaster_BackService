@@ -6,7 +6,7 @@ type TryPayUserOpResponse struct {
 	PayMasterAddress   string              `json:"pay_master_address"`
 	PayMasterSignature string              `json:"pay_master_signature"`
 	PayReceipt         interface{}         `json:"pay_receipt"`
-	GasInfo            *ComputeGasResponse `json:"gaf_info"`
+	GasInfo            *ComputeGasResponse `json:"gas_info"`
 }
 
 type ComputeGasResponse struct {

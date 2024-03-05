@@ -8,17 +8,17 @@ type EthValidator struct {
 	*chain.Base
 }
 
-func (e EthValidator) IsSupport() bool {
+func (e *EthValidator) IsSupport() bool {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e EthValidator) PreValidate() (err error) {
+func (e *EthValidator) PreValidate() (err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e EthValidator) AfterGasValidate() (err error) {
+func (e *EthValidator) AfterGasValidate() (err error) {
 	//TODO implement me
 	panic("implement me")
 }

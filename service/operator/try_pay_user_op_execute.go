@@ -74,7 +74,7 @@ func strategyGenerate(request *model.TryPayUserOpRequest) (*model.Strategy, erro
 	if forceStrategyId := request.ForceStrategyId; forceStrategyId != "" {
 		//force strategy
 		strategy := dashboard_service.GetStrategyById(forceStrategyId)
-		if strategy == (model.Strategy{}) {
+		if &strategy == nil {
 			return &model.Strategy{}, xerrors.Errorf("Not Support Strategy ID: [%w]", forceStrategyId)
 		}
 		return &strategy, nil
@@ -84,7 +84,7 @@ func strategyGenerate(request *model.TryPayUserOpRequest) (*model.Strategy, erro
 	if err != nil {
 		return &model.Strategy{}, err
 	}
-	if suitableStrategy == (model.Strategy{}) {
+	if &suitableStrategy == nil {
 		return &model.Strategy{}, xerrors.Errorf("Empty Strategies")
 	}
 	return &suitableStrategy, nil

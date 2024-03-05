@@ -3,6 +3,7 @@ package operator
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"fmt"
+	"github.com/stretchr/testify/assert"
 
 	"testing"
 )
@@ -10,9 +11,7 @@ import (
 func TestTryPayUserOpExecute(t *testing.T) {
 	request := getMockTryPayUserOpRequest()
 	result, err := TryPayUserOpExecute(&request)
-	if err != nil {
-		t.Errorf("Error: %v", err)
-	}
+	assert.NoError(t, err)
 	fmt.Printf("Result: %v", result)
 
 }
