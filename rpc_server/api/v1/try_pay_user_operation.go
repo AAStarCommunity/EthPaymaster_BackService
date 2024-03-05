@@ -14,6 +14,7 @@ import (
 // @Accept json
 // @Product json
 // @Router /api/v1/try-pay-user-operation [POST]
+// @Param tryPay body model.TryPayUserOpRequest true "UserOp Request"
 // @Success 200
 // @Security JWT
 func TryPayUserOperation(c *gin.Context) {
@@ -23,7 +24,12 @@ func TryPayUserOperation(c *gin.Context) {
 	response := model.GetResponse()
 
 	if err := c.ShouldBindJSON(&request); err != nil {
-		errStr := fmt.Sprintf("Conver Request Error [%v]", err)
+		errStr := fmt.Sprintf("Request Error [%v]", err)
+		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
+	}
+
+	if err := request.Validate(); err != nil {
+		errStr := fmt.Sprintf("Request Error [%v]", err)
 		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
 	}
 

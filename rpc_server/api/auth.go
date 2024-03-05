@@ -10,7 +10,7 @@ import (
 // @Description Get AccessToken By ApiKey
 // @Accept json
 // @Product json
-// @Param credential body models.ClientCredential true "AccessToken Model"
+// @Param credential body model.ClientCredential true "AccessToken Model"
 // @Router /api/auth [post]
 // @Success 200
 func Auth(ctx *gin.Context) {
