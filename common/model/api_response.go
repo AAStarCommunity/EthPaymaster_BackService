@@ -11,8 +11,8 @@ type TryPayUserOpResponse struct {
 
 type ComputeGasResponse struct {
 	StrategyId string
-	tokenCost  string
-	network    string
-	token      string
+	TokenCost  string
+	Network    string
+	Token      string
 	UsdCost    string
 }

@@ -28,6 +28,7 @@ func TryPayUserOperation(c *gin.Context) {
 	}
 
 	result, err := executor.TryPayUserOpExecute(request)
+	//TODO paramValidate
 	if err != nil {
 		errStr := fmt.Sprintf("TryPayUserOpExecute ERROR [%v]", err)
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)

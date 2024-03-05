@@ -10,7 +10,7 @@ import (
 
 func TryPayUserOpExecute(request model.TryPayUserOpRequest) (model.Result, error) {
 	//validator
-	if err := paramValidate(request); err != nil {
+	if err := businessParamValidate(request); err != nil {
 		return model.Result{}, err
 	}
 	userOp := request.UserOperation
@@ -55,7 +55,8 @@ func TryPayUserOpExecute(request model.TryPayUserOpRequest) (model.Result, error
 		Cost:    "cost",
 	}, nil
 }
-func paramValidate(request model.TryPayUserOpRequest) error {
+func businessParamValidate(request model.TryPayUserOpRequest) error {
+	//UserOp Validate
 	return nil
 }
 
