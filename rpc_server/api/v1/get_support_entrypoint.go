@@ -32,7 +32,7 @@ func GetSupportEntrypoint(c *gin.Context) {
 	}
 
 	//2. recall service
-	result, err := operator.GetSupportEntrypointExecute(request)
+	result, err := operator.GetSupportEntrypointExecute(&request)
 	if err != nil {
 		errStr := fmt.Sprintf("%v", err)
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)

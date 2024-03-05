@@ -33,7 +33,7 @@ func TryPayUserOperation(c *gin.Context) {
 		return
 	}
 	//2. recall service
-	result, err := operator.TryPayUserOpExecute(request)
+	result, err := operator.TryPayUserOpExecute(&request)
 	if err != nil {
 		errStr := fmt.Sprintf("TryPayUserOpExecute ERROR [%v]", err)
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)
