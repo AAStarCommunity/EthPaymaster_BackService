@@ -1,8 +1,8 @@
 package v1
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/rpc_server/models"
-	"AAStarCommunity/EthPaymaster_BackService/service"
+	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/service/executor"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -19,10 +19,17 @@ import (
 func TryPayUserOperation(c *gin.Context) {
 	//1.TODO API validate
 	//2. recall service
-	result, err := service.TryPayUserOpExecute()
-	response := models.GetResponse()
+	request := model.TryPayUserOpRequest{}
+	response := model.GetResponse()
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		errStr := fmt.Sprintf("Conver Request Error [%v]", err)
+		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
+	}
+
+	result, err := executor.TryPayUserOpExecute(request)
 	if err != nil {
-		errStr := fmt.Sprintf("%v", err)
+		errStr := fmt.Sprintf("TryPayUserOpExecute ERROR [%v]", err)
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)
 	}
 	response.WithData(result).Success(c)
