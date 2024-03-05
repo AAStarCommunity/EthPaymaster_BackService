@@ -1,0 +1,135 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {
+            "name": "AAStar Support",
+            "url": "https://aastar.xyz"
+        }
+    },
+    "paths": {
+        "/api/auth": {
+            "post": {
+                "description": "Get AccessToken By ApiKey",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "parameters": [
+                    {
+                        "description": "AccessToken Model",
+                        "name": "credential",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ClientCredential"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/healthz": {
+            "get": {
+                "description": "Get Healthz",
+                "tags": [
+                    "Healthz"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/get-support-entrypoint": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "get the support entrypoint",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sponsor"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/get-support-strategy": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "get the support strategy",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sponsor"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/try-pay-user-operation": {
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "sponsor the userOp",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sponsor"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.ClientCredential": {
+            "type": "object",
+            "properties": {
+                "apiKey": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "JWT": {
+            "description": "Type 'Bearer \\\u003cTOKEN\\\u003e' to correctly set the AccessToken",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

@@ -22,14 +22,8 @@ jobs:
       - name: Test
         run: go test -v ./...
       - name: Swagger
-        run: |
-          go install github.com/swaggo/swag/cmd/swag@latest
-          swag init -g ./cmd/server/main.go
-          git config user.name devops
-          git config suer.email devops@aastar.xyz
-          git add ./docs
-          git commit -m "swagger updated"
-          git push
+        run: chmod +x ./.github/scripts/auto-swagger.sh && ./.github/scripts/auto-swagger.sh
+
 
 
 name: Building And Testing
