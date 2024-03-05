@@ -2,13 +2,18 @@ package operator
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"fmt"
 
 	"testing"
 )
 
 func TestTryPayUserOpExecute(t *testing.T) {
 	request := getMockTryPayUserOpRequest()
-	TryPayUserOpExecute(request)
+	result, err := TryPayUserOpExecute(request)
+	if err != nil {
+		t.Errorf("Error: %v", err)
+	}
+	fmt.Printf("Result: %v", result)
 
 }
 

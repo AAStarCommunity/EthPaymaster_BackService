@@ -8,21 +8,15 @@ type TryPayUserOpRequest struct {
 	ForceTokens            string            `json:"force_tokens"`
 	ForceEntryPointAddress string            `json:"force_entry_point_address"`
 	UserOperation          UserOperationItem `json:"user_operation"`
-	Apikey                 string            `json:"apikey"`
 	Extra                  interface{}       `json:"extra"`
 }
 
-func (sender *TryPayUserOpRequest) Validate() error {
-	if len(sender.Apikey) == 0 {
-		return errors.New("apikey mustn't empty")
-	}
-
-	if len(sender.ForceStrategyId) == 0 {
-		if len(sender.ForceNetWork) == 0 || len(sender.ForceTokens) == 0 || len(sender.ForceEntryPointAddress) == 0 {
+func (request *TryPayUserOpRequest) Validate() error {
+	if len(request.ForceStrategyId) == 0 {
+		if len(request.ForceNetWork) == 0 || len(request.ForceTokens) == 0 || len(request.ForceEntryPointAddress) == 0 {
 			return errors.New("strategy configuration illegal")
 		}
 	}
-
 	return nil
 }
 
