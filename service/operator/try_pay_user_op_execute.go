@@ -9,34 +9,36 @@ import (
 )
 
 func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.Result, error) {
-	//validator
+	// validator
 	if err := businessParamValidate(request); err != nil {
-		return &model.Result{}, err
+		return nil, err
 	}
 	userOp := request.UserOperation
-	//getStrategy
-	strategy, err := strategyGenerate(request)
-	if err != nil {
-		return &model.Result{}, err
-	}
-	if err := validator_service.ValidateStrategy(strategy, &userOp); err != nil {
-		return &model.Result{}, err
+
+	// getStrategy
+	var strategy *model.Strategy
+	if stg, err := strategyGenerate(request); err != nil {
+		return nil, err
+	} else if err = validator_service.ValidateStrategy(stg, &userOp); err != nil {
+		return nil, err
+	} else {
+		strategy = stg
 	}
 
 	//base Strategy and UserOp computeGas
 	gasResponse, gasComputeError := gas_service.ComputeGas(&userOp, strategy)
 	if gasComputeError != nil {
-		return &model.Result{}, gasComputeError
+		return nil, gasComputeError
 	}
 
 	//validate gas
 	if err := gas_service.ValidateGas(&userOp, gasResponse); err != nil {
-		return &model.Result{}, err
+		return nil, err
 	}
 	//pay
 	payReceipt, payError := executePay(strategy, &userOp, gasResponse)
 	if payError != nil {
-		return &model.Result{}, payError
+		return nil, payError
 	}
 	paymasterSignature := getPayMasterSignature(strategy, &userOp)
 	var result = model.TryPayUserOpResponse{
@@ -73,19 +75,19 @@ func getPayMasterSignature(strategy *model.Strategy, userOp *model.UserOperation
 func strategyGenerate(request *model.TryPayUserOpRequest) (*model.Strategy, error) {
 	if forceStrategyId := request.ForceStrategyId; forceStrategyId != "" {
 		//force strategy
-		strategy := dashboard_service.GetStrategyById(forceStrategyId)
-		if strategy == (model.Strategy{}) {
+		if strategy := dashboard_service.GetStrategyById(forceStrategyId); strategy == nil {
 			return &model.Strategy{}, xerrors.Errorf("Not Support Strategy ID: [%w]", forceStrategyId)
+		} else {
+			return strategy, nil
 		}
-		return &strategy, nil
 	}
 
-	suitableStrategy, err := dashboard_service.GetSuitableStrategy(&request.ForceEntryPointAddress, &request.ForceNetWork, &request.ForceTokens) //TODO
+	suitableStrategy, err := dashboard_service.GetSuitableStrategy(request.ForceEntryPointAddress, request.ForceNetWork, request.ForceTokens) //TODO
 	if err != nil {
-		return &model.Strategy{}, err
+		return nil, err
 	}
-	if suitableStrategy == (model.Strategy{}) {
-		return &model.Strategy{}, xerrors.Errorf("Empty Strategies")
+	if suitableStrategy == nil {
+		return nil, xerrors.Errorf("Empty Strategies")
 	}
-	return &suitableStrategy, nil
+	return suitableStrategy, nil
 }

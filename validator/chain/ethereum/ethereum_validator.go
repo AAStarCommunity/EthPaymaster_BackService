@@ -4,21 +4,21 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/validator/chain"
 )
 
-type EthValidator struct {
+type Validator struct {
 	*chain.Base
 }
 
-func (e EthValidator) IsSupport() bool {
+func (e *Validator) IsSupport() bool {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e EthValidator) PreValidate() (err error) {
+func (e *Validator) PreValidate() (err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e EthValidator) AfterGasValidate() (err error) {
+func (e *Validator) AfterGasValidate() (err error) {
 	//TODO implement me
 	panic("implement me")
 }

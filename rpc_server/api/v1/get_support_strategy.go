@@ -17,7 +17,6 @@ import (
 // @Router /api/v1/get-support-strategy [GET]
 // @Security JWT
 func GetSupportStrategy(c *gin.Context) {
-	//2. recall service
 	request := model.GetSupportStrategyRequest{}
 	response := model.GetResponse()
 
@@ -32,11 +31,13 @@ func GetSupportStrategy(c *gin.Context) {
 		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
 		return
 	}
-	result, err := operator.GetSupportStrategyExecute(&request)
-	if err != nil {
+
+	if result, err := operator.GetSupportStrategyExecute(&request); err != nil {
 		errStr := fmt.Sprintf("%v", err)
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)
 		return
+	} else {
+		response.WithData(result).Success(c)
+		return
 	}
-	response.WithData(result).Success(c)
 }

@@ -39,5 +39,4 @@ func GetSupportEntrypoint(c *gin.Context) {
 		return
 	}
 	response.WithData(result).Success(c)
-
 }

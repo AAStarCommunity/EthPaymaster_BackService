@@ -6,7 +6,7 @@ type TryPayUserOpRequest struct {
 	ForceStrategyId        string            `json:"force_strategy_id"`
 	ForceNetWork           string            `json:"force_network"`
 	ForceTokens            string            `json:"force_tokens"`
-	ForceEntryPointAddress string            `json:"force_entry_point_address"`
+	ForceEntryPointAddress string            `json:"force_entrypoint_address"`
 	UserOperation          UserOperationItem `json:"user_operation"`
 	Extra                  interface{}       `json:"extra"`
 }

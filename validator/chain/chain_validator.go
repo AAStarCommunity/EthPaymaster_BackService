@@ -1,6 +1,6 @@
 package chain
 
-type IChainValidator interface {
+type Validator interface {
 	PreValidate() (err error)
 	AfterGasValidate() (err error)
 	IsSupport() bool

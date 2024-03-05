@@ -20,6 +20,7 @@ import (
 func TryPayUserOperation(c *gin.Context) {
 	request := model.TryPayUserOpRequest{}
 	response := model.GetResponse()
+
 	//1. API validate
 	if err := c.ShouldBindJSON(&request); err != nil {
 		errStr := fmt.Sprintf("Request Error [%v]", err)
@@ -32,12 +33,14 @@ func TryPayUserOperation(c *gin.Context) {
 		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
 		return
 	}
+
 	//2. recall service
-	result, err := operator.TryPayUserOpExecute(&request)
-	if err != nil {
+	if result, err := operator.TryPayUserOpExecute(&request); err != nil {
 		errStr := fmt.Sprintf("TryPayUserOpExecute ERROR [%v]", err)
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)
 		return
+	} else {
+		response.WithData(result).Success(c)
+		return
 	}
-	response.WithData(result).Success(c)
 }

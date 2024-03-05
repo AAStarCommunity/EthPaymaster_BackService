@@ -152,7 +152,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "extra": {},
-                "force_entry_point_address": {
+                "force_entrypoint_address": {
                     "type": "string"
                 },
                 "force_network": {
