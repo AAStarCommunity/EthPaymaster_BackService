@@ -9,7 +9,7 @@ import (
 
 func TestTryPayUserOpExecute(t *testing.T) {
 	request := getMockTryPayUserOpRequest()
-	result, err := TryPayUserOpExecute(request)
+	result, err := TryPayUserOpExecute(&request)
 	if err != nil {
 		t.Errorf("Error: %v", err)
 	}
