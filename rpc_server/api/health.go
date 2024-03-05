@@ -12,7 +12,7 @@ import (
 // @Description Get Healthz
 // @Accept json
 // @Product json
-// @Router /api/health [get]
+// @Router /api/healthz [get]
 // @Success 200
 func Healthz(c *gin.Context) {
 	response := model.GetResponse()
@@ -22,5 +22,4 @@ func Healthz(c *gin.Context) {
 		"time":        time.Now(),
 		"version":     "v1.0.0",
 	})
-	response.Success(c)
 }

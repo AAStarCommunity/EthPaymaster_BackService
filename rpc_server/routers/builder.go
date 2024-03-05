@@ -16,7 +16,12 @@ func buildRouters(router *gin.Engine, routerMaps []RouterMap) {
 				router.POST(routerMap.Url, routerMap.Func)
 			} else if method == DELETE {
 				router.DELETE(routerMap.Url, routerMap.Func)
-			} // ignore rest methods
+			} else if method == OPTIONS {
+				router.OPTIONS(routerMap.Url, routerMap.Func)
+			} else if method == HEAD {
+				router.HEAD(routerMap.Url, routerMap.Func)
+			}
+			// ignore rest methods
 		}
 
 	}
