@@ -1,8 +1,8 @@
 package v1
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/rpc_server/models"
-	"AAStarCommunity/EthPaymaster_BackService/service"
+	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/service/operator"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -17,13 +17,27 @@ import (
 // @Router /api/v1/get-support-strategy [GET]
 // @Security JWT
 func GetSupportStrategy(c *gin.Context) {
-	//1.TODO API validate
-	//2. recall service
-	result, err := service.GetSupportStrategyExecute()
-	response := models.GetResponse()
-	if err != nil {
+	request := model.GetSupportStrategyRequest{}
+	response := model.GetResponse()
+
+	//1. API validate
+	if err := c.ShouldBindJSON(&request); err != nil {
+		errStr := fmt.Sprintf("Request Error [%v]", err)
+		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
+		return
+	}
+	if err := request.Validate(); err != nil {
+		errStr := fmt.Sprintf("Request Error [%v]", err)
+		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
+		return
+	}
+
+	if result, err := operator.GetSupportStrategyExecute(&request); err != nil {
 		errStr := fmt.Sprintf("%v", err)
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)
+		return
+	} else {
+		response.WithData(result).Success(c)
+		return
 	}
-	response.WithData(result).Success(c)
 }

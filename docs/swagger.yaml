@@ -1,8 +1,51 @@
 definitions:
-  models.ClientCredential:
+  model.ClientCredential:
     properties:
       apiKey:
         type: string
+    type: object
+  model.TryPayUserOpRequest:
+    properties:
+      extra: {}
+      force_entrypoint_address:
+        type: string
+      force_network:
+        type: string
+      force_strategy_id:
+        type: string
+      force_tokens:
+        type: string
+      user_operation:
+        $ref: '#/definitions/model.UserOperationItem'
+    type: object
+  model.UserOperationItem:
+    properties:
+      call_gas_limit:
+        type: string
+      init_code:
+        type: string
+      max_fee_per_gas:
+        type: string
+      max_priority_fee_per_gas:
+        type: string
+      nonce:
+        type: string
+      per_verification_gas:
+        type: string
+      sender:
+        type: string
+      signature:
+        type: string
+      verification_gas_list:
+        type: string
+    required:
+    - call_gas_limit
+    - max_fee_per_gas
+    - max_priority_fee_per_gas
+    - nonce
+    - per_verification_gas
+    - sender
+    - verification_gas_list
     type: object
 info:
   contact:
@@ -20,7 +63,7 @@ paths:
         name: credential
         required: true
         schema:
-          $ref: '#/definitions/models.ClientCredential'
+          $ref: '#/definitions/model.ClientCredential'
       responses:
         "200":
           description: OK
@@ -28,6 +71,8 @@ paths:
       - Auth
   /api/healthz:
     get:
+      consumes:
+      - application/json
       description: Get Healthz
       responses:
         "200":
@@ -65,6 +110,13 @@ paths:
       consumes:
       - application/json
       description: sponsor the userOp
+      parameters:
+      - description: UserOp Request
+        in: body
+        name: tryPay
+        required: true
+        schema:
+          $ref: '#/definitions/model.TryPayUserOpRequest'
       responses:
         "200":
           description: OK

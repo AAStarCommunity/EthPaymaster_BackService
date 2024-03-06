@@ -1,8 +1,8 @@
 package api
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
-	"AAStarCommunity/EthPaymaster_BackService/rpc_server/models"
 	"github.com/gin-gonic/gin"
 	"time"
 )
@@ -10,10 +10,12 @@ import (
 // Healthz
 // @Tags Healthz
 // @Description Get Healthz
+// @Accept json
+// @Product json
 // @Router /api/healthz [get]
 // @Success 200
 func Healthz(c *gin.Context) {
-	response := models.GetResponse()
+	response := model.GetResponse()
 	response.WithDataSuccess(c, gin.H{
 		"hello":       "Eth Paymaster",
 		"environment": conf.Environment.Name,

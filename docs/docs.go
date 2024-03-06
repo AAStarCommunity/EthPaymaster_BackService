@@ -34,7 +34,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.ClientCredential"
+                            "$ref": "#/definitions/model.ClientCredential"
                         }
                     }
                 ],
@@ -48,6 +48,9 @@ const docTemplate = `{
         "/api/healthz": {
             "get": {
                 "description": "Get Healthz",
+                "consumes": [
+                    "application/json"
+                ],
                 "tags": [
                     "Healthz"
                 ],
@@ -117,6 +120,17 @@ const docTemplate = `{
                 "tags": [
                     "Sponsor"
                 ],
+                "parameters": [
+                    {
+                        "description": "UserOp Request",
+                        "name": "tryPay",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.TryPayUserOpRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -126,10 +140,72 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "models.ClientCredential": {
+        "model.ClientCredential": {
             "type": "object",
             "properties": {
                 "apiKey": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.TryPayUserOpRequest": {
+            "type": "object",
+            "properties": {
+                "extra": {},
+                "force_entrypoint_address": {
+                    "type": "string"
+                },
+                "force_network": {
+                    "type": "string"
+                },
+                "force_strategy_id": {
+                    "type": "string"
+                },
+                "force_tokens": {
+                    "type": "string"
+                },
+                "user_operation": {
+                    "$ref": "#/definitions/model.UserOperationItem"
+                }
+            }
+        },
+        "model.UserOperationItem": {
+            "type": "object",
+            "required": [
+                "call_gas_limit",
+                "max_fee_per_gas",
+                "max_priority_fee_per_gas",
+                "nonce",
+                "per_verification_gas",
+                "sender",
+                "verification_gas_list"
+            ],
+            "properties": {
+                "call_gas_limit": {
+                    "type": "string"
+                },
+                "init_code": {
+                    "type": "string"
+                },
+                "max_fee_per_gas": {
+                    "type": "string"
+                },
+                "max_priority_fee_per_gas": {
+                    "type": "string"
+                },
+                "nonce": {
+                    "type": "string"
+                },
+                "per_verification_gas": {
+                    "type": "string"
+                },
+                "sender": {
+                    "type": "string"
+                },
+                "signature": {
+                    "type": "string"
+                },
+                "verification_gas_list": {
                     "type": "string"
                 }
             }

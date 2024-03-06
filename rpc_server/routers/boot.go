@@ -1,10 +1,10 @@
 package routers
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"AAStarCommunity/EthPaymaster_BackService/docs"
 	"AAStarCommunity/EthPaymaster_BackService/rpc_server/middlewares"
-	"AAStarCommunity/EthPaymaster_BackService/rpc_server/models"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -19,7 +19,7 @@ func SetRouters() (routers *gin.Engine) {
 	buildMod(routers)
 	buildRoute(routers)
 	routers.NoRoute(func(ctx *gin.Context) {
-		models.GetResponse().SetHttpCode(http.StatusNotFound).FailCode(ctx, http.StatusNotFound)
+		model.GetResponse().SetHttpCode(http.StatusNotFound).FailCode(ctx, http.StatusNotFound)
 	})
 
 	return

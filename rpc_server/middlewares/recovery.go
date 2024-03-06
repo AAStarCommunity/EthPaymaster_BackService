@@ -1,8 +1,8 @@
 package middlewares
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
-	"AAStarCommunity/EthPaymaster_BackService/rpc_server/models"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -18,7 +18,7 @@ func GenericRecoveryHandler() gin.HandlerFunc {
 		if conf.Environment.Debugger {
 			errStr = fmt.Sprintf("%v", err)
 		}
-		models.GetResponse().SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)
+		model.GetResponse().SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)
 	})
 }
 
