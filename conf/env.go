@@ -38,7 +38,7 @@ func getConfFilePath() *string {
 var Environment *Env
 
 func init() {
-	envName := ProdEnv
+	envName := DevEnv
 	if len(os.Getenv(envKey)) > 0 {
 		envName = os.Getenv(envKey)
 	}
