@@ -1,6 +1,6 @@
 module AAStarCommunity/EthPaymaster_BackService
 
-go 1.22.0
+go 1.22.1
 
 require (
 	github.com/appleboy/gin-jwt/v2 v2.9.2
