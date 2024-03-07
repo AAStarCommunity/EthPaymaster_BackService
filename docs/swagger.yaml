@@ -10,16 +10,18 @@ definitions:
       force_entrypoint_address:
         type: string
       force_network:
-        type: string
+        $ref: '#/definitions/types.NetWork'
       force_strategy_id:
         type: string
-      force_tokens:
+      force_token:
         type: string
       user_operation:
         $ref: '#/definitions/model.UserOperationItem'
     type: object
   model.UserOperationItem:
     properties:
+      call_data:
+        type: string
       call_gas_limit:
         type: string
       init_code:
@@ -39,6 +41,7 @@ definitions:
       verification_gas_list:
         type: string
     required:
+    - call_data
     - call_gas_limit
     - max_fee_per_gas
     - max_priority_fee_per_gas
@@ -47,6 +50,16 @@ definitions:
     - sender
     - verification_gas_list
     type: object
+  types.NetWork:
+    enum:
+    - ethereum
+    - sepolia
+    - arbitrum
+    type: string
+    x-enum-varnames:
+    - Ethereum
+    - Sepolia
+    - Arbitrum
 info:
   contact:
     name: AAStar Support

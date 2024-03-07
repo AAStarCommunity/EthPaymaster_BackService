@@ -156,12 +156,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "force_network": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.NetWork"
                 },
                 "force_strategy_id": {
                     "type": "string"
                 },
-                "force_tokens": {
+                "force_token": {
                     "type": "string"
                 },
                 "user_operation": {
@@ -172,6 +172,7 @@ const docTemplate = `{
         "model.UserOperationItem": {
             "type": "object",
             "required": [
+                "call_data",
                 "call_gas_limit",
                 "max_fee_per_gas",
                 "max_priority_fee_per_gas",
@@ -181,6 +182,9 @@ const docTemplate = `{
                 "verification_gas_list"
             ],
             "properties": {
+                "call_data": {
+                    "type": "string"
+                },
                 "call_gas_limit": {
                     "type": "string"
                 },
@@ -209,6 +213,19 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "types.NetWork": {
+            "type": "string",
+            "enum": [
+                "ethereum",
+                "sepolia",
+                "arbitrum"
+            ],
+            "x-enum-varnames": [
+                "Ethereum",
+                "Sepolia",
+                "Arbitrum"
+            ]
         }
     },
     "securityDefinitions": {
