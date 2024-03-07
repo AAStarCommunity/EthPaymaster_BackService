@@ -114,6 +114,11 @@ paths:
       consumes:
       - application/json
       description: get the support strategy
+      parameters:
+      - description: network
+        in: query
+        name: network
+        type: string
       produces:
       - application/json
       responses:

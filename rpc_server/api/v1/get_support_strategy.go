@@ -14,6 +14,7 @@ import (
 // @Accept json
 // @Produce json
 // @Success 200
+// @Param network query string false "network"
 // @Router /api/v1/get-support-strategy [GET]
 // @Security JWT
 func GetSupportStrategy(c *gin.Context) {

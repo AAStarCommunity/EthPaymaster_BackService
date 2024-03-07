@@ -107,6 +107,14 @@ const docTemplate = `{
                 "tags": [
                     "Sponsor"
                 ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "network",
+                        "name": "network",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK"
