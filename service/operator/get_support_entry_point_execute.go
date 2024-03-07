@@ -2,6 +2,8 @@ package operator
 
 import "AAStarCommunity/EthPaymaster_BackService/common/model"
 
-func GetSupportEntrypointExecute(request *model.GetSupportEntrypointRequest) (*model.Result, error) {
-	return &model.Result{}, nil
+func GetSupportEntrypointExecute(network string) (*model.GetSupportEntryPointResponse, error) {
+	return &model.GetSupportEntryPointResponse{
+		EntrypointDomains: make([]model.EntrypointDomain, 0),
+	}, nil
 }

@@ -17,22 +17,15 @@ import (
 // @Router /api/v1/get-support-strategy [GET]
 // @Security JWT
 func GetSupportStrategy(c *gin.Context) {
-	request := model.GetSupportStrategyRequest{}
 	response := model.GetResponse()
-
-	//1. API validate
-	if err := c.ShouldBindJSON(&request); err != nil {
-		errStr := fmt.Sprintf("Request Error [%v]", err)
-		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
-		return
-	}
-	if err := request.Validate(); err != nil {
-		errStr := fmt.Sprintf("Request Error [%v]", err)
+	network := c.Query("network")
+	if network == "" {
+		errStr := fmt.Sprintf("Request Error [network is empty]")
 		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
 		return
 	}
 
-	if result, err := operator.GetSupportStrategyExecute(&request); err != nil {
+	if result, err := operator.GetSupportStrategyExecute(network); err != nil {
 		errStr := fmt.Sprintf("%v", err)
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)
 		return

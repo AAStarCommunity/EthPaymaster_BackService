@@ -40,7 +40,7 @@ func TryPayUserOperation(c *gin.Context) {
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)
 		return
 	} else {
-		response.WithData(result).Success(c)
+		response.WithDataSuccess(c, result)
 		return
 	}
 }

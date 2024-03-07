@@ -28,3 +28,17 @@ type PayReceipt struct {
 	TransactionHash string `json:"transaction_hash"`
 	Sponsor         string `json:"sponsor"`
 }
+
+type GetSupportEntryPointResponse struct {
+	EntrypointDomains []EntrypointDomain `json:"entrypoints"`
+}
+type EntrypointDomain struct {
+	Address    string        `json:"address"`
+	Desc       string        `json:"desc"`
+	NetWork    types.NetWork `json:"network"`
+	StrategyId string        `json:"strategy_id"`
+}
+
+type GetSupportStrategyResponse struct {
+	Strategies []Strategy `json:"strategies"`
+}

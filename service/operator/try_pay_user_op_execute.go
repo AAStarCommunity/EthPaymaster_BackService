@@ -12,7 +12,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.Result, error) {
+func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserOpResponse, error) {
 	// validator
 	if err := businessParamValidate(request); err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.Result, err
 		return nil, payError
 	}
 	paymasterSignature := getPayMasterSignature(strategy, &userOp)
-	var result = model.TryPayUserOpResponse{
+	var result = &model.TryPayUserOpResponse{
 		StrategyId:         strategy.Id,
 		EntryPointAddress:  strategy.EntryPointAddress,
 		PayMasterAddress:   strategy.PayMasterAddress,
@@ -55,12 +55,7 @@ func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.Result, err
 		GasInfo:            gasResponse,
 	}
 
-	return &model.Result{
-		Code:    200,
-		Data:    result,
-		Message: "message",
-		Cost:    "cost",
-	}, nil
+	return result, nil
 }
 
 func businessParamValidate(request *model.TryPayUserOpRequest) error {

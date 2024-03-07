@@ -14,25 +14,21 @@ import (
 // @Accept json
 // @Product json
 // @Router /api/v1/get-support-entrypoint [GET]
+// @Param network query string false "network"
 // @Success 200
 // @Security JWT
 func GetSupportEntrypoint(c *gin.Context) {
-	request := model.GetSupportEntrypointRequest{}
 	response := model.GetResponse()
 	//1. API validate
-	if err := c.ShouldBindJSON(&request); err != nil {
-		errStr := fmt.Sprintf("Request Error [%v]", err)
-		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
-		return
-	}
-	if err := request.Validate(); err != nil {
-		errStr := fmt.Sprintf("Request Error [%v]", err)
+	network := c.Query("network")
+	if network == "" {
+		errStr := fmt.Sprintf("Request Error [network is empty]")
 		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
 		return
 	}
 
 	//2. recall service
-	result, err := operator.GetSupportEntrypointExecute(&request)
+	result, err := operator.GetSupportEntrypointExecute(network)
 	if err != nil {
 		errStr := fmt.Sprintf("%v", err)
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)

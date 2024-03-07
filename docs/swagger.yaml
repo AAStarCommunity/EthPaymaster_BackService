@@ -97,6 +97,11 @@ paths:
       consumes:
       - application/json
       description: get the support entrypoint
+      parameters:
+      - description: network
+        in: query
+        name: network
+        type: string
       responses:
         "200":
           description: OK
