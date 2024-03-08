@@ -10,6 +10,7 @@ type TryPayUserOpResponse struct {
 	EntryPointAddress  string              `json:"entrypoint_address"`
 	PayMasterAddress   string              `json:"paymaster_address"`
 	PayMasterSignature string              `json:"paymaster_signature"`
+	PayMasterAndData   string              `json:"paymaster_and_data"`
 	PayReceipt         *PayReceipt         `json:"pay_receipt"`
 	GasInfo            *ComputeGasResponse `json:"gas_info"`
 }

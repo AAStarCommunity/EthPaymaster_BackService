@@ -3,6 +3,7 @@ package types
 type TokenType string
 
 const (
-	USDT TokenType = "USDT"
-	ETH  TokenType = "ETH"
+	USDT TokenType = "usdt"
+	ETH  TokenType = "eth"
+	OP   TokenType = "op"
 )
