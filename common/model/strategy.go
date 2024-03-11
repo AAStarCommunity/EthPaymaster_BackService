@@ -6,7 +6,8 @@ type Strategy struct {
 	Id                 string                     `json:"id"`
 	EntryPointAddress  string                     `json:"entrypoint_address"`
 	PayMasterAddress   string                     `json:"paymaster_address"`
-	NetWork            types.NetWork              `json:"network"`
+	PayType            types.PayType              `json:"pay_type"`
+	NetWork            types.Network              `json:"network"`
 	Token              types.TokenType            `json:"token"`
 	Description        string                     `json:"description"`
 	ExecuteRestriction StrategyExecuteRestriction `json:"execute_restriction"`

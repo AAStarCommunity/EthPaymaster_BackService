@@ -2,7 +2,9 @@ package operator
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
+	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/gas_service"
@@ -45,6 +47,9 @@ func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserO
 	if payError != nil {
 		return nil, payError
 	}
+	paymasterAndData := getPayMasterAndData(strategy, &userOp)
+	userOp.PaymasterAndData = paymasterAndData
+	//validatePaymasterUserOp
 	paymasterSignature := getPayMasterSignature(strategy, &userOp)
 	var result = &model.TryPayUserOpResponse{
 		StrategyId:         strategy.Id,
@@ -52,6 +57,7 @@ func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserO
 		PayMasterAddress:   strategy.PayMasterAddress,
 		PayReceipt:         payReceipt,
 		PayMasterSignature: paymasterSignature,
+		PayMasterAndData:   paymasterAndData,
 		GasInfo:            gasResponse,
 	}
 
@@ -62,7 +68,14 @@ func businessParamValidate(request *model.TryPayUserOpRequest) error {
 	if request.ForceStrategyId == "" && (request.ForceToken == "" || request.ForceNetwork == "") {
 		return xerrors.Errorf("Token And Network Must Set When ForceStrategyId Is Empty")
 	}
+	if conf.Environment.IsDevelopment() && request.ForceNetwork != "" {
+		if types.TestNetWork[request.ForceNetwork] {
+			return xerrors.Errorf("Test Network Not Support")
+		}
+	}
+	//recall simulate?
 	//UserOp Validate
+	//check nonce
 	if err := validator_service.ValidateUserOp(&request.UserOperation); err != nil {
 		return err
 	}
@@ -95,6 +108,16 @@ func executePay(strategy *model.Strategy, userOp *model.UserOperationItem, gasRe
 func getPayMasterSignature(strategy *model.Strategy, userOp *model.UserOperationItem) string {
 	signatureBytes, _ := utils.SignUserOp("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421", userOp)
 	return hex.EncodeToString(signatureBytes)
+}
+func getPayMasterAndData(strategy *model.Strategy, userOp *model.UserOperationItem) string {
+	//TODO
+	if strategy.PayType == types.PayTypeERC20 {
+		return ""
+	}
+	if strategy.PayType == types.PayTypeVerifying {
+		return ""
+	}
+	return ""
 }
 
 func strategyGenerate(request *model.TryPayUserOpRequest) (*model.Strategy, error) {

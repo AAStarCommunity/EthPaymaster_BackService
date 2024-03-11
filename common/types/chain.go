@@ -13,10 +13,16 @@ type NetworkInfo struct {
 //	Optimism Chain = "Optimism"
 //)
 
-type NetWork string
+type Network string
 
 const (
-	Ethereum NetWork = "ethereum"
-	Sepolia  NetWork = "sepolia"
-	Arbitrum NetWork = "arbitrum"
+	Ethereum Network = "ethereum"
+	Sepolia  Network = "sepolia"
+	Arbitrum Network = "arbitrum"
 )
+
+var TestNetWork = map[Network]bool{}
+
+func init() {
+	TestNetWork[Sepolia] = true
+}

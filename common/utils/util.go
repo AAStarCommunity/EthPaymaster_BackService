@@ -4,7 +4,11 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"encoding/json"
 	"github.com/ethereum/go-ethereum/crypto"
+	"regexp"
+	"strconv"
 )
+
+var HexPattern = regexp.MustCompile(`^0x[a-fA-F\d]*$`)
 
 func GenerateMockUserOperation() *model.UserOperationItem {
 	//TODO use config
@@ -20,6 +24,20 @@ func GenerateMockUserOperation() *model.UserOperationItem {
 		MaxPriorityFeePerGas: "1500000000",
 		Signature:            "0x760868cd7d9539c6e31c2169c4cab6817beb8247516a90e4301e929011451658623455035b83d38e987ef2e57558695040a25219c39eaa0e31a0ead16a5c925c1c",
 	}
+}
+func ValidateHex(value string) bool {
+	if HexPattern.MatchString(value) {
+		return true
+	}
+	return false
+}
+func IsStringInUint64Range(s string) bool {
+	num, err := strconv.ParseUint(s, 10, 64)
+	if err != nil {
+		return false
+	}
+	// 0 <= num <= MaxUint64
+	return num <= ^uint64(0)
 }
 func GenerateUserOperation() *model.UserOperationItem {
 	return &model.UserOperationItem{}

@@ -31,3 +31,8 @@ func TestSignUserOp(t *testing.T) {
 	fmt.Printf("singature: %s\n", singature)
 
 }
+
+func TestValidate(t *testing.T) {
+	userOp := GenerateMockUserOperation()
+	assert.True(t, ValidateHex(userOp.Sender))
+}

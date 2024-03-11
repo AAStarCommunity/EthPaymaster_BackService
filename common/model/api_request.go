@@ -7,7 +7,7 @@ import (
 
 type TryPayUserOpRequest struct {
 	ForceStrategyId        string            `json:"force_strategy_id"`
-	ForceNetwork           types.NetWork     `json:"force_network"`
+	ForceNetwork           types.Network     `json:"force_network"`
 	ForceToken             string            `json:"force_token"`
 	ForceEntryPointAddress string            `json:"force_entrypoint_address"`
 	UserOperation          UserOperationItem `json:"user_operation"`

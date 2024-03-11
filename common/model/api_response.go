@@ -16,11 +16,12 @@ type TryPayUserOpResponse struct {
 }
 
 type ComputeGasResponse struct {
+	CallGasLimit    uint64          `json:"call_gas_limit"`
 	GasPriceInWei   uint64          `json:"gas_price_wei"` // wei
 	GasPriceInGwei  *big.Float      `json:"gas_price_gwei"`
 	GasPriceInEther string          `json:"gas_price_ether"`
 	TokenCost       string          `json:"token_cost"`
-	Network         types.NetWork   `json:"network"`
+	Network         types.Network   `json:"network"`
 	Token           types.TokenType `json:"token"`
 	UsdCost         string          `json:"usd_cost"`
 	BlobEnable      bool            `json:"blob_enable"`
@@ -36,7 +37,7 @@ type GetSupportEntryPointResponse struct {
 type EntrypointDomain struct {
 	Address    string        `json:"address"`
 	Desc       string        `json:"desc"`
-	NetWork    types.NetWork `json:"network"`
+	NetWork    types.Network `json:"network"`
 	StrategyId string        `json:"strategy_id"`
 }
 

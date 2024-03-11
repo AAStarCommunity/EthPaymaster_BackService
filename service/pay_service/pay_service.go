@@ -20,6 +20,7 @@ func (e *EthereumPayService) GetReceipt() {
 }
 
 func (e *EthereumPayService) Pay() error {
+	//1.if validate Paymaster
 	//TODO implement me
 	return nil
 }
