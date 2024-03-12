@@ -21,7 +21,12 @@ func TestGetGasPrice(t *testing.T) {
 	fmt.Printf("priceWeiInt %d\n", priceWeiInt)
 	fmt.Printf("gasPriceInGwei %f\n", gasPriceInGwei)
 	fmt.Printf("gasPriceInEtherStr %s\n", *gasPriceInEtherStr)
+	baseFee, _ := GetGas(types.Ethereum)
+	fmt.Printf("baseFee %d\n", baseFee.Uint64())
 
+	priorFee, priorFeeIGwei := GetPriorityFee(types.Ethereum)
+	fmt.Printf("priorFee %d\n", priorFee.Uint64())
+	fmt.Printf("priorFeeIGwei %f\n", priorFeeIGwei)
 }
 
 func TestGethClient(t *testing.T) {

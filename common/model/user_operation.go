@@ -10,13 +10,16 @@ import (
 )
 
 // UserOperation  entrypoint v0.0.6
+// verificationGasLimit validateUserOp ,validatePaymasterUserOp limit
+// callGasLimit calldata Execute gas limit
+// preVerificationGas
 type UserOperation struct {
 	Sender               common.Address `json:"sender"   mapstructure:"sender"  binding:"required,hexParam"`
 	Nonce                *big.Int       `json:"nonce"  mapstructure:"nonce"  binding:"required"`
 	InitCode             []byte         `json:"initCode"  mapstructure:"initCode" `
 	CallData             []byte         `json:"callData"  mapstructure:"callData"  binding:"required"`
 	CallGasLimit         *big.Int       `json:"callGasLimit"  mapstructure:"callGasLimit"  binding:"required"`
-	VerificationGasList  *big.Int       `json:"verificationGasLimit"  mapstructure:"verificationGasLimit"  binding:"required"`
+	VerificationGasLimit *big.Int       `json:"verificationGasLimit"  mapstructure:"verificationGasLimit"  binding:"required"`
 	PreVerificationGas   *big.Int       `json:"preVerificationGas"  mapstructure:"preVerificationGas"  binding:"required"`
 	MaxFeePerGas         *big.Int       `json:"maxFeePerGas"  mapstructure:"maxFeePerGas"  binding:"required"`
 	MaxPriorityFeePerGas *big.Int       `json:"maxPriorityFeePerGas"  mapstructure:"maxPriorityFeePerGas"  binding:"required"`

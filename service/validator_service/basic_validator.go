@@ -31,7 +31,7 @@ func ValidateStrategy(strategy *model.Strategy, userOp *model.UserOperation) err
 }
 
 func ValidateUserOp(userOp *model.UserOperation) error {
-	if userOp.PreVerificationGas.Cmp(MinPreVerificationGas) < 0 {
+	if userOp.PreVerificationGas.Cmp(MinPreVerificationGas) == -1 {
 		return xerrors.Errorf("preVerificationGas is less than 21000")
 	}
 

@@ -2,18 +2,18 @@ package gas_service
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/xerrors"
+	"math/big"
 )
 
 func ComputeGas(userOp *model.UserOperation, strategy *model.Strategy) (*model.ComputeGasResponse, error) {
-	priceInWei, gasPriceInGwei, gasPriceInEtherStr, getGasErr := chain_service.GetGasPrice(types.Sepolia)
+	gasPrice, gasPriceErr := chain_service.GetGasPrice(strategy.NetWork)
 	//TODO calculate the maximum possible fee the account needs to pay (based on validation and call gas limits, and current gas values)
-	if getGasErr != nil {
-		return nil, getGasErr
+	if gasPriceErr != nil {
+		return nil, gasPriceErr
 	}
 	estimateCallGasLimit, _ := chain_service.EstimateGasLimitAndCost(strategy.NetWork, ethereum.CallMsg{
 		From: common.HexToAddress(strategy.EntryPointAddress),
@@ -24,20 +24,31 @@ func ComputeGas(userOp *model.UserOperation, strategy *model.Strategy) (*model.C
 	if estimateCallGasLimit > userOpCallGasLimit {
 		return nil, xerrors.Errorf("estimateCallGasLimit %d > userOpCallGasLimit %d", estimateCallGasLimit, userOpCallGasLimit)
 	}
+	//x := gasPrice.MaxBasePriceWei.Int64() + gasPrice.MaxPriorityPriceWei.Int64()
+	//maxFeePerGas := (x, userOp.MaxFeePerGas.Uint64())
+	payMasterPostGasLimit := GetPayMasterGasLimit()
 
+	maxGasLimit := big.NewInt(0).Add(userOp.CallGasLimit, userOp.VerificationGasLimit)
+	maxGasLimit = maxGasLimit.Add(maxGasLimit, payMasterPostGasLimit)
+
+	maxFee := new(big.Int).Mul(maxGasLimit, gasPrice.MaxBasePriceWei)
 	// TODO get PaymasterCallGasLimit
-
+	tokenCost := GetTokenCost(*maxFee, userOp, *strategy)
 	return &model.ComputeGasResponse{
-		GasPriceInWei:   priceInWei.Uint64(),
-		GasPriceInGwei:  gasPriceInGwei,
-		GasPriceInEther: *gasPriceInEtherStr,
-		CallGasLimit:    estimateCallGasLimit,
-		TokenCost:       "0.0001",
-		Network:         strategy.NetWork,
-		Token:           strategy.Token,
-		UsdCost:         "0.4",
-		BlobEnable:      strategy.Enable4844,
+		GasInfo:    gasPrice,
+		TokenCost:  tokenCost,
+		Network:    strategy.NetWork,
+		Token:      strategy.Token,
+		UsdCost:    "0.4",
+		BlobEnable: strategy.Enable4844,
+		MaxFee:     *maxFee,
 	}, nil
+}
+func GetPayMasterGasLimit() *big.Int {
+	return nil
+}
+func GetTokenCost(maxFee big.Int, userOp *model.UserOperation, strategy model.Strategy) string {
+	return "0.0001"
 }
 
 func ValidateGas(userOp *model.UserOperation, gasComputeResponse *model.ComputeGasResponse) error {

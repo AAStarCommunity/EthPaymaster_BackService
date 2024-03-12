@@ -1,6 +1,7 @@
 package chain_service
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"context"
 	"github.com/ethereum/go-ethereum"
@@ -33,23 +34,63 @@ func CheckContractAddressAccess(contract common.Address, chain types.Network) (b
 }
 
 // GetGasPrice return gas price in wei, gwei, ether
-func GetGasPrice(chain types.Network) (*big.Int, *big.Float, *string, error) {
+func GetGasPrice(chain types.Network) (*model.GasPrice, error) {
 	client, exist := EthCompatibleNetWorkClientMap[chain]
 	if !exist {
-		return nil, nil, nil, xerrors.Errorf("chain Client [%s] not exist", chain)
+		return nil, xerrors.Errorf("chain Client [%s] not exist", chain)
 	}
-	priceWei, err := client.SuggestGasPrice(context.Background())
-	if err != nil {
-		return nil, nil, nil, err
+	priceWei, priceWeiErr := client.SuggestGasPrice(context.Background())
+	if priceWeiErr != nil {
+		return nil, priceWeiErr
 	}
+	priorityPriceWei, tiperr := client.SuggestGasTipCap(context.Background())
+	if tiperr != nil {
+		return nil, tiperr
+	}
+	result := model.GasPrice{}
+	result.MaxBasePriceWei = priceWei
+	result.MaxPriorityPriceWei = priorityPriceWei
 
 	gasPriceInGwei := new(big.Float).SetInt(priceWei)
 	gasPriceInGwei.Quo(gasPriceInGwei, GweiFactor)
-
 	gasPriceInEther := new(big.Float).SetInt(priceWei)
 	gasPriceInEther.Quo(gasPriceInEther, EthWeiFactor)
 	gasPriceInEtherStr := gasPriceInEther.Text('f', 18)
-	return priceWei, gasPriceInGwei, &gasPriceInEtherStr, nil
+	result.MaxBasePriceGwei = gasPriceInGwei
+	result.MaxBasePriceEther = &gasPriceInEtherStr
+
+	priorityPriceInGwei := new(big.Float).SetInt(priorityPriceWei)
+	priorityPriceInGwei.Quo(priorityPriceInGwei, GweiFactor)
+	priorityPriceInEther := new(big.Float).SetInt(priorityPriceWei)
+	priorityPriceInEther.Quo(priorityPriceInEther, EthWeiFactor)
+	priorityPriceInEtherStr := priorityPriceInEther.Text('f', 18)
+	result.MaxPriorityPriceGwei = priorityPriceInGwei
+	result.MaxPriorityPriceEther = &priorityPriceInEtherStr
+	result.MaxPriorityPriceGwei = priorityPriceInGwei
+	result.MaxPriorityPriceEther = &priorityPriceInEtherStr
+	return &result, nil
+}
+
+func GetGas(netWork types.Network) (*big.Int, error) {
+	client, exist := EthCompatibleNetWorkClientMap[netWork]
+	if !exist {
+		return nil, xerrors.Errorf("chain Client [%s] not exist", netWork)
+	}
+	head, erro := client.HeaderByNumber(context.Background(), nil)
+	if erro != nil {
+		return nil, erro
+	}
+	return head.BaseFee, nil
+}
+func GetPriorityFee(netWork types.Network) (*big.Int, *big.Float) {
+	client, exist := EthCompatibleNetWorkClientMap[netWork]
+	if !exist {
+		return nil, nil
+	}
+	priceWei, _ := client.SuggestGasTipCap(context.Background())
+	gasPriceInGwei := new(big.Float).SetInt(priceWei)
+	gasPriceInGwei.Quo(gasPriceInGwei, GweiFactor)
+	return priceWei, gasPriceInGwei
 }
 
 func GetEntryPointDeposit(entrypoint string, depositAddress string) uint256.Int {

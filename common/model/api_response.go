@@ -16,15 +16,13 @@ type TryPayUserOpResponse struct {
 }
 
 type ComputeGasResponse struct {
-	CallGasLimit    uint64          `json:"call_gas_limit"`
-	GasPriceInWei   uint64          `json:"gas_price_wei"` // wei
-	GasPriceInGwei  *big.Float      `json:"gas_price_gwei"`
-	GasPriceInEther string          `json:"gas_price_ether"`
-	TokenCost       string          `json:"token_cost"`
-	Network         types.Network   `json:"network"`
-	Token           types.TokenType `json:"token"`
-	UsdCost         string          `json:"usd_cost"`
-	BlobEnable      bool            `json:"blob_enable"`
+	GasInfo    *GasPrice       `json:"gas_info"`
+	TokenCost  string          `json:"token_cost"`
+	Network    types.Network   `json:"network"`
+	Token      types.TokenType `json:"token"`
+	UsdCost    string          `json:"usd_cost"`
+	BlobEnable bool            `json:"blob_enable"`
+	MaxFee     big.Int         `json:"max_fee"`
 }
 type PayReceipt struct {
 	TransactionHash string `json:"transaction_hash"`
