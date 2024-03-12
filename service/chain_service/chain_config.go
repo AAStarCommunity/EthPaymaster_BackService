@@ -6,7 +6,7 @@ import (
 )
 
 var NetworkInfoMap map[types.Network]*types.NetworkInfo
-var NetWorkClientMap map[types.Network]*ethclient.Client
+var EthCompatibleNetWorkClientMap map[types.Network]*ethclient.Client
 
 func init() {
 	ConfigInit()
@@ -27,13 +27,13 @@ func ConfigInit() {
 }
 
 func ClientInit() {
-	NetWorkClientMap = make(map[types.Network]*ethclient.Client)
+	EthCompatibleNetWorkClientMap = make(map[types.Network]*ethclient.Client)
 	for chain, networkInfo := range NetworkInfoMap {
 		client, err := ethclient.Dial(networkInfo.RpcUrl)
 		if err != nil {
 			panic(err)
 		}
-		NetWorkClientMap[chain] = client
+		EthCompatibleNetWorkClientMap[chain] = client
 		continue
 	}
 }

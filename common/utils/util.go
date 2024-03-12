@@ -2,6 +2,7 @@ package utils
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"encoding/hex"
 	"encoding/json"
 	"github.com/ethereum/go-ethereum/crypto"
 	"regexp"
@@ -10,20 +11,23 @@ import (
 
 var HexPattern = regexp.MustCompile(`^0x[a-fA-F\d]*$`)
 
-func GenerateMockUserOperation() *model.UserOperationItem {
+func GenerateMockUserOperation() *map[string]any {
 	//TODO use config
-	return &model.UserOperationItem{
-		Sender:               "0x4A2FD3215420376DA4eD32853C19E4755deeC4D1",
-		Nonce:                "1",
-		InitCode:             "0x",
-		CallData:             "0xb61d27f6000000000000000000000000c206b552ab127608c3f666156c8e03a8471c72df000000000000000000000000000000000000000000000000002386f26fc1000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000",
-		CallGasLimit:         "39837",
-		VerificationGasList:  "100000",
-		PreVerificationGas:   "44020",
-		MaxFeePerGas:         "1743509478",
-		MaxPriorityFeePerGas: "1500000000",
-		Signature:            "0x760868cd7d9539c6e31c2169c4cab6817beb8247516a90e4301e929011451658623455035b83d38e987ef2e57558695040a25219c39eaa0e31a0ead16a5c925c1c",
+	var MockUserOpData = map[string]any{
+		"sender":               "0x4A2FD3215420376DA4eD32853C19E4755deeC4D1",
+		"nonce":                "1",
+		"initCode":             "0xe19e9755942bb0bd0cccce25b1742596b8a8250b3bf2c3e700000000000000000000000078d4f01f56b982a3b03c4e127a5d3afa8ebee6860000000000000000000000008b388a082f370d8ac2e2b3997e9151168bd09ff50000000000000000000000000000000000000000000000000000000000000000",
+		"callData":             "0xb61d27f6000000000000000000000000c206b552ab127608c3f666156c8e03a8471c72df000000000000000000000000000000000000000000000000002386f26fc1000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000",
+		"callGasLimit":         "39837",
+		"verificationGasLimit": "100000",
+		"maxFeePerGas":         "44020",
+		"maxPriorityFeePerGas": "1743509478",
+		"paymasterAndData":     "0x",
+		"preVerificationGas":   "44020",
+		"signature":            "0x760868cd7d9539c6e31c2169c4cab6817beb8247516a90e4301e929011451658623455035b83d38e987ef2e57558695040a25219c39eaa0e31a0ead16a5c925c1c",
 	}
+
+	return &MockUserOpData
 }
 func ValidateHex(value string) bool {
 	if HexPattern.MatchString(value) {
@@ -39,11 +43,18 @@ func IsStringInUint64Range(s string) bool {
 	// 0 <= num <= MaxUint64
 	return num <= ^uint64(0)
 }
-func GenerateUserOperation() *model.UserOperationItem {
-	return &model.UserOperationItem{}
+func GenerateUserOperation() *model.UserOperation {
+	return &model.UserOperation{}
+}
+func EncodeToStringWithPrefix(data []byte) string {
+	res := hex.EncodeToString(data)
+	if res[:2] != "0x" {
+		return "0x" + res
+	}
+	return res
 }
 
-func SignUserOp(privateKeyHex string, userOp *model.UserOperationItem) ([]byte, error) {
+func SignUserOp(privateKeyHex string, userOp *model.UserOperation) ([]byte, error) {
 
 	serializedUserOp, err := json.Marshal(userOp)
 	if err != nil {

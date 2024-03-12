@@ -32,7 +32,7 @@ type PayReceipt struct {
 }
 
 type GetSupportEntryPointResponse struct {
-	EntrypointDomains []EntrypointDomain `json:"entrypoints"`
+	EntrypointDomains *[]EntrypointDomain `json:"entrypoints"`
 }
 type EntrypointDomain struct {
 	Address    string        `json:"address"`

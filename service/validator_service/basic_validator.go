@@ -3,14 +3,18 @@ package validator_service
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
-	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
-	"encoding/hex"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/xerrors"
+	"math/big"
 )
 
-func ValidateStrategy(strategy *model.Strategy, userOp *model.UserOperationItem) error {
+var MinPreVerificationGas *big.Int
+
+func init() {
+	MinPreVerificationGas = big.NewInt(21000)
+}
+func ValidateStrategy(strategy *model.Strategy, userOp *model.UserOperation) error {
 	if strategy == nil {
 		return xerrors.Errorf("empty strategy")
 	}
@@ -18,7 +22,7 @@ func ValidateStrategy(strategy *model.Strategy, userOp *model.UserOperationItem)
 		return xerrors.Errorf("empty strategy network")
 	}
 	// check Paymaster
-	ok, err := chain_service.CheckContractAddressAccess(strategy.PayMasterAddress, strategy.NetWork)
+	ok, err := chain_service.CheckContractAddressAccess(common.HexToAddress(strategy.PayMasterAddress), strategy.NetWork)
 	if !ok || err != nil {
 		return err
 	}
@@ -26,12 +30,16 @@ func ValidateStrategy(strategy *model.Strategy, userOp *model.UserOperationItem)
 	return nil
 }
 
-func ValidateUserOp(userOp *model.UserOperationItem) error {
+func ValidateUserOp(userOp *model.UserOperation) error {
+	if userOp.PreVerificationGas.Cmp(MinPreVerificationGas) < 0 {
+		return xerrors.Errorf("preVerificationGas is less than 21000")
+	}
 
 	if err := checkSender(userOp, types.Sepolia); err != nil {
 		return err
 	}
-	if !utils.IsStringInUint64Range(userOp.Nonce) {
+
+	if !userOp.Nonce.IsInt64() {
 		return xerrors.Errorf("nonce is not in uint64 range")
 	}
 
@@ -43,34 +51,28 @@ func ValidateUserOp(userOp *model.UserOperationItem) error {
 	//validate trusted entrypoint
 	return nil
 }
-func checkSender(userOp *model.UserOperationItem, netWork types.Network) error {
+func checkSender(userOp *model.UserOperation, netWork types.Network) error {
 	//check sender
-	if userOp.Sender != "" {
-		if ok, err := chain_service.CheckContractAddressAccess(userOp.Sender, netWork); err != nil {
-			return err
-		} else if !ok {
-			return xerrors.Errorf("sender address not exist in [%s] network", netWork)
-		}
-		//check balance
+
+	if ok, err := chain_service.CheckContractAddressAccess(userOp.Sender, netWork); err != nil {
+		return err
+	} else if !ok {
+		return xerrors.Errorf("sender address not exist in [%s] network", netWork)
 	}
-	if userOp.InitCode == "" {
-		return xerrors.Errorf("initCode can not be empty if sender is empty")
-	}
+	//check balance
+
+	//if userOp.InitCode == "" {
+	//	return xerrors.Errorf("initCode can not be empty if sender is empty")
+	//}
 	if err := checkInitCode(userOp.InitCode, netWork); err != nil {
 
 	}
 	return nil
 }
-func checkInitCode(initCode string, network types.Network) error {
-	initCodeByte, err := hex.DecodeString(initCode)
-	if err != nil {
-		return xerrors.Errorf("initCode is not hex string %s", initCode)
-	}
-	if len(initCodeByte) < 20 {
-		return xerrors.Errorf("initCode is not valid %s", initCode)
-	}
-	factoryAddress := common.BytesToAddress(initCodeByte[:20])
-	if ok, err := chain_service.CheckContractAddressAccess(factoryAddress.String(), network); err != nil {
+func checkInitCode(initCode []byte, network types.Network) error {
+
+	factoryAddress := common.BytesToAddress(initCode[:20])
+	if ok, err := chain_service.CheckContractAddressAccess(factoryAddress, network); err != nil {
 		return err
 	} else if !ok {
 		return xerrors.Errorf("sender address not exist in [%s] network", network)

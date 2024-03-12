@@ -5,6 +5,7 @@ import "AAStarCommunity/EthPaymaster_BackService/common/types"
 type Strategy struct {
 	Id                 string                     `json:"id"`
 	EntryPointAddress  string                     `json:"entrypoint_address"`
+	EntryPointTag      types.EntrypointTag        `json:"entrypoint_tag"`
 	PayMasterAddress   string                     `json:"paymaster_address"`
 	PayType            types.PayType              `json:"pay_type"`
 	NetWork            types.Network              `json:"network"`

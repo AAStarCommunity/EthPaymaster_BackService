@@ -6,12 +6,12 @@ import (
 )
 
 type TryPayUserOpRequest struct {
-	ForceStrategyId        string            `json:"force_strategy_id"`
-	ForceNetwork           types.Network     `json:"force_network"`
-	ForceToken             string            `json:"force_token"`
-	ForceEntryPointAddress string            `json:"force_entrypoint_address"`
-	UserOperation          UserOperationItem `json:"user_operation"`
-	Extra                  interface{}       `json:"extra"`
+	ForceStrategyId        string         `json:"force_strategy_id"`
+	ForceNetwork           types.Network  `json:"force_network"`
+	ForceToken             string         `json:"force_token"`
+	ForceEntryPointAddress string         `json:"force_entrypoint_address"`
+	UserOp                 map[string]any `json:"user_operation"`
+	Extra                  interface{}    `json:"extra"`
 }
 
 func (request *TryPayUserOpRequest) Validate() error {

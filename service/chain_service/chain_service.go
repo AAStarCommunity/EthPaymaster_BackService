@@ -13,17 +13,16 @@ import (
 var GweiFactor = new(big.Float).SetInt(big.NewInt(1e9))
 var EthWeiFactor = new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil))
 
-func CheckContractAddressAccess(contract string, chain types.Network) (bool, error) {
+func CheckContractAddressAccess(contract common.Address, chain types.Network) (bool, error) {
 	if chain == "" {
 		return false, xerrors.Errorf("chain can not be empty")
 	}
-	contractAddress := common.HexToAddress(contract)
 
-	client, exist := NetWorkClientMap[chain]
+	client, exist := EthCompatibleNetWorkClientMap[chain]
 	if !exist {
 		return false, xerrors.Errorf("chain Client [%s] not exist", chain)
 	}
-	code, err := client.CodeAt(context.Background(), contractAddress, nil)
+	code, err := client.CodeAt(context.Background(), contract, nil)
 	if err != nil {
 		return false, err
 	}
@@ -35,7 +34,7 @@ func CheckContractAddressAccess(contract string, chain types.Network) (bool, err
 
 // GetGasPrice return gas price in wei, gwei, ether
 func GetGasPrice(chain types.Network) (*big.Int, *big.Float, *string, error) {
-	client, exist := NetWorkClientMap[chain]
+	client, exist := EthCompatibleNetWorkClientMap[chain]
 	if !exist {
 		return nil, nil, nil, xerrors.Errorf("chain Client [%s] not exist", chain)
 	}
@@ -57,7 +56,7 @@ func GetEntryPointDeposit(entrypoint string, depositAddress string) uint256.Int 
 	return uint256.Int{1}
 }
 func EstimateGasLimitAndCost(chain types.Network, msg ethereum.CallMsg) (uint64, error) {
-	client, exist := NetWorkClientMap[chain]
+	client, exist := EthCompatibleNetWorkClientMap[chain]
 	if !exist {
 		return 0, xerrors.Errorf("chain Client [%s] not exist", chain)
 	}

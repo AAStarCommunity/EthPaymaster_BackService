@@ -20,6 +20,6 @@ func TestTryPayUserOpExecute(t *testing.T) {
 func getMockTryPayUserOpRequest() *model.TryPayUserOpRequest {
 	return &model.TryPayUserOpRequest{
 		ForceStrategyId: "1",
-		UserOperation:   *utils.GenerateMockUserOperation(),
+		UserOp:          *utils.GenerateMockUserOperation(),
 	}
 }
