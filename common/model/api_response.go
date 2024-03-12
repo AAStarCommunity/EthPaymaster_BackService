@@ -40,5 +40,5 @@ type EntrypointDomain struct {
 }
 
 type GetSupportStrategyResponse struct {
-	Strategies []Strategy `json:"strategies"`
+	Strategies *[]Strategy `json:"strategies"`
 }

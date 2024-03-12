@@ -53,7 +53,7 @@ func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserO
 	}
 
 	//validate gas
-	if err := gas_service.ValidateGas(userOp, gasResponse); err != nil {
+	if err := gas_service.ValidateGas(userOp, gasResponse, strategy); err != nil {
 		return nil, err
 	}
 

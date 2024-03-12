@@ -2,6 +2,7 @@ package gas_service
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
@@ -51,10 +52,15 @@ func GetTokenCost(maxFee big.Int, userOp *model.UserOperation, strategy model.St
 	return "0.0001"
 }
 
-func ValidateGas(userOp *model.UserOperation, gasComputeResponse *model.ComputeGasResponse) error {
+func ValidateGas(userOp *model.UserOperation, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
 	//1.if ERC20 check address balacnce
 	//Validate the account’s deposit in the entryPoint is high enough to cover the max possible cost (cover the already-done verification and max execution gas)
 	//2 if Paymaster check paymaster balance
 	//The maxFeePerGas and maxPriorityFeePerGas are above a configurable minimum value that the client is willing to accept. At the minimum, they are sufficiently high to be included with the current block.basefee.
+	if strategy.PayType == types.PayTypeERC20 {
+		//TODO check address balance
+	} else if strategy.PayType == types.PayTypeVerifying {
+		//TODO check paymaster balance
+	}
 	return nil
 }
