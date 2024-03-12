@@ -5,6 +5,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/paymaster_data_generator"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/gas_service"
@@ -61,10 +62,16 @@ func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserO
 	if payError != nil {
 		return nil, payError
 	}
-	paymasterAndData := getPayMasterAndData(strategy, userOp)
+	paymasterSignature := getPayMasterSignature(strategy, userOp)
+
+	var paymasterAndData []byte
+	if paymasterAndDataRes, err := getPayMasterAndData(strategy, userOp, gasResponse, paymasterSignature); err != nil {
+		return nil, err
+	} else {
+		paymasterAndData = paymasterAndDataRes
+	}
 	userOp.PaymasterAndData = paymasterAndData
 	//validatePaymasterUserOp
-	paymasterSignature := getPayMasterSignature(strategy, userOp)
 	var result = &model.TryPayUserOpResponse{
 		StrategyId:         strategy.Id,
 		EntryPointAddress:  strategy.EntryPointAddress,
@@ -117,15 +124,14 @@ func getPayMasterSignature(strategy *model.Strategy, userOp *model.UserOperation
 	signatureBytes, _ := utils.SignUserOp("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421", userOp)
 	return hex.EncodeToString(signatureBytes)
 }
-func getPayMasterAndData(strategy *model.Strategy, userOp *model.UserOperation) []byte {
-	//TODO
-	if strategy.PayType == types.PayTypeERC20 {
-		return []byte("ERC20")
+func getPayMasterAndData(strategy *model.Strategy, userOp *model.UserOperation, gasResponse *model.ComputeGasResponse, paymasterSign string) ([]byte, error) {
+	paymasterDataGenerator := paymaster_data_generator.GetPaymasterDataGenerator(strategy.PayType)
+	if paymasterDataGenerator == nil {
+		return nil, xerrors.Errorf("Not Support PayType: [%w]", strategy.PayType)
 	}
-	if strategy.PayType == types.PayTypeVerifying {
-		return []byte("Verifying")
-	}
-	return []byte("ETH")
+	extra := make(map[string]any)
+	extra["signature"] = paymasterSign
+	return paymasterDataGenerator.GeneratePayMaster(strategy, userOp, gasResponse, extra)
 }
 
 func strategyGenerate(request *model.TryPayUserOpRequest) (*model.Strategy, error) {

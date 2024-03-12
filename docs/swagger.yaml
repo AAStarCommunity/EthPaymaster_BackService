@@ -10,47 +10,16 @@ definitions:
       force_entrypoint_address:
         type: string
       force_network:
-        $ref: '#/definitions/types.NetWork'
+        $ref: '#/definitions/types.Network'
       force_strategy_id:
         type: string
       force_token:
         type: string
       user_operation:
-        $ref: '#/definitions/model.UserOperationItem'
+        additionalProperties: {}
+        type: object
     type: object
-  model.UserOperationItem:
-    properties:
-      call_data:
-        type: string
-      call_gas_limit:
-        type: string
-      init_code:
-        type: string
-      max_fee_per_gas:
-        type: string
-      max_priority_fee_per_gas:
-        type: string
-      nonce:
-        type: string
-      per_verification_gas:
-        type: string
-      sender:
-        type: string
-      signature:
-        type: string
-      verification_gas_list:
-        type: string
-    required:
-    - call_data
-    - call_gas_limit
-    - max_fee_per_gas
-    - max_priority_fee_per_gas
-    - nonce
-    - per_verification_gas
-    - sender
-    - verification_gas_list
-    type: object
-  types.NetWork:
+  types.Network:
     enum:
     - ethereum
     - sepolia

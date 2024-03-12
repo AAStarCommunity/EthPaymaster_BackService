@@ -161,7 +161,7 @@
                     "type": "string"
                 },
                 "force_network": {
-                    "$ref": "#/definitions/types.NetWork"
+                    "$ref": "#/definitions/types.Network"
                 },
                 "force_strategy_id": {
                     "type": "string"
@@ -170,56 +170,12 @@
                     "type": "string"
                 },
                 "user_operation": {
-                    "$ref": "#/definitions/model.UserOperationItem"
+                    "type": "object",
+                    "additionalProperties": {}
                 }
             }
         },
-        "model.UserOperationItem": {
-            "type": "object",
-            "required": [
-                "call_data",
-                "call_gas_limit",
-                "max_fee_per_gas",
-                "max_priority_fee_per_gas",
-                "nonce",
-                "per_verification_gas",
-                "sender",
-                "verification_gas_list"
-            ],
-            "properties": {
-                "call_data": {
-                    "type": "string"
-                },
-                "call_gas_limit": {
-                    "type": "string"
-                },
-                "init_code": {
-                    "type": "string"
-                },
-                "max_fee_per_gas": {
-                    "type": "string"
-                },
-                "max_priority_fee_per_gas": {
-                    "type": "string"
-                },
-                "nonce": {
-                    "type": "string"
-                },
-                "per_verification_gas": {
-                    "type": "string"
-                },
-                "sender": {
-                    "type": "string"
-                },
-                "signature": {
-                    "type": "string"
-                },
-                "verification_gas_list": {
-                    "type": "string"
-                }
-            }
-        },
-        "types.NetWork": {
+        "types.Network": {
             "type": "string",
             "enum": [
                 "ethereum",
