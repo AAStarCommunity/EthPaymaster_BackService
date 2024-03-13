@@ -19,6 +19,9 @@ func TestGetGasPrice(t *testing.T) {
 	gasprice, _ := GetGasPrice(types.Ethereum)
 	fmt.Printf("gasprice %d\n", gasprice.MaxBasePriceWei.Uint64())
 
+	fmt.Printf("gaspricegwei %f\n", gasprice.MaxBasePriceGwei)
+	fmt.Printf("gaspriceeth %s\n", gasprice.MaxBasePriceEther.String())
+
 }
 
 func TestGethClient(t *testing.T) {

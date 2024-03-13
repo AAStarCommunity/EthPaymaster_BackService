@@ -49,7 +49,6 @@ type PackUserOperation struct {
 }
 
 func NewUserOp(userOp *map[string]any) (*UserOperation, error) {
-
 	var result UserOperation
 	// Convert map to struct
 	decodeConfig := &mapstructure.DecoderConfig{

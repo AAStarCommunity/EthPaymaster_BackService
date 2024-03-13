@@ -20,6 +20,7 @@ type ComputeGasResponse struct {
 	TokenCost  string          `json:"token_cost"`
 	Network    types.Network   `json:"network"`
 	Token      types.TokenType `json:"token"`
+	TokenCount string          `json:"token_count"`
 	UsdCost    string          `json:"usd_cost"`
 	BlobEnable bool            `json:"blob_enable"`
 	MaxFee     big.Int         `json:"max_fee"`

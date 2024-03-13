@@ -46,5 +46,6 @@ func GetToken(fromToken types.TokenType, toToken types.TokenType) (float64, erro
 	}
 	formTokenPrice, _ := GetPriceUsd(fromToken)
 	toTokenPrice, _ := GetPriceUsd(toToken)
+
 	return formTokenPrice / toTokenPrice, nil
 }

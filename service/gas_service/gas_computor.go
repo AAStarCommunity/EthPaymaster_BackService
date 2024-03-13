@@ -3,6 +3,7 @@ package gas_service
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
@@ -31,13 +32,21 @@ func ComputeGas(userOp *model.UserOperation, strategy *model.Strategy) (*model.C
 
 	maxGasLimit := big.NewInt(0).Add(userOp.CallGasLimit, userOp.VerificationGasLimit)
 	maxGasLimit = maxGasLimit.Add(maxGasLimit, payMasterPostGasLimit)
-
 	maxFee := new(big.Int).Mul(maxGasLimit, gasPrice.MaxBasePriceWei)
+	maxFeePriceInEther := new(big.Float).SetInt(maxFee)
+	maxFeePriceInEther.Quo(maxFeePriceInEther, chain_service.EthWeiFactor)
+	tokenCost, _ := getTokenCost(strategy, maxFeePriceInEther)
+	if strategy.PayType == types.PayTypeERC20 {
+		//TODO get ERC20 balance
+		if err := validateErc20Paymaster(tokenCost, strategy); err != nil {
+			return nil, err
+		}
+	}
+
 	// TODO get PaymasterCallGasLimit
-	tokenCost := GetTokenCost(*maxFee, userOp, *strategy)
 	return &model.ComputeGasResponse{
 		GasInfo:    gasPrice,
-		TokenCost:  tokenCost,
+		TokenCost:  tokenCost.Text('f', 18),
 		Network:    strategy.NetWork,
 		Token:      strategy.Token,
 		UsdCost:    "0.4",
@@ -45,11 +54,24 @@ func ComputeGas(userOp *model.UserOperation, strategy *model.Strategy) (*model.C
 		MaxFee:     *maxFee,
 	}, nil
 }
-func GetPayMasterGasLimit() *big.Int {
+func validateErc20Paymaster(tokenCost *big.Float, strategy *model.Strategy) error {
+	//useToken := strategy.Token
+	//// get User address balance
+	//TODO
 	return nil
 }
-func GetTokenCost(maxFee big.Int, userOp *model.UserOperation, strategy model.Strategy) string {
-	return "0.0001"
+func getTokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Float, error) {
+	formTokenType := chain_service.NetworkInfoMap[strategy.NetWork].GasToken
+	toTokenType := strategy.Token
+	toTokenPrice, err := utils.GetToken(formTokenType, toTokenType)
+	if err != nil {
+		return nil, err
+	}
+	tokenCost := new(big.Float).Mul(tokenCount, big.NewFloat(toTokenPrice))
+	return tokenCost, nil
+}
+func GetPayMasterGasLimit() *big.Int {
+	return nil
 }
 
 func ValidateGas(userOp *model.UserOperation, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
