@@ -16,17 +16,9 @@ func TestCheckContractAddressAccess(t *testing.T) {
 	assert.True(t, res)
 }
 func TestGetGasPrice(t *testing.T) {
-	priceWei, gasPriceInGwei, gasPriceInEtherStr, _ := GetGasPrice(types.Ethereum)
-	priceWeiInt := priceWei.Uint64()
-	fmt.Printf("priceWeiInt %d\n", priceWeiInt)
-	fmt.Printf("gasPriceInGwei %f\n", gasPriceInGwei)
-	fmt.Printf("gasPriceInEtherStr %s\n", *gasPriceInEtherStr)
-	baseFee, _ := GetGas(types.Ethereum)
-	fmt.Printf("baseFee %d\n", baseFee.Uint64())
+	gasprice, _ := GetGasPrice(types.Ethereum)
+	fmt.Printf("gasprice %d\n", gasprice.MaxBasePriceWei.Uint64())
 
-	priorFee, priorFeeIGwei := GetPriorityFee(types.Ethereum)
-	fmt.Printf("priorFee %d\n", priorFee.Uint64())
-	fmt.Printf("priorFeeIGwei %f\n", priorFeeIGwei)
 }
 
 func TestGethClient(t *testing.T) {
