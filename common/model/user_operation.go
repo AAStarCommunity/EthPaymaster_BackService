@@ -3,10 +3,17 @@ package model
 import (
 	"encoding/hex"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/xerrors"
 	"math/big"
 	"reflect"
+	"sync"
+)
+
+var (
+	validate = validator.New()
+	onlyOnce = sync.Once{}
 )
 
 // UserOperation  entrypoint v0.0.6
@@ -58,8 +65,34 @@ func NewUserOp(userOp *map[string]any) (*UserOperation, error) {
 	if err := decoder.Decode(userOp); err != nil {
 		return nil, xerrors.Errorf("data [%w] convert failed: [%w]", userOp, err)
 	}
+	onlyOnce.Do(func() {
+		validate.RegisterCustomTypeFunc(validateAddressType, common.Address{})
+		validate.RegisterCustomTypeFunc(validateBigIntType, big.Int{})
+	})
+	err = validate.Struct(result)
+	if err != nil {
+		return nil, err
+	}
 
 	return &result, nil
+}
+
+func validateAddressType(field reflect.Value) interface{} {
+	value, ok := field.Interface().(common.Address)
+	if !ok || value == common.HexToAddress("0x") {
+		return nil
+	}
+
+	return field
+}
+
+func validateBigIntType(field reflect.Value) interface{} {
+	value, ok := field.Interface().(big.Int)
+	if !ok || value.Cmp(big.NewInt(0)) == -1 {
+		return nil
+	}
+
+	return field
 }
 
 func exactFieldMatch(mapKey, fieldName string) bool {

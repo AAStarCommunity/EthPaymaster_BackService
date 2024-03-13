@@ -191,12 +191,14 @@ const docTemplate = `{
             "enum": [
                 "ethereum",
                 "sepolia",
-                "arbitrum"
+                "arbitrum",
+                "arb-sepolia"
             ],
             "x-enum-varnames": [
                 "Ethereum",
                 "Sepolia",
-                "Arbitrum"
+                "Arbitrum",
+                "ArbTest"
             ]
         }
     },

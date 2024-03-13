@@ -24,11 +24,13 @@ definitions:
     - ethereum
     - sepolia
     - arbitrum
+    - arb-sepolia
     type: string
     x-enum-varnames:
     - Ethereum
     - Sepolia
     - Arbitrum
+    - ArbTest
 info:
   contact:
     name: AAStar Support

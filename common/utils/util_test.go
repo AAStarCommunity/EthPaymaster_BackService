@@ -31,10 +31,11 @@ func TestSignUserOp(t *testing.T) {
 	}
 	signByte, err := SignUserOp("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421", userOp)
 	assert.NoError(t, err)
+	len := len(signByte)
+	fmt.Printf("signByte len: %d\n", len)
 	fmt.Printf("signByte: %x\n", signByte)
 	singature := hex.EncodeToString(signByte)
 	fmt.Printf("singature: %s\n", singature)
-
 }
 func TestNewUserOp(t *testing.T) {
 	userOp, newErr := model.NewUserOp(GenerateMockUserOperation())
