@@ -23,15 +23,15 @@ var (
 type UserOperation struct {
 	Sender               common.Address `json:"sender"   mapstructure:"sender"  binding:"required,hexParam"`
 	Nonce                *big.Int       `json:"nonce"  mapstructure:"nonce"  binding:"required"`
-	InitCode             []byte         `json:"initCode"  mapstructure:"initCode" `
-	CallData             []byte         `json:"callData"  mapstructure:"callData"  binding:"required"`
-	CallGasLimit         *big.Int       `json:"callGasLimit"  mapstructure:"callGasLimit"  binding:"required"`
-	VerificationGasLimit *big.Int       `json:"verificationGasLimit"  mapstructure:"verificationGasLimit"  binding:"required"`
-	PreVerificationGas   *big.Int       `json:"preVerificationGas"  mapstructure:"preVerificationGas"  binding:"required"`
-	MaxFeePerGas         *big.Int       `json:"maxFeePerGas"  mapstructure:"maxFeePerGas"  binding:"required"`
-	MaxPriorityFeePerGas *big.Int       `json:"maxPriorityFeePerGas"  mapstructure:"maxPriorityFeePerGas"  binding:"required"`
+	InitCode             []byte         `json:"init_code"  mapstructure:"init_code" `
+	CallData             []byte         `json:"call_data"  mapstructure:"call_data"  binding:"required"`
+	CallGasLimit         *big.Int       `json:"call_gas_limit"  mapstructure:"call_gas_limit"  binding:"required"`
+	VerificationGasLimit *big.Int       `json:"verification_gas_limit"  mapstructure:"verification_gas_limit"  binding:"required"`
+	PreVerificationGas   *big.Int       `json:"pre_verification_gas"  mapstructure:"pre_verification_gas"  binding:"required"`
+	MaxFeePerGas         *big.Int       `json:"max_fee_per_gas"  mapstructure:"max_fee_per_gas"  binding:"required"`
+	MaxPriorityFeePerGas *big.Int       `json:"max_priority_fee_per_gas"  mapstructure:"max_priority_fee_per_gas"  binding:"required"`
 	Signature            []byte         `json:"signature"  mapstructure:"signature"  binding:"required"`
-	PaymasterAndData     []byte         `json:"paymasterAndData"  mapstructure:"paymasterAndData"`
+	PaymasterAndData     []byte         `json:"paymaster_and_data"  mapstructure:"paymaster_and_data"`
 }
 
 // PackUserOperation  entrypoint v0.0.67
