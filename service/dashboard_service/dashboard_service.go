@@ -15,11 +15,11 @@ func init() {
 	MockStrategyMap["1"] = &model.Strategy{
 		Id:                "1",
 		EntryPointAddress: "0x0576a174D229E3cFA37253523E645A78A0C91B57",
-		PayMasterAddress:  "0x0000000000325602a77416A16136FDafd04b299f",
+		PayMasterAddress:  "0x409646509be42aea79eab370efc2c0ec2e51753b",
 		NetWork:           types.Sepolia,
 		PayType:           types.PayTypeVerifying,
 		EntryPointTag:     types.EntrypointV06,
-		Token:             types.USDT,
+		Token:             types.ETH,
 	}
 	MockStrategyMap["2"] = &model.Strategy{
 		Id:                "2",
@@ -28,7 +28,7 @@ func init() {
 		PayType:           types.PayTypeERC20,
 		EntryPointTag:     types.EntrypointV06,
 		NetWork:           types.Sepolia,
-		Token:             types.ETH,
+		Token:             types.USDT,
 	}
 
 	entryPointSupport["0x0576a174D229E3cFA37253523E645A78A0C91B57"] = true

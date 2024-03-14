@@ -63,15 +63,15 @@ func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserO
 	if payError != nil {
 		return nil, payError
 	}
-	paymasterSignature := getPayMasterSignature(strategy, userOp)
 
-	var paymasterAndData []byte
-	if paymasterAndDataRes, err := getPayMasterAndData(strategy, userOp, gasResponse, paymasterSignature); err != nil {
+	var paymasterAndData string
+	if paymasterAndDataRes, err := getPayMasterAndData(strategy, userOp, gasResponse); err != nil {
 		return nil, err
 	} else {
 		paymasterAndData = paymasterAndDataRes
 	}
-	userOp.PaymasterAndData = paymasterAndData
+	paymasterSignature := getPayMasterSignature(strategy, userOp)
+
 	//validatePaymasterUserOp
 	var result = &model.TryPayUserOpResponse{
 		StrategyId:         strategy.Id,
@@ -79,7 +79,7 @@ func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserO
 		PayMasterAddress:   strategy.PayMasterAddress,
 		PayReceipt:         payReceipt,
 		PayMasterSignature: paymasterSignature,
-		PayMasterAndData:   utils.EncodeToStringWithPrefix(paymasterAndData),
+		PayMasterAndData:   paymasterAndData,
 		GasInfo:            gasResponse,
 	}
 	return result, nil
@@ -125,13 +125,12 @@ func getPayMasterSignature(strategy *model.Strategy, userOp *model.UserOperation
 	signatureBytes, _ := utils.SignUserOp("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421", userOp)
 	return hex.EncodeToString(signatureBytes)
 }
-func getPayMasterAndData(strategy *model.Strategy, userOp *model.UserOperation, gasResponse *model.ComputeGasResponse, paymasterSign string) ([]byte, error) {
+func getPayMasterAndData(strategy *model.Strategy, userOp *model.UserOperation, gasResponse *model.ComputeGasResponse) (string, error) {
 	paymasterDataExecutor := paymaster_pay_type.GetPaymasterDataExecutor(strategy.PayType)
 	if paymasterDataExecutor == nil {
-		return nil, xerrors.Errorf("Not Support PayType: [%w]", strategy.PayType)
+		return "", xerrors.Errorf("Not Support PayType: [%w]", strategy.PayType)
 	}
 	extra := make(map[string]any)
-	extra["signature"] = paymasterSign
 	return paymasterDataExecutor.GeneratePayMasterAndData(strategy, userOp, gasResponse, extra)
 }
 

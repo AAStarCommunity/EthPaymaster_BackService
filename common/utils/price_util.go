@@ -23,6 +23,13 @@ func init() {
 }
 
 func GetPriceUsd(tokenType types.TokenType) (float64, error) {
+
+	if types.IsStableToken(tokenType) {
+		return 1, nil
+	}
+	if tokenType == types.ETH {
+		return 4000, nil
+	}
 	url, ok := URLMap[tokenType]
 	if !ok {
 		return 0, xerrors.Errorf("token type [%w] not found", tokenType)

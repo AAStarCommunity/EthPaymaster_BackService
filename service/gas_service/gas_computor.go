@@ -6,6 +6,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/paymaster_pay_type"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
+	"fmt"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/xerrors"
@@ -34,7 +35,11 @@ func ComputeGas(userOp *model.UserOperation, strategy *model.Strategy) (*model.C
 	maxFee := new(big.Int).Mul(maxGasLimit, gasPrice.MaxBasePriceWei)
 	maxFeePriceInEther := new(big.Float).SetInt(maxFee)
 	maxFeePriceInEther.Quo(maxFeePriceInEther, chain_service.EthWeiFactor)
-	tokenCost, _ := getTokenCost(strategy, maxFeePriceInEther)
+	fmt.Printf("maxFeePriceInEther: %f\n", maxFeePriceInEther)
+	tokenCost, err := getTokenCost(strategy, maxFeePriceInEther)
+	if err != nil {
+		return nil, err
+	}
 	var usdCost float64
 	if types.IsStableToken(strategy.Token) {
 		usdCost, _ = tokenCost.Float64()

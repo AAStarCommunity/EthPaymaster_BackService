@@ -2,8 +2,9 @@ package paymaster_pay_type
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
+	"encoding/hex"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/xerrors"
 	"math/big"
@@ -28,12 +29,17 @@ func (v VerifyingPaymasterExecutor) ValidateGas(userOp *model.UserOperation, res
 	return nil
 }
 
-func (v VerifyingPaymasterExecutor) GeneratePayMasterAndData(strategy *model.Strategy, userOp *model.UserOperation, gasResponse *model.ComputeGasResponse, extra map[string]any) ([]byte, error) {
+func (v VerifyingPaymasterExecutor) GeneratePayMasterAndData(strategy *model.Strategy, userOp *model.UserOperation, gasResponse *model.ComputeGasResponse, extra map[string]any) (string, error) {
 	//verifying:[0-1]pay type，[1-21]paymaster address，[21-85]valid timestamp，[85-] signature
-	signature, ok := extra["signature"]
-	if !ok {
-		return nil, xerrors.Errorf("signature not found")
+	validationGas := userOp.VerificationGasLimit.String()[0:16]
+	postOPGas := userOp.CallGasLimit.String()[0:16]
+	message := validationGas + postOPGas + string(strategy.PayType)
+
+	signatureByte, err := utils.SignMessage("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421", message)
+	if err != nil {
+		return "", err
 	}
-	res := "0x" + string(types.PayTypeVerifying) + strategy.PayMasterAddress + "" + signature.(string)
-	return []byte(res), nil
+	signatureStr := hex.EncodeToString(signatureByte)
+	message = message + signatureStr
+	return message, nil
 }
