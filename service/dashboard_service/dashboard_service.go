@@ -7,12 +7,12 @@ import (
 )
 
 // TODO just Temp Mock
-var mockStrategyMap = map[string]*model.Strategy{}
+var MockStrategyMap = map[string]*model.Strategy{}
 var payMasterSupport = map[string]bool{}
 var entryPointSupport = map[string]bool{}
 
 func init() {
-	mockStrategyMap["1"] = &model.Strategy{
+	MockStrategyMap["1"] = &model.Strategy{
 		Id:                "1",
 		EntryPointAddress: "0x0576a174D229E3cFA37253523E645A78A0C91B57",
 		PayMasterAddress:  "0x0000000000325602a77416A16136FDafd04b299f",
@@ -21,7 +21,7 @@ func init() {
 		EntryPointTag:     types.EntrypointV06,
 		Token:             types.USDT,
 	}
-	mockStrategyMap["2"] = &model.Strategy{
+	MockStrategyMap["2"] = &model.Strategy{
 		Id:                "2",
 		EntryPointAddress: "0x0576a174D229E3cFA37253523E645A78A0C91B57",
 		PayMasterAddress:  "0x0000000000325602a77416A16136FDafd04b299f",
@@ -35,7 +35,7 @@ func init() {
 	payMasterSupport["0x0000000000325602a77416A16136FDafd04b299f"] = true
 }
 func GetStrategyById(strategyId string) *model.Strategy {
-	return mockStrategyMap[strategyId]
+	return MockStrategyMap[strategyId]
 }
 func GetSupportEntryPoint() {
 
