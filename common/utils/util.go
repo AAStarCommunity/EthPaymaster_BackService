@@ -22,9 +22,9 @@ func GenerateMockUserOperation() *map[string]any {
 		"verification_gas_limit":   "100000",
 		"max_fee_per_gas":          "44020",
 		"max_priority_fee_per_gas": "1743509478",
-		"paymaster_and_data":       "0x",
 		"pre_verification_gas":     "44020",
 		"signature":                "0x760868cd7d9539c6e31c2169c4cab6817beb8247516a90e4301e929011451658623455035b83d38e987ef2e57558695040a25219c39eaa0e31a0ead16a5c925c1c",
+		"paymaster_and_data":       "0x",
 	}
 
 	return &MockUserOpData
