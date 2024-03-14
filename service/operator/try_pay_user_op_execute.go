@@ -5,7 +5,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
-	"AAStarCommunity/EthPaymaster_BackService/paymaster_data_generator"
+	"AAStarCommunity/EthPaymaster_BackService/paymaster_pay_type"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/gas_service"
@@ -51,6 +51,7 @@ func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserO
 	if gasComputeError != nil {
 		return nil, gasComputeError
 	}
+	//The maxFeePerGas and maxPriorityFeePerGas are above a configurable minimum value that the client is willing to accept. At the minimum, they are sufficiently high to be included with the current block.basefee.
 
 	//validate gas
 	if err := gas_service.ValidateGas(userOp, gasResponse, strategy); err != nil {
@@ -125,13 +126,13 @@ func getPayMasterSignature(strategy *model.Strategy, userOp *model.UserOperation
 	return hex.EncodeToString(signatureBytes)
 }
 func getPayMasterAndData(strategy *model.Strategy, userOp *model.UserOperation, gasResponse *model.ComputeGasResponse, paymasterSign string) ([]byte, error) {
-	paymasterDataGenerator := paymaster_data_generator.GetPaymasterDataGenerator(strategy.PayType)
-	if paymasterDataGenerator == nil {
+	paymasterDataExecutor := paymaster_pay_type.GetPaymasterDataExecutor(strategy.PayType)
+	if paymasterDataExecutor == nil {
 		return nil, xerrors.Errorf("Not Support PayType: [%w]", strategy.PayType)
 	}
 	extra := make(map[string]any)
 	extra["signature"] = paymasterSign
-	return paymasterDataGenerator.GeneratePayMaster(strategy, userOp, gasResponse, extra)
+	return paymasterDataExecutor.GeneratePayMasterAndData(strategy, userOp, gasResponse, extra)
 }
 
 func strategyGenerate(request *model.TryPayUserOpRequest) (*model.Strategy, error) {

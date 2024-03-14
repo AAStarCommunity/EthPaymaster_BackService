@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/holiman/uint256"
 	"golang.org/x/xerrors"
+	"math"
 	"math/big"
 	"strings"
 )
@@ -16,6 +17,21 @@ import (
 var GweiFactor = new(big.Float).SetInt(big.NewInt(1e9))
 var EthWeiFactor = new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil))
 
+const balanceOfAbi = `[{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}]`
+
+var TokenAddressMap map[types.Network]*map[types.TokenType]common.Address
+
+func init() {
+	TokenAddressMap = map[types.Network]*map[types.TokenType]common.Address{
+		types.Ethereum: {
+			types.ETH: common.HexToAddress("0xdac17f958d2ee523a2206206994597c13d831ec7"),
+		},
+		types.Sepolia: {
+			types.USDT: common.HexToAddress("0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"),
+			types.USDC: common.HexToAddress("0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"),
+		},
+	}
+}
 func CheckContractAddressAccess(contract common.Address, chain types.Network) (bool, error) {
 	if chain == "" {
 		return false, xerrors.Errorf("chain can not be empty")
@@ -103,36 +119,44 @@ func EstimateGasLimitAndCost(chain types.Network, msg ethereum.CallMsg) (uint64,
 	}
 	return client.EstimateGas(context.Background(), msg)
 }
-func GetAddressTokenBalance(network types.Network, address common.Address, token types.TokenType) ([]interface{}, error) {
+func GetAddressTokenBalance(network types.Network, address common.Address, token types.TokenType) (float64, error) {
 	client, exist := EthCompatibleNetWorkClientMap[network]
 	if !exist {
-		return nil, xerrors.Errorf("chain Client [%s] not exist", network)
+		return 0, xerrors.Errorf("chain Client [%s] not exist", network)
 	}
-	client.BalanceAt(context.Background(), address, nil)
-	usdtContractAddress := common.HexToAddress("0xdac17f958d2ee523a2206206994597c13d831ec7")
-	//address := common.HexToAddress("0xDf7093eF81fa23415bb703A685c6331584D30177")
-	const bananceABI = `[{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}]`
-	usdtABI, jsonErr := abi.JSON(strings.NewReader(bananceABI))
+	if token == types.ETH {
+		res, err := client.BalanceAt(context.Background(), address, nil)
+		if err != nil {
+			return 0, err
+		}
+		bananceV := float64(res.Int64()) * math.Pow(10, -18)
+		return bananceV, nil
+	}
+
+	tokenContractAddress := (*TokenAddressMap[network])[token]
+	usdtABI, jsonErr := abi.JSON(strings.NewReader(balanceOfAbi))
 	if jsonErr != nil {
-		return nil, jsonErr
+		return 0, jsonErr
 	}
 	data, backErr := usdtABI.Pack("balanceOf", address)
 	if backErr != nil {
-		return nil, backErr
-
+		return 0, backErr
 	}
-	//usdtInstance, err := ethclient.NewContract(usdtContractAddress, usdtAbi, client)
 	result, callErr := client.CallContract(context.Background(), ethereum.CallMsg{
-		To:   &usdtContractAddress,
+		To:   &tokenContractAddress,
 		Data: data,
 	}, nil)
 	if callErr != nil {
-		return nil, callErr
+		return 0, callErr
 	}
-	var balanceResult, unpackErr = usdtABI.Unpack("balanceOf", result)
+
+	var balanceResult *big.Int
+	unpackErr := usdtABI.UnpackIntoInterface(&balanceResult, "balanceOf", result)
 	if unpackErr != nil {
-		return nil, unpackErr
+		return 0, unpackErr
 	}
-	//TODO get token balance
-	return balanceResult, nil
+	balanceResultFloat := float64(balanceResult.Int64()) * math.Pow(10, -6)
+
+	return balanceResultFloat, nil
+
 }

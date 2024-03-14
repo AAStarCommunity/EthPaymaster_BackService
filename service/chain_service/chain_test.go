@@ -30,3 +30,9 @@ func TestGethClient(t *testing.T) {
 	assert.NotEqual(t, 0, num)
 	fmt.Println(num)
 }
+func TestGetAddressTokenBalance(t *testing.T) {
+
+	res, err := GetAddressTokenBalance(types.Sepolia, common.HexToAddress("0xDf7093eF81fa23415bb703A685c6331584D30177"), types.USDC)
+	assert.NoError(t, err)
+	fmt.Println(res)
+}

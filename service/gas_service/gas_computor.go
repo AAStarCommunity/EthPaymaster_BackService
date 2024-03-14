@@ -4,6 +4,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
+	"AAStarCommunity/EthPaymaster_BackService/paymaster_pay_type"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
@@ -26,40 +27,33 @@ func ComputeGas(userOp *model.UserOperation, strategy *model.Strategy) (*model.C
 	if estimateCallGasLimit > userOpCallGasLimit {
 		return nil, xerrors.Errorf("estimateCallGasLimit %d > userOpCallGasLimit %d", estimateCallGasLimit, userOpCallGasLimit)
 	}
-	//x := gasPrice.MaxBasePriceWei.Int64() + gasPrice.MaxPriorityPriceWei.Int64()
-	//maxFeePerGas := (x, userOp.MaxFeePerGas.Uint64())
-	payMasterPostGasLimit := GetPayMasterGasLimit()
 
+	payMasterPostGasLimit := GetPayMasterGasLimit()
 	maxGasLimit := big.NewInt(0).Add(userOp.CallGasLimit, userOp.VerificationGasLimit)
 	maxGasLimit = maxGasLimit.Add(maxGasLimit, payMasterPostGasLimit)
 	maxFee := new(big.Int).Mul(maxGasLimit, gasPrice.MaxBasePriceWei)
 	maxFeePriceInEther := new(big.Float).SetInt(maxFee)
 	maxFeePriceInEther.Quo(maxFeePriceInEther, chain_service.EthWeiFactor)
 	tokenCost, _ := getTokenCost(strategy, maxFeePriceInEther)
-	if strategy.PayType == types.PayTypeERC20 {
-		//TODO get ERC20 balance
-		if err := validateErc20Paymaster(tokenCost, strategy); err != nil {
-			return nil, err
-		}
+	var usdCost float64
+	if types.IsStableToken(strategy.Token) {
+		usdCost, _ = tokenCost.Float64()
+	} else {
+		usdCost, _ = utils.GetPriceUsd(strategy.Token)
 	}
 
 	// TODO get PaymasterCallGasLimit
 	return &model.ComputeGasResponse{
 		GasInfo:    gasPrice,
-		TokenCost:  tokenCost.Text('f', 18),
+		TokenCost:  tokenCost,
 		Network:    strategy.NetWork,
 		Token:      strategy.Token,
-		UsdCost:    "0.4",
+		UsdCost:    usdCost,
 		BlobEnable: strategy.Enable4844,
 		MaxFee:     *maxFee,
 	}, nil
 }
-func validateErc20Paymaster(tokenCost *big.Float, strategy *model.Strategy) error {
-	//useToken := strategy.Token
-	//// get User address balance
-	//TODO
-	return nil
-}
+
 func getTokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Float, error) {
 	formTokenType := chain_service.NetworkInfoMap[strategy.NetWork].GasToken
 	toTokenType := strategy.Token
@@ -67,22 +61,21 @@ func getTokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Float, 
 	if err != nil {
 		return nil, err
 	}
+	if toTokenPrice == 0 {
+		return nil, xerrors.Errorf("toTokenPrice can not be 0")
+	}
 	tokenCost := new(big.Float).Mul(tokenCount, big.NewFloat(toTokenPrice))
 	return tokenCost, nil
 }
 func GetPayMasterGasLimit() *big.Int {
-	return nil
+	//TODO
+	return big.NewInt(0)
 }
 
 func ValidateGas(userOp *model.UserOperation, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
-	//1.if ERC20 check address balacnce
-	//Validate the account’s deposit in the entryPoint is high enough to cover the max possible cost (cover the already-done verification and max execution gas)
-	//2 if Paymaster check paymaster balance
-	//The maxFeePerGas and maxPriorityFeePerGas are above a configurable minimum value that the client is willing to accept. At the minimum, they are sufficiently high to be included with the current block.basefee.
-	if strategy.PayType == types.PayTypeERC20 {
-		//TODO check address balance
-	} else if strategy.PayType == types.PayTypeVerifying {
-		//TODO check paymaster balance
+	paymasterDataExecutor := paymaster_pay_type.GetPaymasterDataExecutor(strategy.PayType)
+	if paymasterDataExecutor == nil {
+		return xerrors.Errorf(" %s paymasterDataExecutor not found", strategy.PayType)
 	}
-	return nil
+	return paymasterDataExecutor.ValidateGas(userOp, gasComputeResponse, strategy)
 }
