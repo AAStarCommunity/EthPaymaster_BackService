@@ -8,5 +8,5 @@ import (
 func TestGetSupportEntrypointExecute(t *testing.T) {
 	res, err := GetSupportEntrypointExecute("network")
 	assert.NoError(t, err)
-	t.Log(res.EntrypointDomains)
+	t.Log(res)
 }
