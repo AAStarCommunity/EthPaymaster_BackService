@@ -31,8 +31,8 @@ func (v VerifyingPaymasterExecutor) ValidateGas(userOp *model.UserOperation, res
 
 func (v VerifyingPaymasterExecutor) GeneratePayMasterAndData(strategy *model.Strategy, userOp *model.UserOperation, gasResponse *model.ComputeGasResponse, extra map[string]any) (string, error) {
 	//verifying:[0-1]pay type，[1-21]paymaster address，[21-85]valid timestamp，[85-] signature
-	validationGas := userOp.VerificationGasLimit.String()[0:16]
-	postOPGas := userOp.CallGasLimit.String()[0:16]
+	validationGas := userOp.VerificationGasLimit.String()
+	postOPGas := userOp.CallGasLimit.String()
 	message := validationGas + postOPGas + string(strategy.PayType)
 
 	signatureByte, err := utils.SignMessage("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421", message)
