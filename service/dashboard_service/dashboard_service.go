@@ -14,7 +14,7 @@ var entryPointSupport = map[string]bool{}
 func init() {
 	MockStrategyMap["1"] = &model.Strategy{
 		Id:                "1",
-		EntryPointAddress: "0x0576a174D229E3cFA37253523E645A78A0C91B57",
+		EntryPointAddress: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
 		PayMasterAddress:  "0x409646509be42aea79eab370efc2c0ec2e51753b",
 		NetWork:           types.Sepolia,
 		PayType:           types.PayTypeVerifying,
@@ -23,7 +23,7 @@ func init() {
 	}
 	MockStrategyMap["2"] = &model.Strategy{
 		Id:                "2",
-		EntryPointAddress: "0x0576a174D229E3cFA37253523E645A78A0C91B57",
+		EntryPointAddress: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
 		PayMasterAddress:  "0x0000000000325602a77416A16136FDafd04b299f",
 		PayType:           types.PayTypeERC20,
 		EntryPointTag:     types.EntrypointV06,
