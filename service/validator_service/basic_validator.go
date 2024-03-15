@@ -53,20 +53,14 @@ func ValidateUserOp(userOp *model.UserOperation) error {
 }
 func checkSender(userOp *model.UserOperation, netWork types.Network) error {
 	//check sender
-
-	if ok, err := chain_service.CheckContractAddressAccess(userOp.Sender, netWork); err != nil {
-		return err
-	} else if !ok {
-		return xerrors.Errorf("sender address not exist in [%s] network", netWork)
+	checkOk, checkSenderErr := chain_service.CheckContractAddressAccess(userOp.Sender, netWork)
+	if !checkOk {
+		if err := checkInitCode(userOp.InitCode, netWork); err != nil {
+			return xerrors.Errorf("%s and %s", checkSenderErr.Error(), err.Error())
+		}
 	}
 	//check balance
 
-	//if userOp.InitCode == "" {
-	//	return xerrors.Errorf("initCode can not be empty if sender is empty")
-	//}
-	if err := checkInitCode(userOp.InitCode, netWork); err != nil {
-
-	}
 	return nil
 }
 func checkInitCode(initCode []byte, network types.Network) error {
@@ -77,9 +71,8 @@ func checkInitCode(initCode []byte, network types.Network) error {
 	if ok, err := chain_service.CheckContractAddressAccess(factoryAddress, network); err != nil {
 		return err
 	} else if !ok {
-		return xerrors.Errorf("sender address not exist in [%s] network", network)
+		return xerrors.Errorf("factoryAddress address [factoryAddress] not exist in [%s] network", network)
 	}
-	// TODO checkFactoryAddress stack
 	//parse its first 20 bytes as a factory address. Record whether the factory is staked,
 	//factory and factoryData - either both exist, or none
 
