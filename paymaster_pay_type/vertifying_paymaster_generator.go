@@ -30,11 +30,11 @@ func (v VerifyingPaymasterExecutor) ValidateGas(userOp *model.UserOperation, res
 }
 
 func (v VerifyingPaymasterExecutor) GeneratePayMasterAndData(strategy *model.Strategy, userOp *model.UserOperation, gasResponse *model.ComputeGasResponse, extra map[string]any) (string, error) {
-	//verifying:[0-1]pay type，[1-21]paymaster address，[21-85]valid timestamp，[85-] signature
+	//[0:20)paymaster address,[20:36)validation gas, [36:52)postop gas,[52:53)typeId,  [53:117)valid timestamp, [117:) signature
 	validationGas := userOp.VerificationGasLimit.String()
 	postOPGas := userOp.CallGasLimit.String()
-	message := validationGas + postOPGas + string(strategy.PayType)
-
+	message := strategy.PayMasterAddress + validationGas + postOPGas + string(strategy.PayType)
+	//0000 timestamp /s (convert to hex)  64
 	signatureByte, err := utils.SignMessage("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421", message)
 	if err != nil {
 		return "", err

@@ -70,7 +70,9 @@ func checkSender(userOp *model.UserOperation, netWork types.Network) error {
 	return nil
 }
 func checkInitCode(initCode []byte, network types.Network) error {
-
+	if len(initCode) < 20 {
+		return xerrors.Errorf("initCode length is less than 20 do not have factory address")
+	}
 	factoryAddress := common.BytesToAddress(initCode[:20])
 	if ok, err := chain_service.CheckContractAddressAccess(factoryAddress, network); err != nil {
 		return err
