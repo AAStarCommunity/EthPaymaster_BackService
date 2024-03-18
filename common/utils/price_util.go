@@ -2,15 +2,21 @@ package utils
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"fmt"
 	"golang.org/x/xerrors"
 	"io"
+	"io/ioutil"
+	"log"
 	"net/http"
+	"net/url"
+	"os"
 	"strconv"
 	"strings"
 )
 
 var (
-	URLMap = map[types.TokenType]string{}
+	URLMap     = map[types.TokenType]string{}
+	httpClient = &http.Client{}
 )
 
 type Price struct {
@@ -55,4 +61,28 @@ func GetToken(fromToken types.TokenType, toToken types.TokenType) (float64, erro
 	toTokenPrice, _ := GetPriceUsd(toToken)
 
 	return formTokenPrice / toTokenPrice, nil
+}
+
+func GetCoinMarketPrice() {
+	req, err := http.NewRequest("GET", "https://pro-api.coinmarketcap.com/v2/tools/price-conversion", nil)
+	if err != nil {
+		log.Print(err)
+		os.Exit(1)
+	}
+	q := url.Values{}
+	q.Add("amount", "2")
+	q.Add("symbol", "BTC")
+	q.Add("convert", "USD")
+
+	req.Header.Set("Accepts", "application/json")
+	req.Header.Add("X-CMC_PRO_API_KEY", "a1441679-b8fd-49a0-aa47-51f88f7d3d52")
+	req.URL.RawQuery = q.Encode()
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request to server")
+		os.Exit(1)
+	}
+	fmt.Println(resp.Status)
+	respBody, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println(string(respBody))
 }

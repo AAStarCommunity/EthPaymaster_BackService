@@ -20,3 +20,7 @@ func TestDemo(t *testing.T) {
 	str := "0000000000000000000000000000000000000000000000000000000000000002"
 	fmt.Printf(strconv.Itoa(len(str)))
 }
+
+func TestGetCoinMarketPrice(t *testing.T) {
+	GetCoinMarketPrice()
+}
