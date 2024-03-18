@@ -133,23 +133,82 @@ func getPayMasterSignature(strategy *model.Strategy, userOp *model.UserOperation
 }
 func packUserOp(userOp *model.UserOperation) (string, error) {
 	abiEncoder, err := abi.JSON(strings.NewReader(`[
-		{"type":"address","name":"sender"},
-		{"type":"uint256","name":"nonce"},
-		{"type":"bytes","name":"init_code"},
-		{"type":"bytes","name":"call_data"},
-		{"type":"uint256","name":"call_gas_limit"},
-		{"type":"uint256","name":"verification_gas_limit"},
-		{"type":"uint256","name":"pre_verification_gas"},
-		{"type":"uint256","name":"max_fee_per_gas"},
-		{"type":"uint256","name":"max_priority_fee_per_gas"},
-		{"type":"bytes","name":"signature"},
-		{"type":"bytes","name":"paymaster_and_data"}
+{
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "sender",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "nonce",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bytes",
+                        "name": "initCode",
+                        "type": "bytes"
+                    },
+                    {
+                        "internalType": "bytes",
+                        "name": "callData",
+                        "type": "bytes"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "callGasLimit",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "verificationGasLimit",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "preVerificationGas",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "maxFeePerGas",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "maxPriorityFeePerGas",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bytes",
+                        "name": "paymasterAndData",
+                        "type": "bytes"
+                    },
+                    {
+                        "internalType": "bytes",
+                        "name": "signature",
+                        "type": "bytes"
+                    }
+                ],
+                "internalType": "struct UserOperation",
+                "name": "op",
+                "type": "tuple"
+            }
+        ],
+        "name": "test",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
 	]`))
 	if err != nil {
 		return "", err
 	}
 
-	encoded, err := abiEncoder.Pack("", userOp.Sender.String(), userOp.Nonce, userOp.InitCode,
+	encoded, err := abiEncoder.Pack("test", userOp.Sender.String(), userOp.Nonce, userOp.InitCode,
 		userOp.CallData, userOp.CallGasLimit, userOp.VerificationGasLimit, userOp.PreVerificationGas,
 		userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas)
 	if err != nil {

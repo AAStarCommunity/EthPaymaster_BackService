@@ -34,14 +34,12 @@ func TestGenerateTestData(t *testing.T) {
 	fmt.Println(len(signature))
 }
 func TestPackUserOp(t *testing.T) {
-
 	userOp, _ := model.NewUserOp(utils.GenerateMockUserOperation())
 	userOp.Signature = nil
 	userOp.PaymasterAndData = nil
+
 	res, err := packUserOp(userOp)
-
 	assert.NoError(t, err)
-
 	fmt.Println(res)
 }
 func TestPackUserOpV2(t *testing.T) {

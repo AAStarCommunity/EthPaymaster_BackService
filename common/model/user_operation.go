@@ -33,6 +33,9 @@ type UserOperation struct {
 	Signature            []byte         `json:"signature"  mapstructure:"signature"  binding:"required"`
 	PaymasterAndData     []byte         `json:"paymaster_and_data"  mapstructure:"paymaster_and_data"`
 }
+type UserOperationSimple struct {
+	Sender []byte `json:"sender"   mapstructure:"sender"  binding:"required,hexParam"`
+}
 
 // PackUserOperation  entrypoint v0.0.67
 type PackUserOperation struct {
