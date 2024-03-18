@@ -5,15 +5,17 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
-	"AAStarCommunity/EthPaymaster_BackService/paymaster_pay_type"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/gas_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/pay_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/validator_service"
 	"encoding/hex"
+	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/xerrors"
+	"strconv"
+	"time"
 )
 
 func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserOpResponse, error) {
@@ -65,12 +67,13 @@ func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserO
 	}
 
 	var paymasterAndData string
-	if paymasterAndDataRes, err := getPayMasterAndData(strategy, userOp, gasResponse); err != nil {
+	var paymasterSignature string
+	if paymasterAndDataRes, paymasterSignatureRes, err := getPayMasterAndData(strategy, userOp, gasResponse); err != nil {
 		return nil, err
 	} else {
 		paymasterAndData = paymasterAndDataRes
+		paymasterSignature = paymasterSignatureRes
 	}
-	paymasterSignature := getPayMasterSignature(strategy, userOp)
 
 	//validatePaymasterUserOp
 	var result = &model.TryPayUserOpResponse{
@@ -125,13 +128,44 @@ func getPayMasterSignature(strategy *model.Strategy, userOp *model.UserOperation
 	signatureBytes, _ := utils.SignUserOp("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421", userOp)
 	return hex.EncodeToString(signatureBytes)
 }
-func getPayMasterAndData(strategy *model.Strategy, userOp *model.UserOperation, gasResponse *model.ComputeGasResponse) (string, error) {
-	paymasterDataExecutor := paymaster_pay_type.GetPaymasterDataExecutor(strategy.PayType)
-	if paymasterDataExecutor == nil {
-		return "", xerrors.Errorf("Not Support PayType: [%w]", strategy.PayType)
+func getPayMasterAndData(strategy *model.Strategy, userOp *model.UserOperation, gasResponse *model.ComputeGasResponse) (string, string, error) {
+	return generatePayMasterAndData(strategy)
+}
+
+func generatePayMasterAndData(strategy *model.Strategy) (string, string, error) {
+	//v0.7 [0:20)paymaster address,[20:36)validation gas, [36:52)postop gas,[52:53)typeId,  [53:117)valid timestamp, [117:) signature
+	//v0.6 [0:20)paymaster address,[20:22)payType, [22:86)start Time ,[86:150)typeId,  [53:117)valid timestamp, [117:) signature
+	//validationGas := userOp.VerificationGasLimit.String()
+	//postOPGas := userOp.CallGasLimit.String()
+
+	message := fmt.Sprintf("%s%s%s", strategy.PayMasterAddress, string(strategy.PayType), getValidTime())
+	signatureByte, err := utils.SignMessage("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421", message)
+	if err != nil {
+		return "", "", err
 	}
-	extra := make(map[string]any)
-	return paymasterDataExecutor.GeneratePayMasterAndData(strategy, userOp, gasResponse, extra)
+
+	signatureStr := hex.EncodeToString(signatureByte)
+	message = message + signatureStr
+	return message, signatureStr, nil
+}
+func getValidTime() string {
+	currentTime := time.Now()
+	currentTimestamp := currentTime.Unix()
+	futureTime := currentTime.Add(15 * time.Minute)
+	futureTimestamp := futureTime.Unix()
+	currentTimestampStr := strconv.FormatInt(currentTimestamp, 10)
+	futureTimestampStr := strconv.FormatInt(futureTimestamp, 10)
+	currentTimestampStrSupply := SupplyZero(currentTimestampStr, 64)
+	futureTimestampStrSupply := SupplyZero(futureTimestampStr, 64)
+	return currentTimestampStrSupply + futureTimestampStrSupply
+}
+func SupplyZero(prefix string, maxTo int) string {
+	padding := maxTo - len(prefix)
+	if padding > 0 {
+		prefix = "0" + prefix
+		prefix = fmt.Sprintf("%0*s", maxTo, prefix)
+	}
+	return prefix
 }
 
 func strategyGenerate(request *model.TryPayUserOpRequest) (*model.Strategy, error) {

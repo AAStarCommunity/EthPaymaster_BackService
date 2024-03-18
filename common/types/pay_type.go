@@ -3,6 +3,6 @@ package types
 type PayType string
 
 const (
-	PayTypeVerifying PayType = "0"
-	PayTypeERC20     PayType = "1"
+	PayTypeVerifying PayType = "00"
+	PayTypeERC20     PayType = "01"
 )
