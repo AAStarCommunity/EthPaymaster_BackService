@@ -133,7 +133,7 @@ func getPayMasterSignature(strategy *model.Strategy, userOp *model.UserOperation
 }
 func packUserOp(userOp *model.UserOperation) (string, error) {
 	abiEncoder, err := abi.JSON(strings.NewReader(`[
-{
+    {
         "inputs": [
             {
                 "components": [
@@ -194,7 +194,7 @@ func packUserOp(userOp *model.UserOperation) (string, error) {
                     }
                 ],
                 "internalType": "struct UserOperation",
-                "name": "op",
+                "name": "userOp",
                 "type": "tuple"
             }
         ],
@@ -203,14 +203,12 @@ func packUserOp(userOp *model.UserOperation) (string, error) {
         "stateMutability": "nonpayable",
         "type": "function"
     }
-	]`))
+]`))
 	if err != nil {
 		return "", err
 	}
 
-	encoded, err := abiEncoder.Pack("test", userOp.Sender.String(), userOp.Nonce, userOp.InitCode,
-		userOp.CallData, userOp.CallGasLimit, userOp.VerificationGasLimit, userOp.PreVerificationGas,
-		userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas)
+	encoded, err := abiEncoder.Pack("test", userOp)
 	if err != nil {
 		return "", err
 	}
