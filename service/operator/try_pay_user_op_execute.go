@@ -11,10 +11,13 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/service/pay_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/validator_service"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/xerrors"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -128,6 +131,49 @@ func getPayMasterSignature(strategy *model.Strategy, userOp *model.UserOperation
 	signatureBytes, _ := utils.SignUserOp("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421", userOp)
 	return hex.EncodeToString(signatureBytes)
 }
+func packUserOp(userOp *model.UserOperation) (string, error) {
+	abiEncoder, err := abi.JSON(strings.NewReader(`[
+		{"type":"address","name":"sender"},
+		{"type":"uint256","name":"nonce"},
+		{"type":"bytes","name":"init_code"},
+		{"type":"bytes","name":"call_data"},
+		{"type":"uint256","name":"call_gas_limit"},
+		{"type":"uint256","name":"verification_gas_limit"},
+		{"type":"uint256","name":"pre_verification_gas"},
+		{"type":"uint256","name":"max_fee_per_gas"},
+		{"type":"uint256","name":"max_priority_fee_per_gas"},
+		{"type":"bytes","name":"signature"},
+		{"type":"bytes","name":"paymaster_and_data"}
+	]`))
+	if err != nil {
+		return "", err
+	}
+
+	encoded, err := abiEncoder.Pack("", userOp.Sender.String(), userOp.Nonce, userOp.InitCode,
+		userOp.CallData, userOp.CallGasLimit, userOp.VerificationGasLimit, userOp.PreVerificationGas,
+		userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas)
+	if err != nil {
+		return "", err
+	}
+	hexString := hex.EncodeToString(encoded)
+	return hexString, nil
+}
+
+func packUserOpSimple(userOp *model.UserOperation) (string, error) {
+	data, err := json.Marshal(userOp)
+	if err != nil {
+		return "", err
+	}
+	hexString := hex.EncodeToString(data)
+
+	return hexString, nil
+
+}
+
+//	func UserOpHash(userOp *model.UserOperation, chainId string, strategy *model.Strategy, validStart string, validEnd string) []byte {
+//		packUserOp(userOp)
+//
+// }
 func getPayMasterAndData(strategy *model.Strategy, userOp *model.UserOperation, gasResponse *model.ComputeGasResponse) (string, string, error) {
 	return generatePayMasterAndData(strategy)
 }
