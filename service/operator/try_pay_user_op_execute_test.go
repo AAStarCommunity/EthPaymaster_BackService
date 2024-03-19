@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"math/big"
 	"testing"
 )
 
@@ -47,13 +48,11 @@ func TestPackUserOp(t *testing.T) {
 }
 
 func TestUserOpHash(t *testing.T) {
-	validStart, validEnd := getValidTime()
 	strategy := dashboard_service.GetStrategyById("1")
 	userOp, _ := model.NewUserOp(utils.GenerateMockUserOperation())
-	userOpHash, err := UserOpHash(userOp, strategy, validStart, validEnd)
+	userOpHash, err := UserOpHash(userOp, strategy, big.NewInt(1), big.NewInt(2))
 	assert.NoError(t, err)
 	fmt.Println(hex.EncodeToString(userOpHash))
-
 }
 
 func TestUserOP(t *testing.T) {

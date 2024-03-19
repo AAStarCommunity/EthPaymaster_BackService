@@ -16,6 +16,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"golang.org/x/xerrors"
+	"math/big"
 	"strconv"
 	"strings"
 	"time"
@@ -216,62 +217,82 @@ func packUserOp(userOp *model.UserOperation) (string, []byte, error) {
 	return hexString, encoded, nil
 }
 
-func UserOpHash(userOp *model.UserOperation, strategy *model.Strategy, validStart string, validEnd string) ([]byte, error) {
+func UserOpHash(userOp *model.UserOperation, strategy *model.Strategy, validStart *big.Int, validEnd *big.Int) ([]byte, error) {
 	_, packUserOpStrByte, err := packUserOp(userOp)
 	if err != nil {
 		return nil, err
 	}
+
 	abiEncoder, err := abi.JSON(strings.NewReader(`[
     {
-        "name": "bar",
-        "type": "function",
         "inputs": [
-			{
-                "type": "uint256",
-                "name": "userOp"
-            },
             {
-                "type": "uint256",
-                "name": "_chainID"
-            },
-            {
-                "type": "address",
-                "name": "_thisAddress"
-            },
-            {
-                "type": "uint256",
-                "name": "_senderNonce"
-            },
-            {
-                "type": "uint256",
-                "name": "_validUntil"
-            },
-            {
-                "type": "uint256",
-                "name": "_validAfter"
+                "components": [
+                    {
+                        "internalType": "bytes",
+                        "name": "userOpHash",
+                        "type": "bytes"
+                    },
+					{
+                        "internalType": "uint256",
+                        "name": "chainId",
+                        "type": "uint256"
+                    },
+					{
+                        "internalType": "address",
+                        "name": "address",
+                        "type": "address"
+                    },
+					{
+                        "internalType": "uint48",
+                        "name": "validUtil",
+                        "type": "uint48"
+                    },
+					{
+                        "internalType": "uint48",
+                        "name": "validAfter",
+                        "type": "uint48"
+                    }
+                ],
+                "internalType": "struct hash",
+                "name": "hash",
+                "type": "tuple"
             }
         ],
-        "outputs": [
-            {
-                "type": "bytes32",
-                "name": "_result"
-            }
-        ]
+        "name": "Hash",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
     }
 ]`))
-	if err != nil {
-		return nil, err
-	}
 	chainId, err := chain_service.GetChainId(strategy.NetWork)
 	if err != nil {
 		return nil, err
 	}
-	data, err := abiEncoder.Pack("bar", &packUserOpStrByte, &chainId, &strategy.PayMasterAddress, &userOp.Nonce, &validStart, &validEnd)
+	hashStruct := struct {
+		UserOpHash []byte
+		ChainId    *big.Int
+		Address    common.Address
+		Nonce      *big.Int
+		ValidUtil  *big.Int
+		ValidAfter *big.Int
+	}{
+		packUserOpStrByte,
+		chainId,
+		common.HexToAddress(strategy.PayMasterAddress),
+		userOp.Nonce,
+		validStart,
+		validEnd,
+	}
+
+	chainId.Int64()
+
+	data, err := abiEncoder.Pack("Hash", hashStruct)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(hex.EncodeToString(data))
 	encodeHash := crypto.Keccak256Hash(data)
-
 	return encodeHash.Bytes(), nil
 
 }
@@ -297,7 +318,10 @@ func generatePayMasterAndData(userOp *model.UserOperation, strategy *model.Strat
 }
 
 func SignPaymaster(userOp *model.UserOperation, strategy *model.Strategy, validStart string, validEnd string) ([]byte, error) {
-	userOpHash, err := UserOpHash(userOp, strategy, validStart, validEnd)
+	//string to int
+	validStartInt, _ := strconv.ParseInt(validStart, 10, 64)
+	validEndInt, _ := strconv.ParseInt(validEnd, 10, 64)
+	userOpHash, err := UserOpHash(userOp, strategy, big.NewInt(validStartInt), big.NewInt(validEndInt))
 	if err != nil {
 		return nil, err
 	}
