@@ -211,97 +211,67 @@ func packUserOp(userOp *model.UserOperation) (string, []byte, error) {
 	method := abiEncoder.Methods["UserOp"]
 	encoded, err := method.Inputs.Pack(userOp)
 
-
 	if err != nil {
 		return "", nil, err
 	}
 	//https://github.com/jayden-sudo/SoulWalletCore/blob/dc76bdb9a156d4f99ef41109c59ab99106c193ac/contracts/utils/CalldataPack.sol#L51-L65
 
-
 	hexString := hex.EncodeToString(encoded)
 
 	hexString = hexString[64:]
-	hexString = hexString[:640]
+	hexLen := len(hexString)
+	hexString = hexString[:hexLen-128]
 	return hexString, encoded, nil
 }
 
-func UserOpHash(userOp *model.UserOperation, strategy *model.Strategy, validStart *big.Int, validEnd *big.Int) ([]byte, error) {
-	_, packUserOpStrByte, err := packUserOp(userOp)
+func UserOpHash(userOp *model.UserOperation, strategy *model.Strategy, validStart *big.Int, validEnd *big.Int) ([]byte, string, error) {
+	packUserOpStr, _, err := packUserOp(userOp)
 	if err != nil {
-		return nil, err
+		return nil, "", err
+	}
+	//
+	bytesTy, err := abi.NewType("bytes", "", nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+	uint256Ty, err := abi.NewType("uint256", "", nil)
+	if err != nil {
+		fmt.Println(err)
 	}
 
-	abiEncoder, err := abi.JSON(strings.NewReader(`[
-    {
-        "inputs": [
-            {
-                "components": [
-                    {
-                        "internalType": "bytes",
-                        "name": "userOpHash",
-                        "type": "bytes"
-                    },
-					{
-                        "internalType": "uint256",
-                        "name": "chainId",
-                        "type": "uint256"
-                    },
-					{
-                        "internalType": "address",
-                        "name": "address",
-                        "type": "address"
-                    },
-					{
-                        "internalType": "uint48",
-                        "name": "validUtil",
-                        "type": "uint48"
-                    },
-					{
-                        "internalType": "uint48",
-                        "name": "validAfter",
-                        "type": "uint48"
-                    }
-                ],
-                "internalType": "struct hash",
-                "name": "hash",
-                "type": "tuple"
-            }
-        ],
-        "name": "Hash",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    }
-]`))
+	addressTy, _ := abi.NewType("address", "", nil)
+	arguments := abi.Arguments{
+		{
+			Type: bytesTy,
+		},
+		{
+			Type: uint256Ty,
+		},
+		{
+			Type: addressTy,
+		},
+		{
+			Type: uint256Ty,
+		},
+		{
+			Type: uint256Ty,
+		},
+		{
+			Type: uint256Ty,
+		},
+	}
 	chainId, err := chain_service.GetChainId(strategy.NetWork)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
-	hashStruct := struct {
-		UserOpHash []byte
-		ChainId    *big.Int
-		Address    common.Address
-		Nonce      *big.Int
-		ValidUtil  *big.Int
-		ValidAfter *big.Int
-	}{
-		packUserOpStrByte,
-		chainId,
-		common.HexToAddress(strategy.PayMasterAddress),
-		userOp.Nonce,
-		validStart,
-		validEnd,
-	}
-
+	packUserOpStrByteNew, _ := hex.DecodeString(packUserOpStr)
 	chainId.Int64()
-
-	data, err := abiEncoder.Pack("Hash", hashStruct)
+	bytesRes, err := arguments.Pack(packUserOpStrByteNew, chainId, common.HexToAddress(strategy.PayMasterAddress), userOp.Nonce, validStart, validEnd)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
-	fmt.Println(hex.EncodeToString(data))
-	encodeHash := crypto.Keccak256Hash(data)
-	return encodeHash.Bytes(), nil
+	encodeHash := crypto.Keccak256Hash(bytesRes)
+	return encodeHash.Bytes(), hex.EncodeToString(bytesRes), nil
 
 }
 
@@ -329,7 +299,7 @@ func SignPaymaster(userOp *model.UserOperation, strategy *model.Strategy, validS
 	//string to int
 	validStartInt, _ := strconv.ParseInt(validStart, 10, 64)
 	validEndInt, _ := strconv.ParseInt(validEnd, 10, 64)
-	userOpHash, err := UserOpHash(userOp, strategy, big.NewInt(validStartInt), big.NewInt(validEndInt))
+	userOpHash, _, err := UserOpHash(userOp, strategy, big.NewInt(validStartInt), big.NewInt(validEndInt))
 	if err != nil {
 		return nil, err
 	}

@@ -19,7 +19,7 @@ func GenerateMockUserOperation() *map[string]any {
 		"init_code":                "0x9406cc6185a346906296840746125a0e449764545fbfb9cf000000000000000000000000340966abb6e37a06014546e0542b3aafad4550810000000000000000000000000000000000000000000000000000000000000000",
 		"max_fee_per_gas":          "0x2aa887baca",
 		"max_priority_fee_per_gas": "0x59682f00",
-		"nonce":                    "0x01",
+		"nonce":                    "0x00",
 		"pre_verification_gas":     "0xae64",
 		"sender":                   "0xF8498599744BC37e141cb800B67Dbf103a6b5881",
 		"signature":                "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c",
