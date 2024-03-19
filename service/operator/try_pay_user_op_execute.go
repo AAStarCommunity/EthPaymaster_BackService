@@ -15,7 +15,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/rlp"
 	"golang.org/x/xerrors"
 	"strconv"
 	"strings"
@@ -199,7 +198,7 @@ func packUserOp(userOp *model.UserOperation) (string, []byte, error) {
                 "type": "tuple"
             }
         ],
-        "name": "test",
+        "name": "UserOp",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -209,7 +208,7 @@ func packUserOp(userOp *model.UserOperation) (string, []byte, error) {
 		return "", nil, err
 	}
 
-	encoded, err := abiEncoder.Pack("test", userOp)
+	encoded, err := abiEncoder.Pack("UserOp", userOp)
 	if err != nil {
 		return "", nil, err
 	}
@@ -221,41 +220,53 @@ func UserOpHash(userOp *model.UserOperation, strategy *model.Strategy, validStar
 	_, packUserOpStrByte, err := packUserOp(userOp)
 	if err != nil {
 		return nil, nil
-
 	}
 	chainId, err := chain_service.GetChainId(strategy.NetWork)
 	if err != nil {
 		return nil, nil
 	}
-	input := []interface{}{packUserOpStrByte, chainId.Int64(), strategy.PayMasterAddress, userOp.Nonce, validStart, validEnd}
-	encodeRes, err := rlp.EncodeToBytes(input)
+	encodeHash := crypto.Keccak256Hash(packUserOpStrByte, chainId.Bytes(), []byte(strategy.PayMasterAddress), userOp.Nonce.Bytes(), []byte(validStart), []byte(validEnd))
 	if err != nil {
 		return nil, nil
 	}
-	byteRes := crypto.Keccak256(encodeRes)
+	byteRes := crypto.Keccak256(encodeHash.Bytes())
 	return byteRes, nil
 }
+
 func getPayMasterAndData(strategy *model.Strategy, userOp *model.UserOperation, gasResponse *model.ComputeGasResponse) (string, string, error) {
-	return generatePayMasterAndData(strategy)
+	return generatePayMasterAndData(userOp, strategy)
 }
 
-func generatePayMasterAndData(strategy *model.Strategy) (string, string, error) {
+func generatePayMasterAndData(userOp *model.UserOperation, strategy *model.Strategy) (string, string, error) {
 	//v0.7 [0:20)paymaster address,[20:36)validation gas, [36:52)postop gas,[52:53)typeId,  [53:117)valid timestamp, [117:) signature
 	//v0.6 [0:20)paymaster address,[20:22)payType, [22:86)start Time ,[86:150)typeId,  [53:117)valid timestamp, [117:) signature
 	//validationGas := userOp.VerificationGasLimit.String()
 	//postOPGas := userOp.CallGasLimit.String()
-
-	message := fmt.Sprintf("%s%s%s", strategy.PayMasterAddress, string(strategy.PayType), getValidTime())
-	signatureByte, err := utils.SignMessage("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421", message)
+	validStart, validEnd := getValidTime()
+	message := fmt.Sprintf("%s%s%s", strategy.PayMasterAddress, string(strategy.PayType), validStart+validEnd)
+	signatureByte, err := SignPaymaster(userOp, strategy, validStart, validEnd)
 	if err != nil {
 		return "", "", err
 	}
-
 	signatureStr := hex.EncodeToString(signatureByte)
 	message = message + signatureStr
 	return message, signatureStr, nil
 }
-func getValidTime() string {
+
+func SignPaymaster(userOp *model.UserOperation, strategy *model.Strategy, validStart string, validEnd string) ([]byte, error) {
+	userOpHash, err := UserOpHash(userOp, strategy, validStart, validEnd)
+	if err != nil {
+		return nil, err
+	}
+	privateKey, err := crypto.HexToECDSA("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421")
+	if err != nil {
+		return nil, err
+	}
+	signature, err := crypto.Sign(userOpHash, privateKey)
+	return signature, err
+}
+
+func getValidTime() (string, string) {
 	currentTime := time.Now()
 	currentTimestamp := currentTime.Unix()
 	futureTime := currentTime.Add(15 * time.Minute)
@@ -264,7 +275,7 @@ func getValidTime() string {
 	futureTimestampStr := strconv.FormatInt(futureTimestamp, 10)
 	currentTimestampStrSupply := SupplyZero(currentTimestampStr, 64)
 	futureTimestampStrSupply := SupplyZero(futureTimestampStr, 64)
-	return currentTimestampStrSupply + futureTimestampStrSupply
+	return currentTimestampStrSupply, futureTimestampStrSupply
 }
 func SupplyZero(prefix string, maxTo int) string {
 	padding := maxTo - len(prefix)

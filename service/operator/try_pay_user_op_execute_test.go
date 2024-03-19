@@ -4,6 +4,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/stretchr/testify/assert"
@@ -27,7 +28,8 @@ func getMockTryPayUserOpRequest() *model.TryPayUserOpRequest {
 
 func TestGenerateTestData(t *testing.T) {
 	strategy := dashboard_service.GetStrategyById("1")
-	str, signature, err := generatePayMasterAndData(strategy)
+	userOp, _ := model.NewUserOp(utils.GenerateMockUserOperation())
+	str, signature, err := generatePayMasterAndData(userOp, strategy)
 	assert.NoError(t, err)
 	fmt.Println(str)
 	fmt.Println(signature)
@@ -45,6 +47,12 @@ func TestPackUserOp(t *testing.T) {
 }
 
 func TestUserOpHash(t *testing.T) {
+	validStart, validEnd := getValidTime()
+	strategy := dashboard_service.GetStrategyById("1")
+	userOp, _ := model.NewUserOp(utils.GenerateMockUserOperation())
+	userOpHash, err := UserOpHash(userOp, strategy, validStart, validEnd)
+	assert.NoError(t, err)
+	fmt.Println(hex.EncodeToString(userOpHash))
 
 }
 
