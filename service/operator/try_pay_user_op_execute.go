@@ -208,8 +208,9 @@ func packUserOp(userOp *model.UserOperation) (string, []byte, error) {
 	if err != nil {
 		return "", nil, err
 	}
+	method := abiEncoder.Methods["UserOp"]
+	encoded, err := method.Inputs.Pack(userOp)
 
-	encoded, err := abiEncoder.Pack("UserOp", userOp)
 	if err != nil {
 		return "", nil, err
 	}
