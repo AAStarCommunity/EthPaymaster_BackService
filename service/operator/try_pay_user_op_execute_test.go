@@ -37,20 +37,17 @@ func TestPackUserOp(t *testing.T) {
 	userOp, _ := model.NewUserOp(utils.GenerateMockUserOperation())
 	userOp.PaymasterAndData = nil
 	userOp.Signature = nil
-	res, err := packUserOp(userOp)
+	res, byteres, err := packUserOp(userOp)
 
 	assert.NoError(t, err)
 	fmt.Println(res)
+	fmt.Println(byteres)
+}
+
+func TestUserOpHash(t *testing.T) {
 
 }
-func TestPackUserOpV2(t *testing.T) {
-	userOp, _ := model.NewUserOp(utils.GenerateMockUserOperation())
-	userOp.Signature = nil
-	userOp.PaymasterAndData = nil
-	res, err := packUserOpSimple(userOp)
-	assert.NoError(t, err)
-	fmt.Println(res)
-}
+
 func TestUserOP(t *testing.T) {
 	userOp, _ := model.NewUserOp(utils.GenerateMockUserOperation())
 	fmt.Println(userOp.Sender.String())

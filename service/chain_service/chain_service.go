@@ -160,3 +160,10 @@ func GetAddressTokenBalance(network types.Network, address common.Address, token
 	return balanceResultFloat, nil
 
 }
+func GetChainId(chain types.Network) (*big.Int, error) {
+	client, exist := EthCompatibleNetWorkClientMap[chain]
+	if !exist {
+		return nil, xerrors.Errorf("chain Client [%s] not exist", chain)
+	}
+	return client.ChainID(context.Background())
+}

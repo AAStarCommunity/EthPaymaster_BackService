@@ -11,10 +11,11 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/service/pay_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/validator_service"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/rlp"
 	"golang.org/x/xerrors"
 	"strconv"
 	"strings"
@@ -131,7 +132,7 @@ func getPayMasterSignature(strategy *model.Strategy, userOp *model.UserOperation
 	signatureBytes, _ := utils.SignUserOp("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421", userOp)
 	return hex.EncodeToString(signatureBytes)
 }
-func packUserOp(userOp *model.UserOperation) (string, error) {
+func packUserOp(userOp *model.UserOperation) (string, []byte, error) {
 	abiEncoder, err := abi.JSON(strings.NewReader(`[
     {
         "inputs": [
@@ -205,32 +206,35 @@ func packUserOp(userOp *model.UserOperation) (string, error) {
     }
 ]`))
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	encoded, err := abiEncoder.Pack("test", userOp)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	hexString := hex.EncodeToString(encoded)
-	return hexString, nil
+	return hexString, encoded, nil
 }
 
-func packUserOpSimple(userOp *model.UserOperation) (string, error) {
-	data, err := json.Marshal(userOp)
+func UserOpHash(userOp *model.UserOperation, strategy *model.Strategy, validStart string, validEnd string) ([]byte, error) {
+	_, packUserOpStrByte, err := packUserOp(userOp)
 	if err != nil {
-		return "", err
+		return nil, nil
+
 	}
-	hexString := hex.EncodeToString(data)
-
-	return hexString, nil
-
+	chainId, err := chain_service.GetChainId(strategy.NetWork)
+	if err != nil {
+		return nil, nil
+	}
+	input := []interface{}{packUserOpStrByte, chainId.Int64(), strategy.PayMasterAddress, userOp.Nonce, validStart, validEnd}
+	encodeRes, err := rlp.EncodeToBytes(input)
+	if err != nil {
+		return nil, nil
+	}
+	byteRes := crypto.Keccak256(encodeRes)
+	return byteRes, nil
 }
-
-//	func UserOpHash(userOp *model.UserOperation, chainId string, strategy *model.Strategy, validStart string, validEnd string) []byte {
-//		packUserOp(userOp)
-//
-// }
 func getPayMasterAndData(strategy *model.Strategy, userOp *model.UserOperation, gasResponse *model.ComputeGasResponse) (string, string, error) {
 	return generatePayMasterAndData(strategy)
 }
