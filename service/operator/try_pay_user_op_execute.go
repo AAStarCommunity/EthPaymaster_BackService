@@ -204,17 +204,24 @@ func packUserOp(userOp *model.UserOperation) (string, []byte, error) {
         "stateMutability": "nonpayable",
         "type": "function"
     }
-]`))
+	]`))
 	if err != nil {
 		return "", nil, err
 	}
 	method := abiEncoder.Methods["UserOp"]
 	encoded, err := method.Inputs.Pack(userOp)
 
+
 	if err != nil {
 		return "", nil, err
 	}
+	//https://github.com/jayden-sudo/SoulWalletCore/blob/dc76bdb9a156d4f99ef41109c59ab99106c193ac/contracts/utils/CalldataPack.sol#L51-L65
+
+
 	hexString := hex.EncodeToString(encoded)
+
+	hexString = hexString[64:]
+	hexString = hexString[:640]
 	return hexString, encoded, nil
 }
 
