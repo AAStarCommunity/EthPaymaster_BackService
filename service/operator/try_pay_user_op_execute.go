@@ -219,18 +219,61 @@ func packUserOp(userOp *model.UserOperation) (string, []byte, error) {
 func UserOpHash(userOp *model.UserOperation, strategy *model.Strategy, validStart string, validEnd string) ([]byte, error) {
 	_, packUserOpStrByte, err := packUserOp(userOp)
 	if err != nil {
-		return nil, nil
+		return nil, err
+	}
+	abiEncoder, err := abi.JSON(strings.NewReader(`[
+    {
+        "name": "bar",
+        "type": "function",
+        "inputs": [
+			{
+                "type": "uint256",
+                "name": "userOp"
+            },
+            {
+                "type": "uint256",
+                "name": "_chainID"
+            },
+            {
+                "type": "address",
+                "name": "_thisAddress"
+            },
+            {
+                "type": "uint256",
+                "name": "_senderNonce"
+            },
+            {
+                "type": "uint256",
+                "name": "_validUntil"
+            },
+            {
+                "type": "uint256",
+                "name": "_validAfter"
+            }
+        ],
+        "outputs": [
+            {
+                "type": "bytes32",
+                "name": "_result"
+            }
+        ]
+    }
+]`))
+	if err != nil {
+		return nil, err
 	}
 	chainId, err := chain_service.GetChainId(strategy.NetWork)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
-	encodeHash := crypto.Keccak256Hash(packUserOpStrByte, chainId.Bytes(), []byte(strategy.PayMasterAddress), userOp.Nonce.Bytes(), []byte(validStart), []byte(validEnd))
+	data, err := abiEncoder.Pack("bar", &packUserOpStrByte, &chainId, &strategy.PayMasterAddress, &userOp.Nonce, &validStart, &validEnd)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
-	byteRes := crypto.Keccak256(encodeHash.Bytes())
-	return byteRes, nil
+	encodeHash := crypto.Keccak256Hash(data)
+
+	return encodeHash.Bytes(), nil
+
 }
 
 func getPayMasterAndData(strategy *model.Strategy, userOp *model.UserOperation, gasResponse *model.ComputeGasResponse) (string, string, error) {
