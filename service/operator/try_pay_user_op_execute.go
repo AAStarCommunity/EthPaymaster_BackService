@@ -208,6 +208,8 @@ func packUserOp(userOp *model.UserOperation) (string, []byte, error) {
 		return "", nil, err
 	}
 	method := abiEncoder.Methods["UserOp"]
+	//TODO disgusting logic
+	userOp.PaymasterAndData = []byte("0xE99c4Db5E360B8c84bF3660393CB2A85c3029b4400000000000000000000000000000000000000000000000000000000171004449600000000000000000000000000000000000000000000000000000017415804969e46721fc1938ac427add8a9e0d5cba2be5b17ccda9b300d0d3eeaff1904dfc23e276abd1ba6e3e269ec6aa36fe6a2442c18d167b53d7f9f0d1b3ebe80b09a6200")
 	encoded, err := method.Inputs.Pack(userOp)
 
 	if err != nil {
