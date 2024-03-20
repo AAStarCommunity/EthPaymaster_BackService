@@ -247,6 +247,7 @@ func UserOpHash(userOp *model.UserOperation, strategy *model.Strategy, validStar
 	if err != nil {
 		fmt.Println(err)
 	}
+	uint48Ty, err := abi.NewType("uint48", "", nil)
 
 	addressTy, _ := abi.NewType("address", "", nil)
 	arguments := abi.Arguments{
@@ -263,10 +264,10 @@ func UserOpHash(userOp *model.UserOperation, strategy *model.Strategy, validStar
 			Type: uint256Ty,
 		},
 		{
-			Type: uint256Ty,
+			Type: uint48Ty,
 		},
 		{
-			Type: uint256Ty,
+			Type: uint48Ty,
 		},
 	}
 	chainId, err := chain_service.GetChainId(strategy.NetWork)
