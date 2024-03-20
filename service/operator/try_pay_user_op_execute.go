@@ -19,7 +19,6 @@ import (
 	"math/big"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserOpResponse, error) {
@@ -140,57 +139,57 @@ func packUserOp(userOp *model.UserOperation) (string, []byte, error) {
                 "components": [
                     {
                         "internalType": "address",
-                        "name": "sender",
+                        "name": "Sender",
                         "type": "address"
                     },
                     {
                         "internalType": "uint256",
-                        "name": "nonce",
+                        "name": "Nonce",
                         "type": "uint256"
                     },
                     {
                         "internalType": "bytes",
-                        "name": "initCode",
+                        "name": "InitCode",
                         "type": "bytes"
                     },
                     {
                         "internalType": "bytes",
-                        "name": "callData",
+                        "name": "CallData",
                         "type": "bytes"
                     },
                     {
                         "internalType": "uint256",
-                        "name": "callGasLimit",
+                        "name": "CallGasLimit",
                         "type": "uint256"
                     },
                     {
                         "internalType": "uint256",
-                        "name": "verificationGasLimit",
+                        "name": "VerificationGasLimit",
                         "type": "uint256"
                     },
                     {
                         "internalType": "uint256",
-                        "name": "preVerificationGas",
+                        "name": "PreVerificationGas",
                         "type": "uint256"
                     },
                     {
                         "internalType": "uint256",
-                        "name": "maxFeePerGas",
+                        "name": "MaxFeePerGas",
                         "type": "uint256"
                     },
                     {
                         "internalType": "uint256",
-                        "name": "maxPriorityFeePerGas",
+                        "name": "MaxPriorityFeePerGas",
                         "type": "uint256"
                     },
                     {
                         "internalType": "bytes",
-                        "name": "paymasterAndData",
+                        "name": "PaymasterAndData",
                         "type": "bytes"
                     },
                     {
                         "internalType": "bytes",
-                        "name": "signature",
+                        "name": "Signature",
                         "type": "bytes"
                     }
                 ],
@@ -215,13 +214,23 @@ func packUserOp(userOp *model.UserOperation) (string, []byte, error) {
 		return "", nil, err
 	}
 	//https://github.com/jayden-sudo/SoulWalletCore/blob/dc76bdb9a156d4f99ef41109c59ab99106c193ac/contracts/utils/CalldataPack.sol#L51-L65
-
 	hexString := hex.EncodeToString(encoded)
 
+	//1. 从 63*10+ 1 ～64*10获取
 	hexString = hexString[64:]
-	hexLen := len(hexString)
-	hexString = hexString[:hexLen-128]
+	//hexLen := len(hexString)
+	subIndex := GetIndex(hexString)
+	hexString = hexString[:subIndex]
+	//fmt.Printf("subIndex: %d\n", subIndex)
 	return hexString, encoded, nil
+}
+func GetIndex(hexString string) int64 {
+	//1. 从 63*10+ 1 ～64*10获取
+
+	indexPre := hexString[576:640]
+	indePreInt, _ := strconv.ParseInt(indexPre, 16, 64)
+	result := indePreInt * 2
+	return result
 }
 
 func UserOpHash(userOp *model.UserOperation, strategy *model.Strategy, validStart *big.Int, validEnd *big.Int) ([]byte, string, error) {
@@ -311,13 +320,15 @@ func SignPaymaster(userOp *model.UserOperation, strategy *model.Strategy, validS
 	return signature, err
 }
 
+// 1710044496
+// 1741580496
 func getValidTime() (string, string) {
-	currentTime := time.Now()
-	currentTimestamp := currentTime.Unix()
-	futureTime := currentTime.Add(15 * time.Minute)
-	futureTimestamp := futureTime.Unix()
-	currentTimestampStr := strconv.FormatInt(currentTimestamp, 10)
-	futureTimestampStr := strconv.FormatInt(futureTimestamp, 10)
+	//currentTime := time.Nsow()
+	//currentTimestamp := 1710044496
+	//futureTime := currentTime.Add(15 * time.Minute)
+	//futureTimestamp := futureTime.Unix()
+	currentTimestampStr := strconv.FormatInt(1710044496, 10)
+	futureTimestampStr := strconv.FormatInt(1741580496, 10)
 	currentTimestampStrSupply := SupplyZero(currentTimestampStr, 64)
 	futureTimestampStrSupply := SupplyZero(futureTimestampStr, 64)
 	return currentTimestampStrSupply, futureTimestampStrSupply
