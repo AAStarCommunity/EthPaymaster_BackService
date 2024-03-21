@@ -209,7 +209,11 @@ func packUserOp(userOp *model.UserOperation) (string, []byte, error) {
 	}
 	method := abiEncoder.Methods["UserOp"]
 	//TODO disgusting logic
-	userOp.PaymasterAndData = []byte("0xE99c4Db5E360B8c84bF3660393CB2A85c3029b4400000000000000000000000000000000000000000000000000000000171004449600000000000000000000000000000000000000000000000000000017415804969e46721fc1938ac427add8a9e0d5cba2be5b17ccda9b300d0d3eeaff1904dfc23e276abd1ba6e3e269ec6aa36fe6a2442c18d167b53d7f9f0d1b3ebe80b09a6200")
+
+	paymasterDataTmp, err := hex.DecodeString("d93349Ee959d295B115Ee223aF10EF432A8E8523000000000000000000000000000000000000000000000000000000001710044496000000000000000000000000000000000000000000000000000000174158049605bea0bfb8539016420e76749fda407b74d3d35c539927a45000156335643827672fa359ee968d72db12d4b4768e8323cd47443505ab138a525c1f61c6abdac501")
+	//fmt.Printf("paymasterDataTmpLen: %x\n", len(paymasterDataTmp))
+	//fmt.Printf("paymasterDataKLen : %x\n", len(userOp.PaymasterAndData))
+	userOp.PaymasterAndData = paymasterDataTmp
 	encoded, err := method.Inputs.Pack(userOp)
 
 	if err != nil {
@@ -297,7 +301,8 @@ func generatePayMasterAndData(userOp *model.UserOperation, strategy *model.Strat
 	//validationGas := userOp.VerificationGasLimit.String()
 	//postOPGas := userOp.CallGasLimit.String()
 	validStart, validEnd := getValidTime()
-	message := fmt.Sprintf("%s%s%s", strategy.PayMasterAddress, string(strategy.PayType), validStart+validEnd)
+	//fmt.Printf("validStart: %s, validEnd: %s\n", validStart, validEnd)
+	message := fmt.Sprintf("%s%s%s%s", strategy.PayMasterAddress, string(strategy.PayType), validStart, validEnd)
 	signatureByte, err := SignPaymaster(userOp, strategy, validStart, validEnd)
 	if err != nil {
 		return "", "", err
