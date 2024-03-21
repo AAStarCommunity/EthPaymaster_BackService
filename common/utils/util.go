@@ -2,6 +2,7 @@ package utils
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -16,12 +17,12 @@ func GenerateMockUserOperation() *map[string]any {
 	var MockUserOpData = map[string]any{
 		"call_data":                "0xb61d27f60000000000000000000000001c7d4b196cb0c7b01d743fbc6116a902379c7238000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000044095ea7b30000000000000000000000000000000000325602a77416a16136fdafd04b299fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000",
 		"call_gas_limit":           "0x54fa",
-		"init_code":                "0x9406cc6185a346906296840746125a0e449764545fbfb9cf000000000000000000000000340966abb6e37a06014546e0542b3aafad4550810000000000000000000000000000000000000000000000000000000000000000",
-		"max_fee_per_gas":          "0x2aa887baca",
+		"init_code":                "0x9406cc6185a346906296840746125a0e449764545fbfb9cf000000000000000000000000b6bcf9517d193f551d0e3d6860103972dd13de7b0000000000000000000000000000000000000000000000000000000000000000",
+		"max_fee_per_gas":          "0x59682f8e",
 		"max_priority_fee_per_gas": "0x59682f00",
 		"nonce":                    "0x00",
 		"pre_verification_gas":     "0xae64",
-		"sender":                   "0xF8498599744BC37e141cb800B67Dbf103a6b5881",
+		"sender":                   "0xFfDB071C2b58CCC10Ad386f9Bb4E8d3d664CE73c",
 		"signature":                "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c",
 		"verification_gas_limit":   "0x05fa35",
 		"paymaster_and_data":       "0xE99c4Db5E360B8c84bF3660393CB2A85c3029b4400000000000000000000000000000000000000000000000000000000171004449600000000000000000000000000000000000000000000000000000017415804969e46721fc1938ac427add8a9e0d5cba2be5b17ccda9b300d0d3eeaff1904dfc23e276abd1ba6e3e269ec6aa36fe6a2442c18d167b53d7f9f0d1b3ebe80b09a6200",
@@ -84,4 +85,18 @@ func SignMessage(privateKeyHex string, message string) ([]byte, error) {
 	}
 
 	return signature, nil
+}
+
+func ToEthSignedMessageHash(msg []byte) []byte {
+	buffer := new(bytes.Buffer)
+	buffer.Write([]byte("\x19Ethereum Signed Message:\n32"))
+	buffer.Write(msg)
+	return crypto.Keccak256(buffer.Bytes())
+}
+
+func ReplaceLastTwoChars(str, replacement string) string {
+	if len(str) < 2 {
+		return str
+	}
+	return str[:len(str)-2] + replacement
 }

@@ -286,8 +286,8 @@ func UserOpHash(userOp *model.UserOperation, strategy *model.Strategy, validStar
 	if err != nil {
 		return nil, "", err
 	}
-	encodeHash := crypto.Keccak256Hash(bytesRes)
-	return encodeHash.Bytes(), hex.EncodeToString(bytesRes), nil
+	encodeHash := crypto.Keccak256(bytesRes)
+	return encodeHash, hex.EncodeToString(bytesRes), nil
 
 }
 
@@ -303,7 +303,7 @@ func generatePayMasterAndData(userOp *model.UserOperation, strategy *model.Strat
 	validStart, validEnd := getValidTime()
 	//fmt.Printf("validStart: %s, validEnd: %s\n", validStart, validEnd)
 	message := fmt.Sprintf("%s%s%s%s", strategy.PayMasterAddress, string(strategy.PayType), validStart, validEnd)
-	signatureByte, err := SignPaymaster(userOp, strategy, validStart, validEnd)
+	signatureByte, _, err := SignPaymaster(userOp, strategy, validStart, validEnd)
 	if err != nil {
 		return "", "", err
 	}
@@ -312,20 +312,41 @@ func generatePayMasterAndData(userOp *model.UserOperation, strategy *model.Strat
 	return message, signatureStr, nil
 }
 
-func SignPaymaster(userOp *model.UserOperation, strategy *model.Strategy, validStart string, validEnd string) ([]byte, error) {
+func SignPaymaster(userOp *model.UserOperation, strategy *model.Strategy, validStart string, validEnd string) ([]byte, []byte, error) {
 	//string to int
 	validStartInt, _ := strconv.ParseInt(validStart, 10, 64)
 	validEndInt, _ := strconv.ParseInt(validEnd, 10, 64)
 	userOpHash, _, err := UserOpHash(userOp, strategy, big.NewInt(validStartInt), big.NewInt(validEndInt))
+	hashToEthSignHash := utils.ToEthSignedMessageHash(userOpHash)
+	fmt.Printf("userOpHashStr: %s\n", hex.EncodeToString(userOpHash))
+	fmt.Printf("hashToEthSignHashStr: %s\n", hex.EncodeToString(hashToEthSignHash))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	privateKey, err := crypto.HexToECDSA("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421")
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	signature, err := crypto.Sign(userOpHash, privateKey)
-	return signature, err
+
+	signature, err := crypto.Sign(hashToEthSignHash, privateKey)
+
+	signatureStr := hex.EncodeToString(signature)
+	var signatureAfterProcess string
+
+	if strings.HasSuffix(signatureStr, "00") {
+		signatureAfterProcess = utils.ReplaceLastTwoChars(signatureStr, "1b")
+	} else if strings.HasSuffix(signatureStr, "01") {
+		signatureAfterProcess = utils.ReplaceLastTwoChars(signatureStr, "1c")
+	} else {
+		signatureAfterProcess = signatureStr
+	}
+
+	signatureAfterProcessByte, err := hex.DecodeString(signatureAfterProcess)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return signatureAfterProcessByte, userOpHash, err
 }
 
 // 1710044496
