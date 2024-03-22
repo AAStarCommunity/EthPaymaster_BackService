@@ -15,7 +15,7 @@ func init() {
 	MockStrategyMap["1"] = &model.Strategy{
 		Id:                "1",
 		EntryPointAddress: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-		PayMasterAddress:  "0xd93349Ee959d295B115Ee223aF10EF432A8E8523",
+		PayMasterAddress:  "0xf196E2916817f8Fc2820c19ef50Fdf47788a5dCD",
 		NetWork:           types.Sepolia,
 		PayType:           types.PayTypeVerifying,
 		EntryPointTag:     types.EntrypointV06,
