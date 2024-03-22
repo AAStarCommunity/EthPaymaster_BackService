@@ -306,7 +306,8 @@ func generatePayMasterAndData(userOp *model.UserOperation, strategy *model.Strat
 	//postOPGas := userOp.CallGasLimit.String()
 	validStart, validEnd := getValidTime()
 	//fmt.Printf("validStart: %s, validEnd: %s\n", validStart, validEnd)
-	message := fmt.Sprintf("%s%s%s%s", strategy.PayMasterAddress, string(strategy.PayType), validEnd, validStart)
+	//TODO  string(strategy.PayType),
+	message := fmt.Sprintf("%s%s%s", strategy.PayMasterAddress, validEnd, validStart)
 	signatureByte, _, err := SignPaymaster(userOp, strategy, validStart, validEnd)
 	if err != nil {
 		return "", "", err
