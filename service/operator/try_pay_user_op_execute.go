@@ -318,8 +318,8 @@ func generatePayMasterAndData(userOp *model.UserOperation, strategy *model.Strat
 
 func SignPaymaster(userOp *model.UserOperation, strategy *model.Strategy, validStart string, validEnd string) ([]byte, []byte, error) {
 	//string to int
-
-	userOpHash, _, err := UserOpHash(userOp, strategy, big.NewInt(1710044496), big.NewInt(1741580496))
+	//TODO
+	userOpHash, _, err := UserOpHash(userOp, strategy, big.NewInt(1710044496), big.NewInt(1820044496))
 	hashToEthSignHash := utils.ToEthSignedMessageHash(userOpHash)
 	fmt.Printf("userOpHashStr: %s\n", hex.EncodeToString(userOpHash))
 	fmt.Printf("hashToEthSignHashStr: %s\n", hex.EncodeToString(hashToEthSignHash))
@@ -360,7 +360,7 @@ func getValidTime() (string, string) {
 	//futureTime := currentTime.Add(15 * time.Minute)
 	//futureTimestamp := futureTime.Unix()
 	currentTimestampStr := strconv.FormatInt(1710044496, 16)
-	futureTimestampStr := strconv.FormatInt(1741580496, 16)
+	futureTimestampStr := strconv.FormatInt(1820044496, 16)
 	currentTimestampStrSupply := SupplyZero(currentTimestampStr, 64)
 	futureTimestampStrSupply := SupplyZero(futureTimestampStr, 64)
 	return currentTimestampStrSupply, futureTimestampStrSupply
