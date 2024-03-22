@@ -356,8 +356,8 @@ func getValidTime() (string, string) {
 	//currentTimestamp := 1710044496
 	//futureTime := currentTime.Add(15 * time.Minute)
 	//futureTimestamp := futureTime.Unix()
-	currentTimestampStr := strconv.FormatInt(1710044496, 10)
-	futureTimestampStr := strconv.FormatInt(1741580496, 10)
+	currentTimestampStr := strconv.FormatInt(1710044496, 16)
+	futureTimestampStr := strconv.FormatInt(1741580496, 16)
 	currentTimestampStrSupply := SupplyZero(currentTimestampStr, 64)
 	futureTimestampStrSupply := SupplyZero(futureTimestampStr, 64)
 	return currentTimestampStrSupply, futureTimestampStrSupply
