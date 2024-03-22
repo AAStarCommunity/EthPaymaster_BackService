@@ -306,7 +306,7 @@ func generatePayMasterAndData(userOp *model.UserOperation, strategy *model.Strat
 	//postOPGas := userOp.CallGasLimit.String()
 	validStart, validEnd := getValidTime()
 	//fmt.Printf("validStart: %s, validEnd: %s\n", validStart, validEnd)
-	message := fmt.Sprintf("%s%s%s%s", strategy.PayMasterAddress, string(strategy.PayType), validStart, validEnd)
+	message := fmt.Sprintf("%s%s%s%s", strategy.PayMasterAddress, string(strategy.PayType), validEnd, validStart)
 	signatureByte, _, err := SignPaymaster(userOp, strategy, validStart, validEnd)
 	if err != nil {
 		return "", "", err
@@ -319,7 +319,7 @@ func generatePayMasterAndData(userOp *model.UserOperation, strategy *model.Strat
 func SignPaymaster(userOp *model.UserOperation, strategy *model.Strategy, validStart string, validEnd string) ([]byte, []byte, error) {
 	//string to int
 	//TODO
-	userOpHash, _, err := UserOpHash(userOp, strategy, big.NewInt(1710044496), big.NewInt(1820044496))
+	userOpHash, _, err := UserOpHash(userOp, strategy, big.NewInt(1820044496), big.NewInt(1710044496))
 	hashToEthSignHash := utils.ToEthSignedMessageHash(userOpHash)
 	fmt.Printf("userOpHashStr: %s\n", hex.EncodeToString(userOpHash))
 	fmt.Printf("hashToEthSignHashStr: %s\n", hex.EncodeToString(hashToEthSignHash))
