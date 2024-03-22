@@ -286,6 +286,10 @@ func UserOpHash(userOp *model.UserOperation, strategy *model.Strategy, validStar
 	if err != nil {
 		return nil, "", err
 	}
+	//bytesResStr := hex.EncodeToString(bytesRes)
+	//fmt.Printf("bytesResStr: %s\n", bytesResStr)
+	//fmt.Printf("bytesRes: %x\n", bytesRes)
+
 	encodeHash := crypto.Keccak256(bytesRes)
 	return encodeHash, hex.EncodeToString(bytesRes), nil
 
