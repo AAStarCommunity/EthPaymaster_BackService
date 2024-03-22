@@ -318,9 +318,8 @@ func generatePayMasterAndData(userOp *model.UserOperation, strategy *model.Strat
 
 func SignPaymaster(userOp *model.UserOperation, strategy *model.Strategy, validStart string, validEnd string) ([]byte, []byte, error) {
 	//string to int
-	validStartInt, _ := strconv.ParseInt(validStart, 10, 64)
-	validEndInt, _ := strconv.ParseInt(validEnd, 10, 64)
-	userOpHash, _, err := UserOpHash(userOp, strategy, big.NewInt(validStartInt), big.NewInt(validEndInt))
+
+	userOpHash, _, err := UserOpHash(userOp, strategy, big.NewInt(1710044496), big.NewInt(1741580496))
 	hashToEthSignHash := utils.ToEthSignedMessageHash(userOpHash)
 	fmt.Printf("userOpHashStr: %s\n", hex.EncodeToString(userOpHash))
 	fmt.Printf("hashToEthSignHashStr: %s\n", hex.EncodeToString(hashToEthSignHash))
