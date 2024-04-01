@@ -2,8 +2,8 @@ package paymaster_pay_type
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
-	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/xerrors"
 	"math/big"
 )
@@ -11,12 +11,12 @@ import (
 type VerifyingPaymasterExecutor struct {
 }
 
-func (v VerifyingPaymasterExecutor) ValidateGas(userOp *model.UserOperation, response *model.ComputeGasResponse, strategy *model.Strategy) error {
+func (v VerifyingPaymasterExecutor) ValidateGas(userOp *userop.UserOperation, response *model.ComputeGasResponse, strategy *model.Strategy) error {
 	//Validate the account’s deposit in the entryPoint is high enough to cover the max possible cost (cover the already-done verification and max execution gas)
 	// Paymaster check paymaster balance
 
 	//check EntryPoint paymasterAddress balance
-	tokenBalance, getTokenBalanceErr := chain_service.GetAddressTokenBalance(strategy.NetWork, common.HexToAddress(strategy.PayMasterAddress), strategy.Token)
+	tokenBalance, getTokenBalanceErr := chain_service.GetAddressTokenBalance(strategy.GetNewWork(), strategy.GetPaymasterAddress(), strategy.GetUseToken())
 	if getTokenBalanceErr != nil {
 		return getTokenBalanceErr
 	}

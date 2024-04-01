@@ -2,7 +2,7 @@ package operator
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"github.com/yuin/goldmark/util"
 )
 
 func GetSupportEntrypointExecute(network string) (*[]model.EntrypointDomain, error) {
@@ -10,8 +10,9 @@ func GetSupportEntrypointExecute(network string) (*[]model.EntrypointDomain, err
 	entrypoints = append(entrypoints, model.EntrypointDomain{
 		Address:    "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
 		Desc:       "desc",
-		NetWork:    types.Sepolia,
+		NetWork:    network.Sepolia,
 		StrategyId: "1",
 	})
+	util.StringToReadOnlyBytes()
 	return &entrypoints, nil
 }

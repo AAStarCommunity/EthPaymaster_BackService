@@ -2,7 +2,9 @@ package operator
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
@@ -22,44 +24,12 @@ import (
 )
 
 func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserOpResponse, error) {
-	// validator
-	if err := businessParamValidate(request); err != nil {
+	userOp, strategy, err := PrepareExecute(request)
+	if err != nil {
 		return nil, err
 	}
-
-	var strategy *model.Strategy
-	// getStrategy
-	strategy, generateErr := strategyGenerate(request)
-	if generateErr != nil {
-		return nil, generateErr
-	}
-	if strategy.EntryPointTag != types.EntrypointV06 {
-		return nil, xerrors.Errorf("Not Support EntryPointTag: [%w]", strategy.EntryPointTag)
-	}
-
-	userOp, newUserOpError := model.NewUserOp(&request.UserOp)
-	if newUserOpError != nil {
-		return nil, newUserOpError
-	}
-
-	if err := validator_service.ValidateStrategy(strategy, userOp); err != nil {
-		return nil, err
-	}
-	//recall simulate?
-	//UserOp Validate
-	//check nonce
-	if err := validator_service.ValidateUserOp(userOp); err != nil {
-		return nil, err
-	}
-	//base Strategy and UserOp computeGas
-	gasResponse, gasComputeError := gas_service.ComputeGas(userOp, strategy)
-	if gasComputeError != nil {
-		return nil, gasComputeError
-	}
-	//The maxFeePerGas and maxPriorityFeePerGas are above a configurable minimum value that the client is willing to accept. At the minimum, they are sufficiently high to be included with the current block.basefee.
-
-	//validate gas
-	if err := gas_service.ValidateGas(userOp, gasResponse, strategy); err != nil {
+	gasResponse, err := ExecuteGas(userOp, strategy)
+	if err != nil {
 		return nil, err
 	}
 
@@ -81,8 +51,8 @@ func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserO
 	//validatePaymasterUserOp
 	var result = &model.TryPayUserOpResponse{
 		StrategyId:         strategy.Id,
-		EntryPointAddress:  strategy.EntryPointAddress,
-		PayMasterAddress:   strategy.PayMasterAddress,
+		EntryPointAddress:  strategy.GetEntryPointAddress().String(),
+		PayMasterAddress:   strategy.GetPaymasterAddress().String(),
 		PayReceipt:         payReceipt,
 		PayMasterSignature: paymasterSignature,
 		PayMasterAndData:   paymasterAndData,
@@ -91,12 +61,62 @@ func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserO
 	return result, nil
 }
 
+func ExecuteGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.ComputeGasResponse, error) {
+	//base Strategy and UserOp computeGas
+	gasResponse, gasComputeError := gas_service.ComputeGas(userOp, strategy)
+	if gasComputeError != nil {
+		return nil, gasComputeError
+	}
+
+	//The maxFeePerGas and maxPriorityFeePerGas are above a configurable minimum value that the client is willing to accept. At the minimum, they are sufficiently high to be included with the current block.basefee.
+
+	//validate gas
+	if err := gas_service.ValidateGas(userOp, gasResponse, strategy); err != nil {
+		return nil, err
+	}
+	return gasResponse, nil
+}
+func PostExecute() {
+
+}
+func PrepareExecute(request *model.TryPayUserOpRequest) (*userop.BaseUserOp, *model.Strategy, error) {
+	// validator
+	if err := businessParamValidate(request); err != nil {
+		return nil, nil, err
+	}
+
+	var strategy *model.Strategy
+	// getStrategy
+	strategy, generateErr := strategyGenerate(request)
+	if generateErr != nil {
+		return nil, nil, generateErr
+
+	}
+
+	userOp, err := userop.NewUserOp(&request.UserOp)
+	if err != nil {
+		return nil, nil, err
+
+	}
+
+	if err := validator_service.ValidateStrategy(strategy); err != nil {
+		return nil, nil, err
+	}
+	//recall simulate?
+	//UserOp Validate
+	//check nonce
+	if err := validator_service.ValidateUserOp(userOp); err != nil {
+		return nil, nil, err
+	}
+	return userOp, strategy, nil
+}
+
 func businessParamValidate(request *model.TryPayUserOpRequest) error {
 	if request.ForceStrategyId == "" && (request.ForceToken == "" || request.ForceNetwork == "") {
 		return xerrors.Errorf("Token And Network Must Set When ForceStrategyId Is Empty")
 	}
 	if conf.Environment.IsDevelopment() && request.ForceNetwork != "" {
-		if types.TestNetWork[request.ForceNetwork] {
+		if network.TestNetWork[request.ForceNetwork] {
 			return xerrors.Errorf("Test Network Not Support")
 		}
 	}
@@ -112,7 +132,7 @@ func businessParamValidate(request *model.TryPayUserOpRequest) error {
 	return nil
 }
 
-func executePay(strategy *model.Strategy, userOp *model.UserOperation, gasResponse *model.ComputeGasResponse) (*model.PayReceipt, error) {
+func executePay(strategy *model.Strategy, userOp *userop.UserOperation, gasResponse *model.ComputeGasResponse) (*model.PayReceipt, error) {
 	//1.Recharge
 	ethereumPayservice := pay_service.EthereumPayService{}
 	if err := ethereumPayservice.Pay(); err != nil {
@@ -127,11 +147,8 @@ func executePay(strategy *model.Strategy, userOp *model.UserOperation, gasRespon
 		Sponsor:         "aastar",
 	}, nil
 }
-func getPayMasterSignature(strategy *model.Strategy, userOp *model.UserOperation) string {
-	signatureBytes, _ := utils.SignUserOp("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421", userOp)
-	return hex.EncodeToString(signatureBytes)
-}
-func packUserOp(userOp *model.UserOperation) (string, []byte, error) {
+
+func packUserOp(userOp *userop.UserOperation) (string, []byte, error) {
 	abiEncoder, err := abi.JSON(strings.NewReader(`[
     {
         "inputs": [
@@ -239,7 +256,16 @@ func GetIndex(hexString string) int64 {
 	return result
 }
 
-func UserOpHash(userOp *model.UserOperation, strategy *model.Strategy, validStart *big.Int, validEnd *big.Int) ([]byte, string, error) {
+func UserOpHash(baseUserOp userop.BaseUserOp, strategy *model.Strategy) ([]byte, string, error) {
+	validStart := big.NewInt(strategy.ExecuteRestriction.EndTime)
+	validEnd := big.NewInt(strategy.ExecuteRestriction.StartTime)
+
+	var useropV1 *userop.UserOperation
+	if useropV1, ok := baseUserOp.(*userop.UserOperation); !ok {
+		return nil, "", xerrors.Errorf("UserOperation type error")
+	}
+	useropV1.Pack(userop.)
+
 	packUserOpStr, _, err := packUserOp(userOp)
 	if err != nil {
 		return nil, "", err
@@ -276,13 +302,13 @@ func UserOpHash(userOp *model.UserOperation, strategy *model.Strategy, validStar
 			Type: uint48Ty,
 		},
 	}
-	chainId, err := chain_service.GetChainId(strategy.NetWork)
+	chainId, err := chain_service.GetChainId(strategy.GetNewWork())
 	if err != nil {
 		return nil, "", err
 	}
 	packUserOpStrByteNew, _ := hex.DecodeString(packUserOpStr)
 	chainId.Int64()
-	bytesRes, err := arguments.Pack(packUserOpStrByteNew, chainId, common.HexToAddress(strategy.PayMasterAddress), userOp.Nonce, validStart, validEnd)
+	bytesRes, err := arguments.Pack(packUserOpStrByteNew, chainId, strategy.GetPaymasterAddress(), userOp.Nonce, validStart, validEnd)
 	if err != nil {
 		return nil, "", err
 	}
@@ -295,11 +321,11 @@ func UserOpHash(userOp *model.UserOperation, strategy *model.Strategy, validStar
 
 }
 
-func getPayMasterAndData(strategy *model.Strategy, userOp *model.UserOperation, gasResponse *model.ComputeGasResponse) (string, string, error) {
+func getPayMasterAndData(strategy *model.Strategy, userOp *userop.BaseUserOp, gasResponse *model.ComputeGasResponse) (string, string, error) {
 	return generatePayMasterAndData(userOp, strategy)
 }
 
-func generatePayMasterAndData(userOp *model.UserOperation, strategy *model.Strategy) (string, string, error) {
+func generatePayMasterAndData(userOp *userop.BaseUserOp, strategy *model.Strategy) (string, string, error) {
 	//v0.7 [0:20)paymaster address,[20:36)validation gas, [36:52)postop gas,[52:53)typeId,  [53:117)valid timestamp, [117:) signature
 	//v0.6 [0:20)paymaster address,[20:22)payType, [22:86)start Time ,[86:150)typeId,  [53:117)valid timestamp, [117:) signature
 	//validationGas := userOp.VerificationGasLimit.String()
@@ -307,7 +333,8 @@ func generatePayMasterAndData(userOp *model.UserOperation, strategy *model.Strat
 	validStart, validEnd := getValidTime()
 	//fmt.Printf("validStart: %s, validEnd: %s\n", validStart, validEnd)
 	//TODO  string(strategy.PayType),
-	message := fmt.Sprintf("%s%s%s", strategy.PayMasterAddress, validEnd, validStart)
+	//strings.Join()
+	message := fmt.Sprintf("%s%s%s", strategy.GetPaymasterAddress().String(), validEnd, validStart)
 	signatureByte, _, err := SignPaymaster(userOp, strategy, validStart, validEnd)
 	if err != nil {
 		return "", "", err
@@ -317,16 +344,39 @@ func generatePayMasterAndData(userOp *model.UserOperation, strategy *model.Strat
 	return message, signatureStr, nil
 }
 
-func SignPaymaster(userOp *model.UserOperation, strategy *model.Strategy, validStart string, validEnd string) ([]byte, []byte, error) {
+func SignPaymaster(userOp userop.BaseUserOp, strategy *model.Strategy, validStart string, validEnd string) ([]byte, []byte, error) {
 	//string to int
 	//TODO
-	userOpHash, _, err := UserOpHash(userOp, strategy, big.NewInt(1820044496), big.NewInt(1710044496))
+	entryPointVersion := userOp.GetEntrypointVersion()
+	var userOpHash []byte
+	if entryPointVersion == types.EntrypointV06 {
+		userOpV1 ,ok  := userOp.(*userop.UserOperation)
+		if !ok {
+			return nil, nil, xerrors.Errorf("UserOperation type error")
+		}
+		userOpV1Hash ,_,err := userOpV1.GetUserOpHash(strategy)
+		if err != nil {
+			return nil, nil, err
+		}
+		userOpHash = userOpV1Hash
+
+	} else if entryPointVersion == types.EntryPointV07 {
+		userOpV2 ,ok  := userOp.(*userop.UserOperationV2)
+		if !ok {
+			return nil, nil, xerrors.Errorf("UserOperation type error")
+		}
+		userOpV2Hash,_,err := userOpV2.GetUserOpHash(strategy)
+		if err != nil {
+			return nil, nil, err
+		}
+		userOpHash = userOpV2Hash
+	} else {
+		return nil, nil, xerrors.Errorf("EntrypointVersion error")
+	}
 	hashToEthSignHash := utils.ToEthSignedMessageHash(userOpHash)
 	fmt.Printf("userOpHashStr: %s\n", hex.EncodeToString(userOpHash))
 	fmt.Printf("hashToEthSignHashStr: %s\n", hex.EncodeToString(hashToEthSignHash))
-	if err != nil {
-		return nil, nil, err
-	}
+
 	privateKey, err := crypto.HexToECDSA("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421")
 	if err != nil {
 		return nil, nil, err

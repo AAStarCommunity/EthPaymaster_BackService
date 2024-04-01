@@ -1,23 +1,54 @@
 package model
 
-import "AAStarCommunity/EthPaymaster_BackService/common/types"
+import (
+	"AAStarCommunity/EthPaymaster_BackService/common/erc20_token"
+	"AAStarCommunity/EthPaymaster_BackService/common/network"
+	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"github.com/ethereum/go-ethereum/common"
+)
 
 type Strategy struct {
 	Id                 string                     `json:"id"`
-	EntryPointAddress  string                     `json:"entrypoint_address"`
-	EntryPointTag      types.EntrypointTag        `json:"entrypoint_tag"`
-	PayMasterAddress   string                     `json:"paymaster_address"`
-	PayType            types.PayType              `json:"pay_type"`
-	NetWork            types.Network              `json:"network"`
-	Token              types.TokenType            `json:"token"`
+	StrategyCode       string                     `json:"strategy_code"`
+	PaymasterInfo      *PaymasterInfo             `json:"paymaster_info"`
+	NetWorkInfo        *NetWorkInfo               `json:"network_info"`
+	EntryPointInfo     *EntryPointInfo            `json:"entrypoint_info"`
 	Description        string                     `json:"description"`
 	ExecuteRestriction StrategyExecuteRestriction `json:"execute_restriction"`
-	EnableEoa          bool                       `json:"enable_eoa"`
-	Enable7560         bool                       `json:"enable_7560"`
-	EnableErc20        bool                       `json:"enable_erc20"`
-	Enable4844         bool                       `json:"enable_4844"`
-	EnableCurrency     bool                       `json:"enable_currency"`
 }
+type PaymasterInfo struct {
+	PayMasterAddress common.Address `json:"paymaster_address"`
+	PayType          types.PayType  `json:"pay_type"`
+}
+type NetWorkInfo struct {
+	NetWork network.Network       `json:"network"`
+	Token   erc20_token.TokenType `json:"token"`
+}
+type EntryPointInfo struct {
+	EntryPointAddress common.Address          `json:"entrypoint_address"`
+	EntryPointTag     types.EntrypointVersion `json:"entrypoint_tag"`
+}
+
+func (strategy *Strategy) GetPaymasterAddress() common.Address {
+	return strategy.PaymasterInfo.PayMasterAddress
+}
+func (strategy *Strategy) GetEntryPointAddress() common.Address {
+	return strategy.EntryPointInfo.EntryPointAddress
+}
+func (strategy *Strategy) GetNewWork() network.Network {
+	return strategy.NetWorkInfo.NetWork
+}
+
+func (strategy *Strategy) GetUseToken() erc20_token.TokenType {
+	return strategy.NetWorkInfo.Token
+}
+func (strategy *Strategy) GetPayType() types.PayType {
+	return strategy.PaymasterInfo.PayType
+}
+func (strategy *Strategy) GetStrategyEntryPointTag() types.EntrypointVersion {
+	return strategy.EntryPointInfo.EntryPointTag
+}
+
 type StrategyExecuteRestriction struct {
 	BanSenderAddress   string `json:"ban_sender_address"`
 	EffectiveStartTime int64  `json:"effective_start_time"`
@@ -25,6 +56,8 @@ type StrategyExecuteRestriction struct {
 	GlobalMaxUSD       int64  `json:"global_max_usd"`
 	GlobalMaxOpCount   int64  `json:"global_max_op_count"`
 	DayMaxUSD          int64  `json:"day_max_usd"`
+	StartTime          int64  `json:"start_time"`
+	EndTime            int64  `json:"end_time"`
 }
 
 type StrategyValidateConfig struct {

@@ -1,19 +1,19 @@
 package utils
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"AAStarCommunity/EthPaymaster_BackService/common/erc20_token"
 	"fmt"
 	"strconv"
 	"testing"
 )
 
 func TestGetPriceUsd(t *testing.T) {
-	price, _ := GetPriceUsd(types.OP)
+	price, _ := GetPriceUsd(erc20_token.OP)
 	fmt.Println(price)
 }
 
 func TestGetToken(t *testing.T) {
-	price, _ := GetToken(types.ETH, types.OP)
+	price, _ := GetToken(erc20_token.ETH, erc20_token.OP)
 	fmt.Println(price)
 }
 func TestDemo(t *testing.T) {

@@ -1,8 +1,9 @@
 package chain_service
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/erc20_token"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"context"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -19,24 +20,23 @@ var EthWeiFactor = new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), big.Ne
 
 const balanceOfAbi = `[{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}]`
 
-var TokenAddressMap map[types.Network]*map[types.TokenType]common.Address
+var TokenAddressMap map[network.Network]*map[erc20_token.TokenType]common.Address
 
 func init() {
-	TokenAddressMap = map[types.Network]*map[types.TokenType]common.Address{
-		types.Ethereum: {
-			types.ETH: common.HexToAddress("0xdac17f958d2ee523a2206206994597c13d831ec7"),
+	TokenAddressMap = map[network.Network]*map[erc20_token.TokenType]common.Address{
+		network.Ethereum: {
+			erc20_token.ETH: common.HexToAddress("0xdac17f958d2ee523a2206206994597c13d831ec7"),
 		},
-		types.Sepolia: {
-			types.USDT: common.HexToAddress("0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"),
-			types.USDC: common.HexToAddress("0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"),
+		network.Sepolia: {
+			erc20_token.USDT: common.HexToAddress("0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"),
+			erc20_token.USDC: common.HexToAddress("0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"),
 		},
 	}
 }
-func CheckContractAddressAccess(contract common.Address, chain types.Network) (bool, error) {
+func CheckContractAddressAccess(contract common.Address, chain network.Network) (bool, error) {
 	if chain == "" {
 		return false, xerrors.Errorf("chain can not be empty")
 	}
-
 	client, exist := EthCompatibleNetWorkClientMap[chain]
 	if !exist {
 		return false, xerrors.Errorf("chain Client [%s] not exist", chain)
@@ -52,7 +52,7 @@ func CheckContractAddressAccess(contract common.Address, chain types.Network) (b
 }
 
 // GetGasPrice return gas price in wei, gwei, ether
-func GetGasPrice(chain types.Network) (*model.GasPrice, error) {
+func GetGasPrice(chain network.Network) (*model.GasPrice, error) {
 	client, exist := EthCompatibleNetWorkClientMap[chain]
 	if !exist {
 		return nil, xerrors.Errorf("chain Client [%s] not exist", chain)
@@ -87,7 +87,7 @@ func GetGasPrice(chain types.Network) (*model.GasPrice, error) {
 	return &result, nil
 }
 
-func GetGas(netWork types.Network) (*big.Int, error) {
+func GetGas(netWork network.Network) (*big.Int, error) {
 	client, exist := EthCompatibleNetWorkClientMap[netWork]
 	if !exist {
 		return nil, xerrors.Errorf("chain Client [%s] not exist", netWork)
@@ -98,7 +98,7 @@ func GetGas(netWork types.Network) (*big.Int, error) {
 	}
 	return head.BaseFee, nil
 }
-func GetPriorityFee(netWork types.Network) (*big.Int, *big.Float) {
+func GetPriorityFee(netWork network.Network) (*big.Int, *big.Float) {
 	client, exist := EthCompatibleNetWorkClientMap[netWork]
 	if !exist {
 		return nil, nil
@@ -112,19 +112,19 @@ func GetPriorityFee(netWork types.Network) (*big.Int, *big.Float) {
 func GetEntryPointDeposit(entrypoint string, depositAddress string) uint256.Int {
 	return uint256.Int{1}
 }
-func EstimateGasLimitAndCost(chain types.Network, msg ethereum.CallMsg) (uint64, error) {
+func EstimateGasLimitAndCost(chain network.Network, msg ethereum.CallMsg) (uint64, error) {
 	client, exist := EthCompatibleNetWorkClientMap[chain]
 	if !exist {
 		return 0, xerrors.Errorf("chain Client [%s] not exist", chain)
 	}
 	return client.EstimateGas(context.Background(), msg)
 }
-func GetAddressTokenBalance(network types.Network, address common.Address, token types.TokenType) (float64, error) {
+func GetAddressTokenBalance(network network.Network, address common.Address, token erc20_token.TokenType) (float64, error) {
 	client, exist := EthCompatibleNetWorkClientMap[network]
 	if !exist {
 		return 0, xerrors.Errorf("chain Client [%s] not exist", network)
 	}
-	if token == types.ETH {
+	if token == erc20_token.ETH {
 		res, err := client.BalanceAt(context.Background(), address, nil)
 		if err != nil {
 			return 0, err
@@ -160,7 +160,7 @@ func GetAddressTokenBalance(network types.Network, address common.Address, token
 	return balanceResultFloat, nil
 
 }
-func GetChainId(chain types.Network) (*big.Int, error) {
+func GetChainId(chain network.Network) (*big.Int, error) {
 	client, exist := EthCompatibleNetWorkClientMap[chain]
 	if !exist {
 		return nil, xerrors.Errorf("chain Client [%s] not exist", chain)

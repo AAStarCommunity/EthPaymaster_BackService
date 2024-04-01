@@ -3,6 +3,7 @@ package paymaster_pay_type
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 )
 
 var (
@@ -17,7 +18,7 @@ func init() {
 
 type PaymasterPayTypeExecutor interface {
 	//GeneratePayMasterAndData(strategy *model.Strategy, userOp *model.UserOperation, gasResponse *model.ComputeGasResponse, extra map[string]any) (string, error)
-	ValidateGas(userOp *model.UserOperation, response *model.ComputeGasResponse, strategy *model.Strategy) error
+	ValidateGas(userOp *userop.UserOperation, response *model.ComputeGasResponse, strategy *model.Strategy) error
 }
 
 func GetPaymasterDataExecutor(payType types.PayType) PaymasterPayTypeExecutor {

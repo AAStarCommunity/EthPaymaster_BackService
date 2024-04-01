@@ -2,6 +2,7 @@ package paymaster_pay_type
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"golang.org/x/xerrors"
 	"math/big"
@@ -10,8 +11,8 @@ import (
 type Erc20PaymasterExecutor struct {
 }
 
-func (e *Erc20PaymasterExecutor) ValidateGas(userOp *model.UserOperation, gasResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
-	tokenBalance, getTokenBalanceErr := chain_service.GetAddressTokenBalance(strategy.NetWork, userOp.Sender, strategy.Token)
+func (e *Erc20PaymasterExecutor) ValidateGas(userOp *userop.UserOperation, gasResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
+	tokenBalance, getTokenBalanceErr := chain_service.GetAddressTokenBalance(strategy.GetNewWork(), userOp.Sender, strategy.GetUseToken())
 	if getTokenBalanceErr != nil {
 		return getTokenBalanceErr
 	}

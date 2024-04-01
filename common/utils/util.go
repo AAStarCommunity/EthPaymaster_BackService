@@ -1,10 +1,9 @@
 package utils
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"bytes"
 	"encoding/hex"
-	"encoding/json"
 	"github.com/ethereum/go-ethereum/crypto"
 	"regexp"
 	"strconv"
@@ -44,8 +43,8 @@ func IsStringInUint64Range(s string) bool {
 	// 0 <= num <= MaxUint64
 	return num <= ^uint64(0)
 }
-func GenerateUserOperation() *model.UserOperation {
-	return &model.UserOperation{}
+func GenerateUserOperation() *userop.UserOperation {
+	return &userop.UserOperation{}
 }
 func EncodeToStringWithPrefix(data []byte) string {
 	res := hex.EncodeToString(data)
@@ -55,20 +54,6 @@ func EncodeToStringWithPrefix(data []byte) string {
 	return res
 }
 
-func SignUserOp(privateKeyHex string, userOp *model.UserOperation) ([]byte, error) {
-
-	serializedUserOp, err := json.Marshal(userOp)
-	if err != nil {
-		return nil, err
-	}
-
-	signature, err := SignMessage(privateKeyHex, string(serializedUserOp))
-	if err != nil {
-		return nil, err
-	}
-
-	return signature, nil
-}
 func SignMessage(privateKeyHex string, message string) ([]byte, error) {
 	privateKey, err := crypto.HexToECDSA(privateKeyHex)
 	if err != nil {
