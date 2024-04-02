@@ -15,6 +15,8 @@ var payMasterSupport = map[string]bool{}
 var entryPointSupport = map[string]bool{}
 
 func init() {
+	entrypoint := common.HexToAddress("0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789")
+	paymaster := common.HexToAddress("0xAEbF4C90b571e7D5cb949790C9b8Dc0280298b63")
 	MockStrategyMap["1"] = &model.Strategy{
 		Id: "1",
 		NetWorkInfo: &model.NetWorkInfo{
@@ -22,15 +24,15 @@ func init() {
 			Token:   erc20_token.ETH,
 		},
 		EntryPointInfo: &model.EntryPointInfo{
-			EntryPointAddress: common.HexToAddress("0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"),
+			EntryPointAddress: &entrypoint,
 			EntryPointTag:     types.EntrypointV06,
 		},
 		ExecuteRestriction: model.StrategyExecuteRestriction{
-			StartTime: 1710044496,
-			EndTime:   1820044496,
+			EffectiveStartTime: 1710044496,
+			EffectiveEndTime:   1820044496,
 		},
 		PaymasterInfo: &model.PaymasterInfo{
-			PayMasterAddress: common.HexToAddress("0xAEbF4C90b571e7D5cb949790C9b8Dc0280298b63"),
+			PayMasterAddress: &paymaster,
 			PayType:          types.PayTypeVerifying,
 		},
 	}

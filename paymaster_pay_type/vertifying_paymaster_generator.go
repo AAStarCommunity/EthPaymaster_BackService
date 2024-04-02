@@ -11,7 +11,7 @@ import (
 type VerifyingPaymasterExecutor struct {
 }
 
-func (v VerifyingPaymasterExecutor) ValidateGas(userOp *userop.UserOperation, response *model.ComputeGasResponse, strategy *model.Strategy) error {
+func (v VerifyingPaymasterExecutor) ValidateGas(userOp *userop.BaseUserOp, response *model.ComputeGasResponse, strategy *model.Strategy) error {
 	//Validate the account’s deposit in the entryPoint is high enough to cover the max possible cost (cover the already-done verification and max execution gas)
 	// Paymaster check paymaster balance
 

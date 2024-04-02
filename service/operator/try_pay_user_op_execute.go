@@ -3,7 +3,6 @@ package operator
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
@@ -14,12 +13,9 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/service/validator_service"
 	"encoding/hex"
 	"fmt"
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"golang.org/x/xerrors"
-	"math/big"
-	"strconv"
 	"strings"
 )
 
@@ -132,7 +128,7 @@ func businessParamValidate(request *model.TryPayUserOpRequest) error {
 	return nil
 }
 
-func executePay(strategy *model.Strategy, userOp *userop.UserOperation, gasResponse *model.ComputeGasResponse) (*model.PayReceipt, error) {
+func executePay(strategy *model.Strategy, userOp *userop.BaseUserOp, gasResponse *model.ComputeGasResponse) (*model.PayReceipt, error) {
 	//1.Recharge
 	ethereumPayservice := pay_service.EthereumPayService{}
 	if err := ethereumPayservice.Pay(); err != nil {
@@ -148,230 +144,30 @@ func executePay(strategy *model.Strategy, userOp *userop.UserOperation, gasRespo
 	}, nil
 }
 
-func packUserOp(userOp *userop.UserOperation) (string, []byte, error) {
-	abiEncoder, err := abi.JSON(strings.NewReader(`[
-    {
-        "inputs": [
-            {
-                "components": [
-                    {
-                        "internalType": "address",
-                        "name": "Sender",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "Nonce",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "bytes",
-                        "name": "InitCode",
-                        "type": "bytes"
-                    },
-                    {
-                        "internalType": "bytes",
-                        "name": "CallData",
-                        "type": "bytes"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "CallGasLimit",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "VerificationGasLimit",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "PreVerificationGas",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "MaxFeePerGas",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "MaxPriorityFeePerGas",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "bytes",
-                        "name": "PaymasterAndData",
-                        "type": "bytes"
-                    },
-                    {
-                        "internalType": "bytes",
-                        "name": "Signature",
-                        "type": "bytes"
-                    }
-                ],
-                "internalType": "struct UserOperation",
-                "name": "userOp",
-                "type": "tuple"
-            }
-        ],
-        "name": "UserOp",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    }
-	]`))
-	if err != nil {
-		return "", nil, err
-	}
-	method := abiEncoder.Methods["UserOp"]
-	//TODO disgusting logic
-
-	paymasterDataTmp, err := hex.DecodeString("d93349Ee959d295B115Ee223aF10EF432A8E8523000000000000000000000000000000000000000000000000000000001710044496000000000000000000000000000000000000000000000000000000174158049605bea0bfb8539016420e76749fda407b74d3d35c539927a45000156335643827672fa359ee968d72db12d4b4768e8323cd47443505ab138a525c1f61c6abdac501")
-	//fmt.Printf("paymasterDataTmpLen: %x\n", len(paymasterDataTmp))
-	//fmt.Printf("paymasterDataKLen : %x\n", len(userOp.PaymasterAndData))
-	userOp.PaymasterAndData = paymasterDataTmp
-	encoded, err := method.Inputs.Pack(userOp)
-
-	if err != nil {
-		return "", nil, err
-	}
-	//https://github.com/jayden-sudo/SoulWalletCore/blob/dc76bdb9a156d4f99ef41109c59ab99106c193ac/contracts/utils/CalldataPack.sol#L51-L65
-	hexString := hex.EncodeToString(encoded)
-
-	//1. 从 63*10+ 1 ～64*10获取
-	hexString = hexString[64:]
-	//hexLen := len(hexString)
-	subIndex := GetIndex(hexString)
-	hexString = hexString[:subIndex]
-	//fmt.Printf("subIndex: %d\n", subIndex)
-	return hexString, encoded, nil
-}
-func GetIndex(hexString string) int64 {
-	//1. 从 63*10+ 1 ～64*10获取
-
-	indexPre := hexString[576:640]
-	indePreInt, _ := strconv.ParseInt(indexPre, 16, 64)
-	result := indePreInt * 2
-	return result
-}
-
-func UserOpHash(baseUserOp userop.BaseUserOp, strategy *model.Strategy) ([]byte, string, error) {
-	validStart := big.NewInt(strategy.ExecuteRestriction.EndTime)
-	validEnd := big.NewInt(strategy.ExecuteRestriction.StartTime)
-
-	var useropV1 *userop.UserOperation
-	if useropV1, ok := baseUserOp.(*userop.UserOperation); !ok {
-		return nil, "", xerrors.Errorf("UserOperation type error")
-	}
-	useropV1.Pack(userop.)
-
-	packUserOpStr, _, err := packUserOp(userOp)
-	if err != nil {
-		return nil, "", err
-	}
-	//
-	bytesTy, err := abi.NewType("bytes", "", nil)
-	if err != nil {
-		fmt.Println(err)
-	}
-	uint256Ty, err := abi.NewType("uint256", "", nil)
-	if err != nil {
-		fmt.Println(err)
-	}
-	uint48Ty, err := abi.NewType("uint48", "", nil)
-
-	addressTy, _ := abi.NewType("address", "", nil)
-	arguments := abi.Arguments{
-		{
-			Type: bytesTy,
-		},
-		{
-			Type: uint256Ty,
-		},
-		{
-			Type: addressTy,
-		},
-		{
-			Type: uint256Ty,
-		},
-		{
-			Type: uint48Ty,
-		},
-		{
-			Type: uint48Ty,
-		},
-	}
-	chainId, err := chain_service.GetChainId(strategy.GetNewWork())
-	if err != nil {
-		return nil, "", err
-	}
-	packUserOpStrByteNew, _ := hex.DecodeString(packUserOpStr)
-	chainId.Int64()
-	bytesRes, err := arguments.Pack(packUserOpStrByteNew, chainId, strategy.GetPaymasterAddress(), userOp.Nonce, validStart, validEnd)
-	if err != nil {
-		return nil, "", err
-	}
-	//bytesResStr := hex.EncodeToString(bytesRes)
-	//fmt.Printf("bytesResStr: %s\n", bytesResStr)
-	//fmt.Printf("bytesRes: %x\n", bytesRes)
-
-	encodeHash := crypto.Keccak256(bytesRes)
-	return encodeHash, hex.EncodeToString(bytesRes), nil
-
-}
-
 func getPayMasterAndData(strategy *model.Strategy, userOp *userop.BaseUserOp, gasResponse *model.ComputeGasResponse) (string, string, error) {
-	return generatePayMasterAndData(userOp, strategy)
-}
-
-func generatePayMasterAndData(userOp *userop.BaseUserOp, strategy *model.Strategy) (string, string, error) {
-	//v0.7 [0:20)paymaster address,[20:36)validation gas, [36:52)postop gas,[52:53)typeId,  [53:117)valid timestamp, [117:) signature
-	//v0.6 [0:20)paymaster address,[20:22)payType, [22:86)start Time ,[86:150)typeId,  [53:117)valid timestamp, [117:) signature
-	//validationGas := userOp.VerificationGasLimit.String()
-	//postOPGas := userOp.CallGasLimit.String()
-	validStart, validEnd := getValidTime()
-	//fmt.Printf("validStart: %s, validEnd: %s\n", validStart, validEnd)
-	//TODO  string(strategy.PayType),
-	//strings.Join()
-	message := fmt.Sprintf("%s%s%s", strategy.GetPaymasterAddress().String(), validEnd, validStart)
-	signatureByte, _, err := SignPaymaster(userOp, strategy, validStart, validEnd)
+	signatureByte, _, err := SignPaymaster(userOp, strategy)
 	if err != nil {
 		return "", "", err
 	}
 	signatureStr := hex.EncodeToString(signatureByte)
-	message = message + signatureStr
-	return message, signatureStr, nil
+	paymasterData, err := generatePayMasterAndData(userOp, strategy)
+	paymasterDataResult := paymasterData + signatureStr
+	return paymasterDataResult, signatureStr, err
 }
 
-func SignPaymaster(userOp userop.BaseUserOp, strategy *model.Strategy, validStart string, validEnd string) ([]byte, []byte, error) {
-	//string to int
-	//TODO
-	entryPointVersion := userOp.GetEntrypointVersion()
-	var userOpHash []byte
-	if entryPointVersion == types.EntrypointV06 {
-		userOpV1 ,ok  := userOp.(*userop.UserOperation)
-		if !ok {
-			return nil, nil, xerrors.Errorf("UserOperation type error")
-		}
-		userOpV1Hash ,_,err := userOpV1.GetUserOpHash(strategy)
-		if err != nil {
-			return nil, nil, err
-		}
-		userOpHash = userOpV1Hash
+func generatePayMasterAndData(userOp *userop.BaseUserOp, strategy *model.Strategy) (string, error) {
+	//TODO  string(strategy.PayType),
+	validStart, validEnd := utils.GetValidTime(strategy)
+	message := fmt.Sprintf("%s%s%s", strategy.GetPaymasterAddress().String(), validEnd, validStart)
 
-	} else if entryPointVersion == types.EntryPointV07 {
-		userOpV2 ,ok  := userOp.(*userop.UserOperationV2)
-		if !ok {
-			return nil, nil, xerrors.Errorf("UserOperation type error")
-		}
-		userOpV2Hash,_,err := userOpV2.GetUserOpHash(strategy)
-		if err != nil {
-			return nil, nil, err
-		}
-		userOpHash = userOpV2Hash
-	} else {
-		return nil, nil, xerrors.Errorf("EntrypointVersion error")
+	return message, nil
+}
+
+func SignPaymaster(userOp *userop.BaseUserOp, strategy *model.Strategy) ([]byte, []byte, error) {
+	userOpValue := *userOp
+	userOpHash, _, err := userOpValue.GetUserOpHash(strategy)
+	if err != nil {
+		return nil, nil, err
 	}
 	hashToEthSignHash := utils.ToEthSignedMessageHash(userOpHash)
 	fmt.Printf("userOpHashStr: %s\n", hex.EncodeToString(userOpHash))
@@ -401,28 +197,6 @@ func SignPaymaster(userOp userop.BaseUserOp, strategy *model.Strategy, validStar
 	}
 
 	return signatureAfterProcessByte, userOpHash, err
-}
-
-// 1710044496
-// 1741580496
-func getValidTime() (string, string) {
-	//currentTime := time.Nsow()
-	//currentTimestamp := 1710044496
-	//futureTime := currentTime.Add(15 * time.Minute)
-	//futureTimestamp := futureTime.Unix()
-	currentTimestampStr := strconv.FormatInt(1710044496, 16)
-	futureTimestampStr := strconv.FormatInt(1820044496, 16)
-	currentTimestampStrSupply := SupplyZero(currentTimestampStr, 64)
-	futureTimestampStrSupply := SupplyZero(futureTimestampStr, 64)
-	return currentTimestampStrSupply, futureTimestampStrSupply
-}
-func SupplyZero(prefix string, maxTo int) string {
-	padding := maxTo - len(prefix)
-	if padding > 0 {
-		prefix = "0" + prefix
-		prefix = fmt.Sprintf("%0*s", maxTo, prefix)
-	}
-	return prefix
 }
 
 func strategyGenerate(request *model.TryPayUserOpRequest) (*model.Strategy, error) {

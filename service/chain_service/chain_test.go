@@ -11,8 +11,9 @@ import (
 )
 
 func TestCheckContractAddressAccess(t *testing.T) {
-	address := "0x0576a174D229E3cFA37253523E645A78A0C91B57"
-	res, err := CheckContractAddressAccess(common.HexToAddress(address), network.Sepolia)
+	addressStr := "0x0576a174D229E3cFA37253523E645A78A0C91B57"
+	address := common.HexToAddress(addressStr)
+	res, err := CheckContractAddressAccess(&address, network.Sepolia)
 	assert.NoError(t, err)
 	assert.True(t, res)
 }

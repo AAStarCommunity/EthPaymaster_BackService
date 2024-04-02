@@ -69,7 +69,7 @@ func checkInitCode(initCode []byte, network network.Network) error {
 		return xerrors.Errorf("initCode length is less than 20 do not have factory address")
 	}
 	factoryAddress := common.BytesToAddress(initCode[:20])
-	if ok, err := chain_service.CheckContractAddressAccess(factoryAddress, network); err != nil {
+	if ok, err := chain_service.CheckContractAddressAccess(&factoryAddress, network); err != nil {
 		return err
 	} else if !ok {
 		return xerrors.Errorf("factoryAddress address [factoryAddress] not exist in [%s] network", network)

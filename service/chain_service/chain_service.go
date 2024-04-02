@@ -33,7 +33,7 @@ func init() {
 		},
 	}
 }
-func CheckContractAddressAccess(contract common.Address, chain network.Network) (bool, error) {
+func CheckContractAddressAccess(contract *common.Address, chain network.Network) (bool, error) {
 	if chain == "" {
 		return false, xerrors.Errorf("chain can not be empty")
 	}
@@ -41,7 +41,7 @@ func CheckContractAddressAccess(contract common.Address, chain network.Network) 
 	if !exist {
 		return false, xerrors.Errorf("chain Client [%s] not exist", chain)
 	}
-	code, err := client.CodeAt(context.Background(), contract, nil)
+	code, err := client.CodeAt(context.Background(), *contract, nil)
 	if err != nil {
 		return false, err
 	}

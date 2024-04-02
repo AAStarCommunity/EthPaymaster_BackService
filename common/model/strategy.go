@@ -17,22 +17,22 @@ type Strategy struct {
 	ExecuteRestriction StrategyExecuteRestriction `json:"execute_restriction"`
 }
 type PaymasterInfo struct {
-	PayMasterAddress common.Address `json:"paymaster_address"`
-	PayType          types.PayType  `json:"pay_type"`
+	PayMasterAddress *common.Address `json:"paymaster_address"`
+	PayType          types.PayType   `json:"pay_type"`
 }
 type NetWorkInfo struct {
 	NetWork network.Network       `json:"network"`
 	Token   erc20_token.TokenType `json:"token"`
 }
 type EntryPointInfo struct {
-	EntryPointAddress common.Address          `json:"entrypoint_address"`
+	EntryPointAddress *common.Address         `json:"entrypoint_address"`
 	EntryPointTag     types.EntrypointVersion `json:"entrypoint_tag"`
 }
 
-func (strategy *Strategy) GetPaymasterAddress() common.Address {
+func (strategy *Strategy) GetPaymasterAddress() *common.Address {
 	return strategy.PaymasterInfo.PayMasterAddress
 }
-func (strategy *Strategy) GetEntryPointAddress() common.Address {
+func (strategy *Strategy) GetEntryPointAddress() *common.Address {
 	return strategy.EntryPointInfo.EntryPointAddress
 }
 func (strategy *Strategy) GetNewWork() network.Network {

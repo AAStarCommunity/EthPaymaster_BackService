@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"bytes"
 	"encoding/hex"
+	"fmt"
 	"github.com/ethereum/go-ethereum/crypto"
 	"regexp"
 	"strconv"
@@ -43,9 +43,7 @@ func IsStringInUint64Range(s string) bool {
 	// 0 <= num <= MaxUint64
 	return num <= ^uint64(0)
 }
-func GenerateUserOperation() *userop.UserOperation {
-	return &userop.UserOperation{}
-}
+
 func EncodeToStringWithPrefix(data []byte) string {
 	res := hex.EncodeToString(data)
 	if res[:2] != "0x" {
@@ -84,4 +82,12 @@ func ReplaceLastTwoChars(str, replacement string) string {
 		return str
 	}
 	return str[:len(str)-2] + replacement
+}
+func SupplyZero(prefix string, maxTo int) string {
+	padding := maxTo - len(prefix)
+	if padding > 0 {
+		prefix = "0" + prefix
+		prefix = fmt.Sprintf("%0*s", maxTo, prefix)
+	}
+	return prefix
 }

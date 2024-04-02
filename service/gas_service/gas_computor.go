@@ -3,6 +3,7 @@ package gas_service
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/erc20_token"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/paymaster_pay_type"
@@ -12,28 +13,46 @@ import (
 	"math/big"
 )
 
-func ComputeGas(userOp *userop.UserOperation, strategy *model.Strategy) (*model.ComputeGasResponse, error) {
+func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.ComputeGasResponse, error) {
 	gasPrice, gasPriceErr := chain_service.GetGasPrice(strategy.GetNewWork())
 	//TODO calculate the maximum possible fee the account needs to pay (based on validation and call gas limits, and current gas values)
 	if gasPriceErr != nil {
 		return nil, gasPriceErr
 	}
-	estimateCallGasLimit, _ := chain_service.EstimateGasLimitAndCost(strategy.GetNewWork(), ethereum.CallMsg{
-		From: strategy.GetEntryPointAddress(),
-		To:   &userOp.Sender,
-		Data: userOp.CallData,
-	})
-	userOpCallGasLimit := userOp.CallGasLimit.Uint64()
-	if estimateCallGasLimit > userOpCallGasLimit*12/10 {
-		return nil, xerrors.Errorf("estimateCallGasLimit %d > userOpCallGasLimit %d", estimateCallGasLimit, userOpCallGasLimit)
+	userOpValue := *userOp
+	userOpValue.GetSender()
+	var maxFeePriceInEther *big.Float
+	var maxFee *big.Int
+	switch userOpValue.GetEntrypointVersion() {
+	case types.EntrypointV06:
+		{
+			useropV6Value := userOpValue.(*userop.UserOperation)
+			estimateCallGasLimit, _ := chain_service.EstimateGasLimitAndCost(strategy.GetNewWork(), ethereum.CallMsg{
+				From: strategy.GetEntryPointAddress(),
+				To:   userOpValue.GetSender(),
+				Data: useropV6Value.CallData,
+			})
+			userOpCallGasLimit := useropV6Value.CallGasLimit.Uint64()
+			if estimateCallGasLimit > userOpCallGasLimit*12/10 {
+				return nil, xerrors.Errorf("estimateCallGasLimit %d > userOpCallGasLimit %d", estimateCallGasLimit, userOpCallGasLimit)
+			}
+
+			payMasterPostGasLimit := GetPayMasterGasLimit()
+			maxGasLimit := big.NewInt(0).Add(useropV6Value.CallGasLimit, useropV6Value.VerificationGasLimit)
+			maxGasLimit = maxGasLimit.Add(maxGasLimit, payMasterPostGasLimit)
+			maxFee = new(big.Int).Mul(maxGasLimit, gasPrice.MaxBasePriceWei)
+			maxFeePriceInEther = new(big.Float).SetInt(maxFee)
+			maxFeePriceInEther.Quo(maxFeePriceInEther, chain_service.EthWeiFactor)
+		}
+		break
+	case types.EntryPointV07:
+		{
+
+		}
+		break
+
 	}
 
-	payMasterPostGasLimit := GetPayMasterGasLimit()
-	maxGasLimit := big.NewInt(0).Add(userOp.CallGasLimit, userOp.VerificationGasLimit)
-	maxGasLimit = maxGasLimit.Add(maxGasLimit, payMasterPostGasLimit)
-	maxFee := new(big.Int).Mul(maxGasLimit, gasPrice.MaxBasePriceWei)
-	maxFeePriceInEther := new(big.Float).SetInt(maxFee)
-	maxFeePriceInEther.Quo(maxFeePriceInEther, chain_service.EthWeiFactor)
 	tokenCost, err := getTokenCost(strategy, maxFeePriceInEther)
 	if err != nil {
 		return nil, err
@@ -74,7 +93,7 @@ func GetPayMasterGasLimit() *big.Int {
 	return big.NewInt(0)
 }
 
-func ValidateGas(userOp *userop.UserOperation, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
+func ValidateGas(userOp *userop.BaseUserOp, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
 	paymasterDataExecutor := paymaster_pay_type.GetPaymasterDataExecutor(strategy.GetPayType())
 	if paymasterDataExecutor == nil {
 		return xerrors.Errorf(" %s paymasterDataExecutor not found", strategy.GetPayType())

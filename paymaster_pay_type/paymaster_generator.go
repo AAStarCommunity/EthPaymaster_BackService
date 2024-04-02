@@ -18,7 +18,7 @@ func init() {
 
 type PaymasterPayTypeExecutor interface {
 	//GeneratePayMasterAndData(strategy *model.Strategy, userOp *model.UserOperation, gasResponse *model.ComputeGasResponse, extra map[string]any) (string, error)
-	ValidateGas(userOp *userop.UserOperation, response *model.ComputeGasResponse, strategy *model.Strategy) error
+	ValidateGas(userOp *userop.BaseUserOp, response *model.ComputeGasResponse, strategy *model.Strategy) error
 }
 
 func GetPaymasterDataExecutor(payType types.PayType) PaymasterPayTypeExecutor {

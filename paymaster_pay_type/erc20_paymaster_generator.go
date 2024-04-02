@@ -11,8 +11,11 @@ import (
 type Erc20PaymasterExecutor struct {
 }
 
-func (e *Erc20PaymasterExecutor) ValidateGas(userOp *userop.UserOperation, gasResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
-	tokenBalance, getTokenBalanceErr := chain_service.GetAddressTokenBalance(strategy.GetNewWork(), userOp.Sender, strategy.GetUseToken())
+func (e *Erc20PaymasterExecutor) ValidateGas(userOp *userop.BaseUserOp, gasResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
+	userOpValue := *userOp
+
+	userOpValue.GetSender()
+	tokenBalance, getTokenBalanceErr := chain_service.GetAddressTokenBalance(strategy.GetNewWork(), userOpValue.GetSender(), strategy.GetUseToken())
 	if getTokenBalanceErr != nil {
 		return getTokenBalanceErr
 	}

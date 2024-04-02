@@ -3,6 +3,7 @@ package userop
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"encoding/hex"
 	"fmt"
@@ -31,17 +32,21 @@ var (
 
 type BaseUserOp interface {
 	GetEntrypointVersion() types.EntrypointVersion
+
+	GetUserOpHash(strategy *model.Strategy) ([]byte, string, error)
+	GetSender() *common.Address
+	Pack() (string, []byte, error)
 }
 type BaseUserOperation struct {
-	Sender               common.Address `json:"sender"   mapstructure:"sender"  binding:"required,hexParam"`
-	InitCode             []byte         `json:"initCode"  mapstructure:"init_code" `
-	CallData             []byte         `json:"callData"  mapstructure:"call_data"  binding:"required"`
-	PreVerificationGas   *big.Int       `json:"preVerificationGas"  mapstructure:"pre_verification_gas"  binding:"required"`
-	MaxFeePerGas         *big.Int       `json:"maxFeePerGas"  mapstructure:"max_fee_per_gas"  binding:"required"`
-	PaymasterAndData     []byte         `json:"paymasterAndData"  mapstructure:"paymaster_and_data"`
-	Signature            []byte         `json:"signature"  mapstructure:"signature"  binding:"required"`
-	Nonce                *big.Int       `json:"nonce"  mapstructure:"nonce"  binding:"required"`
-	MaxPriorityFeePerGas *big.Int       `json:"maxPriorityFeePerGas"  mapstructure:"max_priority_fee_per_gas"  binding:"required"`
+	Sender               *common.Address `json:"sender"   mapstructure:"sender"  binding:"required,hexParam"`
+	InitCode             []byte          `json:"initCode"  mapstructure:"init_code" `
+	CallData             []byte          `json:"callData"  mapstructure:"call_data"  binding:"required"`
+	PreVerificationGas   *big.Int        `json:"preVerificationGas"  mapstructure:"pre_verification_gas"  binding:"required"`
+	MaxFeePerGas         *big.Int        `json:"maxFeePerGas"  mapstructure:"max_fee_per_gas"  binding:"required"`
+	PaymasterAndData     []byte          `json:"paymasterAndData"  mapstructure:"paymaster_and_data"`
+	Signature            []byte          `json:"signature"  mapstructure:"signature"  binding:"required"`
+	Nonce                *big.Int        `json:"nonce"  mapstructure:"nonce"  binding:"required"`
+	MaxPriorityFeePerGas *big.Int        `json:"maxPriorityFeePerGas"  mapstructure:"max_priority_fee_per_gas"  binding:"required"`
 }
 type UserOperation struct {
 	BaseUserOperation
@@ -51,6 +56,9 @@ type UserOperation struct {
 
 func (userOp *UserOperation) GetEntrypointVersion() types.EntrypointVersion {
 	return types.EntrypointV06
+}
+func (userOp *UserOperation) GetSender() *common.Address {
+	return userOp.Sender
 }
 
 // UserOperationV2  entrypoint v0.0.7
@@ -63,6 +71,9 @@ func (u *UserOperationV2) GetEntrypointVersion() types.EntrypointVersion {
 	return types.EntryPointV07
 }
 
+func (u *UserOperationV2) GetSender() *common.Address {
+	return u.Sender
+}
 func NewUserOp(userOp *map[string]any) (*BaseUserOp, error) {
 	var result BaseUserOp
 	// Convert map to struct
@@ -136,19 +147,19 @@ func (userOp *UserOperation) GetUserOpHash(strategy *model.Strategy) ([]byte, st
 	}
 	packUserOpStrByteNew, _ := hex.DecodeString(packUserOpStr)
 	chainId.Int64()
+	validStart, validEnd := GetValidTime(strategy)
+
 	bytesRes, err := arguments.Pack(packUserOpStrByteNew, chainId, strategy.GetPaymasterAddress(), userOp.Nonce, validStart, validEnd)
 	if err != nil {
 		return nil, "", err
 	}
-	//bytesResStr := hex.EncodeToString(bytesRes)
-	//fmt.Printf("bytesResStr: %s\n", bytesResStr)
-	//fmt.Printf("bytesRes: %x\n", bytesRes)
 
 	encodeHash := crypto.Keccak256(bytesRes)
 	return encodeHash, hex.EncodeToString(bytesRes), nil
 }
 func (userOp *UserOperationV2) GetUserOpHash(strategy *model.Strategy) ([]byte, string, error) {
 
+	return nil, "", nil
 }
 
 func (userOp *UserOperation) Pack() (string, []byte, error) {
@@ -324,4 +335,13 @@ func decodeOpTypes(
 	}
 
 	return data, nil
+}
+
+func GetValidTime(strategy *model.Strategy) (string, string) {
+
+	currentTimestampStr := strconv.FormatInt(strategy.ExecuteRestriction.EffectiveStartTime, 16)
+	futureTimestampStr := strconv.FormatInt(strategy.ExecuteRestriction.EffectiveEndTime, 16)
+	currentTimestampStrSupply := utils.SupplyZero(currentTimestampStr, 64)
+	futureTimestampStrSupply := utils.SupplyZero(futureTimestampStr, 64)
+	return currentTimestampStrSupply, futureTimestampStrSupply
 }
