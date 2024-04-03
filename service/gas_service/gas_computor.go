@@ -26,9 +26,10 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 	switch userOpValue.GetEntrypointVersion() {
 	case types.EntrypointV06:
 		{
+			entryPointAddress := strategy.GetEntryPointAddress()
 			useropV6Value := userOpValue.(*userop.UserOperation)
 			estimateCallGasLimit, _ := chain_service.EstimateGasLimitAndCost(strategy.GetNewWork(), ethereum.CallMsg{
-				From: strategy.GetEntryPointAddress(),
+				From: *entryPointAddress,
 				To:   userOpValue.GetSender(),
 				Data: useropV6Value.CallData,
 			})

@@ -3,7 +3,6 @@ package userop
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
-	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"encoding/hex"
 	"fmt"
@@ -36,6 +35,7 @@ type BaseUserOp interface {
 	GetUserOpHash(strategy *model.Strategy) ([]byte, string, error)
 	GetSender() *common.Address
 	Pack() (string, []byte, error)
+	ValidateUserOp() error
 }
 type BaseUserOperation struct {
 	Sender               *common.Address `json:"sender"   mapstructure:"sender"  binding:"required,hexParam"`
@@ -60,6 +60,9 @@ func (userOp *UserOperation) GetEntrypointVersion() types.EntrypointVersion {
 func (userOp *UserOperation) GetSender() *common.Address {
 	return userOp.Sender
 }
+func (userOp *UserOperation) ValidateUserOp() error {
+	return nil
+}
 
 // UserOperationV2  entrypoint v0.0.7
 type UserOperationV2 struct {
@@ -70,11 +73,14 @@ type UserOperationV2 struct {
 func (u *UserOperationV2) GetEntrypointVersion() types.EntrypointVersion {
 	return types.EntryPointV07
 }
+func (userOp *UserOperationV2) ValidateUserOp() error {
+	return nil
 
+}
 func (u *UserOperationV2) GetSender() *common.Address {
 	return u.Sender
 }
-func NewUserOp(userOp *map[string]any) (*BaseUserOp, error) {
+func NewUserOp(userOp *map[string]any, strategy *model.Strategy) (*BaseUserOp, error) {
 	var result BaseUserOp
 	// Convert map to struct
 	decodeConfig := &mapstructure.DecoderConfig{
@@ -147,9 +153,8 @@ func (userOp *UserOperation) GetUserOpHash(strategy *model.Strategy) ([]byte, st
 	}
 	packUserOpStrByteNew, _ := hex.DecodeString(packUserOpStr)
 	chainId.Int64()
-	validStart, validEnd := GetValidTime(strategy)
 
-	bytesRes, err := arguments.Pack(packUserOpStrByteNew, chainId, strategy.GetPaymasterAddress(), userOp.Nonce, validStart, validEnd)
+	bytesRes, err := arguments.Pack(packUserOpStrByteNew, chainId, strategy.GetPaymasterAddress(), userOp.Nonce, strategy.ExecuteRestriction.EffectiveStartTime, strategy.ExecuteRestriction.EffectiveEndTime)
 	if err != nil {
 		return nil, "", err
 	}
@@ -335,13 +340,4 @@ func decodeOpTypes(
 	}
 
 	return data, nil
-}
-
-func GetValidTime(strategy *model.Strategy) (string, string) {
-
-	currentTimestampStr := strconv.FormatInt(strategy.ExecuteRestriction.EffectiveStartTime, 16)
-	futureTimestampStr := strconv.FormatInt(strategy.ExecuteRestriction.EffectiveEndTime, 16)
-	currentTimestampStrSupply := utils.SupplyZero(currentTimestampStr, 64)
-	futureTimestampStrSupply := utils.SupplyZero(futureTimestampStr, 64)
-	return currentTimestampStrSupply, futureTimestampStrSupply
 }

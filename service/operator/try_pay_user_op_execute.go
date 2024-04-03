@@ -3,6 +3,7 @@ package operator
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
+	"AAStarCommunity/EthPaymaster_BackService/common/paymdate_data_generator"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
@@ -16,48 +17,60 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"golang.org/x/xerrors"
+	"strconv"
 	"strings"
 )
 
 func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserOpResponse, error) {
-	userOp, strategy, err := PrepareExecute(request)
+	userOp, strategy, err := prepareExecute(request)
 	if err != nil {
 		return nil, err
 	}
-	gasResponse, err := ExecuteGas(userOp, strategy)
+	gasResponse, err := estimateGas(userOp, strategy)
 	if err != nil {
 		return nil, err
 	}
-
-	//pay
-	payReceipt, payError := executePay(strategy, userOp, gasResponse)
-	if payError != nil {
-		return nil, payError
-	}
-
-	var paymasterAndData string
-	var paymasterSignature string
-	if paymasterAndDataRes, paymasterSignatureRes, err := getPayMasterAndData(strategy, userOp, gasResponse); err != nil {
+	payReceipt, err := executePay(strategy, userOp, gasResponse)
+	if err != nil {
 		return nil, err
-	} else {
-		paymasterAndData = paymasterAndDataRes
-		paymasterSignature = paymasterSignatureRes
 	}
-
-	//validatePaymasterUserOp
-	var result = &model.TryPayUserOpResponse{
-		StrategyId:         strategy.Id,
-		EntryPointAddress:  strategy.GetEntryPointAddress().String(),
-		PayMasterAddress:   strategy.GetPaymasterAddress().String(),
-		PayReceipt:         payReceipt,
-		PayMasterSignature: paymasterSignature,
-		PayMasterAndData:   paymasterAndData,
-		GasInfo:            gasResponse,
+	result, err := postExecute(userOp, strategy, gasResponse)
+	if err != nil {
+		return nil, err
 	}
+	result.PayReceipt = payReceipt
 	return result, nil
 }
 
-func ExecuteGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.ComputeGasResponse, error) {
+func prepareExecute(request *model.TryPayUserOpRequest) (*userop.BaseUserOp, *model.Strategy, error) {
+	// validator
+	if err := businessParamValidate(request); err != nil {
+		return nil, nil, err
+	}
+
+	var strategy *model.Strategy
+	// getStrategy
+	strategy, generateErr := strategyGenerate(request)
+	if generateErr != nil {
+		return nil, nil, generateErr
+
+	}
+
+	userOp, err := userop.NewUserOp(&request.UserOp, strategy)
+	if err != nil {
+		return nil, nil, err
+
+	}
+	if err := validator_service.ValidateStrategy(strategy); err != nil {
+		return nil, nil, err
+	}
+	if err := validator_service.ValidateUserOp(userOp); err != nil {
+		return nil, nil, err
+	}
+	return userOp, strategy, nil
+}
+
+func estimateGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.ComputeGasResponse, error) {
 	//base Strategy and UserOp computeGas
 	gasResponse, gasComputeError := gas_service.ComputeGas(userOp, strategy)
 	if gasComputeError != nil {
@@ -72,39 +85,27 @@ func ExecuteGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 	}
 	return gasResponse, nil
 }
-func PostExecute() {
 
-}
-func PrepareExecute(request *model.TryPayUserOpRequest) (*userop.BaseUserOp, *model.Strategy, error) {
-	// validator
-	if err := businessParamValidate(request); err != nil {
-		return nil, nil, err
+func postExecute(userOp *userop.BaseUserOp, strategy *model.Strategy, gasResponse *model.ComputeGasResponse) (*model.TryPayUserOpResponse, error) {
+	var paymasterAndData string
+	var paymasterSignature string
+	if paymasterAndDataRes, paymasterSignatureRes, err := getPayMasterAndData(strategy, userOp, gasResponse); err != nil {
+		return nil, err
+	} else {
+		paymasterAndData = paymasterAndDataRes
+		paymasterSignature = paymasterSignatureRes
 	}
 
-	var strategy *model.Strategy
-	// getStrategy
-	strategy, generateErr := strategyGenerate(request)
-	if generateErr != nil {
-		return nil, nil, generateErr
-
+	//validatePaymasterUserOp
+	var result = &model.TryPayUserOpResponse{
+		StrategyId:         strategy.Id,
+		EntryPointAddress:  strategy.GetEntryPointAddress().String(),
+		PayMasterAddress:   strategy.GetPaymasterAddress().String(),
+		PayMasterSignature: paymasterSignature,
+		PayMasterAndData:   paymasterAndData,
+		GasInfo:            gasResponse,
 	}
-
-	userOp, err := userop.NewUserOp(&request.UserOp)
-	if err != nil {
-		return nil, nil, err
-
-	}
-
-	if err := validator_service.ValidateStrategy(strategy); err != nil {
-		return nil, nil, err
-	}
-	//recall simulate?
-	//UserOp Validate
-	//check nonce
-	if err := validator_service.ValidateUserOp(userOp); err != nil {
-		return nil, nil, err
-	}
-	return userOp, strategy, nil
+	return result, nil
 }
 
 func businessParamValidate(request *model.TryPayUserOpRequest) error {
@@ -116,10 +117,10 @@ func businessParamValidate(request *model.TryPayUserOpRequest) error {
 			return xerrors.Errorf("Test Network Not Support")
 		}
 	}
-
+	entryPointAddress := common.HexToAddress(request.ForceEntryPointAddress)
 	if request.ForceEntryPointAddress != "" && request.ForceNetwork != "" {
 		// check Address is available in NetWork
-		if ok, err := chain_service.CheckContractAddressAccess(common.HexToAddress(request.ForceEntryPointAddress), request.ForceNetwork); err != nil {
+		if ok, err := chain_service.CheckContractAddressAccess(&entryPointAddress, request.ForceNetwork); err != nil {
 			return err
 		} else if !ok {
 			return xerrors.Errorf("ForceEntryPointAddress: [%s] not exist in [%s] network", request.ForceEntryPointAddress, request.ForceNetwork)
@@ -150,19 +151,31 @@ func getPayMasterAndData(strategy *model.Strategy, userOp *userop.BaseUserOp, ga
 		return "", "", err
 	}
 	signatureStr := hex.EncodeToString(signatureByte)
-	paymasterData, err := generatePayMasterAndData(userOp, strategy)
+	dataGenerateFunc := paymdate_data_generator.GenerateFuncMap[strategy.GetPayType()]
+	paymasterData, _, err := dataGenerateFunc(strategy, userOp, gasResponse)
+	if err != nil {
+		return "", "", err
+	}
 	paymasterDataResult := paymasterData + signatureStr
 	return paymasterDataResult, signatureStr, err
 }
 
 func generatePayMasterAndData(userOp *userop.BaseUserOp, strategy *model.Strategy) (string, error) {
 	//TODO  string(strategy.PayType),
-	validStart, validEnd := utils.GetValidTime(strategy)
+	validStart, validEnd := getValidTime(strategy)
 	message := fmt.Sprintf("%s%s%s", strategy.GetPaymasterAddress().String(), validEnd, validStart)
 
 	return message, nil
 }
 
+func getValidTime(strategy *model.Strategy) (string, string) {
+
+	currentTimestampStr := strconv.FormatInt(strategy.ExecuteRestriction.EffectiveStartTime, 16)
+	futureTimestampStr := strconv.FormatInt(strategy.ExecuteRestriction.EffectiveEndTime, 16)
+	currentTimestampStrSupply := utils.SupplyZero(currentTimestampStr, 64)
+	futureTimestampStrSupply := utils.SupplyZero(futureTimestampStr, 64)
+	return currentTimestampStrSupply, futureTimestampStrSupply
+}
 func SignPaymaster(userOp *userop.BaseUserOp, strategy *model.Strategy) ([]byte, []byte, error) {
 	userOpValue := *userOp
 	userOpHash, _, err := userOpValue.GetUserOpHash(strategy)
@@ -170,8 +183,6 @@ func SignPaymaster(userOp *userop.BaseUserOp, strategy *model.Strategy) ([]byte,
 		return nil, nil, err
 	}
 	hashToEthSignHash := utils.ToEthSignedMessageHash(userOpHash)
-	fmt.Printf("userOpHashStr: %s\n", hex.EncodeToString(userOpHash))
-	fmt.Printf("hashToEthSignHashStr: %s\n", hex.EncodeToString(hashToEthSignHash))
 
 	privateKey, err := crypto.HexToECDSA("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421")
 	if err != nil {

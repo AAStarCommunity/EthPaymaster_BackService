@@ -32,6 +32,9 @@ func ValidateStrategy(strategy *model.Strategy) error {
 }
 
 func ValidateUserOp(userOp *userop.BaseUserOp) error {
+	//recall simulate?
+	//UserOp Validate
+	//check nonce
 	//if userOp.PreVerificationGas.Cmp(MinPreVerificationGas) == -1 {
 	//	return xerrors.Errorf("preVerificationGas is less than 21000")
 	//}

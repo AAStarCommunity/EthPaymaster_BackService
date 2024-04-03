@@ -16,7 +16,8 @@ func (v VerifyingPaymasterExecutor) ValidateGas(userOp *userop.BaseUserOp, respo
 	// Paymaster check paymaster balance
 
 	//check EntryPoint paymasterAddress balance
-	tokenBalance, getTokenBalanceErr := chain_service.GetAddressTokenBalance(strategy.GetNewWork(), strategy.GetPaymasterAddress(), strategy.GetUseToken())
+	paymasterAddress := strategy.GetPaymasterAddress()
+	tokenBalance, getTokenBalanceErr := chain_service.GetAddressTokenBalance(strategy.GetNewWork(), *paymasterAddress, strategy.GetUseToken())
 	if getTokenBalanceErr != nil {
 		return getTokenBalanceErr
 	}

@@ -1,4 +1,4 @@
-package common
+package paymdate_data_generator
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
