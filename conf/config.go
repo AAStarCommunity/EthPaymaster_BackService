@@ -1,19 +1,22 @@
 package conf
 
 import (
+	contract_erc20 "AAStarCommunity/EthPaymaster_BackService/common/contract/erc20"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"github.com/ethereum/go-ethereum/common"
 	"go/token"
 )
 
 var BasicConfig Config
+var TokenContractCache map[common.Address]contract_erc20.Contract
 
 func init() {
 	BasicConfig = Config{}
 }
 
 type Config struct {
-	NetworkConfigMap map[network.Network]*NetWorkConfig `json:"network_config"`
+	NetworkConfigMap  map[network.Network]*NetWorkConfig `json:"network_config"`
+	SupportEntryPoint map[network.Network][]string
 }
 type NetWorkConfig struct {
 	ChainId     string                          `json:"chain_id"`

@@ -1,9 +1,9 @@
 package dashboard_service
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/erc20_token"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
+	"AAStarCommunity/EthPaymaster_BackService/common/token"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"errors"
 	"github.com/ethereum/go-ethereum/common"
@@ -21,7 +21,7 @@ func init() {
 		Id: "1",
 		NetWorkInfo: &model.NetWorkInfo{
 			NetWork: network.Sepolia,
-			Token:   erc20_token.ETH,
+			Token:   token.ETH,
 		},
 		EntryPointInfo: &model.EntryPointInfo{
 			EntryPointAddress: &entrypoint,

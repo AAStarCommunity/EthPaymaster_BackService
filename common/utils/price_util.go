@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/erc20_token"
+	"AAStarCommunity/EthPaymaster_BackService/common/token"
 	"fmt"
 	"golang.org/x/xerrors"
 	"io"
@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	URLMap     = map[erc20_token.TokenType]string{}
+	URLMap     = map[token.TokenType]string{}
 	httpClient = &http.Client{}
 )
 
@@ -23,17 +23,17 @@ type Price struct {
 }
 
 func init() {
-	URLMap = make(map[erc20_token.TokenType]string)
-	URLMap[erc20_token.ETH] = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
-	URLMap[erc20_token.OP] = "https://api.coingecko.com/api/v3/simple/price?ids=optimism&vs_currencies=usd"
+	URLMap = make(map[token.TokenType]string)
+	URLMap[token.ETH] = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
+	URLMap[token.OP] = "https://api.coingecko.com/api/v3/simple/price?ids=optimism&vs_currencies=usd"
 }
 
-func GetPriceUsd(tokenType erc20_token.TokenType) (float64, error) {
+func GetPriceUsd(tokenType token.TokenType) (float64, error) {
 
-	if erc20_token.IsStableToken(tokenType) {
+	if token.IsStableToken(tokenType) {
 		return 1, nil
 	}
-	if tokenType == erc20_token.ETH {
+	if tokenType == token.ETH {
 		return 4000, nil
 	}
 	url, ok := URLMap[tokenType]
@@ -53,8 +53,8 @@ func GetPriceUsd(tokenType erc20_token.TokenType) (float64, error) {
 	usdstr := strings.TrimRight(strarr[2], "}}")
 	return strconv.ParseFloat(usdstr, 64)
 }
-func GetToken(fromToken erc20_token.TokenType, toToken erc20_token.TokenType) (float64, error) {
-	if toToken == erc20_token.USDT {
+func GetToken(fromToken token.TokenType, toToken token.TokenType) (float64, error) {
+	if toToken == token.USDT {
 		return GetPriceUsd(fromToken)
 	}
 	formTokenPrice, _ := GetPriceUsd(fromToken)

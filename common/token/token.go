@@ -1,4 +1,4 @@
-package erc20_token
+package token
 
 type TokenType string
 

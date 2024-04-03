@@ -1,11 +1,11 @@
 package network
 
-import "AAStarCommunity/EthPaymaster_BackService/common/erc20_token"
+import "AAStarCommunity/EthPaymaster_BackService/common/token"
 
 type NetworkInfo struct {
-	Name     string                `json:"main_net_name"`
-	RpcUrl   string                `json:"main_net_rpc_url"`
-	GasToken erc20_token.TokenType `json:"gas_token"`
+	Name     string          `json:"main_net_name"`
+	RpcUrl   string          `json:"main_net_rpc_url"`
+	GasToken token.TokenType `json:"gas_token"`
 }
 
 //newworkConfig : chainId,GasToken, name, is_test,

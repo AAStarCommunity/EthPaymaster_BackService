@@ -10,5 +10,11 @@
         "USDC": ""
       }
     }
+  },
+  "support_entrypoint": {
+    "Ethereum": [
+      "0x1",
+      "0x2"
+    ]
   }
 }

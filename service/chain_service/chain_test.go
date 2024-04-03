@@ -1,8 +1,8 @@
 package chain_service
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/erc20_token"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
+	"AAStarCommunity/EthPaymaster_BackService/common/token"
 	"context"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -34,7 +34,7 @@ func TestGethClient(t *testing.T) {
 }
 func TestGetAddressTokenBalance(t *testing.T) {
 
-	res, err := GetAddressTokenBalance(network.Sepolia, common.HexToAddress("0xDf7093eF81fa23415bb703A685c6331584D30177"), erc20_token.USDC)
+	res, err := GetAddressTokenBalance(network.Sepolia, common.HexToAddress("0xDf7093eF81fa23415bb703A685c6331584D30177"), token.USDC)
 	assert.NoError(t, err)
 	fmt.Println(res)
 }

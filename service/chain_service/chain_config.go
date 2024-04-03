@@ -1,8 +1,8 @@
 package chain_service
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/erc20_token"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
+	"AAStarCommunity/EthPaymaster_BackService/common/token"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
@@ -19,12 +19,12 @@ func ConfigInit() {
 		network.Ethereum: {
 			Name:     "ethereum",
 			RpcUrl:   "https://eth-mainnet.g.alchemy.com/v2/bIZQS43-rJMgv2_SiHqfVvXa-Z1UGoGt",
-			GasToken: erc20_token.ETH,
+			GasToken: token.ETH,
 		},
 		network.Sepolia: {
 			Name:     "sepolia",
 			RpcUrl:   "https://eth-sepolia.g.alchemy.com/v2/wKeLycGxgYRykgf0aGfcpEkUtqyLQg4v",
-			GasToken: erc20_token.ETH,
+			GasToken: token.ETH,
 		},
 	}
 }

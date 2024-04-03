@@ -1,8 +1,8 @@
 package model
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/erc20_token"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
+	"AAStarCommunity/EthPaymaster_BackService/common/token"
 	"math/big"
 )
 
@@ -17,13 +17,13 @@ type TryPayUserOpResponse struct {
 }
 
 type ComputeGasResponse struct {
-	GasInfo    *GasPrice             `json:"gas_info"`
-	TokenCost  *big.Float            `json:"token_cost"`
-	Network    network.Network       `json:"network"`
-	Token      erc20_token.TokenType `json:"token"`
-	UsdCost    float64               `json:"usd_cost"`
-	BlobEnable bool                  `json:"blob_enable"`
-	MaxFee     big.Int               `json:"max_fee"`
+	GasInfo    *GasPrice       `json:"gas_info"`
+	TokenCost  *big.Float      `json:"token_cost"`
+	Network    network.Network `json:"network"`
+	Token      token.TokenType `json:"token"`
+	UsdCost    float64         `json:"usd_cost"`
+	BlobEnable bool            `json:"blob_enable"`
+	MaxFee     big.Int         `json:"max_fee"`
 }
 type PayReceipt struct {
 	TransactionHash string `json:"transaction_hash"`

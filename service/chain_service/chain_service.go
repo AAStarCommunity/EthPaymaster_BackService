@@ -1,9 +1,9 @@
 package chain_service
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/erc20_token"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
+	"AAStarCommunity/EthPaymaster_BackService/common/token"
 	"context"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -20,16 +20,16 @@ var EthWeiFactor = new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), big.Ne
 
 const balanceOfAbi = `[{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}]`
 
-var TokenAddressMap map[network.Network]*map[erc20_token.TokenType]common.Address
+var TokenAddressMap map[network.Network]*map[token.TokenType]common.Address
 
 func init() {
-	TokenAddressMap = map[network.Network]*map[erc20_token.TokenType]common.Address{
+	TokenAddressMap = map[network.Network]*map[token.TokenType]common.Address{
 		network.Ethereum: {
-			erc20_token.ETH: common.HexToAddress("0xdac17f958d2ee523a2206206994597c13d831ec7"),
+			token.ETH: common.HexToAddress("0xdac17f958d2ee523a2206206994597c13d831ec7"),
 		},
 		network.Sepolia: {
-			erc20_token.USDT: common.HexToAddress("0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"),
-			erc20_token.USDC: common.HexToAddress("0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"),
+			token.USDT: common.HexToAddress("0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"),
+			token.USDC: common.HexToAddress("0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"),
 		},
 	}
 }
@@ -119,12 +119,12 @@ func EstimateGasLimitAndCost(chain network.Network, msg ethereum.CallMsg) (uint6
 	}
 	return client.EstimateGas(context.Background(), msg)
 }
-func GetAddressTokenBalance(network network.Network, address common.Address, token erc20_token.TokenType) (float64, error) {
+func GetAddressTokenBalance(network network.Network, address common.Address, token token.TokenType) (float64, error) {
 	client, exist := EthCompatibleNetWorkClientMap[network]
 	if !exist {
 		return 0, xerrors.Errorf("chain Client [%s] not exist", network)
 	}
-	if token == erc20_token.ETH {
+	if token == token.ETH {
 		res, err := client.BalanceAt(context.Background(), address, nil)
 		if err != nil {
 			return 0, err

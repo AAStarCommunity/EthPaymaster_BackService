@@ -114,7 +114,7 @@ func businessParamValidate(request *model.TryPayUserOpRequest) error {
 	}
 	if conf.Environment.IsDevelopment() && request.ForceNetwork != "" {
 		if network.TestNetWork[request.ForceNetwork] {
-			return xerrors.Errorf("Test Network Not Support")
+			return xerrors.Errorf(" %s not the Test Network ", request.ForceNetwork)
 		}
 	}
 	entryPointAddress := common.HexToAddress(request.ForceEntryPointAddress)

@@ -10,7 +10,6 @@ var once sync.Once
 
 type Conf struct {
 	Jwt JWT
-	SecretConfig
 }
 
 var conf *Conf

@@ -1,8 +1,8 @@
 package gas_service
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/erc20_token"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/common/token"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
@@ -59,7 +59,7 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 		return nil, err
 	}
 	var usdCost float64
-	if erc20_token.IsStableToken(strategy.GetUseToken()) {
+	if token.IsStableToken(strategy.GetUseToken()) {
 		usdCost, _ = tokenCost.Float64()
 	} else {
 		usdCost, _ = utils.GetPriceUsd(strategy.GetUseToken())
