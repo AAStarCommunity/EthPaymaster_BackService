@@ -3,16 +3,13 @@ package chain_service
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
-	"AAStarCommunity/EthPaymaster_BackService/common/token"
+	"AAStarCommunity/EthPaymaster_BackService/common/tokens"
 	"context"
 	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/holiman/uint256"
 	"golang.org/x/xerrors"
-	"math"
 	"math/big"
-	"strings"
 )
 
 var GweiFactor = new(big.Float).SetInt(big.NewInt(1e9))
@@ -20,35 +17,22 @@ var EthWeiFactor = new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), big.Ne
 
 const balanceOfAbi = `[{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}]`
 
-var TokenAddressMap map[network.Network]*map[token.TokenType]common.Address
+var TokenAddressMap map[network.Network]*map[tokens.TokenType]common.Address
 
 func init() {
-	TokenAddressMap = map[network.Network]*map[token.TokenType]common.Address{
+	TokenAddressMap = map[network.Network]*map[tokens.TokenType]common.Address{
 		network.Ethereum: {
-			token.ETH: common.HexToAddress("0xdac17f958d2ee523a2206206994597c13d831ec7"),
+			tokens.ETH: common.HexToAddress("0xdac17f958d2ee523a2206206994597c13d831ec7"),
 		},
 		network.Sepolia: {
-			token.USDT: common.HexToAddress("0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"),
-			token.USDC: common.HexToAddress("0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"),
+			tokens.USDT: common.HexToAddress("0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"),
+			tokens.USDC: common.HexToAddress("0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"),
 		},
 	}
 }
 func CheckContractAddressAccess(contract *common.Address, chain network.Network) (bool, error) {
-	if chain == "" {
-		return false, xerrors.Errorf("chain can not be empty")
-	}
-	client, exist := EthCompatibleNetWorkClientMap[chain]
-	if !exist {
-		return false, xerrors.Errorf("chain Client [%s] not exist", chain)
-	}
-	code, err := client.CodeAt(context.Background(), *contract, nil)
-	if err != nil {
-		return false, err
-	}
-	if len(code) == 0 {
-		return false, xerrors.Errorf("contract  [%s] address not exist in [%s] network", contract, chain)
-	}
-	return true, nil
+	executor := network.GetEthereumExecutor(chain)
+	return executor.CheckContractAddressAccess(contract)
 }
 
 // GetGasPrice return gas price in wei, gwei, ether
@@ -119,45 +103,45 @@ func EstimateGasLimitAndCost(chain network.Network, msg ethereum.CallMsg) (uint6
 	}
 	return client.EstimateGas(context.Background(), msg)
 }
-func GetAddressTokenBalance(network network.Network, address common.Address, token token.TokenType) (float64, error) {
-	client, exist := EthCompatibleNetWorkClientMap[network]
-	if !exist {
-		return 0, xerrors.Errorf("chain Client [%s] not exist", network)
-	}
-	if token == token.ETH {
-		res, err := client.BalanceAt(context.Background(), address, nil)
-		if err != nil {
-			return 0, err
-		}
-		bananceV := float64(res.Int64()) * math.Pow(10, -18)
-		return bananceV, nil
-	}
-
-	tokenContractAddress := (*TokenAddressMap[network])[token]
-	usdtABI, jsonErr := abi.JSON(strings.NewReader(balanceOfAbi))
-	if jsonErr != nil {
-		return 0, jsonErr
-	}
-	data, backErr := usdtABI.Pack("balanceOf", address)
-	if backErr != nil {
-		return 0, backErr
-	}
-	result, callErr := client.CallContract(context.Background(), ethereum.CallMsg{
-		To:   &tokenContractAddress,
-		Data: data,
-	}, nil)
-	if callErr != nil {
-		return 0, callErr
-	}
-
-	var balanceResult *big.Int
-	unpackErr := usdtABI.UnpackIntoInterface(&balanceResult, "balanceOf", result)
-	if unpackErr != nil {
-		return 0, unpackErr
-	}
-	balanceResultFloat := float64(balanceResult.Int64()) * math.Pow(10, -6)
-
-	return balanceResultFloat, nil
+func GetAddressTokenBalance(network network.Network, address common.Address, tokenParam tokens.TokenType) (float64, error) {
+	//client, exist := EthCompatibleNetWorkClientMap[network]
+	//if !exist {
+	//	return 0, xerrors.Errorf("chain Client [%s] not exist", network)
+	//}
+	//if tokenParam == tokens.ETH {
+	//	res, err := client.BalanceAt(context.Background(), address, nil)
+	//	if err != nil {
+	//		return 0, err
+	//	}
+	//	bananceV := float64(res.Int64()) * math.Pow(10, -18)
+	//	return bananceV, nil
+	//}
+	//
+	//tokenContractAddress := (*TokenAddressMap[network])[tokenParam]
+	//usdtABI, jsonErr := abi.JSON(strings.NewReader(balanceOfAbi))
+	//if jsonErr != nil {
+	//	return 0, jsonErr
+	//}
+	//data, backErr := usdtABI.Pack("balanceOf", address)
+	//if backErr != nil {
+	//	return 0, backErr
+	//}
+	//result, callErr := client.CallContract(context.Background(), ethereum.CallMsg{
+	//	To:   &tokenContractAddress,
+	//	Data: data,
+	//}, nil)
+	//if callErr != nil {
+	//	return 0, callErr
+	//}
+	//
+	//var balanceResult *big.Int
+	//unpackErr := usdtABI.UnpackIntoInterface(&balanceResult, "balanceOf", result)
+	//if unpackErr != nil {
+	//	return 0, unpackErr
+	//}
+	//balanceResultFloat := float64(balanceResult.Int64()) * math.Pow(10, -6)
+	//
+	//return balanceResultFloat, nil
 
 }
 func GetChainId(chain network.Network) (*big.Int, error) {

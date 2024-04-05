@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/token"
+	"AAStarCommunity/EthPaymaster_BackService/common/tokens"
 	"fmt"
 	"golang.org/x/xerrors"
 	"io"
@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	URLMap     = map[token.TokenType]string{}
+	URLMap     = map[tokens.TokenType]string{}
 	httpClient = &http.Client{}
 )
 
@@ -23,22 +23,22 @@ type Price struct {
 }
 
 func init() {
-	URLMap = make(map[token.TokenType]string)
-	URLMap[token.ETH] = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
-	URLMap[token.OP] = "https://api.coingecko.com/api/v3/simple/price?ids=optimism&vs_currencies=usd"
+	URLMap = make(map[tokens.TokenType]string)
+	URLMap[tokens.ETH] = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
+	URLMap[tokens.OP] = "https://api.coingecko.com/api/v3/simple/price?ids=optimism&vs_currencies=usd"
 }
 
-func GetPriceUsd(tokenType token.TokenType) (float64, error) {
+func GetPriceUsd(tokenType tokens.TokenType) (float64, error) {
 
-	if token.IsStableToken(tokenType) {
+	if tokens.IsStableToken(tokenType) {
 		return 1, nil
 	}
-	if tokenType == token.ETH {
+	if tokenType == tokens.ETH {
 		return 4000, nil
 	}
 	url, ok := URLMap[tokenType]
 	if !ok {
-		return 0, xerrors.Errorf("token type [%w] not found", tokenType)
+		return 0, xerrors.Errorf("tokens type [%w] not found", tokenType)
 	}
 	req, _ := http.NewRequest("GET", url, nil)
 
@@ -53,8 +53,8 @@ func GetPriceUsd(tokenType token.TokenType) (float64, error) {
 	usdstr := strings.TrimRight(strarr[2], "}}")
 	return strconv.ParseFloat(usdstr, 64)
 }
-func GetToken(fromToken token.TokenType, toToken token.TokenType) (float64, error) {
-	if toToken == token.USDT {
+func GetToken(fromToken tokens.TokenType, toToken tokens.TokenType) (float64, error) {
+	if toToken == tokens.USDT {
 		return GetPriceUsd(fromToken)
 	}
 	formTokenPrice, _ := GetPriceUsd(fromToken)

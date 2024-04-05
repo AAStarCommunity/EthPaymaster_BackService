@@ -3,10 +3,10 @@ package operator
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
-	"AAStarCommunity/EthPaymaster_BackService/common/paymdate_data_generator"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/paymaster_pay_type"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/gas_service"
@@ -47,7 +47,6 @@ func prepareExecute(request *model.TryPayUserOpRequest) (*userop.BaseUserOp, *mo
 	if err := businessParamValidate(request); err != nil {
 		return nil, nil, err
 	}
-
 	var strategy *model.Strategy
 	// getStrategy
 	strategy, generateErr := strategyGenerate(request)
@@ -151,7 +150,7 @@ func getPayMasterAndData(strategy *model.Strategy, userOp *userop.BaseUserOp, ga
 		return "", "", err
 	}
 	signatureStr := hex.EncodeToString(signatureByte)
-	dataGenerateFunc := paymdate_data_generator.GenerateFuncMap[strategy.GetPayType()]
+	dataGenerateFunc := paymaster_pay_type.GenerateFuncMap[strategy.GetPayType()]
 	paymasterData, _, err := dataGenerateFunc(strategy, userOp, gasResponse)
 	if err != nil {
 		return "", "", err

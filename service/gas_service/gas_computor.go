@@ -2,7 +2,7 @@ package gas_service
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/common/token"
+	"AAStarCommunity/EthPaymaster_BackService/common/tokens"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
@@ -59,7 +59,7 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 		return nil, err
 	}
 	var usdCost float64
-	if token.IsStableToken(strategy.GetUseToken()) {
+	if tokens.IsStableToken(strategy.GetUseToken()) {
 		usdCost, _ = tokenCost.Float64()
 	} else {
 		usdCost, _ = utils.GetPriceUsd(strategy.GetUseToken())
@@ -95,9 +95,10 @@ func GetPayMasterGasLimit() *big.Int {
 }
 
 func ValidateGas(userOp *userop.BaseUserOp, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
-	paymasterDataExecutor := paymaster_pay_type.GetPaymasterDataExecutor(strategy.GetPayType())
-	if paymasterDataExecutor == nil {
-		return xerrors.Errorf(" %s paymasterDataExecutor not found", strategy.GetPayType())
+	validateFunc := paymaster_pay_type.GasValidateFuncMap[strategy.GetPayType()]
+	err := validateFunc(userOp, gasComputeResponse, strategy)
+	if err != nil {
+		return err
 	}
-	return paymasterDataExecutor.ValidateGas(userOp, gasComputeResponse, strategy)
+	return nil
 }
