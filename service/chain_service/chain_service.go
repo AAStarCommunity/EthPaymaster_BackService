@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/holiman/uint256"
 	"golang.org/x/xerrors"
+	"math"
 	"math/big"
 )
 
@@ -103,51 +104,14 @@ func EstimateGasLimitAndCost(chain network.Network, msg ethereum.CallMsg) (uint6
 	}
 	return client.EstimateGas(context.Background(), msg)
 }
-func GetAddressTokenBalance(network network.Network, address common.Address, tokenParam tokens.TokenType) (float64, error) {
-	//client, exist := EthCompatibleNetWorkClientMap[network]
-	//if !exist {
-	//	return 0, xerrors.Errorf("chain Client [%s] not exist", network)
-	//}
-	//if tokenParam == tokens.ETH {
-	//	res, err := client.BalanceAt(context.Background(), address, nil)
-	//	if err != nil {
-	//		return 0, err
-	//	}
-	//	bananceV := float64(res.Int64()) * math.Pow(10, -18)
-	//	return bananceV, nil
-	//}
-	//
-	//tokenContractAddress := (*TokenAddressMap[network])[tokenParam]
-	//usdtABI, jsonErr := abi.JSON(strings.NewReader(balanceOfAbi))
-	//if jsonErr != nil {
-	//	return 0, jsonErr
-	//}
-	//data, backErr := usdtABI.Pack("balanceOf", address)
-	//if backErr != nil {
-	//	return 0, backErr
-	//}
-	//result, callErr := client.CallContract(context.Background(), ethereum.CallMsg{
-	//	To:   &tokenContractAddress,
-	//	Data: data,
-	//}, nil)
-	//if callErr != nil {
-	//	return 0, callErr
-	//}
-	//
-	//var balanceResult *big.Int
-	//unpackErr := usdtABI.UnpackIntoInterface(&balanceResult, "balanceOf", result)
-	//if unpackErr != nil {
-	//	return 0, unpackErr
-	//}
-	//balanceResultFloat := float64(balanceResult.Int64()) * math.Pow(10, -6)
-	//
-	//return balanceResultFloat, nil
-
-}
-func GetChainId(chain network.Network) (*big.Int, error) {
-	client, exist := EthCompatibleNetWorkClientMap[chain]
-	if !exist {
-		return nil, xerrors.Errorf("chain Client [%s] not exist", chain)
+func GetAddressTokenBalance(networkParam network.Network, address common.Address, tokenTypeParam tokens.TokenType) (float64, error) {
+	executor := network.GetEthereumExecutor(networkParam)
+	bananceResult, err := executor.GetUserTokenBalance(address, tokenTypeParam)
+	if err != nil {
+		return 0, err
 	}
-	return client.ChainID(context.Background())
+
+	balanceResultFloat := float64(bananceResult.Int64()) * math.Pow(10, -6)
+	return balanceResultFloat, nil
+
 }

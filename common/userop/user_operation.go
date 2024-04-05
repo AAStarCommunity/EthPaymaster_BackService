@@ -3,7 +3,7 @@ package userop
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
-	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
+	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"encoding/hex"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -147,12 +147,15 @@ func (userOp *UserOperation) GetUserOpHash(strategy *model.Strategy) ([]byte, st
 			Type: uint48Ty,
 		},
 	}
-	chainId, err := chain_service.GetChainId(strategy.GetNewWork())
+
+	chainId := conf.GetChainId(strategy.GetNewWork())
+	if chainId == nil {
+		return nil, "", xerrors.Errorf("empty NetWork")
+	}
 	if err != nil {
 		return nil, "", err
 	}
 	packUserOpStrByteNew, _ := hex.DecodeString(packUserOpStr)
-	chainId.Int64()
 
 	bytesRes, err := arguments.Pack(packUserOpStrByteNew, chainId, strategy.GetPaymasterAddress(), userOp.Nonce, strategy.ExecuteRestriction.EffectiveStartTime, strategy.ExecuteRestriction.EffectiveEndTime)
 	if err != nil {

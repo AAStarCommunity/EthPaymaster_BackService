@@ -38,9 +38,3 @@ func TestGetAddressTokenBalance(t *testing.T) {
 	assert.NoError(t, err)
 	fmt.Println(res)
 }
-
-func TestGetChainId(t *testing.T) {
-	res, err := GetChainId(network.Sepolia)
-	assert.NoError(t, err)
-	fmt.Println(res)
-}

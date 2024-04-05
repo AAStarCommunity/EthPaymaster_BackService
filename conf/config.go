@@ -6,6 +6,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/tokens"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/ethereum/go-ethereum/common"
+	"math/big"
 )
 
 var BasicConfig Config
@@ -21,7 +22,7 @@ type Config struct {
 	SupportPaymaster  map[network.Network]*mapset.Set[string]
 }
 type NetWorkConfig struct {
-	ChainId     string                               `json:"chain_id"`
+	ChainId     *big.Int                             `json:"chain_id"`
 	IsTest      bool                                 `json:"is_test"`
 	RpcUrl      string                               `json:"rpc_url"`
 	ApiKey      string                               `json:"api_key"`
@@ -34,4 +35,8 @@ func GetTokenAddress(networkParam network.Network, tokenParam tokens.TokenType) 
 }
 func CheckEntryPointExist(network2 network.Network, address string) {
 
+}
+func GetChainId(newworkParam network.Network) *big.Int {
+	networkConfig := BasicConfig.NetworkConfigMap[newworkParam]
+	return networkConfig.ChainId
 }
