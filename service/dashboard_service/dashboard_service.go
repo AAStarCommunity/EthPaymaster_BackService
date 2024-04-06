@@ -3,7 +3,6 @@ package dashboard_service
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
-	"AAStarCommunity/EthPaymaster_BackService/common/tokens"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"errors"
 	"github.com/ethereum/go-ethereum/common"
@@ -21,7 +20,7 @@ func init() {
 		Id: "1",
 		NetWorkInfo: &model.NetWorkInfo{
 			NetWork: network.Sepolia,
-			Token:   tokens.ETH,
+			Token:   types.ETH,
 		},
 		EntryPointInfo: &model.EntryPointInfo{
 			EntryPointAddress: &entrypoint,

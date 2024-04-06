@@ -3,7 +3,7 @@ package network
 import (
 	contract_erc20 "AAStarCommunity/EthPaymaster_BackService/common/contract/erc20"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/common/tokens"
+	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"context"
@@ -34,7 +34,7 @@ var ClientCache map[Network]*ethclient.Client
 func init() {
 	TokenContractCache = make(map[*common.Address]*contract_erc20.Contract)
 }
-func (executor EthereumExecutor) GetUserTokenBalance(userAddress common.Address, token tokens.TokenType) (*big.Int, error) {
+func (executor EthereumExecutor) GetUserTokenBalance(userAddress common.Address, token types.TokenType) (*big.Int, error) {
 	tokenAddress := conf.GetTokenAddress(executor.network, token)
 	tokenInstance, err := executor.GetTokenContract(tokenAddress)
 	if err != nil {

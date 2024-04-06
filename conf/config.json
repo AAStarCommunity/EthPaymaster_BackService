@@ -9,6 +9,26 @@
         "USDT": "",
         "USDC": ""
       }
+    },
+    "Ethereum": {
+      "chain_id": "1",
+      "is_test": false,
+      "rpc_url": "",
+      "api_key": "",
+      "token_config": {
+        "USDT": "",
+        "USDC": ""
+      }
+    },
+    "Sepolia": {
+      "chain_id": "1",
+      "is_test": true,
+      "rpc_url": "",
+      "api_key": "",
+      "token_config": {
+        "USDT": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0",
+        "USDC": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"
+      }
     }
   },
   "support_entrypoint": {

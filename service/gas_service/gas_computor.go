@@ -2,7 +2,7 @@ package gas_service
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/common/tokens"
+	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
@@ -19,14 +19,17 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 		return nil, gasPriceErr
 	}
 	userOpValue := *userOp
-	userOpValue.GetSender()
 	var maxFeePriceInEther *big.Float
 	var maxFee *big.Int
+	estimateCallGasLimit, err := chain_service.EstimateUserOpGas(strategy, userOp)
+	if err != nil {
+		return nil, err
+	}
 	switch userOpValue.GetEntrypointVersion() {
 	case types.EntrypointV06:
 		{
 			useropV6Value := userOpValue.(*userop.UserOperation)
-			estimateCallGasLimit, _ := chain_service.EstimateUserOpGas(strategy, userOp)
+
 			userOpCallGasLimit := useropV6Value.CallGasLimit.Uint64()
 			if estimateCallGasLimit > userOpCallGasLimit*12/10 {
 				return nil, xerrors.Errorf("estimateCallGasLimit %d > userOpCallGasLimit %d", estimateCallGasLimit, userOpCallGasLimit)
@@ -37,7 +40,7 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 			maxGasLimit = maxGasLimit.Add(maxGasLimit, payMasterPostGasLimit)
 			maxFee = new(big.Int).Mul(maxGasLimit, gasPrice.MaxBasePriceWei)
 			maxFeePriceInEther = new(big.Float).SetInt(maxFee)
-			maxFeePriceInEther.Quo(maxFeePriceInEther, chain_service.EthWeiFactor)
+			maxFeePriceInEther.Quo(maxFeePriceInEther, network.EthWeiFactor)
 		}
 		break
 	case types.EntryPointV07:
@@ -53,7 +56,7 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 		return nil, err
 	}
 	var usdCost float64
-	if tokens.IsStableToken(strategy.GetUseToken()) {
+	if types.IsStableToken(strategy.GetUseToken()) {
 		usdCost, _ = tokenCost.Float64()
 	} else {
 		usdCost, _ = utils.GetPriceUsd(strategy.GetUseToken())
@@ -71,17 +74,21 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 }
 
 func getTokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Float, error) {
-	formTokenType := chain_service.NetworkInfoMap[strategy.GetNewWork()].GasToken
-	toTokenType := strategy.GetUseToken()
-	toTokenPrice, err := utils.GetToken(formTokenType, toTokenType)
-	if err != nil {
-		return nil, err
+	if strategy.GetPayType() == types.PayTypeERC20 {
+		formTokenType := chain_service.NetworkInfoMap[strategy.GetNewWork()].GasToken
+		toTokenType := strategy.GetUseToken()
+		toTokenPrice, err := utils.GetToken(formTokenType, toTokenType)
+		if err != nil {
+			return nil, err
+		}
+		if toTokenPrice == 0 {
+			return nil, xerrors.Errorf("toTokenPrice can not be 0")
+		}
+		tokenCost := new(big.Float).Mul(tokenCount, big.NewFloat(toTokenPrice))
+		return tokenCost, nil
 	}
-	if toTokenPrice == 0 {
-		return nil, xerrors.Errorf("toTokenPrice can not be 0")
-	}
-	tokenCost := new(big.Float).Mul(tokenCount, big.NewFloat(toTokenPrice))
-	return tokenCost, nil
+	return tokenCount, nil
+
 }
 func GetPayMasterGasLimit() *big.Int {
 	//TODO

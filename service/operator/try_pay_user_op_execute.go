@@ -51,7 +51,7 @@ func prepareExecute(request *model.TryPayUserOpRequest) (*userop.BaseUserOp, *mo
 
 	}
 
-	userOp, err := userop.NewUserOp(&request.UserOp, strategy)
+	userOp, err := userop.NewUserOp(&request.UserOp, strategy.GetStrategyEntryPointTag())
 	if err != nil {
 		return nil, nil, err
 

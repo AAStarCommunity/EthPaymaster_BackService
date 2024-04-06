@@ -2,7 +2,6 @@ package model
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
-	"AAStarCommunity/EthPaymaster_BackService/common/tokens"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -21,8 +20,8 @@ type PaymasterInfo struct {
 	PayType          types.PayType   `json:"pay_type"`
 }
 type NetWorkInfo struct {
-	NetWork network.Network  `json:"network"`
-	Token   tokens.TokenType `json:"tokens"`
+	NetWork network.Network `json:"network"`
+	Token   types.TokenType `json:"tokens"`
 }
 type EntryPointInfo struct {
 	EntryPointAddress *common.Address         `json:"entrypoint_address"`
@@ -39,7 +38,7 @@ func (strategy *Strategy) GetNewWork() network.Network {
 	return strategy.NetWorkInfo.NetWork
 }
 
-func (strategy *Strategy) GetUseToken() tokens.TokenType {
+func (strategy *Strategy) GetUseToken() types.TokenType {
 	return strategy.NetWorkInfo.Token
 }
 func (strategy *Strategy) GetPayType() types.PayType {

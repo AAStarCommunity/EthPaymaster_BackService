@@ -1,6 +1,7 @@
 package gas_service
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
@@ -11,7 +12,7 @@ import (
 )
 
 func TestComputeGas(t *testing.T) {
-	userOp, newErr := userop.NewUserOp(utils.GenerateMockUserOperation())
+	userOp, newErr := userop.NewUserOp(utils.GenerateMockUserOperation(), types.EntrypointV06)
 	assert.NoError(t, newErr)
 	strategy := dashboard_service.GetStrategyById("1")
 	gas, err := ComputeGas(userOp, strategy)

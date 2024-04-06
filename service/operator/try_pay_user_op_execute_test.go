@@ -128,7 +128,7 @@ func checkhash(t *testing.T, name string, f func([]byte) []byte, msg, exp []byte
 }
 
 func TestGenerateTestPaymaterDataparse(t *testing.T) {
-	//contractABI, err := abi.JSON([]byte(`[
+	//contractABI, err := paymaster_abi.JSON([]byte(`[
 	//	{
 	//		"constant": false,
 	//		"inputs": [
