@@ -2,6 +2,7 @@ package operator
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
@@ -32,10 +33,10 @@ func getMockTryPayUserOpRequest() *model.TryPayUserOpRequest {
 
 func TestPackUserOp(t *testing.T) {
 	// give same len signuature and paymasteranddata
-	userOp, _ := userop.NewUserOp(utils.GenerateMockUserOperation())
+	userOp, _ := userop.NewUserOp(utils.GenerateMockUserOperation(), types.EntrypointV06)
 	userOpValue := *userOp
 
-	res, byteres, err := userOpValue.Pack()
+	res, byteres, err := userOpValue.PackUserOp()
 	shouldEqualStr := "000000000000000000000000ffdb071c2b58ccc10ad386f9bb4e8d3d664ce73c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000016000000000000000000000000000000000000000000000000000000000000001e000000000000000000000000000000000000000000000000000000000000054fa000000000000000000000000000000000000000000000000000000000005fa35000000000000000000000000000000000000000000000000000000000000ae640000000000000000000000000000000000000000000000000000000059682f8e0000000000000000000000000000000000000000000000000000000059682f00000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000003c000000000000000000000000000000000000000000000000000000000000000589406cc6185a346906296840746125a0e449764545fbfb9cf000000000000000000000000b6bcf9517d193f551d0e3d6860103972dd13de7b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e4b61d27f60000000000000000000000001c7d4b196cb0c7b01d743fbc6116a902379c7238000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000044095ea7b30000000000000000000000000000000000325602a77416a16136fdafd04b299fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 	assert.NoError(t, err)
 	assert.EqualValues(t, shouldEqualStr, res)
@@ -50,7 +51,7 @@ func TestConvertHex(t *testing.T) {
 
 func TestSignPaymaster(t *testing.T) {
 
-	userOp, _ := userop.NewUserOp(utils.GenerateMockUserOperation())
+	userOp, _ := userop.NewUserOp(utils.GenerateMockUserOperation(), types.EntrypointV06)
 	strategy := dashboard_service.GetStrategyById("1")
 	//fmt.Printf("validStart: %s, validEnd: %s\n", validStart, validEnd)
 	//message := fmt.Sprintf("%s%s%s%s", strategy.PayMasterAddress, string(strategy.PayType), validStart, validEnd)
@@ -73,7 +74,7 @@ func TestSign(t *testing.T) {
 
 func TestUserOpHash(t *testing.T) {
 	strategy := dashboard_service.GetStrategyById("1")
-	op, _ := userop.NewUserOp(utils.GenerateMockUserOperation())
+	op, _ := userop.NewUserOp(utils.GenerateMockUserOperation(), types.EntrypointV06)
 	userOpValue := *op
 
 	userOpV1, ok := userOpValue.(*userop.UserOperation)

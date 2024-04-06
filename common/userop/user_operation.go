@@ -46,7 +46,7 @@ func init() {
 			Type: paymaster_abi.Uint48Type,
 		},
 	}
-	userOpV1PackArg := abi.Arguments{
+	userOpV1PackArg = abi.Arguments{
 		{
 			Name: "Sender",
 			Type: paymaster_abi.AddressType,
@@ -92,6 +92,11 @@ func init() {
 
 func NewUserOp(userOp *map[string]any, entryPointVersion types.EntrypointVersion) (*BaseUserOp, error) {
 	var result BaseUserOp
+	if entryPointVersion == types.EntryPointV07 {
+		result = &UserOperationV2{}
+	} else {
+		result = &UserOperation{}
+	}
 	// Convert map to struct
 	decodeConfig := &mapstructure.DecoderConfig{
 		DecodeHook: decodeOpTypes,
@@ -120,10 +125,9 @@ func NewUserOp(userOp *map[string]any, entryPointVersion types.EntrypointVersion
 
 type BaseUserOp interface {
 	GetEntrypointVersion() types.EntrypointVersion
-
 	GetUserOpHash(strategy *model.Strategy) ([]byte, string, error)
 	GetSender() *common.Address
-	Pack() (string, []byte, error)
+	PackUserOp() (string, []byte, error)
 	ValidateUserOp() error
 	GetCallData() []byte
 }
@@ -163,7 +167,7 @@ func (userOp *UserOperation) GetCallData() []byte {
 }
 
 func (userOp *UserOperation) GetUserOpHash(strategy *model.Strategy) ([]byte, string, error) {
-	packUserOpStr, _, err := userOp.Pack()
+	packUserOpStr, _, err := userOp.PackUserOp()
 	if err != nil {
 		return nil, "", err
 	}
@@ -186,12 +190,10 @@ func (userOp *UserOperation) GetUserOpHash(strategy *model.Strategy) ([]byte, st
 	return encodeHash, hex.EncodeToString(bytesRes), nil
 }
 
-func (userOp *UserOperation) Pack() (string, []byte, error) {
+func (userOp *UserOperation) PackUserOp() (string, []byte, error) {
 	//TODO disgusting logic
 	paymasterDataMock := "d93349Ee959d295B115Ee223aF10EF432A8E8523000000000000000000000000000000000000000000000000000000001710044496000000000000000000000000000000000000000000000000000000174158049605bea0bfb8539016420e76749fda407b74d3d35c539927a45000156335643827672fa359ee968d72db12d4b4768e8323cd47443505ab138a525c1f61c6abdac501"
 	encoded, err := userOpV1PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, userOp.CallGasLimit, userOp.VerificationGasLimit, userOp.PreVerificationGas, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, paymasterDataMock, userOp.Sender)
-	//fmt.Printf("paymasterDataTmpLen: %x\n", len(paymasterDataTmp))
-	//fmt.Printf("paymasterDataKLen : %x\n", len(userOp.PaymasterAndData))
 
 	if err != nil {
 		return "", nil, err
@@ -231,7 +233,7 @@ func (userOp *UserOperationV2) GetCallData() []byte {
 	return userOp.CallData
 }
 
-func (userOp *UserOperationV2) Pack() (string, []byte, error) {
+func (userOp *UserOperationV2) PackUserOp() (string, []byte, error) {
 	return "", nil, nil
 }
 

@@ -17,7 +17,6 @@ func init() {
 	GasValidateFuncMap[types.PayTypeVerifying] = VerifyingGasValidate()
 	GasValidateFuncMap[types.PayTypeERC20] = Erc20GasValidate()
 	GasValidateFuncMap[types.PayTypeSuperVerifying] = SuperGasValidate()
-
 }
 
 type ValidatePaymasterGasFunc = func(userOp *userop.BaseUserOp, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error
