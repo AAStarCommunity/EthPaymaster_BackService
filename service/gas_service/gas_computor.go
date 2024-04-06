@@ -8,7 +8,6 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/paymaster_pay_type"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
-	"github.com/ethereum/go-ethereum"
 	"golang.org/x/xerrors"
 	"math/big"
 )
@@ -26,13 +25,8 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 	switch userOpValue.GetEntrypointVersion() {
 	case types.EntrypointV06:
 		{
-			entryPointAddress := strategy.GetEntryPointAddress()
 			useropV6Value := userOpValue.(*userop.UserOperation)
-			estimateCallGasLimit, _ := chain_service.EstimateGasLimitAndCost(strategy.GetNewWork(), ethereum.CallMsg{
-				From: *entryPointAddress,
-				To:   userOpValue.GetSender(),
-				Data: useropV6Value.CallData,
-			})
+			estimateCallGasLimit, _ := chain_service.EstimateUserOpGas(strategy, userOp)
 			userOpCallGasLimit := useropV6Value.CallGasLimit.Uint64()
 			if estimateCallGasLimit > userOpCallGasLimit*12/10 {
 				return nil, xerrors.Errorf("estimateCallGasLimit %d > userOpCallGasLimit %d", estimateCallGasLimit, userOpCallGasLimit)

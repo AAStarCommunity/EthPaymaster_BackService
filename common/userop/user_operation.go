@@ -36,6 +36,7 @@ type BaseUserOp interface {
 	GetSender() *common.Address
 	Pack() (string, []byte, error)
 	ValidateUserOp() error
+	GetCallData() []byte
 }
 type BaseUserOperation struct {
 	Sender               *common.Address `json:"sender"   mapstructure:"sender"  binding:"required,hexParam"`
@@ -63,6 +64,9 @@ func (userOp *UserOperation) GetSender() *common.Address {
 func (userOp *UserOperation) ValidateUserOp() error {
 	return nil
 }
+func (userOp *UserOperation) GetCallData() []byte {
+	return userOp.CallData
+}
 
 // UserOperationV2  entrypoint v0.0.7
 type UserOperationV2 struct {
@@ -80,6 +84,10 @@ func (userOp *UserOperationV2) ValidateUserOp() error {
 func (u *UserOperationV2) GetSender() *common.Address {
 	return u.Sender
 }
+func (userOp *UserOperationV2) GetCallData() []byte {
+	return userOp.CallData
+}
+
 func NewUserOp(userOp *map[string]any, strategy *model.Strategy) (*BaseUserOp, error) {
 	var result BaseUserOp
 	// Convert map to struct

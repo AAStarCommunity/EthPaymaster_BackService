@@ -3,15 +3,12 @@ package chain_service
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/tokens"
-	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 var NetworkInfoMap map[network.Network]*network.NetworkInfo
-var EthCompatibleNetWorkClientMap map[network.Network]*ethclient.Client
 
 func init() {
 	ConfigInit()
-	ClientInit()
 }
 func ConfigInit() {
 	//TODO api key secret store
@@ -26,17 +23,5 @@ func ConfigInit() {
 			RpcUrl:   "https://eth-sepolia.g.alchemy.com/v2/wKeLycGxgYRykgf0aGfcpEkUtqyLQg4v",
 			GasToken: tokens.ETH,
 		},
-	}
-}
-
-func ClientInit() {
-	EthCompatibleNetWorkClientMap = make(map[network.Network]*ethclient.Client)
-	for chain, networkInfo := range NetworkInfoMap {
-		client, err := ethclient.Dial(networkInfo.RpcUrl)
-		if err != nil {
-			panic(err)
-		}
-		EthCompatibleNetWorkClientMap[chain] = client
-		continue
 	}
 }

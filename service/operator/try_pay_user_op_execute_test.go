@@ -30,14 +30,6 @@ func getMockTryPayUserOpRequest() *model.TryPayUserOpRequest {
 	}
 }
 
-func TestGenerateTestData(t *testing.T) {
-	strategy := dashboard_service.GetStrategyById("1")
-	userOp, _ := userop.NewUserOp(utils.GenerateMockUserOperation())
-	str, err := generatePayMasterAndData(userOp, strategy)
-	assert.NoError(t, err)
-	fmt.Println(str)
-
-}
 func TestPackUserOp(t *testing.T) {
 	// give same len signuature and paymasteranddata
 	userOp, _ := userop.NewUserOp(utils.GenerateMockUserOperation())

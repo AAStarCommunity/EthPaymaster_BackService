@@ -7,17 +7,13 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"AAStarCommunity/EthPaymaster_BackService/paymaster_pay_type"
-	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/gas_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/pay_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/validator_service"
 	"encoding/hex"
-	"fmt"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"golang.org/x/xerrors"
-	"strconv"
 	"strings"
 )
 
@@ -116,14 +112,9 @@ func businessParamValidate(request *model.TryPayUserOpRequest) error {
 			return xerrors.Errorf(" %s not the Test Network ", request.ForceNetwork)
 		}
 	}
-	entryPointAddress := common.HexToAddress(request.ForceEntryPointAddress)
-	if request.ForceEntryPointAddress != "" && request.ForceNetwork != "" {
-		// check Address is available in NetWork
-		if ok, err := chain_service.CheckContractAddressAccess(&entryPointAddress, request.ForceNetwork); err != nil {
-			return err
-		} else if !ok {
-			return xerrors.Errorf("ForceEntryPointAddress: [%s] not exist in [%s] network", request.ForceEntryPointAddress, request.ForceNetwork)
-		}
+	exist := conf.CheckEntryPointExist(request.ForceNetwork, request.ForceEntryPointAddress)
+	if !exist {
+		return xerrors.Errorf("ForceEntryPointAddress: [%s] not exist in [%s] network", request.ForceEntryPointAddress, request.ForceNetwork)
 	}
 	return nil
 }
@@ -151,7 +142,7 @@ func getPayMasterAndData(strategy *model.Strategy, userOp *userop.BaseUserOp, ga
 	}
 	signatureStr := hex.EncodeToString(signatureByte)
 	dataGenerateFunc := paymaster_pay_type.GenerateFuncMap[strategy.GetPayType()]
-	paymasterData, _, err := dataGenerateFunc(strategy, userOp, gasResponse)
+	paymasterData, err := dataGenerateFunc(strategy, userOp, gasResponse)
 	if err != nil {
 		return "", "", err
 	}
@@ -159,22 +150,6 @@ func getPayMasterAndData(strategy *model.Strategy, userOp *userop.BaseUserOp, ga
 	return paymasterDataResult, signatureStr, err
 }
 
-func generatePayMasterAndData(userOp *userop.BaseUserOp, strategy *model.Strategy) (string, error) {
-	//TODO  string(strategy.PayType),
-	validStart, validEnd := getValidTime(strategy)
-	message := fmt.Sprintf("%s%s%s", strategy.GetPaymasterAddress().String(), validEnd, validStart)
-
-	return message, nil
-}
-
-func getValidTime(strategy *model.Strategy) (string, string) {
-
-	currentTimestampStr := strconv.FormatInt(strategy.ExecuteRestriction.EffectiveStartTime, 16)
-	futureTimestampStr := strconv.FormatInt(strategy.ExecuteRestriction.EffectiveEndTime, 16)
-	currentTimestampStrSupply := utils.SupplyZero(currentTimestampStr, 64)
-	futureTimestampStrSupply := utils.SupplyZero(futureTimestampStr, 64)
-	return currentTimestampStrSupply, futureTimestampStrSupply
-}
 func SignPaymaster(userOp *userop.BaseUserOp, strategy *model.Strategy) ([]byte, []byte, error) {
 	userOpValue := *userOp
 	userOpHash, _, err := userOpValue.GetUserOpHash(strategy)

@@ -4,17 +4,11 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/tokens"
-	"context"
-	"github.com/ethereum/go-ethereum"
+	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/holiman/uint256"
-	"golang.org/x/xerrors"
 	"math"
-	"math/big"
 )
-
-var GweiFactor = new(big.Float).SetInt(big.NewInt(1e9))
-var EthWeiFactor = new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil))
 
 const balanceOfAbi = `[{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}]`
 
@@ -38,71 +32,17 @@ func CheckContractAddressAccess(contract *common.Address, chain network.Network)
 
 // GetGasPrice return gas price in wei, gwei, ether
 func GetGasPrice(chain network.Network) (*model.GasPrice, error) {
-	client, exist := EthCompatibleNetWorkClientMap[chain]
-	if !exist {
-		return nil, xerrors.Errorf("chain Client [%s] not exist", chain)
-	}
-	priceWei, priceWeiErr := client.SuggestGasPrice(context.Background())
-	if priceWeiErr != nil {
-		return nil, priceWeiErr
-	}
-	priorityPriceWei, tiperr := client.SuggestGasTipCap(context.Background())
-	if tiperr != nil {
-		return nil, tiperr
-	}
-	result := model.GasPrice{}
-	result.MaxBasePriceWei = priceWei
-	result.MaxPriorityPriceWei = priorityPriceWei
-
-	gasPriceInGwei := new(big.Float).SetInt(priceWei)
-	gasPriceInGwei.Quo(gasPriceInGwei, GweiFactor)
-	gasPriceInEther := new(big.Float).SetInt(priceWei)
-	gasPriceInEther.Quo(gasPriceInEther, EthWeiFactor)
-	gasPriceInGweiFloat, _ := gasPriceInGwei.Float64()
-	result.MaxBasePriceGwei = gasPriceInGweiFloat
-	result.MaxBasePriceEther = gasPriceInEther
-
-	priorityPriceInGwei := new(big.Float).SetInt(priorityPriceWei)
-	priorityPriceInGwei.Quo(priorityPriceInGwei, GweiFactor)
-	priorityPriceInEther := new(big.Float).SetInt(priorityPriceWei)
-	priorityPriceInEther.Quo(priorityPriceInEther, EthWeiFactor)
-	priorityPriceInGweiFloat, _ := priorityPriceInGwei.Float64()
-	result.MaxPriorityPriceGwei = priorityPriceInGweiFloat
-	result.MaxPriorityPriceEther = gasPriceInEther
-	return &result, nil
-}
-
-func GetGas(netWork network.Network) (*big.Int, error) {
-	client, exist := EthCompatibleNetWorkClientMap[netWork]
-	if !exist {
-		return nil, xerrors.Errorf("chain Client [%s] not exist", netWork)
-	}
-	head, erro := client.HeaderByNumber(context.Background(), nil)
-	if erro != nil {
-		return nil, erro
-	}
-	return head.BaseFee, nil
-}
-func GetPriorityFee(netWork network.Network) (*big.Int, *big.Float) {
-	client, exist := EthCompatibleNetWorkClientMap[netWork]
-	if !exist {
-		return nil, nil
-	}
-	priceWei, _ := client.SuggestGasTipCap(context.Background())
-	gasPriceInGwei := new(big.Float).SetInt(priceWei)
-	gasPriceInGwei.Quo(gasPriceInGwei, GweiFactor)
-	return priceWei, gasPriceInGwei
+	ethereumExecutor := network.GetEthereumExecutor(chain)
+	return ethereumExecutor.GetCurGasPrice()
+	//TODO starknet
 }
 
 func GetEntryPointDeposit(entrypoint string, depositAddress string) uint256.Int {
 	return uint256.Int{1}
 }
-func EstimateGasLimitAndCost(chain network.Network, msg ethereum.CallMsg) (uint64, error) {
-	client, exist := EthCompatibleNetWorkClientMap[chain]
-	if !exist {
-		return 0, xerrors.Errorf("chain Client [%s] not exist", chain)
-	}
-	return client.EstimateGas(context.Background(), msg)
+func EstimateUserOpGas(strategy *model.Strategy, op *userop.BaseUserOp) (uint64, error) {
+	ethereumExecutor := network.GetEthereumExecutor(strategy.GetNewWork())
+	return ethereumExecutor.EstimateUserOpGas(strategy.GetEntryPointAddress(), op)
 }
 func GetAddressTokenBalance(networkParam network.Network, address common.Address, tokenTypeParam tokens.TokenType) (float64, error) {
 	executor := network.GetEthereumExecutor(networkParam)

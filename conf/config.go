@@ -33,9 +33,11 @@ func GetTokenAddress(networkParam network.Network, tokenParam tokens.TokenType) 
 	networkConfig := BasicConfig.NetworkConfigMap[networkParam]
 	return networkConfig.TokenConfig[tokenParam]
 }
-func CheckEntryPointExist(network2 network.Network, address string) {
+func CheckEntryPointExist(network2 network.Network, address string) bool {
+	return true
 
 }
+
 func GetChainId(newworkParam network.Network) *big.Int {
 	networkConfig := BasicConfig.NetworkConfigMap[newworkParam]
 	return networkConfig.ChainId
