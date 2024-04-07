@@ -71,9 +71,7 @@ func estimateGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Co
 	if gasComputeError != nil {
 		return nil, gasComputeError
 	}
-
 	//The maxFeePerGas and maxPriorityFeePerGas are above a configurable minimum value that the client is willing to accept. At the minimum, they are sufficiently high to be included with the current block.basefee.
-
 	//validate gas
 	if err := gas_service.ValidateGas(userOp, gasResponse, strategy); err != nil {
 		return nil, err
@@ -136,7 +134,7 @@ func executePay(strategy *model.Strategy, userOp *userop.BaseUserOp, gasResponse
 }
 
 func getPayMasterAndData(strategy *model.Strategy, userOp *userop.BaseUserOp, gasResponse *model.ComputeGasResponse) (string, string, error) {
-	signatureByte, _, err := SignPaymaster(userOp, strategy)
+	signatureByte, _, err := signPaymaster(userOp, strategy)
 	if err != nil {
 		return "", "", err
 	}
@@ -150,24 +148,29 @@ func getPayMasterAndData(strategy *model.Strategy, userOp *userop.BaseUserOp, ga
 	return paymasterDataResult, signatureStr, err
 }
 
-func SignPaymaster(userOp *userop.BaseUserOp, strategy *model.Strategy) ([]byte, []byte, error) {
+func signPaymaster(userOp *userop.BaseUserOp, strategy *model.Strategy) ([]byte, []byte, error) {
 	userOpValue := *userOp
 	userOpHash, _, err := userOpValue.GetUserOpHash(strategy)
 	if err != nil {
 		return nil, nil, err
 	}
-	hashToEthSignHash := utils.ToEthSignedMessageHash(userOpHash)
-
-	privateKey, err := crypto.HexToECDSA("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421")
+	signature, err := getUserOpHashSign(userOpHash)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	signature, err := crypto.Sign(hashToEthSignHash, privateKey)
+	return signature, userOpHash, err
+}
 
+func getUserOpHashSign(userOpHash []byte) ([]byte, error) {
+	privateKey, err := crypto.HexToECDSA("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421")
+	if err != nil {
+		return nil, err
+	}
+
+	signature, err := crypto.Sign(userOpHash, privateKey)
 	signatureStr := hex.EncodeToString(signature)
 	var signatureAfterProcess string
-
 	if strings.HasSuffix(signatureStr, "00") {
 		signatureAfterProcess = utils.ReplaceLastTwoChars(signatureStr, "1b")
 	} else if strings.HasSuffix(signatureStr, "01") {
@@ -175,15 +178,8 @@ func SignPaymaster(userOp *userop.BaseUserOp, strategy *model.Strategy) ([]byte,
 	} else {
 		signatureAfterProcess = signatureStr
 	}
-
-	signatureAfterProcessByte, err := hex.DecodeString(signatureAfterProcess)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return signatureAfterProcessByte, userOpHash, err
+	return hex.DecodeString(signatureAfterProcess)
 }
-
 func strategyGenerate(request *model.TryPayUserOpRequest) (*model.Strategy, error) {
 	if forceStrategyId := request.ForceStrategyId; forceStrategyId != "" {
 		//force strategy

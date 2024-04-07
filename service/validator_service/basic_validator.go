@@ -48,14 +48,14 @@ func ValidateUserOp(userOp *userop.BaseUserOp) error {
 	//}
 
 	//If initCode is not empty, parse its first 20 bytes as a factory address. Record whether the factory is staked, in case the later simulation indicates that it needs to be. If the factory accesses global state, it must be staked - see reputation, throttling and banning section for details.
-	//The verificationGasLimit is sufficiently low (<= MAX_VERIFICATION_GAS) and the preVerificationGas is sufficiently high (enough to pay for the calldata gas cost of serializing the UserOperation plus PRE_VERIFICATION_OVERHEAD_GAS)
+	//The verificationGasLimit is sufficiently low (<= MAX_VERIFICATION_GAS) and the preVerificationGas is sufficiently high (enough to pay for the calldata gas cost of serializing the UserOperationV06 plus PRE_VERIFICATION_OVERHEAD_GAS)
 	// check Sender is valid ,if sender is invalid And InitCode empty, return error
 	//
 	// nonce is valid
 	//validate trusted entrypoint
 	return nil
 }
-func checkSender(userOp *userop.UserOperation, netWork network.Network) error {
+func checkSender(userOp *userop.UserOperationV06, netWork network.Network) error {
 	//check sender
 	checkOk, checkSenderErr := chain_service.CheckContractAddressAccess(userOp.Sender, netWork)
 	if !checkOk {

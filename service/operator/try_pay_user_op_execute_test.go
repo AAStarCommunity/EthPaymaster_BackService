@@ -55,7 +55,7 @@ func TestSignPaymaster(t *testing.T) {
 	strategy := dashboard_service.GetStrategyById("1")
 	//fmt.Printf("validStart: %s, validEnd: %s\n", validStart, validEnd)
 	//message := fmt.Sprintf("%s%s%s%s", strategy.PayMasterAddress, string(strategy.PayType), validStart, validEnd)
-	signatureByte, hashByte, err := SignPaymaster(userOp, strategy)
+	signatureByte, hashByte, err := signPaymaster(userOp, strategy)
 	//signatureStr := hex.EncodeToString(signatureByte)
 	assert.NoError(t, err)
 
@@ -77,7 +77,7 @@ func TestUserOpHash(t *testing.T) {
 	op, _ := userop.NewUserOp(utils.GenerateMockUserOperation(), types.EntrypointV06)
 	userOpValue := *op
 
-	userOpV1, ok := userOpValue.(*userop.UserOperation)
+	userOpV1, ok := userOpValue.(*userop.UserOperationV06)
 	if !ok {
 		return
 	}

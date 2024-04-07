@@ -4,6 +4,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_abi"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"encoding/hex"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -19,14 +20,14 @@ import (
 )
 
 var (
-	validate              = validator.New()
-	onlyOnce              = sync.Once{}
-	userOPV1HashArguments abi.Arguments
-	userOpV1PackArg       abi.Arguments
+	validate                  = validator.New()
+	onlyOnce                  = sync.Once{}
+	userOPV06GetHashArguments abi.Arguments
+	userOpV06PackArg          abi.Arguments
 )
 
 func init() {
-	userOPV1HashArguments = abi.Arguments{
+	userOPV06GetHashArguments = abi.Arguments{
 		{
 			Type: paymaster_abi.BytesType,
 		},
@@ -46,7 +47,7 @@ func init() {
 			Type: paymaster_abi.Uint48Type,
 		},
 	}
-	userOpV1PackArg = abi.Arguments{
+	userOpV06PackArg = abi.Arguments{
 		{
 			Name: "Sender",
 			Type: paymaster_abi.AddressType,
@@ -93,9 +94,9 @@ func init() {
 func NewUserOp(userOp *map[string]any, entryPointVersion types.EntrypointVersion) (*BaseUserOp, error) {
 	var result BaseUserOp
 	if entryPointVersion == types.EntryPointV07 {
-		result = &UserOperationV2{}
+		result = &UserOperationV07{}
 	} else {
-		result = &UserOperation{}
+		result = &UserOperationV06{}
 	}
 	// Convert map to struct
 	decodeConfig := &mapstructure.DecoderConfig{
@@ -143,64 +144,70 @@ type BaseUserOperation struct {
 	MaxPriorityFeePerGas *big.Int        `json:"maxPriorityFeePerGas"  mapstructure:"max_priority_fee_per_gas"  binding:"required"`
 }
 
-// UserOperation  entrypoint v0.0.6
+// UserOperationV06  entrypoint v0.0.6
 // verificationGasLimit validateUserOp ,validatePaymasterUserOp limit
 // callGasLimit calldata Execute gas limit
 // preVerificationGas
-type UserOperation struct {
+type UserOperationV06 struct {
 	BaseUserOperation
 	CallGasLimit         *big.Int `json:"callGasLimit"  mapstructure:"call_gas_limit"  binding:"required"`
 	VerificationGasLimit *big.Int `json:"verificationGasLimit"  mapstructure:"verification_gas_limit"  binding:"required"`
 }
 
-func (userOp *UserOperation) GetEntrypointVersion() types.EntrypointVersion {
+func (userOp *UserOperationV06) GetEntrypointVersion() types.EntrypointVersion {
 	return types.EntrypointV06
 }
-func (userOp *UserOperation) GetSender() *common.Address {
+func (userOp *UserOperationV06) GetSender() *common.Address {
 	return userOp.Sender
 }
-func (userOp *UserOperation) ValidateUserOp() error {
+func (userOp *UserOperationV06) ValidateUserOp() error {
 	return nil
 }
-func (userOp *UserOperation) GetCallData() []byte {
+func (userOp *UserOperationV06) GetCallData() []byte {
 	return userOp.CallData
 }
 
-func (userOp *UserOperation) GetUserOpHash(strategy *model.Strategy) ([]byte, string, error) {
+func (userOp *UserOperationV06) GetUserOpHash(strategy *model.Strategy) ([]byte, string, error) {
 	packUserOpStr, _, err := userOp.PackUserOp()
 	if err != nil {
 		return nil, "", err
 	}
 
-	chainId := conf.GetChainId(strategy.GetNewWork())
-	if chainId == nil {
-		return nil, "", xerrors.Errorf("empty NetWork")
-	}
-	if err != nil {
-		return nil, "", err
-	}
-	packUserOpStrByteNew, _ := hex.DecodeString(packUserOpStr)
-
-	bytesRes, err := userOPV1HashArguments.Pack(packUserOpStrByteNew, chainId, strategy.GetPaymasterAddress(), userOp.Nonce, strategy.ExecuteRestriction.EffectiveStartTime, strategy.ExecuteRestriction.EffectiveEndTime)
+	packUserOpStrByteNew, err := hex.DecodeString(packUserOpStr)
 	if err != nil {
 		return nil, "", err
 	}
 
-	encodeHash := crypto.Keccak256(bytesRes)
-	return encodeHash, hex.EncodeToString(bytesRes), nil
+	bytesRes, err := userOPV06GetHashArguments.Pack(packUserOpStrByteNew, conf.GetChainId(strategy.GetNewWork()), strategy.GetPaymasterAddress(), userOp.Nonce, strategy.ExecuteRestriction.EffectiveStartTime, strategy.ExecuteRestriction.EffectiveEndTime)
+	if err != nil {
+		return nil, "", err
+	}
+
+	userOpHash := crypto.Keccak256(bytesRes)
+	afterProcessUserOphash := utils.ToEthSignedMessageHash(userOpHash)
+	return afterProcessUserOphash, hex.EncodeToString(bytesRes), nil
+
 }
 
-func (userOp *UserOperation) PackUserOp() (string, []byte, error) {
+// PackUserOp return keccak256(abi.encode(
+//
+//	    pack(userOp),
+//	    block.chainid,
+//	    address(this),
+//	    senderNonce[userOp.getSender()],
+//	    validUntil,
+//	    validAfter
+//	));
+func (userOp *UserOperationV06) PackUserOp() (string, []byte, error) {
 	//TODO disgusting logic
 	paymasterDataMock := "d93349Ee959d295B115Ee223aF10EF432A8E8523000000000000000000000000000000000000000000000000000000001710044496000000000000000000000000000000000000000000000000000000174158049605bea0bfb8539016420e76749fda407b74d3d35c539927a45000156335643827672fa359ee968d72db12d4b4768e8323cd47443505ab138a525c1f61c6abdac501"
-	encoded, err := userOpV1PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, userOp.CallGasLimit, userOp.VerificationGasLimit, userOp.PreVerificationGas, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, paymasterDataMock, userOp.Sender)
-
+	encoded, err := userOpV06PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, userOp.CallGasLimit, userOp.VerificationGasLimit, userOp.PreVerificationGas, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, paymasterDataMock, userOp.Sender)
 	if err != nil {
 		return "", nil, err
 	}
 	//https://github.com/jayden-sudo/SoulWalletCore/blob/dc76bdb9a156d4f99ef41109c59ab99106c193ac/contracts/utils/CalldataPack.sol#L51-L65
 	hexString := hex.EncodeToString(encoded)
-	//1. 从 63*10+ 1 ～64*10获取
+	//1. get From  63*10+ 1 ～64*10
 	hexString = hexString[64:]
 	//hexLen := len(hexString)
 	subIndex := GetIndex(hexString)
@@ -213,38 +220,50 @@ func (userOp *UserOperation) PackUserOp() (string, []byte, error) {
 Userop V2
 **/
 
-// UserOperationV2  entrypoint v0.0.7
-type UserOperationV2 struct {
+// UserOperationV07  entrypoint v0.0.7
+type UserOperationV07 struct {
 	BaseUserOperation
 	AccountGasLimit string `json:"account_gas_limit" binding:"required"`
 }
 
-func (u *UserOperationV2) GetEntrypointVersion() types.EntrypointVersion {
+func (userOp *UserOperationV07) GetEntrypointVersion() types.EntrypointVersion {
 	return types.EntryPointV07
 }
-func (userOp *UserOperationV2) ValidateUserOp() error {
+func (userOp *UserOperationV07) ValidateUserOp() error {
 	return nil
 
 }
-func (u *UserOperationV2) GetSender() *common.Address {
-	return u.Sender
+func (userOp *UserOperationV07) GetSender() *common.Address {
+	return userOp.Sender
 }
-func (userOp *UserOperationV2) GetCallData() []byte {
+func (userOp *UserOperationV07) GetCallData() []byte {
 	return userOp.CallData
 }
 
-func (userOp *UserOperationV2) PackUserOp() (string, []byte, error) {
-	return "", nil, nil
+func (userOp *UserOperationV07) PackUserOp() (string, []byte, error) {
+	panic("should never call v0.0.7 userOpPack")
 }
 
-func (userOp *UserOperationV2) GetUserOpHash(strategy *model.Strategy) ([]byte, string, error) {
-
+// GetUserOpHash return keccak256(
+//
+//	abi.encode(
+//	    sender,
+//	    userOp.nonce,
+//	    keccak256(userOp.initCode),
+//	    keccak256(userOp.callData),
+//	    userOp.accountGasLimits,
+//	    userOp.paymasterAndData[:PAYMASTER_DATA_OFFSET + 56],
+//	    userOp.preVerificationGas,
+//	    userOp.gasFees,
+//	    block.chainid,
+//	    address(this)
+//	)
+func (userOp *UserOperationV07) GetUserOpHash(strategy *model.Strategy) ([]byte, string, error) {
 	return nil, "", nil
 }
 
 func GetIndex(hexString string) int64 {
 	//1. 从 63*10+ 1 ～64*10获取
-
 	indexPre := hexString[576:640]
 	indePreInt, _ := strconv.ParseInt(indexPre, 16, 64)
 	result := indePreInt * 2
@@ -255,7 +274,6 @@ func validateAddressType(field reflect.Value) interface{} {
 	if !ok || value == common.HexToAddress("0x") {
 		return nil
 	}
-
 	return field
 }
 
@@ -264,7 +282,6 @@ func validateBigIntType(field reflect.Value) interface{} {
 	if !ok || value.Cmp(big.NewInt(0)) == -1 {
 		return nil
 	}
-
 	return field
 }
 
