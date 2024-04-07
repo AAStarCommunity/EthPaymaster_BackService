@@ -38,6 +38,8 @@ func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserO
 	return result, nil
 }
 
+//sub Function ---------
+
 func prepareExecute(request *model.TryPayUserOpRequest) (*userop.BaseUserOp, *model.Strategy, error) {
 	// validator
 	if err := businessParamValidate(request); err != nil {
@@ -48,7 +50,6 @@ func prepareExecute(request *model.TryPayUserOpRequest) (*userop.BaseUserOp, *mo
 	strategy, generateErr := strategyGenerate(request)
 	if generateErr != nil {
 		return nil, nil, generateErr
-
 	}
 
 	userOp, err := userop.NewUserOp(&request.UserOp, strategy.GetStrategyEntryPointTag())
@@ -77,6 +78,22 @@ func estimateGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Co
 		return nil, err
 	}
 	return gasResponse, nil
+}
+
+func executePay(strategy *model.Strategy, userOp *userop.BaseUserOp, gasResponse *model.ComputeGasResponse) (*model.PayReceipt, error) {
+	//1.Recharge
+	ethereumPayservice := pay_service.EthereumPayService{}
+	if err := ethereumPayservice.Pay(); err != nil {
+		return nil, err
+	}
+	//2.record account
+	ethereumPayservice.RecordAccount()
+	//3.return Receipt
+	ethereumPayservice.GetReceipt()
+	return &model.PayReceipt{
+		TransactionHash: "0x110406d44ec1681fcdab1df2310181dee26ff43c37167b2c9c496b35cce69437",
+		Sponsor:         "aastar",
+	}, nil
 }
 
 func postExecute(userOp *userop.BaseUserOp, strategy *model.Strategy, gasResponse *model.ComputeGasResponse) (*model.TryPayUserOpResponse, error) {
@@ -115,22 +132,6 @@ func businessParamValidate(request *model.TryPayUserOpRequest) error {
 		return xerrors.Errorf("ForceEntryPointAddress: [%s] not exist in [%s] network", request.ForceEntryPointAddress, request.ForceNetwork)
 	}
 	return nil
-}
-
-func executePay(strategy *model.Strategy, userOp *userop.BaseUserOp, gasResponse *model.ComputeGasResponse) (*model.PayReceipt, error) {
-	//1.Recharge
-	ethereumPayservice := pay_service.EthereumPayService{}
-	if err := ethereumPayservice.Pay(); err != nil {
-		return nil, err
-	}
-	//2.record account
-	ethereumPayservice.RecordAccount()
-	//3.return Receipt
-	ethereumPayservice.GetReceipt()
-	return &model.PayReceipt{
-		TransactionHash: "0x110406d44ec1681fcdab1df2310181dee26ff43c37167b2c9c496b35cce69437",
-		Sponsor:         "aastar",
-	}, nil
 }
 
 func getPayMasterAndData(strategy *model.Strategy, userOp *userop.BaseUserOp, gasResponse *model.ComputeGasResponse) (string, string, error) {
@@ -180,6 +181,7 @@ func getUserOpHashSign(userOpHash []byte) ([]byte, error) {
 	}
 	return hex.DecodeString(signatureAfterProcess)
 }
+
 func strategyGenerate(request *model.TryPayUserOpRequest) (*model.Strategy, error) {
 	if forceStrategyId := request.ForceStrategyId; forceStrategyId != "" {
 		//force strategy
