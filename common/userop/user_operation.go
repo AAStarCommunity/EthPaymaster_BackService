@@ -275,8 +275,10 @@ Userop V2
 // UserOperationV07  entrypoint v0.0.7
 type UserOperationV07 struct {
 	BaseUserOperation
-	AccountGasLimit string `json:"account_gas_limit" binding:"required"`
-	GasFees         []byte `json:"gasFees" binding:"required"`
+	AccountGasLimit               string `json:"account_gas_limit" binding:"required"`
+	PaymasterVerificationGasLimit string `json:"paymaster_verification_gas_limit" binding:"required"`
+	PaymasterPostOpGasLimit       string `json:"paymaster_post_op_gas_limit" binding:"required"`
+	GasFees                       []byte `json:"gasFees" binding:"required"`
 }
 
 func (userOp *UserOperationV07) GetEntrypointVersion() types.EntrypointVersion {
