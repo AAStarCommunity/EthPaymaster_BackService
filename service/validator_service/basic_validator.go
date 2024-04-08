@@ -31,7 +31,7 @@ func ValidateStrategy(strategy *model.Strategy) error {
 	return nil
 }
 
-func ValidateUserOp(userOp *userop.BaseUserOp) error {
+func ValidateUserOp(userOpParam *userop.BaseUserOp, strategy *model.Strategy) error {
 	//recall simulate?
 	//UserOp Validate
 	//check nonce
@@ -39,10 +39,11 @@ func ValidateUserOp(userOp *userop.BaseUserOp) error {
 	//	return xerrors.Errorf("preVerificationGas is less than 21000")
 	//}
 	//
-	//if err := checkSender(userOp, network.Sepolia); err != nil {
-	//	return err
-	//}
-	//
+
+	if err := checkSender(userOpParam, strategy.GetNewWork()); err != nil {
+		return err
+	}
+	//userOpValue := *userOpParam
 	//if !userOp.Nonce.IsInt64() {
 	//	return xerrors.Errorf("nonce is not in uint64 range")
 	//}
@@ -55,16 +56,17 @@ func ValidateUserOp(userOp *userop.BaseUserOp) error {
 	//validate trusted entrypoint
 	return nil
 }
-func checkSender(userOp *userop.UserOperationV06, netWork network.Network) error {
+func checkSender(userOpParam *userop.BaseUserOp, netWork network.Network) error {
 	//check sender
-	checkOk, checkSenderErr := chain_service.CheckContractAddressAccess(userOp.Sender, netWork)
+	userOpValue := *userOpParam
+
+	checkOk, checkSenderErr := chain_service.CheckContractAddressAccess(userOpValue.GetSender(), netWork)
 	if !checkOk {
-		if err := checkInitCode(userOp.InitCode, netWork); err != nil {
+		if err := checkInitCode(userOpValue.GetInitCode(), netWork); err != nil {
 			return xerrors.Errorf("%s and %s", checkSenderErr.Error(), err.Error())
 		}
 	}
 	//check balance
-
 	return nil
 }
 func checkInitCode(initCode []byte, network network.Network) error {

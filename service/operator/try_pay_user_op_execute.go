@@ -60,7 +60,7 @@ func prepareExecute(request *model.TryPayUserOpRequest) (*userop.BaseUserOp, *mo
 	if err := validator_service.ValidateStrategy(strategy); err != nil {
 		return nil, nil, err
 	}
-	if err := validator_service.ValidateUserOp(userOp); err != nil {
+	if err := validator_service.ValidateUserOp(userOp, strategy); err != nil {
 		return nil, nil, err
 	}
 	return userOp, strategy, nil

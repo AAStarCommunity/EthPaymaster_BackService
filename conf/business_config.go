@@ -9,14 +9,14 @@ import (
 	"math/big"
 )
 
-var BasicConfig Config
+var BasicConfig BusinessConfig
 var TokenContractCache map[common.Address]contract_erc20.Contract
 
 func init() {
-	BasicConfig = Config{}
+	BasicConfig = BusinessConfig{}
 }
 
-type Config struct {
+type BusinessConfig struct {
 	NetworkConfigMap  map[network.Network]*NetWorkConfig `json:"network_config"`
 	SupportEntryPoint map[network.Network]*mapset.Set[string]
 	SupportPaymaster  map[network.Network]*mapset.Set[string]

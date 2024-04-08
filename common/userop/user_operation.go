@@ -130,6 +130,7 @@ type BaseUserOp interface {
 	GetSender() *common.Address
 	PackUserOp() (string, []byte, error)
 	ValidateUserOp() error
+	GetInitCode() []byte
 	GetCallData() []byte
 }
 type BaseUserOperation struct {
@@ -166,7 +167,9 @@ func (userOp *UserOperationV06) ValidateUserOp() error {
 func (userOp *UserOperationV06) GetCallData() []byte {
 	return userOp.CallData
 }
-
+func (userop *UserOperationV06) GetInitCode() []byte {
+	return userop.InitCode
+}
 func (userOp *UserOperationV06) GetUserOpHash(strategy *model.Strategy) ([]byte, string, error) {
 	packUserOpStr, _, err := userOp.PackUserOp()
 	if err != nil {
@@ -232,6 +235,9 @@ func (userOp *UserOperationV07) GetEntrypointVersion() types.EntrypointVersion {
 func (userOp *UserOperationV07) ValidateUserOp() error {
 	return nil
 
+}
+func (userOp *UserOperationV07) GetInitCode() []byte {
+	return userOp.InitCode
 }
 func (userOp *UserOperationV07) GetSender() *common.Address {
 	return userOp.Sender
