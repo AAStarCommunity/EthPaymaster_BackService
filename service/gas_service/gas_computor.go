@@ -29,7 +29,6 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 	case types.EntrypointV06:
 		{
 			useropV6Value := userOpValue.(*userop.UserOperationV06)
-
 			userOpCallGasLimit := useropV6Value.CallGasLimit.Uint64()
 			if estimateCallGasLimit > userOpCallGasLimit*12/10 {
 				return nil, xerrors.Errorf("estimateCallGasLimit %d > userOpCallGasLimit %d", estimateCallGasLimit, userOpCallGasLimit)

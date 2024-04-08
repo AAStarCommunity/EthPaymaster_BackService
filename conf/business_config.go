@@ -34,8 +34,9 @@ func GetTokenAddress(networkParam types.Network, tokenParam types.TokenType) *co
 	return networkConfig.TokenConfig[tokenParam]
 }
 func CheckEntryPointExist(network2 types.Network, address string) bool {
-	return true
-
+	entryPointSet := BasicConfig.SupportEntryPoint[network2]
+	entryPointSetValue := *entryPointSet
+	return entryPointSetValue.Contains(address)
 }
 func GetGasToken(networkParam types.Network) types.TokenType {
 	networkConfig := BasicConfig.NetworkConfigMap[networkParam]

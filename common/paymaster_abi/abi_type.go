@@ -7,6 +7,7 @@ import (
 
 var (
 	BytesType   abi.Type
+	Bytes32Type abi.Type
 	Uint48Type  abi.Type
 	Uint256Type abi.Type
 	AddressType abi.Type
@@ -18,6 +19,12 @@ func init() {
 		panic(fmt.Sprintf("[initerror] %s", err))
 	}
 	BytesType = bytesTypeVar
+
+	byte32TypeVar, err := abi.NewType("bytes32", "", nil)
+	if err != nil {
+		panic(fmt.Sprintf("[initerror] %s", err))
+	}
+	Bytes32Type = byte32TypeVar
 
 	uint48Var, err := abi.NewType("uint48", "", nil)
 	if err != nil {

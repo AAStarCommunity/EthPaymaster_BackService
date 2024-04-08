@@ -20,13 +20,17 @@ import (
 )
 
 var (
+	MinPreVerificationGas     *big.Int
 	validate                  = validator.New()
 	onlyOnce                  = sync.Once{}
 	userOPV06GetHashArguments abi.Arguments
+	UserOpV07GetHashArguments abi.Arguments
 	userOpV06PackArg          abi.Arguments
 )
 
 func init() {
+	MinPreVerificationGas = big.NewInt(21000)
+
 	userOPV06GetHashArguments = abi.Arguments{
 		{
 			Type: paymaster_abi.BytesType,
@@ -45,6 +49,44 @@ func init() {
 		},
 		{
 			Type: paymaster_abi.Uint48Type,
+		},
+	}
+	UserOpV07GetHashArguments = abi.Arguments{
+		{
+			Type: paymaster_abi.AddressType, //Sender
+		},
+		{
+			Type: paymaster_abi.Uint256Type, //userOp.nonce
+		},
+		{
+			Type: paymaster_abi.Bytes32Type, //keccak256(userOp.initCode),
+		},
+		{
+			Type: paymaster_abi.Bytes32Type, //keccak256(userOp.callData),
+		},
+		{
+			Type: paymaster_abi.Bytes32Type, //userOp.accountGasLimits,
+		},
+		{
+			Type: paymaster_abi.Uint256Type, //uint256(bytes32(userOp.paymasterAndData[PAYMASTER_VALIDATION_GAS_OFFSET : PAYMASTER_DATA_OFFSET])),
+		},
+		{
+			Type: paymaster_abi.Uint256Type, // userOp.preVerificationGas,
+		},
+		{
+			Type: paymaster_abi.Uint256Type, //userOp.gasFees,
+		},
+		{
+			Type: paymaster_abi.Uint256Type, //block.chainid,
+		},
+		{
+			Type: paymaster_abi.AddressType, //address(this),
+		},
+		{
+			Type: paymaster_abi.Uint48Type, // validUntil,
+		},
+		{
+			Type: paymaster_abi.Uint48Type, // validAfter,
 		},
 	}
 	userOpV06PackArg = abi.Arguments{
@@ -132,17 +174,16 @@ type BaseUserOp interface {
 	ValidateUserOp() error
 	GetInitCode() []byte
 	GetCallData() []byte
+	GetNonce() *big.Int
 }
 type BaseUserOperation struct {
-	Sender               *common.Address `json:"sender"   mapstructure:"sender"  binding:"required,hexParam"`
-	InitCode             []byte          `json:"initCode"  mapstructure:"init_code" `
-	CallData             []byte          `json:"callData"  mapstructure:"call_data"  binding:"required"`
-	PreVerificationGas   *big.Int        `json:"preVerificationGas"  mapstructure:"pre_verification_gas"  binding:"required"`
-	MaxFeePerGas         *big.Int        `json:"maxFeePerGas"  mapstructure:"max_fee_per_gas"  binding:"required"`
-	PaymasterAndData     []byte          `json:"paymasterAndData"  mapstructure:"paymaster_and_data"`
-	Signature            []byte          `json:"signature"  mapstructure:"signature"  binding:"required"`
-	Nonce                *big.Int        `json:"nonce"  mapstructure:"nonce"  binding:"required"`
-	MaxPriorityFeePerGas *big.Int        `json:"maxPriorityFeePerGas"  mapstructure:"max_priority_fee_per_gas"  binding:"required"`
+	Sender             *common.Address `json:"sender"   mapstructure:"sender"  binding:"required,hexParam"`
+	Nonce              *big.Int        `json:"nonce"  mapstructure:"nonce"  binding:"required"`
+	InitCode           []byte          `json:"initCode"  mapstructure:"init_code" `
+	CallData           []byte          `json:"callData"  mapstructure:"call_data"  binding:"required"`
+	PreVerificationGas *big.Int        `json:"preVerificationGas"  mapstructure:"pre_verification_gas"  binding:"required"`
+	PaymasterAndData   []byte          `json:"paymasterAndData"  mapstructure:"paymaster_and_data"`
+	Signature          []byte          `json:"signature"  mapstructure:"signature"  binding:"required"`
 }
 
 // UserOperationV06  entrypoint v0.0.6
@@ -151,8 +192,10 @@ type BaseUserOperation struct {
 // preVerificationGas
 type UserOperationV06 struct {
 	BaseUserOperation
+	MaxFeePerGas         *big.Int `json:"maxFeePerGas"  mapstructure:"max_fee_per_gas"  binding:"required"`
 	CallGasLimit         *big.Int `json:"callGasLimit"  mapstructure:"call_gas_limit"  binding:"required"`
 	VerificationGasLimit *big.Int `json:"verificationGasLimit"  mapstructure:"verification_gas_limit"  binding:"required"`
+	MaxPriorityFeePerGas *big.Int `json:"maxPriorityFeePerGas"  mapstructure:"max_priority_fee_per_gas"  binding:"required"`
 }
 
 func (userOp *UserOperationV06) GetEntrypointVersion() types.EntrypointVersion {
@@ -162,6 +205,9 @@ func (userOp *UserOperationV06) GetSender() *common.Address {
 	return userOp.Sender
 }
 func (userOp *UserOperationV06) ValidateUserOp() error {
+	if userOp.PreVerificationGas.Cmp(MinPreVerificationGas) == -1 {
+		return xerrors.Errorf("preVerificationGas is less than 21000")
+	}
 	return nil
 }
 func (userOp *UserOperationV06) GetCallData() []byte {
@@ -169,6 +215,9 @@ func (userOp *UserOperationV06) GetCallData() []byte {
 }
 func (userop *UserOperationV06) GetInitCode() []byte {
 	return userop.InitCode
+}
+func (userOp *UserOperationV06) GetNonce() *big.Int {
+	return userOp.Nonce
 }
 func (userOp *UserOperationV06) GetUserOpHash(strategy *model.Strategy) ([]byte, string, error) {
 	packUserOpStr, _, err := userOp.PackUserOp()
@@ -227,6 +276,7 @@ Userop V2
 type UserOperationV07 struct {
 	BaseUserOperation
 	AccountGasLimit string `json:"account_gas_limit" binding:"required"`
+	GasFees         []byte `json:"gasFees" binding:"required"`
 }
 
 func (userOp *UserOperationV07) GetEntrypointVersion() types.EntrypointVersion {
@@ -245,7 +295,9 @@ func (userOp *UserOperationV07) GetSender() *common.Address {
 func (userOp *UserOperationV07) GetCallData() []byte {
 	return userOp.CallData
 }
-
+func (userOp *UserOperationV07) GetNonce() *big.Int {
+	return userOp.Nonce
+}
 func (userOp *UserOperationV07) PackUserOp() (string, []byte, error) {
 	panic("should never call v0.0.7 userOpPack")
 }
@@ -258,14 +310,23 @@ func (userOp *UserOperationV07) PackUserOp() (string, []byte, error) {
 //	    keccak256(userOp.initCode),
 //	    keccak256(userOp.callData),
 //	    userOp.accountGasLimits,
-//	    userOp.paymasterAndData[:PAYMASTER_DATA_OFFSET + 56],
+//	    uint256(bytes32(userOp.paymasterAndData[PAYMASTER_VALIDATION_GAS_OFFSET : PAYMASTER_DATA_OFFSET])),
 //	    userOp.preVerificationGas,
 //	    userOp.gasFees,
 //	    block.chainid,
 //	    address(this)
 //	)
 func (userOp *UserOperationV07) GetUserOpHash(strategy *model.Strategy) ([]byte, string, error) {
-	return nil, "", nil
+	paymasterDataMock := "d93349Ee959d295B115Ee223aF10EF432A8E8523000000000000000000000000000000000000000000000000000000001710044496000000000000000000000000000000000000000000000000000000174158049605bea0bfb8539016420e76749fda407b74d3d35c539927a45000156335643827672fa359ee968d72db12d4b4768e8323cd47443505ab138a525c1f61c6abdac501"
+	byteRes, err := UserOpV07GetHashArguments.Pack(userOp.Sender, userOp.Nonce, crypto.Keccak256(userOp.InitCode),
+		crypto.Keccak256(userOp.CallData), userOp.AccountGasLimit,
+		paymasterDataMock, userOp.PreVerificationGas, userOp.GasFees, conf.GetChainId(strategy.GetNewWork()), strategy.GetPaymasterAddress())
+	if err != nil {
+		return nil, "", err
+	}
+	userOpHash := crypto.Keccak256(byteRes)
+	afterProcessUserOphash := utils.ToEthSignedMessageHash(userOpHash)
+	return afterProcessUserOphash, hex.EncodeToString(byteRes), nil
 }
 
 func GetIndex(hexString string) int64 {
