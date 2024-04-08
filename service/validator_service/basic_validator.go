@@ -2,7 +2,7 @@ package validator_service
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/common/network"
+	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"github.com/ethereum/go-ethereum/common"
@@ -56,7 +56,7 @@ func ValidateUserOp(userOpParam *userop.BaseUserOp, strategy *model.Strategy) er
 	//validate trusted entrypoint
 	return nil
 }
-func checkSender(userOpParam *userop.BaseUserOp, netWork network.Network) error {
+func checkSender(userOpParam *userop.BaseUserOp, netWork types.Network) error {
 	//check sender
 	userOpValue := *userOpParam
 
@@ -69,7 +69,7 @@ func checkSender(userOpParam *userop.BaseUserOp, netWork network.Network) error 
 	//check balance
 	return nil
 }
-func checkInitCode(initCode []byte, network network.Network) error {
+func checkInitCode(initCode []byte, network types.Network) error {
 	if len(initCode) < 20 {
 		return xerrors.Errorf("initCode length is less than 20 do not have factory address")
 	}

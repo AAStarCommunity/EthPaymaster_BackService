@@ -2,7 +2,7 @@ package operator
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/common/network"
+	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
@@ -123,7 +123,7 @@ func businessParamValidate(request *model.TryPayUserOpRequest) error {
 		return xerrors.Errorf("Token And Network Must Set When ForceStrategyId Is Empty")
 	}
 	if conf.Environment.IsDevelopment() && request.ForceNetwork != "" {
-		if network.TestNetWork[request.ForceNetwork] {
+		if types.TestNetWork[request.ForceNetwork] {
 			return xerrors.Errorf(" %s not the Test Network ", request.ForceNetwork)
 		}
 	}

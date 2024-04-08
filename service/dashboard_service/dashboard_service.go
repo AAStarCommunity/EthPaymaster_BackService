@@ -2,7 +2,6 @@ package dashboard_service
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"errors"
 	"github.com/ethereum/go-ethereum/common"
@@ -19,7 +18,7 @@ func init() {
 	MockStrategyMap["1"] = &model.Strategy{
 		Id: "1",
 		NetWorkInfo: &model.NetWorkInfo{
-			NetWork: network.Sepolia,
+			NetWork: types.Sepolia,
 			Token:   types.ETH,
 		},
 		EntryPointInfo: &model.EntryPointInfo{
@@ -45,7 +44,7 @@ func GetStrategyById(strategyId string) *model.Strategy {
 func GetSupportEntryPoint() {
 
 }
-func GetSuitableStrategy(entrypoint string, chain network.Network, token string) (*model.Strategy, error) {
+func GetSuitableStrategy(entrypoint string, chain types.Network, token string) (*model.Strategy, error) {
 	return nil, errors.New("not implemented")
 }
 func IsEntryPointsSupport(address string) bool {

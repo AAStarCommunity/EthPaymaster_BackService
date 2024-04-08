@@ -2,7 +2,6 @@ package conf
 
 import (
 	contract_erc20 "AAStarCommunity/EthPaymaster_BackService/common/contract/erc20"
-	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/ethereum/go-ethereum/common"
@@ -17,9 +16,9 @@ func init() {
 }
 
 type BusinessConfig struct {
-	NetworkConfigMap  map[network.Network]*NetWorkConfig `json:"network_config"`
-	SupportEntryPoint map[network.Network]*mapset.Set[string]
-	SupportPaymaster  map[network.Network]*mapset.Set[string]
+	NetworkConfigMap  map[types.Network]*NetWorkConfig `json:"network_config"`
+	SupportEntryPoint map[types.Network]*mapset.Set[string]
+	SupportPaymaster  map[types.Network]*mapset.Set[string]
 }
 type NetWorkConfig struct {
 	ChainId     *big.Int                            `json:"chain_id"`
@@ -30,20 +29,20 @@ type NetWorkConfig struct {
 	GasToken    types.TokenType
 }
 
-func GetTokenAddress(networkParam network.Network, tokenParam types.TokenType) *common.Address {
+func GetTokenAddress(networkParam types.Network, tokenParam types.TokenType) *common.Address {
 	networkConfig := BasicConfig.NetworkConfigMap[networkParam]
 	return networkConfig.TokenConfig[tokenParam]
 }
-func CheckEntryPointExist(network2 network.Network, address string) bool {
+func CheckEntryPointExist(network2 types.Network, address string) bool {
 	return true
 
 }
-func GetGasToken(networkParam network.Network) types.TokenType {
+func GetGasToken(networkParam types.Network) types.TokenType {
 	networkConfig := BasicConfig.NetworkConfigMap[networkParam]
 	return networkConfig.GasToken
 }
 
-func GetChainId(newworkParam network.Network) *big.Int {
+func GetChainId(newworkParam types.Network) *big.Int {
 	networkConfig := BasicConfig.NetworkConfigMap[newworkParam]
 	return networkConfig.ChainId
 }

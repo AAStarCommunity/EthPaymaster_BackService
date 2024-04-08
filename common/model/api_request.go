@@ -1,20 +1,20 @@
 package model
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/network"
+	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"errors"
 	"golang.org/x/xerrors"
 )
 
 type TryPayUserOpRequest struct {
-	ForceStrategyId        string          `json:"force_strategy_id"`
-	ForceNetwork           network.Network `json:"force_network"`
-	ForceToken             string          `json:"force_token"`
-	ForceEntryPointAddress string          `json:"force_entrypoint_address"`
-	UserOp                 map[string]any  `json:"user_operation"`
-	Extra                  interface{}     `json:"extra"`
-	OnlyEstimateGas        bool            `json:"only_estimate_gas"`
+	ForceStrategyId        string         `json:"force_strategy_id"`
+	ForceNetwork           types.Network  `json:"force_network"`
+	ForceToken             string         `json:"force_token"`
+	ForceEntryPointAddress string         `json:"force_entrypoint_address"`
+	UserOp                 map[string]any `json:"user_operation"`
+	Extra                  interface{}    `json:"extra"`
+	OnlyEstimateGas        bool           `json:"only_estimate_gas"`
 }
 
 func (request *TryPayUserOpRequest) Validate() error {
@@ -27,7 +27,7 @@ func (request *TryPayUserOpRequest) Validate() error {
 		return xerrors.Errorf("Token And Network Must Set When ForceStrategyId Is Empty")
 	}
 	if conf.Environment.IsDevelopment() && request.ForceNetwork != "" {
-		if network.TestNetWork[request.ForceNetwork] {
+		if types.TestNetWork[request.ForceNetwork] {
 			return xerrors.Errorf(" %s not the Test Network ", request.ForceNetwork)
 		}
 	}

@@ -1,7 +1,6 @@
 package model
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"math/big"
 )
@@ -19,7 +18,7 @@ type TryPayUserOpResponse struct {
 type ComputeGasResponse struct {
 	GasInfo    *GasPrice       `json:"gas_info"`
 	TokenCost  *big.Float      `json:"token_cost"`
-	Network    network.Network `json:"network"`
+	Network    types.Network   `json:"network"`
 	Token      types.TokenType `json:"tokens"`
 	UsdCost    float64         `json:"usd_cost"`
 	BlobEnable bool            `json:"blob_enable"`
@@ -34,10 +33,10 @@ type GetSupportEntryPointResponse struct {
 	EntrypointDomains *[]EntrypointDomain `json:"entrypoints"`
 }
 type EntrypointDomain struct {
-	Address    string          `json:"address"`
-	Desc       string          `json:"desc"`
-	NetWork    network.Network `json:"network"`
-	StrategyId string          `json:"strategy_id"`
+	Address    string        `json:"address"`
+	Desc       string        `json:"desc"`
+	NetWork    types.Network `json:"network"`
+	StrategyId string        `json:"strategy_id"`
 }
 
 type GetSupportStrategyResponse struct {

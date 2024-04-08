@@ -12,13 +12,13 @@ import (
 
 const balanceOfAbi = `[{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}]`
 
-func CheckContractAddressAccess(contract *common.Address, chain network.Network) (bool, error) {
+func CheckContractAddressAccess(contract *common.Address, chain types.Network) (bool, error) {
 	executor := network.GetEthereumExecutor(chain)
 	return executor.CheckContractAddressAccess(contract)
 }
 
 // GetGasPrice return gas price in wei, gwei, ether
-func GetGasPrice(chain network.Network) (*model.GasPrice, error) {
+func GetGasPrice(chain types.Network) (*model.GasPrice, error) {
 	ethereumExecutor := network.GetEthereumExecutor(chain)
 	return ethereumExecutor.GetCurGasPrice()
 	//TODO starknet
@@ -31,7 +31,7 @@ func EstimateUserOpGas(strategy *model.Strategy, op *userop.BaseUserOp) (uint64,
 	ethereumExecutor := network.GetEthereumExecutor(strategy.GetNewWork())
 	return ethereumExecutor.EstimateUserOpGas(strategy.GetEntryPointAddress(), op)
 }
-func GetAddressTokenBalance(networkParam network.Network, address common.Address, tokenTypeParam types.TokenType) (float64, error) {
+func GetAddressTokenBalance(networkParam types.Network, address common.Address, tokenTypeParam types.TokenType) (float64, error) {
 	executor := network.GetEthereumExecutor(networkParam)
 	bananceResult, err := executor.GetUserTokenBalance(address, tokenTypeParam)
 	if err != nil {

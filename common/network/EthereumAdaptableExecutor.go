@@ -21,15 +21,15 @@ var EthWeiFactor = new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), big.Ne
 type EthereumExecutor struct {
 	BaseExecutor
 	Client  *ethclient.Client
-	network Network
+	network types.Network
 }
 
-func GetEthereumExecutor(network Network) *EthereumExecutor {
+func GetEthereumExecutor(network types.Network) *EthereumExecutor {
 	return nil
 }
 
 var TokenContractCache map[*common.Address]*contract_erc20.Contract
-var ClientCache map[Network]*ethclient.Client
+var ClientCache map[types.Network]*ethclient.Client
 
 func init() {
 	TokenContractCache = make(map[*common.Address]*contract_erc20.Contract)
