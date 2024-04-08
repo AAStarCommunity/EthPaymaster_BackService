@@ -32,11 +32,6 @@ func ValidateStrategy(strategy *model.Strategy) error {
 }
 
 func ValidateUserOp(userOpParam *userop.BaseUserOp, strategy *model.Strategy) error {
-	//recall simulate?
-	//UserOp Validate
-	//check nonce
-
-	//
 	if err := checkSender(userOpParam, strategy.GetNewWork()); err != nil {
 		return err
 	}
@@ -44,17 +39,11 @@ func ValidateUserOp(userOpParam *userop.BaseUserOp, strategy *model.Strategy) er
 	if !userOpValue.GetNonce().IsInt64() {
 		return xerrors.Errorf("nonce is not in uint64 range")
 	}
-
 	return userOpValue.ValidateUserOp()
-
 	//If initCode is not empty, parse its first 20 bytes as a factory address. Record whether the factory is staked, in case the later simulation indicates that it needs to be. If the factory accesses global state, it must be staked - see reputation, throttling and banning section for details.
 	//The verificationGasLimit is sufficiently low (<= MAX_VERIFICATION_GAS) and the preVerificationGas is sufficiently high (enough to pay for the calldata gas cost of serializing the UserOperationV06 plus PRE_VERIFICATION_OVERHEAD_GAS)
-	//
-
-	//validate trusted entrypoint
 }
 func checkSender(userOpParam *userop.BaseUserOp, netWork types.Network) error {
-	//check sender
 	userOpValue := *userOpParam
 	checkOk, checkSenderErr := chain_service.CheckContractAddressAccess(userOpValue.GetSender(), netWork)
 	if !checkOk {
@@ -62,7 +51,6 @@ func checkSender(userOpParam *userop.BaseUserOp, netWork types.Network) error {
 			return xerrors.Errorf("%s and %s", checkSenderErr.Error(), err.Error())
 		}
 	}
-	//check balance
 	return nil
 }
 func checkInitCode(initCode []byte, network types.Network) error {
@@ -75,9 +63,6 @@ func checkInitCode(initCode []byte, network types.Network) error {
 	} else if !ok {
 		return xerrors.Errorf("factoryAddress address [factoryAddress] not exist in [%s] network", network)
 	}
-	//parse its first 20 bytes as a factory address. Record whether the factory is staked,
-	//factory and factoryData - either both exist, or none
-
 	//parse its first 20 bytes as a factory address. Record whether the factory is staked,
 	//factory and factoryData - either both exist, or none
 	return nil
