@@ -23,11 +23,15 @@ func ValidateStrategy(strategy *model.Strategy) error {
 		return xerrors.Errorf("empty strategy network")
 	}
 	// check Paymaster
-	ok, err := chain_service.CheckContractAddressAccess(strategy.GetPaymasterAddress(), strategy.GetNewWork())
-	if !ok || err != nil {
+	_, err := chain_service.CheckContractAddressAccess(strategy.GetPaymasterAddress(), strategy.GetNewWork())
+	if err != nil {
 		return err
 	}
 	// check EntryPoint
+	_, err = chain_service.CheckContractAddressAccess(strategy.GetEntryPointAddress(), strategy.GetNewWork())
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

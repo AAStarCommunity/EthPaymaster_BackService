@@ -41,7 +41,6 @@ func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserO
 //sub Function ---------
 
 func prepareExecute(request *model.TryPayUserOpRequest) (*userop.BaseUserOp, *model.Strategy, error) {
-
 	if err := businessParamValidate(request); err != nil {
 		return nil, nil, err
 	}

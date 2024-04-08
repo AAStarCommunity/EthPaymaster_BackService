@@ -13,6 +13,7 @@ import (
 const balanceOfAbi = `[{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}]`
 
 func CheckContractAddressAccess(contract *common.Address, chain types.Network) (bool, error) {
+	//todo needcache
 	executor := network.GetEthereumExecutor(chain)
 	return executor.CheckContractAddressAccess(contract)
 }
