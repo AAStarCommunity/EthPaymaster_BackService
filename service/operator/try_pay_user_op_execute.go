@@ -2,10 +2,8 @@ package operator
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
-	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"AAStarCommunity/EthPaymaster_BackService/paymaster_pay_type"
 	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/gas_service"
@@ -41,9 +39,7 @@ func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserO
 //sub Function ---------
 
 func prepareExecute(request *model.TryPayUserOpRequest) (*userop.BaseUserOp, *model.Strategy, error) {
-	if err := businessParamValidate(request); err != nil {
-		return nil, nil, err
-	}
+
 	var strategy *model.Strategy
 
 	strategy, generateErr := strategyGenerate(request)
@@ -115,22 +111,6 @@ func postExecute(userOp *userop.BaseUserOp, strategy *model.Strategy, gasRespons
 		GasInfo:            gasResponse,
 	}
 	return result, nil
-}
-
-func businessParamValidate(request *model.TryPayUserOpRequest) error {
-	if request.ForceStrategyId == "" && (request.ForceToken == "" || request.ForceNetwork == "") {
-		return xerrors.Errorf("Token And Network Must Set When ForceStrategyId Is Empty")
-	}
-	if conf.Environment.IsDevelopment() && request.ForceNetwork != "" {
-		if types.TestNetWork[request.ForceNetwork] {
-			return xerrors.Errorf(" %s not the Test Network ", request.ForceNetwork)
-		}
-	}
-	exist := conf.CheckEntryPointExist(request.ForceNetwork, request.ForceEntryPointAddress)
-	if !exist {
-		return xerrors.Errorf("ForceEntryPointAddress: [%s] not exist in [%s] network", request.ForceEntryPointAddress, request.ForceNetwork)
-	}
-	return nil
 }
 
 func getPayMasterAndData(strategy *model.Strategy, userOp *userop.BaseUserOp, gasResponse *model.ComputeGasResponse) (string, string, error) {

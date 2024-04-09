@@ -11,6 +11,7 @@ var StableCoinSet mapset.Set[TokenType]
 //var StableCoinMap map[TokenType]bool
 
 func init() {
+	StableCoinSet = mapset.NewSet[TokenType]()
 	StableCoinSet.Add(USDT)
 	StableCoinSet.Add(USDC)
 

@@ -319,10 +319,10 @@ func (userOp *UserOperationV07) PackUserOp() (string, []byte, error) {
 //	    address(this)
 //	)
 func (userOp *UserOperationV07) GetUserOpHash(strategy *model.Strategy) ([]byte, string, error) {
-	paymasterDataMock := "d93349Ee959d295B115Ee223aF10EF432A8E8523000000000000000000000000000000000000000000000000000000001710044496000000000000000000000000000000000000000000000000000000174158049605bea0bfb8539016420e76749fda407b74d3d35c539927a45000156335643827672fa359ee968d72db12d4b4768e8323cd47443505ab138a525c1f61c6abdac501"
+	paymasterGasValue := userOp.PaymasterPostOpGasLimit + userOp.PaymasterVerificationGasLimit
 	byteRes, err := UserOpV07GetHashArguments.Pack(userOp.Sender, userOp.Nonce, crypto.Keccak256(userOp.InitCode),
 		crypto.Keccak256(userOp.CallData), userOp.AccountGasLimit,
-		paymasterDataMock, userOp.PreVerificationGas, userOp.GasFees, conf.GetChainId(strategy.GetNewWork()), strategy.GetPaymasterAddress())
+		paymasterGasValue, userOp.PreVerificationGas, userOp.GasFees, conf.GetChainId(strategy.GetNewWork()), strategy.GetPaymasterAddress())
 	if err != nil {
 		return nil, "", err
 	}

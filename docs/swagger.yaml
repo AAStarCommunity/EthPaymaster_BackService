@@ -15,6 +15,8 @@ definitions:
         type: string
       force_token:
         type: string
+      only_estimate_gas:
+        type: boolean
       user_operation:
         additionalProperties: {}
         type: object

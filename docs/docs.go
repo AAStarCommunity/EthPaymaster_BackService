@@ -180,6 +180,9 @@ const docTemplate = `{
                 "force_token": {
                     "type": "string"
                 },
+                "only_estimate_gas": {
+                    "type": "boolean"
+                },
                 "user_operation": {
                     "type": "object",
                     "additionalProperties": {}
