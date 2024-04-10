@@ -59,6 +59,26 @@
         "USDT": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0",
         "USDC": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"
       }
+    },
+    "scroll-sepolia": {
+      "chain_id": "534351",
+      "is_test": true,
+      "rpc_url": "https://sepolia-rpc.scroll.io",
+      "api_key": "",
+      "token_config": {
+        "USDT": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0",
+        "USDC": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"
+      }
+    },
+    "scroll": {
+      "chain_id": "534351",
+      "is_test": false,
+      "rpc_url": "https://rpc.scroll.io",
+      "api_key": "",
+      "token_config": {
+        "USDT": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0",
+        "USDC": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"
+      }
     }
   },
   "support_entrypoint": {

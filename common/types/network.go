@@ -20,10 +20,12 @@ type NetworkInfo struct {
 type Network string
 
 const (
-	Ethereum    Network = "ethereum"
-	Sepolia     Network = "sepolia"
-	Optimism    Network = "optimism"
-	ArbitrumOne Network = "arbitrum-one"
-	ArbTest     Network = "arb-sepolia"
-	Starknet    Network = "starknet"
+	Ethereum        Network = "ethereum"
+	Sepolia         Network = "sepolia"
+	Optimism        Network = "optimism"
+	Optimismsepolia Network = "optimism-sepolia"
+	ArbitrumOne     Network = "arbitrum-one"
+	ArbitrumSeplia  Network = "arbitrum-sepolia"
+	ScrollSepolia   Network = "scroll-sepolia"
+	Starknet        Network = "starknet"
 )
