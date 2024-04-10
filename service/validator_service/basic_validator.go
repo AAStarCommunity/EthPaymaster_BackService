@@ -40,6 +40,8 @@ func ValidateUserOp(userOpParam *userop.BaseUserOp, strategy *model.Strategy) er
 	return userOpValue.ValidateUserOp()
 	//If initCode is not empty, parse its first 20 bytes as a factory address. Record whether the factory is staked, in case the later simulation indicates that it needs to be. If the factory accesses global state, it must be staked - see reputation, throttling and banning section for details.
 	//The verificationGasLimit is sufficiently low (<= MAX_VERIFICATION_GAS) and the preVerificationGas is sufficiently high (enough to pay for the calldata gas cost of serializing the UserOperationV06 plus PRE_VERIFICATION_OVERHEAD_GAS)
+
+	//TODO secure check https://github.com/eth-infinitism/account-abstraction/blob/develop/erc/ERCS/erc-7562.md
 }
 func checkSender(userOpParam *userop.BaseUserOp, netWork types.Network) error {
 	userOpValue := *userOpParam
