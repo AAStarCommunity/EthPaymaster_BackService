@@ -85,11 +85,19 @@
     "Ethereum": [
       "0x1",
       "0x2"
+    ],
+    "Sepolia": [
+      "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+      "0x2"
     ]
   },
   "support_paymaster": {
     "Ethereum": [
       "0x1",
+      "0x2"
+    ],
+    "Sepolia": [
+      "0x0000000000325602a77416A16136FDafd04b299f",
       "0x2"
     ]
   }
