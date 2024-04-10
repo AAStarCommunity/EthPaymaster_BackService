@@ -29,14 +29,14 @@ func GetEthereumExecutor(network types.Network) *EthereumExecutor {
 }
 
 var TokenContractCache map[*common.Address]*contract_erc20.Contract
-var ClientCache map[types.Network]*ethclient.Client
 
 func init() {
 	TokenContractCache = make(map[*common.Address]*contract_erc20.Contract)
 }
 func (executor EthereumExecutor) GetUserTokenBalance(userAddress common.Address, token types.TokenType) (*big.Int, error) {
-	tokenAddress := conf.GetTokenAddress(executor.network, token)
-	tokenInstance, err := executor.GetTokenContract(tokenAddress)
+	tokenAddress := conf.GetTokenAddress(executor.network, token) //TODO
+	ethTokenAddress := common.HexToAddress(tokenAddress)
+	tokenInstance, err := executor.GetTokenContract(&ethTokenAddress)
 	if err != nil {
 		return nil, err
 	}

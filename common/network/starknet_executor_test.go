@@ -2,20 +2,21 @@ package network
 
 import (
 	"context"
-	starknetRpc "github.com/NethermindEth/starknet.go/rpc"
+	"fmt"
+	"github.com/NethermindEth/starknet.go/rpc"
 	"testing"
 )
 
 func TestDemo(t *testing.T) {
-	starkProvider, err := starknetRpc.NewProvider("")
+	starkProvider, err := rpc.NewProvider("https://starknet-sepolia.g.alchemy.com/v2/uuXjaVAZy6-uzgoobtYd1IIX-IfjvXBc")
 	if err != nil {
 		t.Errorf("Error: %v", err)
 		return
 	}
-	chainId, err := starkProvider.ChainID(context.Background())
-	if err != nil {
-		t.Errorf("Error: %v", err)
+	chainId, chainIdError := starkProvider.ChainID(context.Background())
+	if chainIdError != nil {
+		t.Errorf("Error: %v", chainIdError)
 		return
 	}
-	t.Logf("Chain ID: %v", chainId)
+	fmt.Println(chainId)
 }

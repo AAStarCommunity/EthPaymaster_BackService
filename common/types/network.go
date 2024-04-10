@@ -27,9 +27,3 @@ const (
 	ArbTest     Network = "arb-sepolia"
 	Starknet    Network = "starknet"
 )
-
-var TestNetWork = map[Network]bool{}
-
-func init() {
-	TestNetWork[Sepolia] = true
-}

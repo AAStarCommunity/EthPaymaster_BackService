@@ -27,9 +27,9 @@ func (request *TryPayUserOpRequest) Validate() error {
 		return xerrors.Errorf("Token And Network Must Set When ForceStrategyId Is Empty")
 	}
 	if conf.Environment.IsDevelopment() && request.ForceNetwork != "" {
-		if types.TestNetWork[request.ForceNetwork] {
-			return xerrors.Errorf(" %s not the Test Network ", request.ForceNetwork)
-		}
+		//if types.TestNetWork[request.ForceNetwork] {
+		//	return xerrors.Errorf(" %s not the Test Network ", request.ForceNetwork)
+		//}
 	}
 	exist := conf.CheckEntryPointExist(request.ForceNetwork, request.ForceEntryPointAddress)
 	if !exist {

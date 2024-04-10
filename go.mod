@@ -3,6 +3,7 @@ module AAStarCommunity/EthPaymaster_BackService
 go 1.22.1
 
 require (
+	github.com/NethermindEth/starknet.go v0.7.0
 	github.com/appleboy/gin-jwt/v2 v2.9.2
 	github.com/deckarep/golang-set/v2 v2.6.0
 	github.com/ethereum/go-ethereum v1.13.14
@@ -18,7 +19,13 @@ require (
 	golang.org/x/time v0.5.0
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028
 	k8s.io/apimachinery v0.29.3
- 	github.com/NethermindEth/starknet.go v0.7.0
+)
+
+require (
+	github.com/NethermindEth/juno v0.3.1 // indirect
+	github.com/fxamacker/cbor/v2 v2.4.0 // indirect
+	github.com/test-go/testify v1.1.4 // indirect
+	github.com/x448/float16 v0.8.4 // indirect
 )
 
 require (
