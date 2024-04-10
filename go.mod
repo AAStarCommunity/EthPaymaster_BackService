@@ -18,7 +18,7 @@ require (
 	golang.org/x/time v0.5.0
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028
 	k8s.io/apimachinery v0.29.3
-
+ 	github.com/NethermindEth/starknet.go v0.7.0
 )
 
 require (
