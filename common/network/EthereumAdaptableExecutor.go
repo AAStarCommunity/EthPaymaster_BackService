@@ -1,7 +1,7 @@
 package network
 
 import (
-	contract_erc20 "AAStarCommunity/EthPaymaster_BackService/common/contract/erc20"
+	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/erc20"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"

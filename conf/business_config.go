@@ -1,7 +1,7 @@
 package conf
 
 import (
-	contract_erc20 "AAStarCommunity/EthPaymaster_BackService/common/contract/erc20"
+	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/erc20"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/ethereum/go-ethereum/common"
