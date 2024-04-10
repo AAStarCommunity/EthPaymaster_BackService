@@ -1,7 +1,7 @@
 package ethereum
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/validator/chain"
+	"AAStarCommunity/EthPaymaster_BackService/service/validator_service/chain"
 )
 
 type Validator struct {
