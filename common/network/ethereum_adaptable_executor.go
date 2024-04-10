@@ -13,10 +13,13 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"golang.org/x/xerrors"
 	"math/big"
+	"sync"
 )
 
 var GweiFactor = new(big.Float).SetInt(big.NewInt(1e9))
 var EthWeiFactor = new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil))
+var once sync.Once
+var executorMap map[types.Network]*EthereumExecutor = make(map[types.Network]*EthereumExecutor)
 
 type EthereumExecutor struct {
 	BaseExecutor
@@ -25,7 +28,20 @@ type EthereumExecutor struct {
 }
 
 func GetEthereumExecutor(network types.Network) *EthereumExecutor {
-	return nil
+	once.Do(func() {
+		if executorMap[network] == nil {
+			client, err := ethclient.Dial(conf.GetEthereumRpcUrl(network))
+			if err != nil {
+				panic(err)
+			}
+
+			executorMap[network] = &EthereumExecutor{
+				network: network,
+				Client:  client,
+			}
+		}
+	})
+	return executorMap[network]
 }
 
 var TokenContractCache map[*common.Address]*contract_erc20.Contract

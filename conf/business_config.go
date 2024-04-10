@@ -112,3 +112,7 @@ func GetChainId(newworkParam types.Network) string {
 	networkConfig := BasicConfig.NetworkConfigMap[newworkParam]
 	return networkConfig.ChainId
 }
+func GetEthereumRpcUrl(network types.Network) string {
+	networkConfig := BasicConfig.NetworkConfigMap[network]
+	return networkConfig.RpcUrl
+}
