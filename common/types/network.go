@@ -20,10 +20,12 @@ type NetworkInfo struct {
 type Network string
 
 const (
-	Ethereum Network = "ethereum"
-	Sepolia  Network = "sepolia"
-	Arbitrum Network = "arbitrum"
-	ArbTest  Network = "arb-sepolia"
+	Ethereum    Network = "ethereum"
+	Sepolia     Network = "sepolia"
+	Optimism    Network = "optimism"
+	ArbitrumOne Network = "arbitrum-one"
+	ArbTest     Network = "arb-sepolia"
+	Starknet    Network = "starknet"
 )
 
 var TestNetWork = map[Network]bool{}

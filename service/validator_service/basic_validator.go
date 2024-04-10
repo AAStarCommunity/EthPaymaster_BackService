@@ -7,14 +7,8 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/xerrors"
-	"math/big"
 )
 
-var MinPreVerificationGas *big.Int
-
-func init() {
-	MinPreVerificationGas = big.NewInt(21000)
-}
 func ValidateStrategy(strategy *model.Strategy) error {
 	if strategy == nil {
 		return xerrors.Errorf("empty strategy")

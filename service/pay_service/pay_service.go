@@ -24,3 +24,21 @@ func (e *EthereumPayService) Pay() error {
 	//TODO implement me
 	return nil
 }
+
+type StarkNetPayService struct {
+}
+
+func (s StarkNetPayService) Pay() error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s StarkNetPayService) RecordAccount() {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s StarkNetPayService) getReceipt() {
+	//TODO implement me
+	panic("implement me")
+}

@@ -31,10 +31,10 @@ require (
 	github.com/chenzhuoyu/iasm v0.9.1 // indirect
 	github.com/consensys/bavard v0.1.13 // indirect
 	github.com/consensys/gnark-crypto v0.12.1 // indirect
-	github.com/crate-crypto/go-kzg-4844 v0.7.0 // indirect
+	github.com/crate-crypto/go-kzg-4844 v0.7.0 // indirect; indirect(force degrade)
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.3.0 // indirect
-	github.com/ethereum/c-kzg-4844 v0.4.0 // indirect
+	github.com/ethereum/c-kzg-4844 v0.4.0 // indirect; indirect (force degrade)
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
