@@ -28,4 +28,5 @@ const (
 	ArbitrumSeplia  Network = "arbitrum-sepolia"
 	ScrollSepolia   Network = "scroll-sepolia"
 	Starknet        Network = "starknet"
+	StarknetSepolia Network = "starknet-sepolia"
 )
