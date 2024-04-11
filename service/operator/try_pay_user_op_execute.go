@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserOpResponse, error) {
+func TryPayUserOpExecute(request *model.UserOpRequest) (*model.TryPayUserOpResponse, error) {
 	userOp, strategy, err := prepareExecute(request)
 	if err != nil {
 		return nil, err
@@ -38,11 +38,11 @@ func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.TryPayUserO
 
 //sub Function ---------
 
-func prepareExecute(request *model.TryPayUserOpRequest) (*userop.BaseUserOp, *model.Strategy, error) {
+func prepareExecute(request *model.UserOpRequest) (*userop.BaseUserOp, *model.Strategy, error) {
 
 	var strategy *model.Strategy
 
-	strategy, generateErr := strategyGenerate(request)
+	strategy, generateErr := StrategyGenerate(request)
 	if generateErr != nil {
 		return nil, nil, generateErr
 	}
@@ -161,7 +161,7 @@ func getUserOpHashSign(userOpHash []byte) ([]byte, error) {
 	return hex.DecodeString(signatureAfterProcess)
 }
 
-func strategyGenerate(request *model.TryPayUserOpRequest) (*model.Strategy, error) {
+func StrategyGenerate(request *model.UserOpRequest) (*model.Strategy, error) {
 	if forceStrategyId := request.ForceStrategyId; forceStrategyId != "" {
 		//force strategy
 		if strategy := dashboard_service.GetStrategyById(forceStrategyId); strategy == nil {

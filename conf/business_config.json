@@ -1,6 +1,6 @@
 {
   "network_config": {
-    "Ethereum": {
+    "ethereum": {
       "chain_id": "1",
       "is_test": false,
       "rpc_url": "https://eth-mainnet.g.alchemy.com/v2",
@@ -10,7 +10,7 @@
         "USDC": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"
       }
     },
-    "Sepolia": {
+    "sepolia": {
       "chain_id": "11155111",
       "is_test": true,
       "rpc_url": "https://eth-sepolia.g.alchemy.com/v2",
@@ -99,24 +99,44 @@
         "USDT": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0",
         "USDC": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"
       }
+    },
+    "base": {
+      "chain_id": "8453",
+      "is_test": false,
+      "rpc_url": "https://starknet-mainnet.g.alchemy.com/v2",
+      "api_key": "suCMhzhev596v1NCDOhhJzbR3KJ4CfZz",
+      "token_config": {
+        "USDT": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0",
+        "USDC": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"
+      }
+    },
+    "base-sepolia": {
+      "chain_id": "84532",
+      "is_test": false,
+      "rpc_url": "https://starknet-mainnet.g.alchemy.com/v2",
+      "api_key": "suCMhzhev596v1NCDOhhJzbR3KJ4CfZz",
+      "token_config": {
+        "USDT": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0",
+        "USDC": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"
+      }
     }
   },
   "support_entrypoint": {
-    "Ethereum": [
+    "ethereum": [
       "0x1",
       "0x2"
     ],
-    "Sepolia": [
+    "sepolia": [
       "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
       "0x2"
     ]
   },
   "support_paymaster": {
-    "Ethereum": [
+    "ethereum": [
       "0x1",
       "0x2"
     ],
-    "Sepolia": [
+    "sepolia": [
       "0x0000000000325602a77416A16136FDafd04b299f",
       "0x2"
     ]

@@ -6,6 +6,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
+	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"AAStarCommunity/EthPaymaster_BackService/paymaster_pay_type"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"golang.org/x/xerrors"
@@ -74,7 +75,8 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 
 func getTokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Float, error) {
 	if strategy.GetPayType() == types.PayTypeERC20 {
-		formTokenType := chain_service.NetworkInfoMap[strategy.GetNewWork()].GasToken
+
+		formTokenType := conf.GetGasToken(strategy.GetNewWork())
 		toTokenType := strategy.GetUseToken()
 		toTokenPrice, err := utils.GetToken(formTokenType, toTokenType)
 		if err != nil {

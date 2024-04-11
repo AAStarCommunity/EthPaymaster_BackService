@@ -7,17 +7,17 @@ import (
 	"golang.org/x/xerrors"
 )
 
-type TryPayUserOpRequest struct {
+type UserOpRequest struct {
 	ForceStrategyId        string         `json:"force_strategy_id"`
 	ForceNetwork           types.Network  `json:"force_network"`
 	ForceToken             string         `json:"force_token"`
 	ForceEntryPointAddress string         `json:"force_entrypoint_address"`
 	UserOp                 map[string]any `json:"user_operation"`
 	Extra                  interface{}    `json:"extra"`
-	OnlyEstimateGas        bool           `json:"only_estimate_gas"`
+	EstimateOpGas          bool           `json:"estimate_op_gas"`
 }
 
-func (request *TryPayUserOpRequest) Validate() error {
+func (request *UserOpRequest) Validate() error {
 	if len(request.ForceStrategyId) == 0 {
 		if len(request.ForceNetwork) == 0 || len(request.ForceToken) == 0 || len(request.ForceEntryPointAddress) == 0 {
 			return errors.New("strategy configuration illegal")
@@ -27,9 +27,9 @@ func (request *TryPayUserOpRequest) Validate() error {
 		return xerrors.Errorf("Token And Network Must Set When ForceStrategyId Is Empty")
 	}
 	if conf.Environment.IsDevelopment() && request.ForceNetwork != "" {
-		//if types.TestNetWork[request.ForceNetwork] {
-		//	return xerrors.Errorf(" %s not the Test Network ", request.ForceNetwork)
-		//}
+		if !conf.IsTestNet(request.ForceNetwork) {
+			return xerrors.Errorf("ForceNetwork: [%s] is not test network", request.ForceNetwork)
+		}
 	}
 	exist := conf.CheckEntryPointExist(request.ForceNetwork, request.ForceEntryPointAddress)
 	if !exist {

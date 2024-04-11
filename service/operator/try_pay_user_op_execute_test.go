@@ -24,8 +24,8 @@ func TestTryPayUserOpExecute(t *testing.T) {
 	fmt.Printf("Result: %v", string(resultJson))
 }
 
-func getMockTryPayUserOpRequest() *model.TryPayUserOpRequest {
-	return &model.TryPayUserOpRequest{
+func getMockTryPayUserOpRequest() *model.UserOpRequest {
+	return &model.UserOpRequest{
 		ForceStrategyId: "1",
 		UserOp:          *utils.GenerateMockUserOperation(),
 	}

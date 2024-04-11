@@ -116,3 +116,17 @@ func GetEthereumRpcUrl(network types.Network) string {
 	networkConfig := BasicConfig.NetworkConfigMap[network]
 	return networkConfig.RpcUrl
 }
+
+var (
+	testNetWork = mapset.NewSet(
+		types.Sepolia, types.OptimismSepolia, types.ArbitrumSeplia, types.ScrollSepolia, types.StarknetSepolia, types.BaseSepolia)
+	opeStackNetWork = mapset.NewSet(
+		types.Optimism, types.OptimismSepolia, types.Base, types.BaseSepolia)
+)
+
+func IsTestNet(network types.Network) bool {
+	return testNetWork.Contains(network)
+}
+func IsOpStackNetWork(network types.Network) bool {
+	return opeStackNetWork.Contains(network)
+}

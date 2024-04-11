@@ -6,27 +6,19 @@ type NetworkInfo struct {
 	GasToken TokenType `json:"gas_token"`
 }
 
-//newworkConfig : chainId,GasToken, name, is_test,
-//newwork clinetconfig : name, rpc_url, apikey,
-
-//type Chain string
-//
-//const (
-//	Ethereum Chain = "Ethereum"
-//	Arbitrum Chain = "Arbitrum"
-//	Optimism Chain = "Optimism"
-//)
-
 type Network string
 
 const (
 	Ethereum        Network = "ethereum"
 	Sepolia         Network = "sepolia"
 	Optimism        Network = "optimism"
-	Optimismsepolia Network = "optimism-sepolia"
+	OptimismSepolia Network = "optimism-sepolia"
 	ArbitrumOne     Network = "arbitrum-one"
 	ArbitrumSeplia  Network = "arbitrum-sepolia"
+	Scroll          Network = "scroll"
 	ScrollSepolia   Network = "scroll-sepolia"
 	Starknet        Network = "starknet"
 	StarknetSepolia Network = "starknet-sepolia"
+	Base            Network = "base"
+	BaseSepolia     Network = "base-sepolia"
 )

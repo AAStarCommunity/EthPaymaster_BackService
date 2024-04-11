@@ -8,35 +8,30 @@ import (
 	"net/http"
 )
 
-// TryPayUserOperation
+// EstimateUserOpGas
 // @Tags Sponsor
-// @Description sponsor the userOp
+// @Description get the estimate gas of the userOp
 // @Accept json
 // @Product json
-// @Router /api/v1/try-pay-user-operation [POST]
+// @Router /api/v1/estimate-user-operation-gas [POST]
 // @Param tryPay body model.UserOpRequest true "UserOp Request"
 // @Success 200
 // @Security JWT
-func TryPayUserOperation(c *gin.Context) {
+func EstimateUserOpGas(c *gin.Context) {
 	request := model.UserOpRequest{}
 	response := model.GetResponse()
-
-	//1. API validate
 	if err := c.ShouldBindJSON(&request); err != nil {
 		errStr := fmt.Sprintf("Request Error [%v]", err)
 		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
 		return
 	}
-
 	if err := request.Validate(); err != nil {
 		errStr := fmt.Sprintf("Request Error [%v]", err)
 		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
 		return
 	}
-
-	//2. recall service
-	if result, err := operator.TryPayUserOpExecute(&request); err != nil {
-		errStr := fmt.Sprintf("TryPayUserOpExecute ERROR [%v]", err)
+	if result, err := operator.GetEstimateUserOpGas(&request); err != nil {
+		errStr := fmt.Sprintf("GetEstimateUserOpGas ERROR [%v]", err)
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)
 		return
 	} else {
