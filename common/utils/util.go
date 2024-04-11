@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/ethereum/go-ethereum/crypto"
+	"math/big"
 	"regexp"
 	"strconv"
 )
@@ -90,4 +91,7 @@ func SupplyZero(prefix string, maxTo int) string {
 		prefix = fmt.Sprintf("%0*s", maxTo, prefix)
 	}
 	return prefix
+}
+func IsLessThanZero(value *big.Int) bool {
+	//TODO
 }

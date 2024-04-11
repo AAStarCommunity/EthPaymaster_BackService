@@ -192,10 +192,14 @@ type BaseUserOperation struct {
 // preVerificationGas
 type UserOperationV06 struct {
 	BaseUserOperation
-	MaxFeePerGas         *big.Int `json:"maxFeePerGas"  mapstructure:"max_fee_per_gas"  binding:"required"`
-	CallGasLimit         *big.Int `json:"callGasLimit"  mapstructure:"call_gas_limit"  binding:"required"`
-	VerificationGasLimit *big.Int `json:"verificationGasLimit"  mapstructure:"verification_gas_limit"  binding:"required"`
+	//Maximum fee per gas (similar to EIP-1559  max_fee_per_gas)
+	MaxFeePerGas *big.Int `json:"maxFeePerGas"  mapstructure:"max_fee_per_gas"  binding:"required"`
+	//Maximum priority fee per gas (similar to EIP-1559 max_priority_fee_per_gas)
 	MaxPriorityFeePerGas *big.Int `json:"maxPriorityFeePerGas"  mapstructure:"max_priority_fee_per_gas"  binding:"required"`
+	//Gas limit for execution phase
+	CallGasLimit *big.Int `json:"callGasLimit"  mapstructure:"call_gas_limit"  binding:"required"`
+	//Gas limit for verification phase
+	VerificationGasLimit *big.Int `json:"verificationGasLimit"  mapstructure:"verification_gas_limit"  binding:"required"`
 }
 
 func (userOp *UserOperationV06) GetEntrypointVersion() types.EntrypointVersion {

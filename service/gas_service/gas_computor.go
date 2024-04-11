@@ -22,18 +22,33 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 	userOpValue := *userOp
 	var maxFeePriceInEther *big.Float
 	var maxFee *big.Int
-	estimateCallGasLimit, err := chain_service.EstimateUserOpGas(strategy, userOp)
-	if err != nil {
-		return nil, err
-	}
+	opEstimateGas := model.UserOpEstimateGas{}
 	switch userOpValue.GetEntrypointVersion() {
 	case types.EntrypointV06:
 		{
+			// Get MaxFeePerGas And MaxPriorityFeePerGas
+			// if MaxFeePerGas <=0 use recommend gas price
 			useropV6Value := userOpValue.(*userop.UserOperationV06)
+			if utils.IsLessThanZero(useropV6Value.MaxFeePerGas) {
+				useropV6Value.MaxFeePerGas = gasPrice.MaxBasePriceWei
+			}
+			if utils.IsLessThanZero(useropV6Value.MaxPriorityFeePerGas) {
+				useropV6Value.MaxPriorityFeePerGas = gasPrice.MaxPriorityPriceWei
+			}
+			opEstimateGas.MaxFeePerGas = useropV6Value.MaxFeePerGas
+			opEstimateGas.MaxPriorityFeePerGas = useropV6Value.MaxPriorityFeePerGas
+
+			// TODO Get verificationGasLimit callGasLimit
+			estimateCallGasLimit, err := chain_service.EstimateUserOpGas(strategy, userOp)
+			if err != nil {
+				return nil, err
+			}
 			userOpCallGasLimit := useropV6Value.CallGasLimit.Uint64()
 			if estimateCallGasLimit > userOpCallGasLimit*12/10 {
 				return nil, xerrors.Errorf("estimateCallGasLimit %d > userOpCallGasLimit %d", estimateCallGasLimit, userOpCallGasLimit)
 			}
+
+			// TODO  Get PreVerificationGas
 
 			payMasterPostGasLimit := GetPayMasterGasLimit()
 			maxGasLimit := big.NewInt(0).Add(useropV6Value.CallGasLimit, useropV6Value.VerificationGasLimit)
@@ -64,12 +79,13 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 
 	// TODO get PaymasterCallGasLimit
 	return &model.ComputeGasResponse{
-		GasInfo:   gasPrice,
-		TokenCost: tokenCost,
-		Network:   strategy.GetNewWork(),
-		Token:     strategy.GetUseToken(),
-		UsdCost:   usdCost,
-		MaxFee:    *maxFee,
+		GasInfo:       gasPrice,
+		TokenCost:     tokenCost,
+		OpEstimateGas: &opEstimateGas,
+		Network:       strategy.GetNewWork(),
+		Token:         strategy.GetUseToken(),
+		UsdCost:       usdCost,
+		MaxFee:        *maxFee,
 	}, nil
 }
 
