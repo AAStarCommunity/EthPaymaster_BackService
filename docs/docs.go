@@ -61,6 +61,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/estimate-user-operation-gas": {
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "get the estimate gas of the userOp",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sponsor"
+                ],
+                "parameters": [
+                    {
+                        "description": "UserOp Request",
+                        "name": "tryPay",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.UserOpRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/v1/get-support-entrypoint": {
             "get": {
                 "security": [
@@ -143,7 +175,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.TryPayUserOpRequest"
+                            "$ref": "#/definitions/model.UserOpRequest"
                         }
                     }
                 ],
@@ -164,9 +196,12 @@ const docTemplate = `{
                 }
             }
         },
-        "model.TryPayUserOpRequest": {
+        "model.UserOpRequest": {
             "type": "object",
             "properties": {
+                "estimate_op_gas": {
+                    "type": "boolean"
+                },
                 "extra": {},
                 "force_entrypoint_address": {
                     "type": "string"
@@ -180,9 +215,6 @@ const docTemplate = `{
                 "force_token": {
                     "type": "string"
                 },
-                "only_estimate_gas": {
-                    "type": "boolean"
-                },
                 "user_operation": {
                     "type": "object",
                     "additionalProperties": {}
@@ -194,14 +226,30 @@ const docTemplate = `{
             "enum": [
                 "ethereum",
                 "sepolia",
-                "arbitrum",
-                "arb-sepolia"
+                "optimism",
+                "optimism-sepolia",
+                "arbitrum-one",
+                "arbitrum-sepolia",
+                "scroll",
+                "scroll-sepolia",
+                "starknet",
+                "starknet-sepolia",
+                "base",
+                "base-sepolia"
             ],
             "x-enum-varnames": [
                 "Ethereum",
                 "Sepolia",
-                "Arbitrum",
-                "ArbTest"
+                "Optimism",
+                "OptimismSepolia",
+                "ArbitrumOne",
+                "ArbitrumSeplia",
+                "Scroll",
+                "ScrollSepolia",
+                "Starknet",
+                "StarknetSepolia",
+                "Base",
+                "BaseSepolia"
             ]
         }
     },

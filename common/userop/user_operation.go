@@ -272,6 +272,11 @@ func (userOp *UserOperationV06) PackUserOp() (string, []byte, error) {
 	return hexString, encoded, nil
 }
 
+// return
+func (userOp *UserOperationV06) EstimateGasLimit(strategy *model.Strategy) (uint64, uint64, error) {
+	return 0, 0, nil
+}
+
 /**
 Userop V2
 **/
@@ -279,10 +284,10 @@ Userop V2
 // UserOperationV07  entrypoint v0.0.7
 type UserOperationV07 struct {
 	BaseUserOperation
-	AccountGasLimit               string `json:"account_gas_limit" binding:"required"`
-	PaymasterVerificationGasLimit string `json:"paymaster_verification_gas_limit" binding:"required"`
-	PaymasterPostOpGasLimit       string `json:"paymaster_post_op_gas_limit" binding:"required"`
-	GasFees                       []byte `json:"gasFees" binding:"required"`
+	AccountGasLimit               *big.Int `json:"account_gas_limit" binding:"required"`
+	PaymasterVerificationGasLimit *big.Int `json:"paymaster_verification_gas_limit" binding:"required"`
+	PaymasterPostOpGasLimit       *big.Int `json:"paymaster_post_op_gas_limit" binding:"required"`
+	GasFees                       []byte   `json:"gasFees" binding:"required"`
 }
 
 func (userOp *UserOperationV07) GetEntrypointVersion() types.EntrypointVersion {
@@ -323,7 +328,8 @@ func (userOp *UserOperationV07) PackUserOp() (string, []byte, error) {
 //	    address(this)
 //	)
 func (userOp *UserOperationV07) GetUserOpHash(strategy *model.Strategy) ([]byte, string, error) {
-	paymasterGasValue := userOp.PaymasterPostOpGasLimit + userOp.PaymasterVerificationGasLimit
+	//TODO
+	paymasterGasValue := userOp.PaymasterPostOpGasLimit.Text(20) + userOp.PaymasterVerificationGasLimit.Text(20)
 	byteRes, err := UserOpV07GetHashArguments.Pack(userOp.Sender, userOp.Nonce, crypto.Keccak256(userOp.InitCode),
 		crypto.Keccak256(userOp.CallData), userOp.AccountGasLimit,
 		paymasterGasValue, userOp.PreVerificationGas, userOp.GasFees, conf.GetChainId(strategy.GetNewWork()), strategy.GetPaymasterAddress())

@@ -24,6 +24,7 @@ func TryPayUserOpExecute(request *model.UserOpRequest) (*model.TryPayUserOpRespo
 	if err != nil {
 		return nil, err
 	}
+
 	payReceipt, err := executePay(strategy, userOp, gasResponse)
 	if err != nil {
 		return nil, err

@@ -2,7 +2,6 @@ package gas_service
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
@@ -29,38 +28,44 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 			// Get MaxFeePerGas And MaxPriorityFeePerGas
 			// if MaxFeePerGas <=0 use recommend gas price
 			useropV6Value := userOpValue.(*userop.UserOperationV06)
-			if utils.IsLessThanZero(useropV6Value.MaxFeePerGas) {
-				useropV6Value.MaxFeePerGas = gasPrice.MaxBasePriceWei
-			}
-			if utils.IsLessThanZero(useropV6Value.MaxPriorityFeePerGas) {
-				useropV6Value.MaxPriorityFeePerGas = gasPrice.MaxPriorityPriceWei
-			}
 			opEstimateGas.MaxFeePerGas = useropV6Value.MaxFeePerGas
 			opEstimateGas.MaxPriorityFeePerGas = useropV6Value.MaxPriorityFeePerGas
-
+			if utils.IsLessThanZero(useropV6Value.MaxFeePerGas) {
+				opEstimateGas.MaxFeePerGas = gasPrice.MaxBasePriceWei
+			}
+			if utils.IsLessThanZero(useropV6Value.MaxPriorityFeePerGas) {
+				opEstimateGas.MaxPriorityFeePerGas = gasPrice.MaxPriorityPriceWei
+			}
 			// TODO Get verificationGasLimit callGasLimit
-			estimateCallGasLimit, err := chain_service.EstimateUserOpGas(strategy, userOp)
+			//estimateCallGasLimit, err := chain_service.EstimateUserOpGas(strategy, userOp)
+			//if err != nil {
+			//	return nil, err
+			//}
+			//if estimateCallGasLimit > userOpCallGasLimit*12/10 {
+			//	return nil, xerrors.Errorf("estimateCallGasLimit %d > userOpCallGasLimit %d", estimateCallGasLimit, userOpCallGasLimit)
+			//}
+			useropV6Value.MaxFeePerGas = opEstimateGas.MaxFeePerGas
+			useropV6Value.MaxPriorityFeePerGas = opEstimateGas.MaxPriorityFeePerGas
+
+			verficationGasLimit, callGasLimit, err := useropV6Value.EstimateGasLimit(strategy)
 			if err != nil {
 				return nil, err
 			}
-			userOpCallGasLimit := useropV6Value.CallGasLimit.Uint64()
-			if estimateCallGasLimit > userOpCallGasLimit*12/10 {
-				return nil, xerrors.Errorf("estimateCallGasLimit %d > userOpCallGasLimit %d", estimateCallGasLimit, userOpCallGasLimit)
-			}
+			opEstimateGas.VerificationGasLimit = big.NewInt(int64(verficationGasLimit))
+			opEstimateGas.CallGasLimit = big.NewInt(int64(callGasLimit))
 
 			// TODO  Get PreVerificationGas
 
-			payMasterPostGasLimit := GetPayMasterGasLimit()
-			maxGasLimit := big.NewInt(0).Add(useropV6Value.CallGasLimit, useropV6Value.VerificationGasLimit)
-			maxGasLimit = maxGasLimit.Add(maxGasLimit, payMasterPostGasLimit)
-			maxFee = new(big.Int).Mul(maxGasLimit, gasPrice.MaxBasePriceWei)
-			maxFeePriceInEther = new(big.Float).SetInt(maxFee)
-			maxFeePriceInEther.Quo(maxFeePriceInEther, network.EthWeiFactor)
+			// over UserOp
+
+			useropV6Value.VerificationGasLimit = opEstimateGas.VerificationGasLimit
+			useropV6Value.CallGasLimit = opEstimateGas.CallGasLimit
 		}
 		break
 	case types.EntryPointV07:
 		{
-
+			useropV7Value := userOpValue.(*userop.UserOperationV07)
+			useropV7Value.PaymasterVerificationGasLimit = opEstimateGas.PaymasterVerificationGasLimit
 		}
 		break
 
@@ -106,10 +111,6 @@ func getTokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Float, 
 	}
 	return tokenCount, nil
 
-}
-func GetPayMasterGasLimit() *big.Int {
-	//TODO
-	return big.NewInt(0)
 }
 
 func ValidateGas(userOp *userop.BaseUserOp, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {

@@ -4,8 +4,10 @@ definitions:
       apiKey:
         type: string
     type: object
-  model.TryPayUserOpRequest:
+  model.UserOpRequest:
     properties:
+      estimate_op_gas:
+        type: boolean
       extra: {}
       force_entrypoint_address:
         type: string
@@ -15,8 +17,6 @@ definitions:
         type: string
       force_token:
         type: string
-      only_estimate_gas:
-        type: boolean
       user_operation:
         additionalProperties: {}
         type: object
@@ -25,14 +25,30 @@ definitions:
     enum:
     - ethereum
     - sepolia
-    - arbitrum
-    - arb-sepolia
+    - optimism
+    - optimism-sepolia
+    - arbitrum-one
+    - arbitrum-sepolia
+    - scroll
+    - scroll-sepolia
+    - starknet
+    - starknet-sepolia
+    - base
+    - base-sepolia
     type: string
     x-enum-varnames:
     - Ethereum
     - Sepolia
-    - Arbitrum
-    - ArbTest
+    - Optimism
+    - OptimismSepolia
+    - ArbitrumOne
+    - ArbitrumSeplia
+    - Scroll
+    - ScrollSepolia
+    - Starknet
+    - StarknetSepolia
+    - Base
+    - BaseSepolia
 info:
   contact:
     name: AAStar Support
@@ -65,6 +81,25 @@ paths:
           description: OK
       tags:
       - Healthz
+  /api/v1/estimate-user-operation-gas:
+    post:
+      consumes:
+      - application/json
+      description: get the estimate gas of the userOp
+      parameters:
+      - description: UserOp Request
+        in: body
+        name: tryPay
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserOpRequest'
+      responses:
+        "200":
+          description: OK
+      security:
+      - JWT: []
+      tags:
+      - Sponsor
   /api/v1/get-support-entrypoint:
     get:
       consumes:
@@ -112,7 +147,7 @@ paths:
         name: tryPay
         required: true
         schema:
-          $ref: '#/definitions/model.TryPayUserOpRequest'
+          $ref: '#/definitions/model.UserOpRequest'
       responses:
         "200":
           description: OK
