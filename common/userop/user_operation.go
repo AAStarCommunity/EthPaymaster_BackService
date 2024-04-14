@@ -175,6 +175,7 @@ type BaseUserOp interface {
 	GetInitCode() []byte
 	GetCallData() []byte
 	GetNonce() *big.Int
+	GetFactoryAddress() *common.Address
 }
 type BaseUserOperation struct {
 	Sender             *common.Address `json:"sender"   mapstructure:"sender"  binding:"required,hexParam"`
@@ -222,6 +223,10 @@ func (userop *UserOperationV06) GetInitCode() []byte {
 }
 func (userOp *UserOperationV06) GetNonce() *big.Int {
 	return userOp.Nonce
+}
+func (userOp *UserOperationV06) GetFactoryAddress() *common.Address {
+	//TODO
+	return nil
 }
 func (userOp *UserOperationV06) GetUserOpHash(strategy *model.Strategy) ([]byte, string, error) {
 	packUserOpStr, _, err := userOp.PackUserOp()
@@ -276,6 +281,9 @@ func (userOp *UserOperationV06) PackUserOp() (string, []byte, error) {
 func (userOp *UserOperationV06) EstimateGasLimit(strategy *model.Strategy) (uint64, uint64, error) {
 	return 0, 0, nil
 }
+func getVerificationGasLimit(strategy *model.Strategy, userOp *UserOperationV06) (uint64, error) {
+	return 0, nil
+}
 
 /**
 Userop V2
@@ -296,6 +304,10 @@ func (userOp *UserOperationV07) GetEntrypointVersion() types.EntrypointVersion {
 func (userOp *UserOperationV07) ValidateUserOp() error {
 	return nil
 
+}
+func (userOp *UserOperationV07) GetFactoryAddress() *common.Address {
+	//TODO
+	return nil
 }
 func (userOp *UserOperationV07) GetInitCode() []byte {
 	return userOp.InitCode

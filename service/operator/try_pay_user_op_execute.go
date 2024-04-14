@@ -20,16 +20,16 @@ func TryPayUserOpExecute(request *model.UserOpRequest) (*model.TryPayUserOpRespo
 	if err != nil {
 		return nil, err
 	}
-	gasResponse, err := estimateGas(userOp, strategy)
+	gasResponse, paymasterUserOp, err := estimateGas(userOp, strategy)
 	if err != nil {
 		return nil, err
 	}
 
-	payReceipt, err := executePay(strategy, userOp, gasResponse)
+	payReceipt, err := executePay(strategy, paymasterUserOp, gasResponse)
 	if err != nil {
 		return nil, err
 	}
-	result, err := postExecute(userOp, strategy, gasResponse)
+	result, err := postExecute(paymasterUserOp, strategy, gasResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -62,18 +62,18 @@ func prepareExecute(request *model.UserOpRequest) (*userop.BaseUserOp, *model.St
 	return userOp, strategy, nil
 }
 
-func estimateGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.ComputeGasResponse, error) {
+func estimateGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.ComputeGasResponse, *userop.BaseUserOp, error) {
 	//base Strategy and UserOp computeGas
-	gasResponse, gasComputeError := gas_service.ComputeGas(userOp, strategy)
+	gasResponse, paymasterUserOp, gasComputeError := gas_service.ComputeGas(*userOp, strategy)
 	if gasComputeError != nil {
-		return nil, gasComputeError
+		return nil, nil, gasComputeError
 	}
 	//The maxFeePerGas and maxPriorityFeePerGas are above a configurable minimum value that the client is willing to accept. At the minimum, they are sufficiently high to be included with the current block.basefee.
 	//validate gas
 	if err := gas_service.ValidateGas(userOp, gasResponse, strategy); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return gasResponse, nil
+	return gasResponse, paymasterUserOp, nil
 }
 
 func executePay(strategy *model.Strategy, userOp *userop.BaseUserOp, gasResponse *model.ComputeGasResponse) (*model.PayReceipt, error) {

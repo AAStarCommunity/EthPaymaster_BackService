@@ -89,11 +89,24 @@ func (executor EthereumExecutor) EstimateUserOpGas(entrypointAddress *common.Add
 	client := executor.Client
 	userOpValue := *userOpParam
 	userOpValue.GetSender()
-	userOpValue.GetSender()
 	res, err := client.EstimateGas(context.Background(), ethereum.CallMsg{
 		From: *entrypointAddress,
 		To:   userOpValue.GetSender(),
 		Data: userOpValue.GetCallData(),
+	})
+	if err != nil {
+		return 0, err
+	}
+	return res, nil
+}
+func (executor EthereumExecutor) EstimateCreateSenderGas(entrypointAddress *common.Address, userOpParam *userop.BaseUserOp) (uint64, error) {
+	client := executor.Client
+	userOpValue := *userOpParam
+	userOpValue.GetSender()
+	res, err := client.EstimateGas(context.Background(), ethereum.CallMsg{
+		From: *entrypointAddress,
+		To:   userOpValue.GetFactoryAddress(),
+		Data: userOpValue.GetInitCode(),
 	})
 	if err != nil {
 		return 0, err

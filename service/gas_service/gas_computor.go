@@ -12,22 +12,23 @@ import (
 	"math/big"
 )
 
-func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.ComputeGasResponse, error) {
+// https://blog.particle.network/bundler-predicting-gas/
+func ComputeGas(userOp userop.BaseUserOp, strategy *model.Strategy) (*model.ComputeGasResponse, *userop.BaseUserOp, error) {
 	gasPrice, gasPriceErr := chain_service.GetGasPrice(strategy.GetNewWork())
 	//TODO calculate the maximum possible fee the account needs to pay (based on validation and call gas limits, and current gas values)
 	if gasPriceErr != nil {
-		return nil, gasPriceErr
+		return nil, nil, gasPriceErr
 	}
-	userOpValue := *userOp
+	paymasterUserOp := userOp
 	var maxFeePriceInEther *big.Float
 	var maxFee *big.Int
 	opEstimateGas := model.UserOpEstimateGas{}
-	switch userOpValue.GetEntrypointVersion() {
+	switch paymasterUserOp.GetEntrypointVersion() {
 	case types.EntrypointV06:
 		{
 			// Get MaxFeePerGas And MaxPriorityFeePerGas
 			// if MaxFeePerGas <=0 use recommend gas price
-			useropV6Value := userOpValue.(*userop.UserOperationV06)
+			useropV6Value := paymasterUserOp.(*userop.UserOperationV06)
 			opEstimateGas.MaxFeePerGas = useropV6Value.MaxFeePerGas
 			opEstimateGas.MaxPriorityFeePerGas = useropV6Value.MaxPriorityFeePerGas
 			if utils.IsLessThanZero(useropV6Value.MaxFeePerGas) {
@@ -49,7 +50,7 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 
 			verficationGasLimit, callGasLimit, err := useropV6Value.EstimateGasLimit(strategy)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			opEstimateGas.VerificationGasLimit = big.NewInt(int64(verficationGasLimit))
 			opEstimateGas.CallGasLimit = big.NewInt(int64(callGasLimit))
@@ -64,7 +65,7 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 		break
 	case types.EntryPointV07:
 		{
-			useropV7Value := userOpValue.(*userop.UserOperationV07)
+			useropV7Value := paymasterUserOp.(*userop.UserOperationV07)
 			useropV7Value.PaymasterVerificationGasLimit = opEstimateGas.PaymasterVerificationGasLimit
 		}
 		break
@@ -73,7 +74,7 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 
 	tokenCost, err := getTokenCost(strategy, maxFeePriceInEther)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	var usdCost float64
 	if types.IsStableToken(strategy.GetUseToken()) {
@@ -91,7 +92,7 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 		Token:         strategy.GetUseToken(),
 		UsdCost:       usdCost,
 		MaxFee:        *maxFee,
-	}, nil
+	}, &paymasterUserOp, nil
 }
 
 func getTokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Float, error) {
