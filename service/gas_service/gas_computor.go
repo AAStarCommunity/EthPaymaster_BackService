@@ -38,7 +38,7 @@ func ComputeGas(userOp userop.BaseUserOp, strategy *model.Strategy) (*model.Comp
 				opEstimateGas.MaxPriorityFeePerGas = gasPrice.MaxPriorityPriceWei
 			}
 			// TODO Get verificationGasLimit callGasLimit
-			//estimateCallGasLimit, err := chain_service.EstimateUserOpGas(strategy, userOp)
+			//estimateCallGasLimit, err := chain_service.EstimateUserOpCallGas(strategy, userOp)
 			//if err != nil {
 			//	return nil, err
 			//}

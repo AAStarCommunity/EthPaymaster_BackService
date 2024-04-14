@@ -30,7 +30,7 @@ func GetEntryPointDeposit(entrypoint string, depositAddress string) uint256.Int 
 }
 func EstimateUserOpGas(strategy *model.Strategy, op *userop.BaseUserOp) (uint64, error) {
 	ethereumExecutor := network.GetEthereumExecutor(strategy.GetNewWork())
-	return ethereumExecutor.EstimateUserOpGas(strategy.GetEntryPointAddress(), op)
+	return ethereumExecutor.EstimateUserOpCallGas(strategy.GetEntryPointAddress(), op)
 }
 func GetAddressTokenBalance(networkParam types.Network, address common.Address, tokenTypeParam types.TokenType) (float64, error) {
 	executor := network.GetEthereumExecutor(networkParam)

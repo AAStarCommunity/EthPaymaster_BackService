@@ -85,7 +85,7 @@ func (executor EthereumExecutor) GetTokenContract(tokenAddress *common.Address) 
 	return contract, nil
 }
 
-func (executor EthereumExecutor) EstimateUserOpGas(entrypointAddress *common.Address, userOpParam *userop.BaseUserOp) (uint64, error) {
+func (executor EthereumExecutor) EstimateUserOpCallGas(entrypointAddress *common.Address, userOpParam *userop.BaseUserOp) (uint64, error) {
 	client := executor.Client
 	userOpValue := *userOpParam
 	userOpValue.GetSender()
