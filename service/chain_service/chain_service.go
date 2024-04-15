@@ -5,9 +5,12 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
+	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/holiman/uint256"
+	"golang.org/x/xerrors"
 	"math"
+	"math/big"
 )
 
 const balanceOfAbi = `[{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}]`
@@ -20,9 +23,24 @@ func CheckContractAddressAccess(contract *common.Address, chain types.Network) (
 
 // GetGasPrice return gas price in wei, gwei, ether
 func GetGasPrice(chain types.Network) (*model.GasPrice, error) {
-	ethereumExecutor := network.GetEthereumExecutor(chain)
-	return ethereumExecutor.GetCurGasPrice()
-	//TODO starknet
+	if conf.IsEthereumAdaptableNetWork(chain) {
+		ethereumExecutor := network.GetEthereumExecutor(chain)
+		return ethereumExecutor.GetGasPrice()
+	} else if chain == types.Starknet || chain == types.StarknetSepolia {
+		starknetExecutor := network.GetStarknetExecutor()
+		return starknetExecutor.GetGasPrice()
+	} else {
+		return nil, xerrors.Errorf("chain %s not support", chain)
+	}
+	//MaxFeePerGas
+	//MaxPriorityPrice
+	//preOpGas (get verificationGasLimit from preOpGas)
+	//
+
+}
+func GetCallGasLimit(chain types.Network) (*big.Int, *big.Int, error) {
+	//TODO
+	return nil, nil, nil
 }
 
 func GetEntryPointDeposit(entrypoint string, depositAddress string) uint256.Int {
@@ -42,4 +60,12 @@ func GetAddressTokenBalance(networkParam types.Network, address common.Address, 
 	balanceResultFloat := float64(bananceResult.Int64()) * math.Pow(10, -6)
 	return balanceResultFloat, nil
 
+}
+func SimulateHandleOp(networkParam types.Network) (*model.SimulateHandleOpResult, error) {
+
+	return nil, nil
+
+}
+func GetVertificationGasLimit(chain types.Network) (*big.Int, error) {
+	return nil, nil
 }

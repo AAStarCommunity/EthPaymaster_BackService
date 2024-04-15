@@ -32,7 +32,7 @@ func ComputeGas(userOp userop.BaseUserOp, strategy *model.Strategy) (*model.Comp
 			opEstimateGas.MaxFeePerGas = useropV6Value.MaxFeePerGas
 			opEstimateGas.MaxPriorityFeePerGas = useropV6Value.MaxPriorityFeePerGas
 			if utils.IsLessThanZero(useropV6Value.MaxFeePerGas) {
-				opEstimateGas.MaxFeePerGas = gasPrice.MaxBasePriceWei
+				opEstimateGas.MaxFeePerGas = gasPrice.MaxFeePerGas
 			}
 			if utils.IsLessThanZero(useropV6Value.MaxPriorityFeePerGas) {
 				opEstimateGas.MaxPriorityFeePerGas = gasPrice.MaxPriorityPriceWei

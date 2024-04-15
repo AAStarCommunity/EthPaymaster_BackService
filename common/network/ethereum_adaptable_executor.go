@@ -16,6 +16,7 @@ import (
 	"sync"
 )
 
+var PreVerificationGas = new(big.Int).SetInt64(21000)
 var GweiFactor = new(big.Float).SetInt(big.NewInt(1e9))
 var EthWeiFactor = new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil))
 var once sync.Once
@@ -114,7 +115,7 @@ func (executor EthereumExecutor) EstimateCreateSenderGas(entrypointAddress *comm
 	return res, nil
 }
 
-func (executor EthereumExecutor) GetCurGasPrice() (*model.GasPrice, error) {
+func (executor EthereumExecutor) GetGasPrice() (*model.GasPrice, error) {
 
 	client := executor.Client
 
@@ -127,23 +128,27 @@ func (executor EthereumExecutor) GetCurGasPrice() (*model.GasPrice, error) {
 		return nil, tiperr
 	}
 	result := model.GasPrice{}
-	result.MaxBasePriceWei = priceWei
+	result.MaxFeePerGas = priceWei
 	result.MaxPriorityPriceWei = priorityPriceWei
-
-	gasPriceInGwei := new(big.Float).SetInt(priceWei)
-	gasPriceInGwei.Quo(gasPriceInGwei, GweiFactor)
-	gasPriceInEther := new(big.Float).SetInt(priceWei)
-	gasPriceInEther.Quo(gasPriceInEther, EthWeiFactor)
-	gasPriceInGweiFloat, _ := gasPriceInGwei.Float64()
-	result.MaxBasePriceGwei = gasPriceInGweiFloat
-	result.MaxBasePriceEther = gasPriceInEther
-
-	priorityPriceInGwei := new(big.Float).SetInt(priorityPriceWei)
-	priorityPriceInGwei.Quo(priorityPriceInGwei, GweiFactor)
-	priorityPriceInEther := new(big.Float).SetInt(priorityPriceWei)
-	priorityPriceInEther.Quo(priorityPriceInEther, EthWeiFactor)
-	priorityPriceInGweiFloat, _ := priorityPriceInGwei.Float64()
-	result.MaxPriorityPriceGwei = priorityPriceInGweiFloat
-	result.MaxPriorityPriceEther = gasPriceInEther
 	return &result, nil
+	//
+	//gasPriceInGwei := new(big.Float).SetInt(priceWei)
+	//gasPriceInGwei.Quo(gasPriceInGwei, GweiFactor)
+	//gasPriceInEther := new(big.Float).SetInt(priceWei)
+	//gasPriceInEther.Quo(gasPriceInEther, EthWeiFactor)
+	//gasPriceInGweiFloat, _ := gasPriceInGwei.Float64()
+	//result.MaxBasePriceGwei = gasPriceInGweiFloat
+	//result.MaxBasePriceEther = gasPriceInEther
+	//
+	//priorityPriceInGwei := new(big.Float).SetInt(priorityPriceWei)
+	//priorityPriceInGwei.Quo(priorityPriceInGwei, GweiFactor)
+	//priorityPriceInEther := new(big.Float).SetInt(priorityPriceWei)
+	//priorityPriceInEther.Quo(priorityPriceInEther, EthWeiFactor)
+	//priorityPriceInGweiFloat, _ := priorityPriceInGwei.Float64()
+	//result.MaxPriorityPriceGwei = priorityPriceInGweiFloat
+	//result.MaxPriorityPriceEther = gasPriceInEther
+	//return &result, nil
+}
+func (executor EthereumExecutor) GetPreVerificationGas() (uint64, error) {
+	return PreVerificationGas.Uint64(), nil
 }

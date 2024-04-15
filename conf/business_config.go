@@ -122,6 +122,8 @@ var (
 		types.Sepolia, types.OptimismSepolia, types.ArbitrumSeplia, types.ScrollSepolia, types.StarknetSepolia, types.BaseSepolia)
 	opeStackNetWork = mapset.NewSet(
 		types.Optimism, types.OptimismSepolia, types.Base, types.BaseSepolia)
+	ethereumAdaptableNetWork = mapset.NewSet(
+		types.Optimism, types.OptimismSepolia, types.Sepolia)
 )
 
 func IsTestNet(network types.Network) bool {
@@ -129,4 +131,7 @@ func IsTestNet(network types.Network) bool {
 }
 func IsOpStackNetWork(network types.Network) bool {
 	return opeStackNetWork.Contains(network)
+}
+func IsEthereumAdaptableNetWork(network types.Network) bool {
+	return ethereumAdaptableNetWork.Contains(network)
 }
