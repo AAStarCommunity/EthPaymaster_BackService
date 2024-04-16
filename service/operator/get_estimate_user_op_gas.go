@@ -17,7 +17,7 @@ func GetEstimateUserOpGas(request *model.UserOpRequest) (*model.ComputeGasRespon
 	if err != nil {
 		return nil, err
 	}
-	gasResponse, gasComputeError := gas_service.ComputeGas(userOp, strategy)
+	gasResponse, _, gasComputeError := gas_service.ComputeGas(userOp, strategy)
 	if gasComputeError != nil {
 		return nil, gasComputeError
 	}

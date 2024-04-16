@@ -64,7 +64,7 @@ func prepareExecute(request *model.UserOpRequest) (*userop.BaseUserOp, *model.St
 
 func estimateGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.ComputeGasResponse, *userop.BaseUserOp, error) {
 	//base Strategy and UserOp computeGas
-	gasResponse, paymasterUserOp, gasComputeError := gas_service.ComputeGas(*userOp, strategy)
+	gasResponse, paymasterUserOp, gasComputeError := gas_service.ComputeGas(userOp, strategy)
 	if gasComputeError != nil {
 		return nil, nil, gasComputeError
 	}

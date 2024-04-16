@@ -72,12 +72,13 @@ type OriginBusinessConfig struct {
 	SupportPaymaster  map[types.Network][]string             `json:"support_paymaster"`
 }
 type OriginNetWorkConfig struct {
-	ChainId     string                     `json:"chain_id"`
-	IsTest      bool                       `json:"is_test"`
-	RpcUrl      string                     `json:"rpc_url"`
-	ApiKey      string                     `json:"api_key"`
-	TokenConfig map[types.TokenType]string `json:"token_config"`
-	GasToken    types.TokenType
+	ChainId          string                     `json:"chain_id"`
+	IsTest           bool                       `json:"is_test"`
+	RpcUrl           string                     `json:"rpc_url"`
+	ApiKey           string                     `json:"api_key"`
+	TokenConfig      map[types.TokenType]string `json:"token_config"`
+	GasToken         types.TokenType
+	GasOracleAddress string
 }
 
 type BusinessConfig struct {
@@ -86,11 +87,12 @@ type BusinessConfig struct {
 	SupportPaymaster  map[types.Network]mapset.Set[string] `json:"support_paymaster"`
 }
 type NetWorkConfig struct {
-	ChainId     string                     `json:"chain_id"`
-	IsTest      bool                       `json:"is_test"`
-	RpcUrl      string                     `json:"rpc_url"`
-	TokenConfig map[types.TokenType]string `json:"token_config"`
-	GasToken    types.TokenType
+	ChainId          string                     `json:"chain_id"`
+	IsTest           bool                       `json:"is_test"`
+	RpcUrl           string                     `json:"rpc_url"`
+	TokenConfig      map[types.TokenType]string `json:"token_config"`
+	GasToken         types.TokenType
+	GasOracleAddress common.Address
 }
 
 func GetTokenAddress(networkParam types.Network, tokenParam types.TokenType) string {
@@ -119,11 +121,11 @@ func GetEthereumRpcUrl(network types.Network) string {
 
 var (
 	testNetWork = mapset.NewSet(
-		types.Sepolia, types.OptimismSepolia, types.ArbitrumSeplia, types.ScrollSepolia, types.StarknetSepolia, types.BaseSepolia)
+		types.ETHEREUM_SEPOLIA, types.OPTIMISM_SEPOLIA, types.ARBITRUM_SPEOLIA, types.SCROLL_SEPOLIA, types.STARKET_SEPOLIA, types.BaseSepolia)
 	opeStackNetWork = mapset.NewSet(
-		types.Optimism, types.OptimismSepolia, types.Base, types.BaseSepolia)
+		types.OPTIMISM_MAINNET, types.OPTIMISM_SEPOLIA, types.Base, types.BaseSepolia)
 	ethereumAdaptableNetWork = mapset.NewSet(
-		types.Optimism, types.OptimismSepolia, types.Sepolia)
+		types.OPTIMISM_MAINNET, types.OPTIMISM_SEPOLIA, types.ETHEREUM_SEPOLIA)
 )
 
 func IsTestNet(network types.Network) bool {

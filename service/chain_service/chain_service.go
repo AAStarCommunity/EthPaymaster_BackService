@@ -26,7 +26,7 @@ func GetGasPrice(chain types.Network) (*model.GasPrice, error) {
 	if conf.IsEthereumAdaptableNetWork(chain) {
 		ethereumExecutor := network.GetEthereumExecutor(chain)
 		return ethereumExecutor.GetGasPrice()
-	} else if chain == types.Starknet || chain == types.StarknetSepolia {
+	} else if chain == types.STARKET_MAINNET || chain == types.STARKET_SEPOLIA {
 		starknetExecutor := network.GetStarknetExecutor()
 		return starknetExecutor.GetGasPrice()
 	} else {
@@ -41,6 +41,14 @@ func GetGasPrice(chain types.Network) (*model.GasPrice, error) {
 func GetCallGasLimit(chain types.Network) (*big.Int, *big.Int, error) {
 	//TODO
 	return nil, nil, nil
+}
+
+// GetPreVerificationGas https://github.com/eth-infinitism/bundler/blob/main/packages/sdk/src/calcPreVerificationGas.ts
+func GetPreVerificationGas(chain types.Network) (*big.Int, error) {
+	// Arb https://medium.com/offchainlabs/understanding-arbitrum-2-dimensional-fees-fd1d582596c9.
+	// op
+	//TODO
+	return nil, nil
 }
 
 func GetEntryPointDeposit(entrypoint string, depositAddress string) uint256.Int {

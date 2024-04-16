@@ -13,13 +13,13 @@ import (
 )
 
 // https://blog.particle.network/bundler-predicting-gas/
-func ComputeGas(userOp userop.BaseUserOp, strategy *model.Strategy) (*model.ComputeGasResponse, *userop.BaseUserOp, error) {
+func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.ComputeGasResponse, *userop.BaseUserOp, error) {
 	gasPrice, gasPriceErr := chain_service.GetGasPrice(strategy.GetNewWork())
 	//TODO calculate the maximum possible fee the account needs to pay (based on validation and call gas limits, and current gas values)
 	if gasPriceErr != nil {
 		return nil, nil, gasPriceErr
 	}
-	paymasterUserOp := userOp
+	paymasterUserOp := *userOp
 	var maxFeePriceInEther *big.Float
 	var maxFee *big.Int
 	opEstimateGas := model.UserOpEstimateGas{}
@@ -71,7 +71,8 @@ func ComputeGas(userOp userop.BaseUserOp, strategy *model.Strategy) (*model.Comp
 		break
 
 	}
-
+	preVertificationGas, err := chain_service.GetPreVerificationGas(strategy.GetNewWork())
+	opEstimateGas.PreVerificationGas = preVertificationGas
 	tokenCost, err := getTokenCost(strategy, maxFeePriceInEther)
 	if err != nil {
 		return nil, nil, err

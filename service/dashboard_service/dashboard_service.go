@@ -18,7 +18,7 @@ func init() {
 	MockStrategyMap["1"] = &model.Strategy{
 		Id: "1",
 		NetWorkInfo: &model.NetWorkInfo{
-			NetWork: types.Sepolia,
+			NetWork: types.ETHEREUM_SEPOLIA,
 			Token:   types.ETH,
 		},
 		EntryPointInfo: &model.EntryPointInfo{

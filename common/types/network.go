@@ -9,16 +9,16 @@ type NetworkInfo struct {
 type Network string
 
 const (
-	Ethereum        Network = "ethereum"
-	Sepolia         Network = "sepolia"
-	Optimism        Network = "optimism"
-	OptimismSepolia Network = "optimism-sepolia"
-	ArbitrumOne     Network = "arbitrum-one"
-	ArbitrumSeplia  Network = "arbitrum-sepolia"
-	Scroll          Network = "scroll"
-	ScrollSepolia   Network = "scroll-sepolia"
-	Starknet        Network = "starknet"
-	StarknetSepolia Network = "starknet-sepolia"
-	Base            Network = "base"
-	BaseSepolia     Network = "base-sepolia"
+	ETHEREUM_MAINNET Network = "ethereum"
+	ETHEREUM_SEPOLIA Network = "sepolia"
+	OPTIMISM_MAINNET Network = "optimism"
+	OPTIMISM_SEPOLIA Network = "optimism-sepolia"
+	ARBITRUM_ONE     Network = "arbitrum-one"
+	ARBITRUM_SPEOLIA Network = "arbitrum-sepolia"
+	SCROLL_MAINNET   Network = "scroll"
+	SCROLL_SEPOLIA   Network = "scroll-sepolia"
+	STARKET_MAINNET  Network = "starknet"
+	STARKET_SEPOLIA  Network = "starknet-sepolia"
+	Base             Network = "base"
+	BaseSepolia      Network = "base-sepolia"
 )
