@@ -44,10 +44,10 @@ func GetCallGasLimit(chain types.Network) (*big.Int, *big.Int, error) {
 }
 
 // GetPreVerificationGas https://github.com/eth-infinitism/bundler/blob/main/packages/sdk/src/calcPreVerificationGas.ts
-func GetPreVerificationGas(chain types.Network) (*big.Int, error) {
+func GetPreVerificationGas(chain types.Network, userOp *userop.BaseUserOp, strategy *model.Strategy, gasInfo model.UserOpEstimateGas) (*big.Int, error) {
 	stack := conf.GetNetWorkStack(chain)
 	preGasFunc := network.PreVerificationGasFuncMap[stack]
-	return preGasFunc()
+	return preGasFunc(userOp, strategy)
 }
 
 func GetEntryPointDeposit(entrypoint string, depositAddress string) uint256.Int {

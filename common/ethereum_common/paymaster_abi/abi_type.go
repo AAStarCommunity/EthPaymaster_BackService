@@ -10,7 +10,9 @@ var (
 	Bytes32Type abi.Type
 	Uint48Type  abi.Type
 	Uint256Type abi.Type
+	Uint64Type  abi.Type
 	AddressType abi.Type
+	BooleanType abi.Type
 )
 
 func init() {
@@ -38,9 +40,21 @@ func init() {
 	}
 	Uint256Type = uint256TypeVar
 
+	uint64TypeVar, err := abi.NewType("uint64", "", nil)
+	if err != nil {
+		panic(fmt.Sprintf("[initerror] %s", err))
+	}
+	Uint64Type = uint64TypeVar
+
 	addressType, err := abi.NewType("address", "", nil)
 	if err != nil {
 		panic(fmt.Sprintf("[initerror] %s", err))
 	}
 	AddressType = addressType
+
+	boolTypeVar, err := abi.NewType("bool", "", nil)
+	if err != nil {
+		panic(fmt.Sprintf("[initerror] %s", err))
+	}
+	BooleanType = boolTypeVar
 }

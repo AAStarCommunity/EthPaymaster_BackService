@@ -14,6 +14,7 @@ const (
 	OPTIMISM_MAINNET Network = "optimism"
 	OPTIMISM_SEPOLIA Network = "optimism-sepolia"
 	ARBITRUM_ONE     Network = "arbitrum-one"
+	ARBITRUM_NOVA    Network = "arbitrum-nova"
 	ARBITRUM_SPEOLIA Network = "arbitrum-sepolia"
 	SCROLL_MAINNET   Network = "scroll"
 	SCROLL_SEPOLIA   Network = "scroll-sepolia"

@@ -2,6 +2,7 @@ package network
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/erc20"
+	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/l1_gas_oracle"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
@@ -21,6 +22,11 @@ var GweiFactor = new(big.Float).SetInt(big.NewInt(1e9))
 var EthWeiFactor = new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil))
 var once sync.Once
 var executorMap map[types.Network]*EthereumExecutor = make(map[types.Network]*EthereumExecutor)
+var TokenContractCache map[*common.Address]*contract_erc20.Contract
+
+func init() {
+	TokenContractCache = make(map[*common.Address]*contract_erc20.Contract)
+}
 
 type EthereumExecutor struct {
 	BaseExecutor
@@ -45,11 +51,6 @@ func GetEthereumExecutor(network types.Network) *EthereumExecutor {
 	return executorMap[network]
 }
 
-var TokenContractCache map[*common.Address]*contract_erc20.Contract
-
-func init() {
-	TokenContractCache = make(map[*common.Address]*contract_erc20.Contract)
-}
 func (executor EthereumExecutor) GetUserTokenBalance(userAddress common.Address, token types.TokenType) (*big.Int, error) {
 	tokenAddress := conf.GetTokenAddress(executor.network, token) //TODO
 	ethTokenAddress := common.HexToAddress(tokenAddress)
@@ -157,4 +158,27 @@ func (executor EthereumExecutor) GetPreVerificationGas() (uint64, error) {
 		return 0, nil
 	}
 	return PreVerificationGas.Uint64(), nil
+}
+
+func (executor EthereumExecutor) GetL1DataFee(data []byte) (*big.Int, error) {
+	address := conf.L1GasOracleInL2[executor.network]
+	contract, err := l1_gas_oracle.NewContract(address, executor.Client)
+	if err != nil {
+		return nil, err
+	}
+
+	abi, err := l1_gas_oracle.ContractMetaData.GetAbi()
+	if err != nil {
+		return nil, err
+	}
+	method := abi.Methods["getL1Fee"]
+	input, err := method.Inputs.Pack(data)
+	if err != nil {
+		return nil, err
+	}
+	fee, err := contract.GetL1Fee(nil, input)
+	if err != nil {
+		return nil, err
+	}
+	return fee, nil
 }

@@ -71,8 +71,8 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 		break
 
 	}
-	preVertificationGas, err := chain_service.GetPreVerificationGas(strategy.GetNewWork())
-	opEstimateGas.PreVerificationGas = preVertificationGas
+	preVerificationGas, err := chain_service.GetPreVerificationGas(strategy.GetNewWork(), userOp, strategy, opEstimateGas)
+	opEstimateGas.PreVerificationGas = preVerificationGas
 	tokenCost, err := getTokenCost(strategy, maxFeePriceInEther)
 	if err != nil {
 		return nil, nil, err

@@ -28,6 +28,8 @@ type ComputeGasResponse struct {
 type UserOpEstimateGas struct {
 	//common
 	PreVerificationGas *big.Int `json:"preVerificationGas"`
+
+	BaseFee *big.Int `json:"baseFee"`
 	//v0.6
 	VerificationGasLimit *big.Int `json:"verificationGasLimit"`
 	CallGasLimit         *big.Int `json:"callGasLimit"`

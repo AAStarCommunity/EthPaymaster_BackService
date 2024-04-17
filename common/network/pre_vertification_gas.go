@@ -1,15 +1,18 @@
 package network
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/arbitrum"
+	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
+	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"math"
 	"math/big"
 )
 
 var PreVerificationGasFuncMap = map[types.NewWorkStack]PreVerificationGasFunc{}
 
-type PreVerificationGasFunc = func() (*big.Int, error)
+type PreVerificationGasFunc = func(op *userop.BaseUserOp, strategy *model.Strategy, gasInfo model.UserOpEstimateGas) (*big.Int, error)
 
 func init() {
 	PreVerificationGasFuncMap[types.ARBSTACK] = ArbitrumPreVerificationGasFunc()
@@ -18,19 +21,52 @@ func init() {
 }
 
 // https://medium.com/offchainlabs/understanding-arbitrum-2-dimensional-fees-fd1d582596c9.
+// https://docs.arbitrum.io/build-decentralized-apps/nodeinterface/reference
 func ArbitrumPreVerificationGasFunc() PreVerificationGasFunc {
-	return func() (*big.Int, error) {
+	return func(op *userop.BaseUserOp, strategy *model.Strategy, gasInfo model.UserOpEstimateGas) (*big.Int, error) {
+		base, err := getBasicPreVerificationGas(op, strategy)
+		if err != nil {
+			return nil, err
+		}
+		executor := GetEthereumExecutor(strategy.GetNewWork())
+		estimateOutPut, err := arbitrum.GetEstimateL1ComponentMethod(executor.Client)
+		if err != nil {
+			return nil, err
+		}
+		big.NewInt(0).Add(base, big.NewInt(int64(estimateOutPut.GasEstimateForL1)))
 		return big.NewInt(0), nil
 	}
 }
 func DefaultPreVerificationGasFunc() PreVerificationGasFunc {
-	return func() (*big.Int, error) {
+	return func(op *userop.BaseUserOp, strategy *model.Strategy, gasInfo model.UserOpEstimateGas) (*big.Int, error) {
 		return big.NewInt(0), nil
 	}
 }
+
+// https://docs.optimism.io/builders/app-developers/transactions/estimates#execution-gas-fee
 func OPStackPreVerificationGasFunc() PreVerificationGasFunc {
-	return func() (*big.Int, error) {
-		return big.NewInt(0), nil
+	return func(op *userop.BaseUserOp, strategy *model.Strategy, gasInfo model.UserOpEstimateGas) (*big.Int, error) {
+		basicGas, err := getBasicPreVerificationGas(op, strategy)
+		if err != nil {
+			return nil, err
+		}
+		executor := GetEthereumExecutor(strategy.GetNewWork())
+		data, err := getInputData(op)
+		if err != nil {
+			return nil, err
+		}
+		l1DataFee, err := executor.GetL1DataFee(data)
+		if err != nil {
+			return nil, err
+		}
+		l2Price := gasInfo.MaxFeePerGas
+		l2Piroriry := big.NewInt(0).Add(gasInfo.MaxPriorityFeePerGas, gasInfo.BaseFee)
+		// use smaller one
+		if utils.IsLess(l2Piroriry, l2Piroriry) {
+			l2Price = l2Piroriry
+		}
+		//Return static + L1 buffer as PVG. L1 buffer is equal to L1Fee/L2Price.
+		return big.NewInt(0).Add(basicGas, big.NewInt(0).Mul(l1DataFee, l2Price)), nil
 	}
 }
 
@@ -41,11 +77,12 @@ func OPStackPreVerificationGasFunc() PreVerificationGasFunc {
  * @param userOp filled userOp to calculate. The only possible missing fields can be the signature and preVerificationGas itself
  * @param overheads gas overheads to use, to override the default values
  */
-func getBasicPreVerificationGas(op userop.BaseUserOp) (*big.Int, error) {
-	op.SetPreVerificationGas(types.DUMMAY_PREVERIFICATIONGAS_BIGINT)
-	op.SetSignature(types.DUMMY_SIGNATURE_BYTE)
+func getBasicPreVerificationGas(op *userop.BaseUserOp, strategy *model.Strategy) (*big.Int, error) {
+	//op.SetPreVerificationGas(types.DUMMAY_PREVERIFICATIONGAS_BIGINT)
+	//op.SetSignature(types.DUMMY_SIGNATURE_BYTE)
 	//Simulate the `packUserOp(p)` function and return a byte slice.
-	_, userOPPack, err := op.PackUserOpForMock()
+	opValue := *op
+	_, userOPPack, err := opValue.PackUserOpForMock()
 	if err != nil {
 		return nil, err
 	}
@@ -64,4 +101,8 @@ func getBasicPreVerificationGas(op userop.BaseUserOp) (*big.Int, error) {
 	result := new(big.Int)
 	floatVal.Int(result)
 	return result, err
+}
+
+func getInputData(op *userop.BaseUserOp) ([]byte, error) {
+	return nil, nil
 }

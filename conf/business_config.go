@@ -1,7 +1,6 @@
 package conf
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/erc20"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"encoding/json"
 	"fmt"
@@ -11,7 +10,6 @@ import (
 )
 
 var BasicConfig *BusinessConfig
-var TokenContractCache map[common.Address]contract_erc20.Contract
 
 func init() {
 	originConfig := initBusinessConfig()
@@ -129,7 +127,7 @@ var (
 	ArbStackNetWork = mapset.NewSet(
 		types.ARBITRUM_SPEOLIA, types.ARBITRUM_ONE)
 
-	L1GasOracleInL2 = &map[types.Network]common.Address{
+	L1GasOracleInL2 = map[types.Network]common.Address{
 		types.OPTIMISM_MAINNET: common.HexToAddress("0x420000000000000000000000000000000000000F"),
 	}
 )

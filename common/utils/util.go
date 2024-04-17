@@ -96,3 +96,6 @@ func IsLessThanZero(value *big.Int) bool {
 	return false
 	//TODO
 }
+func IsLess(a *big.Int, b *big.Int) bool {
+	return a.Cmp(b) < 0
+}
