@@ -16,6 +16,31 @@ var (
 	DUMMAY_PREVERIFICATIONGAS_BIGINT = big.NewInt(DUMMYPREVERIFICATIONGAS)
 )
 
+var GasOverHand = struct {
+	//fixed overhead for entire handleOp bundle.
+	Fixed float64
+	//per userOp overhead, added on top of the above fixed per-bundle
+	PerUserOp float64
+	//overhead for userOp word (32 bytes) block
+	PerUserOpWord float64
+	//zero byte cost, for calldata gas cost calculations
+	ZeroByte float64
+	//non-zero byte cost, for calldata gas cost calculations
+	NonZeroByte float64
+	//expected bundle size, to split per-bundle overhead between all ops.
+	BundleSize float64
+	//expected length of the userOp signature.
+	sigSize float64
+}{
+	Fixed:         21000,
+	PerUserOp:     18300,
+	PerUserOpWord: 4,
+	ZeroByte:      4,
+	NonZeroByte:   16,
+	BundleSize:    1,
+	sigSize:       65,
+}
+
 func init() {
 	signatureByte, err := hex.DecodeString(DUMMY_SIGNATURE[2:])
 	if err != nil {

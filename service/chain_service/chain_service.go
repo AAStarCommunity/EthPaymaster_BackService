@@ -45,7 +45,6 @@ func GetCallGasLimit(chain types.Network) (*big.Int, *big.Int, error) {
 
 // GetPreVerificationGas https://github.com/eth-infinitism/bundler/blob/main/packages/sdk/src/calcPreVerificationGas.ts
 func GetPreVerificationGas(chain types.Network) (*big.Int, error) {
-
 	stack := conf.GetNetWorkStack(chain)
 	preGasFunc := network.PreVerificationGasFuncMap[stack]
 	return preGasFunc()
