@@ -120,20 +120,39 @@ func GetEthereumRpcUrl(network types.Network) string {
 }
 
 var (
-	testNetWork = mapset.NewSet(
+	TestNetWork = mapset.NewSet(
 		types.ETHEREUM_SEPOLIA, types.OPTIMISM_SEPOLIA, types.ARBITRUM_SPEOLIA, types.SCROLL_SEPOLIA, types.STARKET_SEPOLIA, types.BaseSepolia)
-	opeStackNetWork = mapset.NewSet(
+	OpeStackNetWork = mapset.NewSet(
 		types.OPTIMISM_MAINNET, types.OPTIMISM_SEPOLIA, types.Base, types.BaseSepolia)
-	ethereumAdaptableNetWork = mapset.NewSet(
+	EthereumAdaptableNetWork = mapset.NewSet(
 		types.OPTIMISM_MAINNET, types.OPTIMISM_SEPOLIA, types.ETHEREUM_SEPOLIA)
+	ArbStackNetWork = mapset.NewSet(
+		types.ARBITRUM_SPEOLIA, types.ARBITRUM_ONE)
+
+	L1GasOracleInL2 = &map[types.Network]common.Address{
+		types.OPTIMISM_MAINNET: common.HexToAddress("0x420000000000000000000000000000000000000F"),
+	}
 )
 
+func GetNetWorkStack(network types.Network) types.NewWorkStack {
+	if IsOpStackNetWork(network) {
+		return types.OPSTACK
+	}
+	if IsArbNetWork(network) {
+		return types.ARBSTACK
+	}
+	return types.DEFAULT_STACK
+}
+
 func IsTestNet(network types.Network) bool {
-	return testNetWork.Contains(network)
+	return TestNetWork.Contains(network)
 }
 func IsOpStackNetWork(network types.Network) bool {
-	return opeStackNetWork.Contains(network)
+	return OpeStackNetWork.Contains(network)
 }
 func IsEthereumAdaptableNetWork(network types.Network) bool {
-	return ethereumAdaptableNetWork.Contains(network)
+	return EthereumAdaptableNetWork.Contains(network)
+}
+func IsArbNetWork(network types.Network) bool {
+	return ArbStackNetWork.Contains(network)
 }

@@ -150,5 +150,11 @@ func (executor EthereumExecutor) GetGasPrice() (*model.GasPrice, error) {
 	//return &result, nil
 }
 func (executor EthereumExecutor) GetPreVerificationGas() (uint64, error) {
+	if conf.ArbStackNetWork.Contains(executor.network) {
+		return 0, nil
+	}
+	if conf.OpeStackNetWork.Contains(executor.network) {
+		return 0, nil
+	}
 	return PreVerificationGas.Uint64(), nil
 }

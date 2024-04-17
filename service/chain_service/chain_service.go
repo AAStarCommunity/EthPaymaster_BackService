@@ -45,10 +45,10 @@ func GetCallGasLimit(chain types.Network) (*big.Int, *big.Int, error) {
 
 // GetPreVerificationGas https://github.com/eth-infinitism/bundler/blob/main/packages/sdk/src/calcPreVerificationGas.ts
 func GetPreVerificationGas(chain types.Network) (*big.Int, error) {
-	// Arb https://medium.com/offchainlabs/understanding-arbitrum-2-dimensional-fees-fd1d582596c9.
-	// op
-	//TODO
-	return nil, nil
+
+	stack := conf.GetNetWorkStack(chain)
+	preGasFunc := network.PreVerificationGasFuncMap[stack]
+	return preGasFunc()
 }
 
 func GetEntryPointDeposit(entrypoint string, depositAddress string) uint256.Int {

@@ -26,6 +26,7 @@ var (
 	userOPV06GetHashArguments abi.Arguments
 	UserOpV07GetHashArguments abi.Arguments
 	userOpV06PackArg          abi.Arguments
+	UserOpV07PackArg          abi.Arguments
 )
 
 func init() {
@@ -131,6 +132,44 @@ func init() {
 			Type: paymaster_abi.BytesType,
 		},
 	}
+	UserOpV07PackArg = abi.Arguments{
+		{
+			Name: "Sender",
+			Type: paymaster_abi.AddressType,
+		},
+		{
+			Name: "Nonce",
+			Type: paymaster_abi.Uint256Type,
+		},
+		{
+			Name: "InitCode",
+			Type: paymaster_abi.BytesType,
+		},
+		{
+			Name: "CallData",
+			Type: paymaster_abi.BytesType,
+		},
+		{
+			Name: "AccountGasLimits",
+			Type: paymaster_abi.Uint256Type,
+		},
+		{
+			Name: "PreVerificationGas",
+			Type: paymaster_abi.Uint256Type,
+		},
+		{
+			Name: "GasFees",
+			Type: paymaster_abi.Uint256Type,
+		},
+		{
+			Name: "PaymasterAndData",
+			Type: paymaster_abi.BytesType,
+		},
+		{
+			Name: "Signature",
+			Type: paymaster_abi.BytesType,
+		},
+	}
 }
 
 func NewUserOp(userOp *map[string]any, entryPointVersion types.EntrypointVersion) (*BaseUserOp, error) {
@@ -170,12 +209,14 @@ type BaseUserOp interface {
 	GetEntrypointVersion() types.EntrypointVersion
 	GetUserOpHash(strategy *model.Strategy) ([]byte, string, error)
 	GetSender() *common.Address
-	PackUserOp() (string, []byte, error)
+	PackUserOpForMock() (string, []byte, error)
 	ValidateUserOp() error
 	GetInitCode() []byte
 	GetCallData() []byte
 	GetNonce() *big.Int
 	GetFactoryAddress() *common.Address
+	SetSignature(signature []byte)
+	SetPreVerificationGas(preVerificationGas *big.Int)
 }
 type BaseUserOperation struct {
 	Sender             *common.Address `json:"sender"   mapstructure:"sender"  binding:"required,hexParam"`
@@ -203,6 +244,12 @@ type UserOperationV06 struct {
 	VerificationGasLimit *big.Int `json:"verificationGasLimit"  mapstructure:"verification_gas_limit"  binding:"required"`
 }
 
+func (userOp *UserOperationV06) SetSignature(signature []byte) {
+	userOp.Signature = signature
+}
+func (userOp *UserOperationV06) SetPreVerificationGas(preVerificationGas *big.Int) {
+	userOp.PreVerificationGas = preVerificationGas
+}
 func (userOp *UserOperationV06) GetEntrypointVersion() types.EntrypointVersion {
 	return types.EntrypointV06
 }
@@ -228,8 +275,34 @@ func (userOp *UserOperationV06) GetFactoryAddress() *common.Address {
 	//TODO
 	return nil
 }
+
+// PackUserOpForMock return keccak256(abi.encode(
+//
+//	    pack(userOp),
+//	    block.chainid,
+//	    address(this),
+//	    senderNonce[userOp.getSender()],
+//	    validUntil,
+//	    validAfter
+//	));
+func packUserOpV6ForUserOpHash(userOp *UserOperationV06) (string, []byte, error) {
+	//TODO disgusting logic
+	encoded, err := userOpV06PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, userOp.CallGasLimit, userOp.VerificationGasLimit, userOp.PreVerificationGas, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, types.DUMMY_PAYMASTER_DATA, userOp.Sender)
+	if err != nil {
+		return "", nil, err
+	}
+	//https://github.com/jayden-sudo/SoulWalletCore/blob/dc76bdb9a156d4f99ef41109c59ab99106c193ac/contracts/utils/CalldataPack.sol#L51-L65
+	hexString := hex.EncodeToString(encoded)
+	//1. get From  63*10+ 1 ～64*10
+	hexString = hexString[64:]
+	//hexLen := len(hexString)
+	subIndex := GetIndex(hexString)
+	hexString = hexString[:subIndex]
+	//fmt.Printf("subIndex: %d\n", subIndex)
+	return hexString, encoded, nil
+}
 func (userOp *UserOperationV06) GetUserOpHash(strategy *model.Strategy) ([]byte, string, error) {
-	packUserOpStr, _, err := userOp.PackUserOp()
+	packUserOpStr, _, err := packUserOpV6ForUserOpHash(userOp)
 	if err != nil {
 		return nil, "", err
 	}
@@ -250,31 +323,13 @@ func (userOp *UserOperationV06) GetUserOpHash(strategy *model.Strategy) ([]byte,
 
 }
 
-// PackUserOp return keccak256(abi.encode(
-//
-//	    pack(userOp),
-//	    block.chainid,
-//	    address(this),
-//	    senderNonce[userOp.getSender()],
-//	    validUntil,
-//	    validAfter
-//	));
-func (userOp *UserOperationV06) PackUserOp() (string, []byte, error) {
-	//TODO disgusting logic
-	paymasterDataMock := "d93349Ee959d295B115Ee223aF10EF432A8E8523000000000000000000000000000000000000000000000000000000001710044496000000000000000000000000000000000000000000000000000000174158049605bea0bfb8539016420e76749fda407b74d3d35c539927a45000156335643827672fa359ee968d72db12d4b4768e8323cd47443505ab138a525c1f61c6abdac501"
-	encoded, err := userOpV06PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, userOp.CallGasLimit, userOp.VerificationGasLimit, userOp.PreVerificationGas, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, paymasterDataMock, userOp.Sender)
+func (userOp *UserOperationV06) PackUserOpForMock() (string, []byte, error) {
+	//TODO  UserMock
+	encoded, err := userOpV06PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, userOp.CallGasLimit, userOp.VerificationGasLimit, userOp.PreVerificationGas, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, types.DUMMY_PAYMASTER_DATA, userOp.Sender)
 	if err != nil {
 		return "", nil, err
 	}
-	//https://github.com/jayden-sudo/SoulWalletCore/blob/dc76bdb9a156d4f99ef41109c59ab99106c193ac/contracts/utils/CalldataPack.sol#L51-L65
-	hexString := hex.EncodeToString(encoded)
-	//1. get From  63*10+ 1 ～64*10
-	hexString = hexString[64:]
-	//hexLen := len(hexString)
-	subIndex := GetIndex(hexString)
-	hexString = hexString[:subIndex]
-	//fmt.Printf("subIndex: %d\n", subIndex)
-	return hexString, encoded, nil
+	return hex.EncodeToString(encoded), encoded, nil
 }
 
 // return
@@ -305,6 +360,13 @@ func (userOp *UserOperationV07) ValidateUserOp() error {
 	return nil
 
 }
+
+func (userOp *UserOperationV07) SetSignature(signature []byte) {
+	userOp.Signature = signature
+}
+func (userOp *UserOperationV07) SetPreVerificationGas(preVerificationGas *big.Int) {
+	userOp.PreVerificationGas = preVerificationGas
+}
 func (userOp *UserOperationV07) GetFactoryAddress() *common.Address {
 	//TODO
 	return nil
@@ -321,8 +383,12 @@ func (userOp *UserOperationV07) GetCallData() []byte {
 func (userOp *UserOperationV07) GetNonce() *big.Int {
 	return userOp.Nonce
 }
-func (userOp *UserOperationV07) PackUserOp() (string, []byte, error) {
-	panic("should never call v0.0.7 userOpPack")
+func (userOp *UserOperationV07) PackUserOpForMock() (string, []byte, error) {
+	encoded, err := UserOpV07PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, userOp.AccountGasLimit, userOp.PreVerificationGas, userOp.PreVerificationGas, userOp.GasFees, types.DUMMY_PAYMASTER_DATA, userOp.Signature)
+	if err != nil {
+		return "", nil, err
+	}
+	return hex.EncodeToString(encoded), encoded, nil
 }
 
 // GetUserOpHash return keccak256(

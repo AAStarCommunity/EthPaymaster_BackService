@@ -93,5 +93,6 @@ func SupplyZero(prefix string, maxTo int) string {
 	return prefix
 }
 func IsLessThanZero(value *big.Int) bool {
+	return false
 	//TODO
 }

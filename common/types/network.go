@@ -22,3 +22,11 @@ const (
 	Base             Network = "base"
 	BaseSepolia      Network = "base-sepolia"
 )
+
+type NewWorkStack string
+
+const (
+	OPSTACK       NewWorkStack = "opstack"
+	ARBSTACK      NewWorkStack = "arbstack"
+	DEFAULT_STACK NewWorkStack = "default"
+)
