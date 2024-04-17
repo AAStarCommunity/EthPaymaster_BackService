@@ -47,7 +47,7 @@ func GetCallGasLimit(chain types.Network) (*big.Int, *big.Int, error) {
 func GetPreVerificationGas(chain types.Network, userOp *userop.BaseUserOp, strategy *model.Strategy, gasInfo model.UserOpEstimateGas) (*big.Int, error) {
 	stack := conf.GetNetWorkStack(chain)
 	preGasFunc := network.PreVerificationGasFuncMap[stack]
-	return preGasFunc(userOp, strategy)
+	return preGasFunc(userOp, strategy, gasInfo)
 }
 
 func GetEntryPointDeposit(entrypoint string, depositAddress string) uint256.Int {

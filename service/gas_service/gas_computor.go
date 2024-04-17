@@ -23,56 +23,24 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 	var maxFeePriceInEther *big.Float
 	var maxFee *big.Int
 	opEstimateGas := model.UserOpEstimateGas{}
-	switch paymasterUserOp.GetEntrypointVersion() {
-	case types.EntrypointV06:
-		{
-			// Get MaxFeePerGas And MaxPriorityFeePerGas
-			// if MaxFeePerGas <=0 use recommend gas price
-			useropV6Value := paymasterUserOp.(*userop.UserOperationV06)
-			opEstimateGas.MaxFeePerGas = useropV6Value.MaxFeePerGas
-			opEstimateGas.MaxPriorityFeePerGas = useropV6Value.MaxPriorityFeePerGas
-			if utils.IsLessThanZero(useropV6Value.MaxFeePerGas) {
-				opEstimateGas.MaxFeePerGas = gasPrice.MaxFeePerGas
-			}
-			if utils.IsLessThanZero(useropV6Value.MaxPriorityFeePerGas) {
-				opEstimateGas.MaxPriorityFeePerGas = gasPrice.MaxPriorityPriceWei
-			}
-			// TODO Get verificationGasLimit callGasLimit
-			//estimateCallGasLimit, err := chain_service.EstimateUserOpCallGas(strategy, userOp)
-			//if err != nil {
-			//	return nil, err
-			//}
-			//if estimateCallGasLimit > userOpCallGasLimit*12/10 {
-			//	return nil, xerrors.Errorf("estimateCallGasLimit %d > userOpCallGasLimit %d", estimateCallGasLimit, userOpCallGasLimit)
-			//}
-			useropV6Value.MaxFeePerGas = opEstimateGas.MaxFeePerGas
-			useropV6Value.MaxPriorityFeePerGas = opEstimateGas.MaxPriorityFeePerGas
 
-			verficationGasLimit, callGasLimit, err := useropV6Value.EstimateGasLimit(strategy)
-			if err != nil {
-				return nil, nil, err
-			}
-			opEstimateGas.VerificationGasLimit = big.NewInt(int64(verficationGasLimit))
-			opEstimateGas.CallGasLimit = big.NewInt(int64(callGasLimit))
+	entryPointVersion := paymasterUserOp.GetEntrypointVersion()
 
-			// TODO  Get PreVerificationGas
-
-			// over UserOp
-
-			useropV6Value.VerificationGasLimit = opEstimateGas.VerificationGasLimit
-			useropV6Value.CallGasLimit = opEstimateGas.CallGasLimit
-		}
-		break
-	case types.EntryPointV07:
-		{
-			useropV7Value := paymasterUserOp.(*userop.UserOperationV07)
-			useropV7Value.PaymasterVerificationGasLimit = opEstimateGas.PaymasterVerificationGasLimit
-		}
-		break
-
-	}
+	verficationGasLimit, err := EstimateVerificationGasLimit(strategy)
+	callGasLimit, err := EstimateCallGasLimit(strategy)
+	maxFeePerGas, maxPriorityFeePerGas, baseFee := GetFeePerGas(strategy)
+	opEstimateGas.VerificationGasLimit = verficationGasLimit
+	opEstimateGas.CallGasLimit = callGasLimit
+	opEstimateGas.MaxFeePerGas = maxFeePerGas
+	opEstimateGas.MaxPriorityFeePerGas = maxPriorityFeePerGas
+	opEstimateGas.BaseFee = baseFee
 	preVerificationGas, err := chain_service.GetPreVerificationGas(strategy.GetNewWork(), userOp, strategy, opEstimateGas)
 	opEstimateGas.PreVerificationGas = preVerificationGas
+	if entryPointVersion == types.EntryPointV07 {
+		opEstimateGas.PaymasterPostOpGasLimit = types.DUMMY_PAYMASTER_POSTOP_GASLIMIT_BIGINT
+		opEstimateGas.PaymasterVerificationGasLimit = types.DUMMY_PAYMASTER_VERIFICATIONGASLIMIT_BIGINT
+	}
+
 	tokenCost, err := getTokenCost(strategy, maxFeePriceInEther)
 	if err != nil {
 		return nil, nil, err
@@ -94,6 +62,15 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 		UsdCost:       usdCost,
 		MaxFee:        *maxFee,
 	}, &paymasterUserOp, nil
+}
+
+func GetFeePerGas(strategy *model.Strategy) (*big.Int, *big.Int, *big.Int) {
+	return nil, nil, nil
+}
+
+func EstimateCallGasLimit(strategy *model.Strategy) (*big.Int, error) {
+	//TODO
+	return nil, nil
 }
 
 func getTokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Float, error) {
@@ -122,4 +99,9 @@ func ValidateGas(userOp *userop.BaseUserOp, gasComputeResponse *model.ComputeGas
 		return err
 	}
 	return nil
+}
+
+func EstimateVerificationGasLimit(strategy *model.Strategy) (*big.Int, error) {
+	//TODO
+	return nil, nil
 }
