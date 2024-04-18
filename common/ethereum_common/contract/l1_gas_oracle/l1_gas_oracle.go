@@ -1,6 +1,3 @@
-// Code generated - DO NOT EDIT.
-// This file is a generated binding and any manual changes will be lost.
-
 package l1_gas_oracle
 
 import (
@@ -212,7 +209,7 @@ func (_Contract *ContractCallerSession) GetL1Fee(_data []byte) (*big.Int, error)
 }
 
 // GetL1GasUsed is a free data retrieval call binding the contract method 0xde26c4a1.
-//
+// Computes the amount of L1 gas used for a transaction. Adds the overhead which represents the per-transaction gas overhead of posting the transaction and state roots to L1. Adds 74 bytes of padding to account for the fact that the input does not have a signature.
 // Solidity: function getL1GasUsed(bytes _data) view returns(uint256)
 func (_Contract *ContractCaller) GetL1GasUsed(opts *bind.CallOpts, _data []byte) (*big.Int, error) {
 	var out []interface{}

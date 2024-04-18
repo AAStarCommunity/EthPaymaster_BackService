@@ -11,8 +11,16 @@ type GasPrice struct {
 	//MaxPriorityPriceEther *big.Float `json:"max_priority_price_ether"`
 }
 type SimulateHandleOpResult struct {
+	// PreOpGas = preGas - gasleft() + userOp.preVerificationGas;
+	// PreOpGas = verificationGasLimit + userOp.preVerificationGas;
 	PreOpGas      *big.Int `json:"pre_op_gas"`
 	GasPaid       *big.Int `json:"gas_paid"`
 	TargetSuccess bool
 	TargetResult  []byte
+}
+
+type GasFeePerGasResult struct {
+	MaxFeePerGas         *big.Int
+	MaxPriorityFeePerGas *big.Int
+	BaseFee              *big.Int
 }

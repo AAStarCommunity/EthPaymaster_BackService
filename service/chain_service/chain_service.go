@@ -44,19 +44,17 @@ func GetCallGasLimit(chain types.Network) (*big.Int, *big.Int, error) {
 }
 
 // GetPreVerificationGas https://github.com/eth-infinitism/bundler/blob/main/packages/sdk/src/calcPreVerificationGas.ts
-func GetPreVerificationGas(chain types.Network, userOp *userop.BaseUserOp, strategy *model.Strategy, gasInfo model.UserOpEstimateGas) (*big.Int, error) {
+func GetPreVerificationGas(chain types.Network, userOp *userop.BaseUserOp, strategy *model.Strategy, gasFeeResult *model.GasFeePerGasResult) (*big.Int, error) {
 	stack := conf.GetNetWorkStack(chain)
 	preGasFunc := network.PreVerificationGasFuncMap[stack]
-	return preGasFunc(userOp, strategy, gasInfo)
+	return preGasFunc(userOp, strategy, gasFeeResult)
 }
 
 func GetEntryPointDeposit(entrypoint string, depositAddress string) uint256.Int {
+
 	return uint256.Int{1}
 }
-func EstimateUserOpGas(strategy *model.Strategy, op *userop.BaseUserOp) (uint64, error) {
-	ethereumExecutor := network.GetEthereumExecutor(strategy.GetNewWork())
-	return ethereumExecutor.EstimateUserOpCallGas(strategy.GetEntryPointAddress(), op)
-}
+
 func GetAddressTokenBalance(networkParam types.Network, address common.Address, tokenTypeParam types.TokenType) (float64, error) {
 	executor := network.GetEthereumExecutor(networkParam)
 	bananceResult, err := executor.GetUserTokenBalance(address, tokenTypeParam)
@@ -68,10 +66,20 @@ func GetAddressTokenBalance(networkParam types.Network, address common.Address, 
 	return balanceResultFloat, nil
 
 }
-func SimulateHandleOp(networkParam types.Network) (*model.SimulateHandleOpResult, error) {
+func SimulateHandleOp(networkParam types.Network, op *userop.BaseUserOp, strategy model.Strategy) (*model.SimulateHandleOpResult, error) {
+	executor := network.GetEthereumExecutor(networkParam)
+	opValue := *op
+	entrypointVersion := opValue.GetEntrypointVersion()
+	if entrypointVersion == types.EntryPointV07 {
+		userOpV6 := opValue.(*userop.UserOperationV06)
+		return executor.SimulateV06HandleOp(userOpV6, strategy.GetEntryPointAddress())
 
-	return nil, nil
-
+	} else if entrypointVersion == types.EntrypointV06 {
+		userOpV7 := opValue.(*userop.UserOperationV07)
+		return executor.SimulateV07HandleOp(userOpV7, strategy.GetEntryPointAddress())
+	}
+	return nil, xerrors.Errorf("[never be here]entrypoint version %s not support", entrypointVersion)
+	//TODO Starknet
 }
 func GetVertificationGasLimit(chain types.Network) (*big.Int, error) {
 	return nil, nil

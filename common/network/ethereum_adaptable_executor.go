@@ -1,6 +1,8 @@
 package network
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/contract_entrypoint_v06"
+	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/contract_entrypoint_v07"
 	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/erc20"
 	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/l1_gas_oracle"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
@@ -18,14 +20,20 @@ import (
 )
 
 var PreVerificationGas = new(big.Int).SetInt64(21000)
+
+// GweiFactor Each gwei is equal to one-billionth of an ETH (0.000000001 ETH or 10-9 ETH).
 var GweiFactor = new(big.Float).SetInt(big.NewInt(1e9))
 var EthWeiFactor = new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil))
 var once sync.Once
 var executorMap map[types.Network]*EthereumExecutor = make(map[types.Network]*EthereumExecutor)
 var TokenContractCache map[*common.Address]*contract_erc20.Contract
+var V06EntryPointContractCache map[types.Network]map[common.Address]*contract_entrypoint_v06.Contract
+var V07EntryPointContractCache map[types.Network]map[common.Address]*contract_entrypoint_v07.Contract
 
 func init() {
 	TokenContractCache = make(map[*common.Address]*contract_erc20.Contract)
+	V06EntryPointContractCache = make(map[types.Network]map[common.Address]*contract_entrypoint_v06.Contract)
+	V07EntryPointContractCache = make(map[types.Network]map[common.Address]*contract_entrypoint_v07.Contract)
 }
 
 type EthereumExecutor struct {
@@ -87,7 +95,7 @@ func (executor EthereumExecutor) GetTokenContract(tokenAddress *common.Address) 
 	return contract, nil
 }
 
-func (executor EthereumExecutor) EstimateUserOpCallGas(entrypointAddress *common.Address, userOpParam *userop.BaseUserOp) (uint64, error) {
+func (executor EthereumExecutor) EstimateUserOpCallGas(entrypointAddress *common.Address, userOpParam *userop.BaseUserOp) (*big.Int, error) {
 	client := executor.Client
 	userOpValue := *userOpParam
 	userOpValue.GetSender()
@@ -97,11 +105,11 @@ func (executor EthereumExecutor) EstimateUserOpCallGas(entrypointAddress *common
 		Data: userOpValue.GetCallData(),
 	})
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	return res, nil
+	return new(big.Int).SetUint64(res), nil
 }
-func (executor EthereumExecutor) EstimateCreateSenderGas(entrypointAddress *common.Address, userOpParam *userop.BaseUserOp) (uint64, error) {
+func (executor EthereumExecutor) EstimateCreateSenderGas(entrypointAddress *common.Address, userOpParam *userop.BaseUserOp) (*big.Int, error) {
 	client := executor.Client
 	userOpValue := *userOpParam
 	userOpValue.GetSender()
@@ -111,9 +119,9 @@ func (executor EthereumExecutor) EstimateCreateSenderGas(entrypointAddress *comm
 		Data: userOpValue.GetInitCode(),
 	})
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	return res, nil
+	return new(big.Int).SetUint64(res), nil
 }
 
 func (executor EthereumExecutor) GetGasPrice() (*model.GasPrice, error) {
@@ -160,8 +168,16 @@ func (executor EthereumExecutor) GetPreVerificationGas() (uint64, error) {
 	return PreVerificationGas.Uint64(), nil
 }
 
+// GetL1DataFee
+// OpSrource https://github.com/ethereum-optimism/optimism/blob/233ede59d16cb01bdd8e7ff662a153a4c3178bdd/packages/contracts/contracts/L2/predeploys/OVM_GasPriceOracle.sol#L109-L124
+// l1Gas = zeros * TX_DATA_ZERO_GAS + (nonzeros + 4) * TX_DATA_NON_ZERO_GAS
+// l1GasFee = ((l1Gas + overhead) * l1BaseFee * scalar) / PRECISION
 func (executor EthereumExecutor) GetL1DataFee(data []byte) (*big.Int, error) {
-	address := conf.L1GasOracleInL2[executor.network]
+	address, ok := conf.L1GasOracleInL2[executor.network]
+	if !ok {
+		return nil, xerrors.Errorf("L1GasOracleInL2 not found in network %s", executor.network)
+	}
+
 	contract, err := l1_gas_oracle.NewContract(address, executor.Client)
 	if err != nil {
 		return nil, err
@@ -181,4 +197,49 @@ func (executor EthereumExecutor) GetL1DataFee(data []byte) (*big.Int, error) {
 		return nil, err
 	}
 	return fee, nil
+}
+
+func (executor EthereumExecutor) SimulateV06HandleOp(v06 *userop.UserOperationV06, entryPoint *common.Address) (*model.SimulateHandleOpResult, error) {
+	_, err := executor.GetEntryPoint06(entryPoint)
+	if err != nil {
+		return nil, err
+	}
+	//TODO
+	//contract.SimulateHandleOp(nil, v06.Target, v06.Data
+	//contract.SimulateHandleOp()
+	return nil, nil
+}
+func (executor EthereumExecutor) SimulateV07HandleOp(v07 *userop.UserOperationV07, entryPoint *common.Address) (*model.SimulateHandleOpResult, error) {
+	_, err := executor.GetEntryPoint07(entryPoint)
+	if err != nil {
+		return nil, err
+	}
+	//TODO
+	return nil, nil
+}
+
+func (executor EthereumExecutor) GetEntryPoint07(entryPoint *common.Address) (*contract_entrypoint_v07.Contract, error) {
+	contract, ok := V07EntryPointContractCache[executor.network][*entryPoint]
+	if !ok {
+		contractInstance, err := contract_entrypoint_v07.NewContract(*entryPoint, executor.Client)
+		if err != nil {
+			return nil, err
+		}
+		V07EntryPointContractCache[executor.network][*entryPoint] = contractInstance
+		return contractInstance, nil
+	}
+	return contract, nil
+}
+func (executor EthereumExecutor) GetEntryPoint06(entryPoint *common.Address) (*contract_entrypoint_v06.Contract, error) {
+	contract, ok := V06EntryPointContractCache[executor.network][*entryPoint]
+	if !ok {
+		contractInstance, err := contract_entrypoint_v06.NewContract(*entryPoint, executor.Client)
+		if err != nil {
+			return nil, err
+		}
+		V06EntryPointContractCache[executor.network][*entryPoint] = contractInstance
+		return contractInstance, nil
+	}
+	return contract, nil
+
 }
