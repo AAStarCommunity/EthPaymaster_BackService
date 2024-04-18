@@ -24,7 +24,7 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 	var maxFeePriceInEther *big.Float
 	var maxFee *big.Int
 
-	simulateResult, err := chain_service.SimulateHandleOp(strategy.GetNewWork())
+	simulateResult, err := chain_service.SimulateHandleOp(strategy.GetNewWork(), userOp, strategy)
 	if err != nil {
 		return nil, nil, err
 	}

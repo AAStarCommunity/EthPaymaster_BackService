@@ -9,6 +9,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
+	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"context"
 	"github.com/ethereum/go-ethereum"
@@ -42,6 +43,7 @@ type EthereumExecutor struct {
 	BaseExecutor
 	Client  *ethclient.Client
 	network types.Network
+	ChainId *big.Int
 }
 
 func GetEthereumExecutor(network types.Network) *EthereumExecutor {
@@ -51,14 +53,42 @@ func GetEthereumExecutor(network types.Network) *EthereumExecutor {
 			if err != nil {
 				panic(err)
 			}
-
+			var chainId *big.Int
+			_, success := chainId.SetString(conf.GetChainId(network), 10)
+			if !success {
+				panic(xerrors.Errorf("chainId %s is invalid", conf.GetChainId(network)))
+			}
 			executorMap[network] = &EthereumExecutor{
 				network: network,
 				Client:  client,
+				ChainId: chainId,
 			}
 		}
 	})
 	return executorMap[network]
+}
+
+func (executor EthereumExecutor) GetEntryPointV6Deposit(entryPoint *common.Address, depoist common.Address) (*big.Int, error) {
+	contract, err := executor.GetEntryPoint06(entryPoint)
+	if err != nil {
+		return nil, err
+	}
+	depoistInfo, err := contract.GetDepositInfo(nil, depoist)
+	if err != nil {
+		return nil, err
+	}
+	return depoistInfo.Deposit, nil
+}
+func (executor EthereumExecutor) GetEntryPointV7Deposit(entryPoint *common.Address, depoist common.Address) (*big.Int, error) {
+	contract, err := executor.GetEntryPoint07(entryPoint)
+	if err != nil {
+		return nil, err
+	}
+	depoistInfo, err := contract.GetDepositInfo(nil, depoist)
+	if err != nil {
+		return nil, err
+	}
+	return depoistInfo.Deposit, nil
 }
 
 func (executor EthereumExecutor) GetUserTokenBalance(userAddress common.Address, token types.TokenType) (*big.Int, error) {
@@ -202,49 +232,74 @@ func (executor EthereumExecutor) GetL1DataFee(data []byte) (*big.Int, error) {
 }
 
 func (executor EthereumExecutor) SimulateV06HandleOp(v06 *userop.UserOperationV06, entryPoint *common.Address) (*model.SimulateHandleOpResult, error) {
-	contract, err := executor.GetEntryPoint06(entryPoint)
+	abi, err := contract_entrypoint_v06.ContractMetaData.GetAbi()
 	if err != nil {
 		return nil, err
 	}
-	auth, err := executor.GetAuth()
+	_, packOp, _ := v06.PackUserOpForMock()
+	callData, err := abi.Pack("simulateHandleOp", packOp, nil, nil)
+	client := executor.Client
+	err = client.Client().Call(nil, "eth_call", &ethereum.CallMsg{
+		From: *entryPoint,
+		To:   conf.GetSimulateEntryPointAddress(executor.network),
+		Data: callData,
+	}, "latest")
+	simResult, simErr := contract_entrypoint_v06.NewExecutionResult(err)
+	if simErr != nil {
+		return nil, simErr
+	}
+
+	return &model.SimulateHandleOpResult{
+		PreOpGas:      simResult.PreOpGas,
+		GasPaid:       simResult.Paid,
+		TargetSuccess: simResult.TargetSuccess,
+		TargetResult:  simResult.TargetResult,
+	}, nil
+}
+
+func (executor EthereumExecutor) SimulateV07HandleOp(userOpV07 *userop.UserOperationV07) (*model.SimulateHandleOpResult, error) {
+
+	//tx, err := contract.SimulateHandleOp(auth, simulate_entrypoint.PackedUserOperation{
+	//	Sender:             *userOpV07.Sender,
+	//	Nonce:              userOpV07.Nonce,
+	//	InitCode:           userOpV07.InitCode,
+	//	CallData:           userOpV07.CallData,
+	//	AccountGasLimits:   userOpV07.AccountGasLimit,
+	//	PreVerificationGas: userOpV07.PreVerificationGas,
+	//	GasFees:            userOpV07.GasFees,
+	//	PaymasterAndData:   userOpV07.PaymasterAndData,
+	//	Signature:          userOpV07.Signature,
+	//}, address, nil)
+
+	//get CallData
+
+	var result *simulate_entrypoint.IEntryPointSimulationsExecutionResult
+
+	simulateAbi, err := simulate_entrypoint.ContractMetaData.GetAbi()
 	if err != nil {
 		return nil, err
 	}
-	tx, err := contract.SimulateHandleOp(auth, contract_entrypoint_v06.UserOperation{}, common.Address{}, nil)
+	_, packOp, _ := userOpV07.PackUserOpForMock()
+	callData, err := simulateAbi.Pack("simulateHandleOp", packOp, nil, nil)
 	if err != nil {
 		return nil, err
 	}
-	result, err := GetSimulateHandlerResult(tx.Data())
+	client := executor.Client
+	err = client.Client().Call(&result, "eth_call", &ethereum.CallMsg{
+		From: common.HexToAddress("0x"),
+		To:   conf.GetSimulateEntryPointAddress(executor.network),
+		Data: callData,
+	}, "latest")
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
-}
-
-func GetSimulateHandlerResult(data []byte) (*model.SimulateHandleOpResult, error) {
-	return nil, xerrors.Errorf("not implement")
-	//TODO
-}
-func (executor EthereumExecutor) SimulateV07HandleOp(v07 *userop.UserOperationV07) (*model.SimulateHandleOpResult, error) {
-	contract, err := executor.GetSimulateEntryPoint()
-	if err != nil {
-		return nil, err
-	}
-	auth, err := executor.GetAuth()
-	if err != nil {
-		return nil, err
-	}
-	//TODO
-	tx, err := contract.SimulateHandleOp(auth, simulate_entrypoint.PackedUserOperation{}, common.Address{}, nil)
-	if err != nil {
-		return nil, err
-	}
-	result, err := GetSimulateHandlerResult(tx.Data())
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+	return &model.SimulateHandleOpResult{
+		PreOpGas:      result.PreOpGas,
+		GasPaid:       result.Paid,
+		TargetSuccess: result.TargetSuccess,
+		TargetResult:  result.TargetResult,
+	}, nil
 }
 func (executor EthereumExecutor) GetSimulateEntryPoint() (*simulate_entrypoint.Contract, error) {
 	contract, ok := SimulateEntryPointContractCache[executor.network]
@@ -285,6 +340,8 @@ func (executor EthereumExecutor) GetEntryPoint06(entryPoint *common.Address) (*c
 
 }
 func (executor EthereumExecutor) GetAuth() (*bind.TransactOpts, error) {
-	//TODO
-	return nil, xerrors.Errorf("not implement")
+	if executor.ChainId == nil {
+		return nil, xerrors.Errorf("chainId is nil")
+	}
+	return utils.GetAuth(executor.ChainId, types.DUMMY_PRIVATE_KEY)
 }

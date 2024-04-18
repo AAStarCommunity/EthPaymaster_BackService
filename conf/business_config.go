@@ -157,3 +157,6 @@ func IsEthereumAdaptableNetWork(network types.Network) bool {
 func IsArbNetWork(network types.Network) bool {
 	return ArbStackNetWork.Contains(network)
 }
+func GetSimulateEntryPointAddress(network types.Network) *common.Address {
+	panic("implement me")
+}
