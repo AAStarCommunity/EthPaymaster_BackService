@@ -66,7 +66,7 @@ func SimulateHandleOp(networkParam types.Network, op *userop.BaseUserOp, strateg
 
 	} else if entrypointVersion == types.EntrypointV06 {
 		userOpV7 := opValue.(*userop.UserOperationV07)
-		return executor.SimulateV07HandleOp(userOpV7)
+		return executor.SimulateV07HandleOp(userOpV7, strategy.GetEntryPointAddress())
 	}
 	return nil, xerrors.Errorf("[never be here]entrypoint version %s not support", entrypointVersion)
 	//TODO Starknet

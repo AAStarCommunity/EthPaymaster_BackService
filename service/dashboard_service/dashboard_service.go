@@ -3,8 +3,8 @@ package dashboard_service
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"errors"
-	"github.com/ethereum/go-ethereum/common"
 )
 
 // TODO just Temp Mock
@@ -13,39 +13,18 @@ var payMasterSupport = map[string]bool{}
 var entryPointSupport = map[string]bool{}
 
 func init() {
-	entrypoint := common.HexToAddress("0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789")
-	paymaster := common.HexToAddress("0xAEbF4C90b571e7D5cb949790C9b8Dc0280298b63")
-	MockStrategyMap["1"] = &model.Strategy{
-		Id: "1",
-		NetWorkInfo: &model.NetWorkInfo{
-			NetWork: types.ETHEREUM_SEPOLIA,
-			Token:   types.ETH,
-		},
-		EntryPointInfo: &model.EntryPointInfo{
-			EntryPointAddress: &entrypoint,
-			EntryPointTag:     types.EntrypointV06,
-		},
-		ExecuteRestriction: model.StrategyExecuteRestriction{
-			EffectiveStartTime: 1710044496,
-			EffectiveEndTime:   1820044496,
-		},
-		PaymasterInfo: &model.PaymasterInfo{
-			PayMasterAddress: &paymaster,
-			PayType:          types.PayTypeVerifying,
-		},
-	}
 
-	entryPointSupport["0x0576a174D229E3cFA37253523E645A78A0C91B57"] = true
-	payMasterSupport["0x0000000000325602a77416A16136FDafd04b299f"] = true
 }
 func GetStrategyById(strategyId string) *model.Strategy {
-	return MockStrategyMap[strategyId]
+	return conf.BasicStrategyConfig[strategyId]
 }
-func GetSupportEntryPoint() {
 
-}
-func GetSuitableStrategy(entrypoint string, chain types.Network, token string) (*model.Strategy, error) {
-	return nil, errors.New("not implemented")
+func GetSuitableStrategy(entrypoint string, chain types.Network, payType types.PayType) (*model.Strategy, error) {
+	strategy := conf.SuitableStrategyMap[chain][entrypoint][payType]
+	if strategy == nil {
+		return nil, errors.New("strategy not found")
+	}
+	return strategy, nil
 }
 func IsEntryPointsSupport(address string) bool {
 	if entryPointSupport[address] {

@@ -25,7 +25,7 @@ func EstimateUserOpGas(c *gin.Context) {
 		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
 		return
 	}
-	if err := request.Validate(); err != nil {
+	if err := ValidateUserOpRequest(request); err != nil {
 		errStr := fmt.Sprintf("Request Error [%v]", err)
 		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
 		return

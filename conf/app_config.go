@@ -1,15 +1,32 @@
 package conf
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"fmt"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"os"
+	"strings"
 	"sync"
 )
 
 var once sync.Once
+var Environment *model.Env
 
 type Conf struct {
 	Jwt JWT
+}
+
+func EnvInit() {
+	envName := model.DevEnv
+	if len(os.Getenv(model.EnvKey)) > 0 {
+		envName = os.Getenv(model.EnvKey)
+	}
+	Environment = &model.Env{
+		Name: envName,
+		Debugger: func() bool {
+			return envName != model.ProdEnv
+		}(),
+	}
 }
 
 var conf *Conf
@@ -23,6 +40,13 @@ func getConf() *Conf {
 		}
 	})
 	return conf
+}
+func getConfFilePath() *string {
+	path := fmt.Sprintf("conf/appsettings.%s.yaml", strings.ToLower(Environment.Name))
+	if _, err := os.Stat(path); err != nil && os.IsNotExist(err) {
+		path = fmt.Sprintf("conf/appsettings.yaml")
+	}
+	return &path
 }
 
 // getConfiguration

@@ -2,6 +2,7 @@ package model
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -48,14 +49,15 @@ func (strategy *Strategy) GetStrategyEntryPointTag() types.EntrypointVersion {
 }
 
 type StrategyExecuteRestriction struct {
-	BanSenderAddress   string `json:"ban_sender_address"`
-	EffectiveStartTime int64  `json:"effective_start_time"`
-	EffectiveEndTime   int64  `json:"effective_end_time"`
-	GlobalMaxUSD       int64  `json:"global_max_usd"`
-	GlobalMaxOpCount   int64  `json:"global_max_op_count"`
-	DayMaxUSD          int64  `json:"day_max_usd"`
-	StartTime          int64  `json:"start_time"`
-	EndTime            int64  `json:"end_time"`
+	BanSenderAddress   string             `json:"ban_sender_address"`
+	EffectiveStartTime int64              `json:"effective_start_time"`
+	EffectiveEndTime   int64              `json:"effective_end_time"`
+	GlobalMaxUSD       int64              `json:"global_max_usd"`
+	GlobalMaxOpCount   int64              `json:"global_max_op_count"`
+	DayMaxUSD          int64              `json:"day_max_usd"`
+	StartTime          int64              `json:"start_time"`
+	EndTime            int64              `json:"end_time"`
+	AccessProject      mapset.Set[string] `json:"access_project"`
 }
 
 type StrategyValidateConfig struct {

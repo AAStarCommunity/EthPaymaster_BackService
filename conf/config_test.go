@@ -22,3 +22,13 @@ func TestConvertConfig(t *testing.T) {
 
 	fmt.Println(ethPaymaster)
 }
+
+func TestBasicStrategy(t *testing.T) {
+	if BasicStrategyConfig == nil {
+		t.Errorf("config is nil")
+	}
+	fmt.Println(fmt.Sprintf("config: %v", BasicStrategyConfig))
+	strategy := BasicStrategyConfig["Ethereum_Sepolia_v06_verifyPaymaster"]
+
+	fmt.Println(*strategy)
+}

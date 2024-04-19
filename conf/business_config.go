@@ -7,16 +7,20 @@ import (
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/ethereum/go-ethereum/common"
 	"os"
+	"strings"
 )
 
 var BasicConfig *BusinessConfig
 
-func init() {
+func BasicConfigInit() {
 	originConfig := initBusinessConfig()
 	BasicConfig = convertConfig(originConfig)
 }
 func getBasicConfigPath() *string {
-	path := "../conf/business_config.json"
+	path := fmt.Sprintf("../conf/business_%s_config.json", strings.ToLower(Environment.Name))
+	if _, err := os.Stat(path); err != nil && os.IsNotExist(err) {
+		path = fmt.Sprintf("../conf/business_config.json")
+	}
 	return &path
 }
 func convertConfig(originConfig *OriginBusinessConfig) *BusinessConfig {
@@ -34,7 +38,6 @@ func convertConfig(originConfig *OriginBusinessConfig) *BusinessConfig {
 		}
 
 		paymasterArr := originConfig.SupportPaymaster[network]
-		fmt.Printf("paymasterArr: %v\n", paymasterArr)
 		paymasterSet := mapset.NewSet[string]()
 		paymasterSet.Append(paymasterArr...)
 		basic.SupportPaymaster[network] = paymasterSet
