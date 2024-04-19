@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/xerrors"
+	"math/big"
 	"os"
 	"strings"
 	"sync"
@@ -65,6 +66,14 @@ func convertMapToStrategyConfig(data map[string]map[string]any) (map[string]*mod
 	for key, value := range data {
 		paymasterAddress := common.HexToAddress(value["paymaster_address"].(string))
 		entryPointAddress := common.HexToAddress(value["entrypoint_address"].(string))
+		effectiveStartTime, ok := new(big.Int).SetString(value["effective_start_time"].(string), 10)
+		if !ok {
+			return nil, xerrors.Errorf("effective_start_time illegal")
+		}
+		effectiveEndTime, ok := new(big.Int).SetString(value["effective_end_time"].(string), 10)
+		if !ok {
+			return nil, xerrors.Errorf("effective_end_time illegal")
+		}
 
 		strategy := &model.Strategy{
 			Id:           key,
@@ -76,15 +85,17 @@ func convertMapToStrategyConfig(data map[string]map[string]any) (map[string]*mod
 				EntryPointAddress: &entryPointAddress,
 				EntryPointTag:     types.EntrypointVersion(value["entrypoint_tag"].(string)),
 			},
+
 			ExecuteRestriction: model.StrategyExecuteRestriction{
-				EffectiveStartTime: value["effective_start_time"].(int64),
-				EffectiveEndTime:   value["effective_end_time"].(int64),
+				EffectiveStartTime: effectiveStartTime,
+				EffectiveEndTime:   effectiveEndTime,
 			},
 			PaymasterInfo: &model.PaymasterInfo{
 				PayMasterAddress: &paymasterAddress,
 				PayType:          types.PayType(value["paymaster_pay_type"].(string)),
 			},
 		}
+
 		config[key] = strategy
 		suitableStrategyMap[strategy.NetWorkInfo.NetWork][strategy.GetEntryPointAddress().String()][strategy.GetPayType()] = strategy
 	}

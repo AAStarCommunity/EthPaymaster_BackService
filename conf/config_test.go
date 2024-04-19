@@ -23,6 +23,6 @@ func TestConvertConfig(t *testing.T) {
 	fmt.Println(ethPaymaster)
 }
 func TestStrategyConfig(t *testing.T) {
-	GetBasicStrategyConfig("Ethereum")
+	BasicStrategyInit()
 
 }

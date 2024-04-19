@@ -3,9 +3,9 @@
     "network": "ethereum-sepolia",
     "entrypoint_address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
     "entrypoint_tag": "v0.6",
-    "effective_start_time": 1710044496,
-    "effective_end_time": 1820044496,
-    "paymaster": "0xAEbF4C90b571e7D5cb949790C9b8Dc0280298b63",
+    "effective_start_time": "1710044496",
+    "effective_end_time": "1820044496",
+    "paymaster_address": "0xAEbF4C90b571e7D5cb949790C9b8Dc0280298b63",
     "paymaster_pay_type": "00",
     "access_project": "official"
   },
@@ -13,9 +13,9 @@
     "network": "optimism-sepolia",
     "entrypoint_address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
     "entrypoint_tag": "v0.6",
-    "effective_start_time": 1710044496,
-    "effective_end_time": 1820044496,
-    "paymaster": "0xAEbF4C90b571e7D5cb949790C9b8Dc0280298b63",
+    "effective_start_time": "1710044496",
+    "effective_end_time": "1820044496",
+    "paymaster_address": "0xAEbF4C90b571e7D5cb949790C9b8Dc0280298b63",
     "paymaster_pay_type": "00",
     "access_project": "official"
   }
