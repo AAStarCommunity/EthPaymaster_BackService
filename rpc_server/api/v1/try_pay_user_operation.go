@@ -3,6 +3,7 @@ package v1
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/envirment"
 	"AAStarCommunity/EthPaymaster_BackService/service/operator"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -55,7 +56,7 @@ func ValidateUserOpRequest(request model.UserOpRequest) error {
 	if request.ForceStrategyId == "" && (request.ForceToken == "" || request.ForceNetwork == "") {
 		return xerrors.Errorf("Token And Network Must Set When ForceStrategyId Is Empty")
 	}
-	if conf.Environment.IsDevelopment() && request.ForceNetwork != "" {
+	if envirment.Environment.IsDevelopment() && request.ForceNetwork != "" {
 		if !conf.IsTestNet(request.ForceNetwork) {
 			return xerrors.Errorf("ForceNetwork: [%s] is not test network", request.ForceNetwork)
 		}

@@ -3,8 +3,8 @@ package routers
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
-	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"AAStarCommunity/EthPaymaster_BackService/docs"
+	"AAStarCommunity/EthPaymaster_BackService/envirment"
 	"AAStarCommunity/EthPaymaster_BackService/rpc_server/middlewares"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -43,7 +43,7 @@ func SetRouters() (routers *gin.Engine) {
 func buildRoute(routers *gin.Engine) {
 	// build http routers and middleware
 	routers.Use(middlewares.GenericRecoveryHandler())
-	if conf.Environment.IsDevelopment() {
+	if envirment.Environment.IsDevelopment() {
 		routers.Use(middlewares.LogHandler())
 	}
 	routers.Use(middlewares.CorsHandler())
@@ -58,14 +58,14 @@ func buildRoute(routers *gin.Engine) {
 func buildMod(routers *gin.Engine) {
 
 	// prod mode
-	if conf.Environment.IsProduction() {
+	if envirment.Environment.IsProduction() {
 		gin.SetMode(gin.ReleaseMode)
 		gin.DefaultWriter = io.Discard // disable gin log
 		return
 	}
 
 	// dev mod
-	if conf.Environment.IsDevelopment() {
+	if envirment.Environment.IsDevelopment() {
 		gin.SetMode(gin.DebugMode)
 		buildSwagger(routers)
 		return

@@ -7,34 +7,41 @@ import (
 	"errors"
 )
 
-// TODO just Temp Mock
 var MockStrategyMap = map[string]*model.Strategy{}
-var payMasterSupport = map[string]bool{}
-var entryPointSupport = map[string]bool{}
 
 func init() {
 
 }
 func GetStrategyById(strategyId string) *model.Strategy {
-	return conf.BasicStrategyConfig[strategyId]
+	return conf.GetBasicStrategyConfig(strategyId)
+
 }
 
 func GetSuitableStrategy(entrypoint string, chain types.Network, payType types.PayType) (*model.Strategy, error) {
-	strategy := conf.SuitableStrategyMap[chain][entrypoint][payType]
+	strategy, err := conf.GetSuitableStrategy(entrypoint, chain, payType)
+	if err != nil {
+		return nil, err
+	}
+
 	if strategy == nil {
 		return nil, errors.New("strategy not found")
 	}
 	return strategy, nil
 }
-func IsEntryPointsSupport(address string) bool {
-	if entryPointSupport[address] {
-		return true
-	}
-	return false
+func GetStrategyListByNetwork(chain types.Network) []model.Strategy {
+	panic("implement me")
 }
-func IsPayMasterSupport(address string) bool {
-	if payMasterSupport[address] {
-		return true
+func IsEntryPointsSupport(address string, chain types.Network) bool {
+	supportEntryPointSet, ok := conf.BasicConfig.SupportEntryPoint[chain]
+	if !ok {
+		return false
 	}
-	return false
+	return supportEntryPointSet.Contains(address)
+}
+func IsPayMasterSupport(address string, chain types.Network) bool {
+	supportPayMasterSet, ok := conf.BasicConfig.SupportPaymaster[chain]
+	if !ok {
+		return false
+	}
+	return supportPayMasterSet.Contains(address)
 }

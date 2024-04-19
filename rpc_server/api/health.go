@@ -2,7 +2,7 @@ package api
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/envirment"
 	"github.com/gin-gonic/gin"
 	"time"
 )
@@ -18,7 +18,7 @@ func Healthz(c *gin.Context) {
 	response := model.GetResponse()
 	response.WithDataSuccess(c, gin.H{
 		"hello":       "Eth Paymaster",
-		"environment": conf.Environment.Name,
+		"environment": envirment.Environment.Name,
 		"time":        time.Now(),
 		"version":     "v1.0.0",
 	})

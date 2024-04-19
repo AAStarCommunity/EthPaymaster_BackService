@@ -3,30 +3,48 @@ package conf
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"AAStarCommunity/EthPaymaster_BackService/envirment"
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
+	"golang.org/x/xerrors"
 	"os"
 	"strings"
+	"sync"
 )
 
-var originConfig *OriginBusinessConfig
-var BasicStrategyConfig map[string]*model.Strategy = make(map[string]*model.Strategy)
-var SuitableStrategyMap map[types.Network]map[string]map[types.PayType]*model.Strategy = make(map[types.Network]map[string]map[types.PayType]*model.Strategy)
+var once sync.Once
+var basicStrategyConfig map[string]*model.Strategy
+var suitableStrategyMap map[types.Network]map[string]map[types.PayType]*model.Strategy
 
-func getStrategyConfigPath() *string {
-	path := fmt.Sprintf("../conf/basic_strategy_%s_config.json", strings.ToLower(Environment.Name))
-	fmt.Println(path)
-	if _, err := os.Stat(path); err != nil && os.IsNotExist(err) {
-		path = fmt.Sprintf("../conf/basic_strategy_config.json")
-	}
-	return &path
+func GetBasicStrategyConfig(key string) *model.Strategy {
+	once.Do(func() {
+		if basicStrategyConfig == nil {
+			BasicStrategyInit()
+		}
+	})
+	return basicStrategyConfig[key]
 }
-func BasicStrategyConfigInit() {
-	filePah := getStrategyConfigPath()
-	file, err := os.Open(*filePah)
+func GetSuitableStrategy(entrypoint string, chain types.Network, payType types.PayType) (*model.Strategy, error) {
+	once.Do(func() {
+		if basicStrategyConfig == nil {
+			BasicStrategyInit()
+		}
+	})
+	strategy := suitableStrategyMap[chain][entrypoint][payType]
+	if strategy == nil {
+		return nil, xerrors.Errorf("strategy not found")
+	}
+	return strategy, nil
+}
+
+func BasicStrategyInit() {
+	basicStrategyConfig = make(map[string]*model.Strategy)
+	suitableStrategyMap = make(map[types.Network]map[string]map[types.PayType]*model.Strategy)
+	path := fmt.Sprintf("../conf/basic_strategy_%s_config.json", strings.ToLower(envirment.Environment.Name))
+	file, err := os.Open(path)
 	if err != nil {
-		panic(fmt.Sprintf("file not found: %s", *filePah))
+		panic(err)
 	}
 	//var mapValue map[string]any
 	decoder := json.NewDecoder(file)
@@ -39,7 +57,7 @@ func BasicStrategyConfigInit() {
 	if err != nil {
 		panic(fmt.Sprintf("parse file error: %s", err))
 	}
-	BasicStrategyConfig = strateyMap
+	basicStrategyConfig = strateyMap
 }
 func convertMapToStrategyConfig(data map[string]map[string]any) (map[string]*model.Strategy, error) {
 	config := make(map[string]*model.Strategy)
@@ -68,7 +86,7 @@ func convertMapToStrategyConfig(data map[string]map[string]any) (map[string]*mod
 			},
 		}
 		config[key] = strategy
-		SuitableStrategyMap[strategy.NetWorkInfo.NetWork][strategy.GetEntryPointAddress().String()][strategy.GetPayType()] = strategy
+		suitableStrategyMap[strategy.NetWorkInfo.NetWork][strategy.GetEntryPointAddress().String()][strategy.GetPayType()] = strategy
 	}
 	return config, nil
 }

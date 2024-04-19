@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/envirment"
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	"time"
@@ -19,8 +19,8 @@ func GinJwtMiddleware() *jwt.GinJWTMiddleware {
 
 func AuthHandler() gin.HandlerFunc {
 	m, _ := jwt.New(&jwt.GinJWTMiddleware{
-		Realm:       conf.GetJwtKey().Realm,
-		Key:         []byte(conf.GetJwtKey().Security),
+		Realm:       envirment.GetJwtKey().Realm,
+		Key:         []byte(envirment.GetJwtKey().Security),
 		Timeout:     time.Hour * 24,
 		MaxRefresh:  time.Hour / 2,
 		IdentityKey: "jti",

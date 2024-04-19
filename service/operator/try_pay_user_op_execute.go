@@ -2,6 +2,7 @@ package operator
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/paymaster_pay_type"
@@ -172,7 +173,7 @@ func StrategyGenerate(request *model.UserOpRequest) (*model.Strategy, error) {
 		}
 	}
 
-	suitableStrategy, err := dashboard_service.GetSuitableStrategy(request.ForceEntryPointAddress, request.ForceNetwork, request.ForceToken) //TODO
+	suitableStrategy, err := dashboard_service.GetSuitableStrategy(request.ForceEntryPointAddress, request.ForceNetwork, types.PayTypeSuperVerifying) //TODO
 	if err != nil {
 		return nil, err
 	}

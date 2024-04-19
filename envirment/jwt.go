@@ -1,4 +1,4 @@
-package conf
+package envirment
 
 import "sync"
 
@@ -16,7 +16,7 @@ var onceJwt sync.Once
 func GetJwtKey() *JWT {
 	onceJwt.Do(func() {
 		if jwt == nil {
-			j := getConf().Jwt
+			j := GetAppConf().Jwt
 			jwt = &JWT{
 				Security: j.Security,
 				Realm:    j.Realm,

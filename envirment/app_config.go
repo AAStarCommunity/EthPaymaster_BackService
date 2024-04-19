@@ -1,4 +1,4 @@
-package conf
+package envirment
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
@@ -16,7 +16,7 @@ type Conf struct {
 	Jwt JWT
 }
 
-func EnvInit() {
+func init() {
 	envName := model.DevEnv
 	if len(os.Getenv(model.EnvKey)) > 0 {
 		envName = os.Getenv(model.EnvKey)
@@ -31,8 +31,8 @@ func EnvInit() {
 
 var conf *Conf
 
-// getConf read conf from file
-func getConf() *Conf {
+// GetAppConf read conf from file
+func GetAppConf() *Conf {
 	once.Do(func() {
 		if conf == nil {
 			filePath := getConfFilePath()
