@@ -13,6 +13,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -185,6 +186,12 @@ func (executor EthereumExecutor) GetGasPrice() (*model.GasPrice, error) {
 	result := model.GasPrice{}
 	result.MaxFeePerGas = priceWei
 	result.MaxPriorityPriceWei = priorityPriceWei
+
+	head, err := client.HeaderByNumber(context.Background(), nil)
+	if err != nil {
+		return nil, err
+	}
+	result.BaseFee = head.BaseFee
 	return &result, nil
 	//
 	//gasPriceInGwei := new(big.Float).SetInt(priceWei)
@@ -283,18 +290,25 @@ func (executor EthereumExecutor) SimulateV07HandleOp(userOpV07 *userop.UserOpera
 	if err != nil {
 		return nil, err
 	}
-	client := executor.Client
+	//client := executor.Client
 	msg := ethereum.CallMsg{
 		To:   entryPoint,
 		Data: callData,
 	}
-	callMsg := utils.ToCallArg(&msg)
+	//callMsg := utils.ToCallArg(&msg)
 	mapAcc := &map[common.Address]gethclient.OverrideAccount{
 		*entryPoint: {
 			Code: EntryPointSimulationsDeployCode,
 		},
 	}
-	err = client.Client().CallContext(context.Background(), &result, "eth_call", callMsg, "latest", mapAcc)
+	gClient := executor.GethClient
+	byteResult, err := gClient.CallContractWithBlockOverrides(context.Background(), msg, nil, mapAcc, gethclient.BlockOverrides{})
+	if err != nil {
+		return nil, err
+	}
+	//byteResult, err := client.CallContract(context.Background(), msg, nil )
+	err = json.Unmarshal(byteResult, &result)
+	//err = client.Client().CallContext(context.Background(), &result, "eth_call", callMsg, "latest", mapAcc)
 	if err != nil {
 		return nil, err
 	}

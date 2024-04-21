@@ -39,7 +39,7 @@ func GetGasPrice(chain types.Network) (*model.GasPrice, error) {
 }
 
 // GetPreVerificationGas https://github.com/eth-infinitism/bundler/blob/main/packages/sdk/src/calcPreVerificationGas.ts
-func GetPreVerificationGas(chain types.Network, userOp *userop.BaseUserOp, strategy *model.Strategy, gasFeeResult *model.GasFeePerGasResult) (*big.Int, error) {
+func GetPreVerificationGas(chain types.Network, userOp *userop.BaseUserOp, strategy *model.Strategy, gasFeeResult *model.GasPrice) (*big.Int, error) {
 	stack := conf.GetNetWorkStack(chain)
 	preGasFunc := network.PreVerificationGasFuncMap[stack]
 	return preGasFunc(userOp, strategy, gasFeeResult)

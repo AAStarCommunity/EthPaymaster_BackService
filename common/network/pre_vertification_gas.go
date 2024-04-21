@@ -12,7 +12,7 @@ import (
 
 var PreVerificationGasFuncMap = map[types.NewWorkStack]PreVerificationGasFunc{}
 
-type PreVerificationGasFunc = func(op *userop.BaseUserOp, strategy *model.Strategy, gasFeeResult *model.GasFeePerGasResult) (*big.Int, error)
+type PreVerificationGasFunc = func(op *userop.BaseUserOp, strategy *model.Strategy, gasFeeResult *model.GasPrice) (*big.Int, error)
 
 func init() {
 	PreVerificationGasFuncMap[types.ARBSTACK] = ArbitrumPreVerificationGasFunc()
@@ -23,7 +23,7 @@ func init() {
 // https://medium.com/offchainlabs/understanding-arbitrum-2-dimensional-fees-fd1d582596c9.
 // https://docs.arbitrum.io/build-decentralized-apps/nodeinterface/reference
 func ArbitrumPreVerificationGasFunc() PreVerificationGasFunc {
-	return func(op *userop.BaseUserOp, strategy *model.Strategy, gasFeeResult *model.GasFeePerGasResult) (*big.Int, error) {
+	return func(op *userop.BaseUserOp, strategy *model.Strategy, gasFeeResult *model.GasPrice) (*big.Int, error) {
 		base, err := getBasicPreVerificationGas(op, strategy)
 		if err != nil {
 			return nil, err
@@ -38,7 +38,7 @@ func ArbitrumPreVerificationGasFunc() PreVerificationGasFunc {
 	}
 }
 func DefaultPreVerificationGasFunc() PreVerificationGasFunc {
-	return func(op *userop.BaseUserOp, strategy *model.Strategy, gasFeeResult *model.GasFeePerGasResult) (*big.Int, error) {
+	return func(op *userop.BaseUserOp, strategy *model.Strategy, gasFeeResult *model.GasPrice) (*big.Int, error) {
 		return getBasicPreVerificationGas(op, strategy)
 	}
 }
@@ -48,7 +48,7 @@ func DefaultPreVerificationGasFunc() PreVerificationGasFunc {
 // https://docs.optimism.io/builders/app-developers/transactions/estimates#execution-gas-fee
 // https://docs.optimism.io/stack/transactions/fees#the-l1-data-fee
 func OPStackPreVerificationGasFunc() PreVerificationGasFunc {
-	return func(op *userop.BaseUserOp, strategy *model.Strategy, gasFeeResult *model.GasFeePerGasResult) (*big.Int, error) {
+	return func(op *userop.BaseUserOp, strategy *model.Strategy, gasFeeResult *model.GasPrice) (*big.Int, error) {
 		basicGas, err := getBasicPreVerificationGas(op, strategy)
 		if err != nil {
 			return nil, err
@@ -63,7 +63,7 @@ func OPStackPreVerificationGasFunc() PreVerificationGasFunc {
 			return nil, err
 		}
 		l2Price := gasFeeResult.MaxFeePerGas
-		l2Piroriry := big.NewInt(0).Add(gasFeeResult.MaxPriorityFeePerGas, gasFeeResult.BaseFee)
+		l2Piroriry := big.NewInt(0).Add(gasFeeResult.MaxFeePerGas, gasFeeResult.BaseFee)
 		// use smaller one
 		if utils.LeftIsLessTanRight(l2Piroriry, l2Price) {
 			l2Price = l2Piroriry
