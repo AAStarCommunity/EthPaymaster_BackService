@@ -11,11 +11,11 @@ import (
 	"strings"
 )
 
-var BasicConfig *BusinessConfig
+var basicConfig *BusinessConfig
 
-func init() {
+func BusinessConfigInit() {
 	originConfig := initBusinessConfig()
-	BasicConfig = convertConfig(originConfig)
+	basicConfig = convertConfig(originConfig)
 }
 func getBasicConfigPath() *string {
 	path := fmt.Sprintf("../conf/business_%s_config.json", strings.ToLower(envirment.Environment.Name))
@@ -96,55 +96,55 @@ type NetWorkConfig struct {
 }
 
 func GetTokenAddress(networkParam types.Network, tokenParam types.TokenType) string {
-	networkConfig := BasicConfig.NetworkConfigMap[networkParam]
+	networkConfig := basicConfig.NetworkConfigMap[networkParam]
 
 	return networkConfig.TokenConfig[tokenParam]
 }
 func CheckEntryPointExist(network2 types.Network, address string) bool {
-	entryPointSet := BasicConfig.SupportEntryPoint[network2]
+	entryPointSet := basicConfig.SupportEntryPoint[network2]
 	entryPointSetValue := entryPointSet
 	return entryPointSetValue.Contains(address)
 }
 func GetGasToken(networkParam types.Network) types.TokenType {
-	networkConfig := BasicConfig.NetworkConfigMap[networkParam]
+	networkConfig := basicConfig.NetworkConfigMap[networkParam]
 	return networkConfig.GasToken
 }
 
 func GetChainId(newworkParam types.Network) string {
-	networkConfig := BasicConfig.NetworkConfigMap[newworkParam]
+	networkConfig := basicConfig.NetworkConfigMap[newworkParam]
 	return networkConfig.ChainId
 }
 func GetEthereumRpcUrl(network types.Network) string {
-	networkConfig := BasicConfig.NetworkConfigMap[network]
+	networkConfig := basicConfig.NetworkConfigMap[network]
 	return networkConfig.RpcUrl
 }
 
 var (
 	TestNetWork = mapset.NewSet(
-		types.ETHEREUM_SEPOLIA, types.OPTIMISM_SEPOLIA, types.ARBITRUM_SPEOLIA, types.SCROLL_SEPOLIA, types.STARKET_SEPOLIA, types.BaseSepolia)
+		types.EthereumSepolia, types.OptimismSepolia, types.ArbitrumSpeolia, types.ScrollSepolia, types.StarketSepolia, types.BaseSepolia)
 	OpeStackNetWork = mapset.NewSet(
-		types.OPTIMISM_MAINNET, types.OPTIMISM_SEPOLIA, types.Base, types.BaseSepolia)
+		types.OptimismMainnet, types.OptimismSepolia, types.BaseMainnet, types.BaseSepolia)
 	EthereumAdaptableNetWork = mapset.NewSet(
-		types.OPTIMISM_MAINNET, types.OPTIMISM_SEPOLIA, types.ETHEREUM_SEPOLIA)
+		types.OptimismMainnet, types.OptimismSepolia, types.EthereumSepolia)
 	ArbStackNetWork = mapset.NewSet(
-		types.ARBITRUM_SPEOLIA, types.ARBITRUM_ONE)
+		types.ArbitrumSpeolia, types.ArbitrumOne, types.ArbitrumNova)
 
 	L1GasOracleInL2 = map[types.Network]common.Address{
-		types.OPTIMISM_MAINNET: common.HexToAddress("0x420000000000000000000000000000000000000F"),
-		types.OPTIMISM_SEPOLIA: common.HexToAddress("0x420000000000000000000000000000000000000F"),
-		types.SCROLL_SEPOLIA:   common.HexToAddress("0x5300000000000000000000000000000000000002"),
-		types.SCROLL_MAINNET:   common.HexToAddress("0x5300000000000000000000000000000000000002"),
+		types.OptimismMainnet: common.HexToAddress("0x420000000000000000000000000000000000000F"),
+		types.OptimismSepolia: common.HexToAddress("0x420000000000000000000000000000000000000F"),
+		types.ScrollSepolia:   common.HexToAddress("0x5300000000000000000000000000000000000002"),
+		types.ScrollMainnet:   common.HexToAddress("0x5300000000000000000000000000000000000002"),
 	}
 )
 
 func GetNetWorkStack(network types.Network) types.NewWorkStack {
 	if IsOpStackNetWork(network) {
-		return types.OPSTACK
+		return types.OpStack
 	}
 	if IsArbNetWork(network) {
-		return types.ARBSTACK
+		return types.ArbStack
 	}
-	return types.DEFAULT_STACK
+	return types.DefaultStack
 }
 
 func IsTestNet(network types.Network) bool {

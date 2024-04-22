@@ -22,7 +22,7 @@ func TestConvertConfig(t *testing.T) {
 
 	fmt.Println(ethPaymaster)
 }
-func TestStrategyConfig(t *testing.T) {
+func TestConfigInit(t *testing.T) {
 	BasicStrategyInit()
 
 }

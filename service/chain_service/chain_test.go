@@ -11,12 +11,12 @@ import (
 func TestCheckContractAddressAccess(t *testing.T) {
 	addressStr := "0x0576a174D229E3cFA37253523E645A78A0C91B57"
 	address := common.HexToAddress(addressStr)
-	res, err := CheckContractAddressAccess(&address, types.ETHEREUM_SEPOLIA)
+	res, err := CheckContractAddressAccess(&address, types.EthereumSepolia)
 	assert.NoError(t, err)
 	assert.True(t, res)
 }
 func TestGetGasPrice(t *testing.T) {
-	gasprice, _ := GetGasPrice(types.ETHEREUM_MAINNET)
+	gasprice, _ := GetGasPrice(types.EthereumMainnet)
 	fmt.Printf("gasprice %d\n", gasprice.MaxFeePerGas.Uint64())
 
 }
@@ -29,7 +29,7 @@ func TestGetGasPrice(t *testing.T) {
 //	}
 func TestGetAddressTokenBalance(t *testing.T) {
 
-	res, err := GetAddressTokenBalance(types.ETHEREUM_SEPOLIA, common.HexToAddress("0xDf7093eF81fa23415bb703A685c6331584D30177"), types.USDC)
+	res, err := GetAddressTokenBalance(types.EthereumSepolia, common.HexToAddress("0xDf7093eF81fa23415bb703A685c6331584D30177"), types.USDC)
 	assert.NoError(t, err)
 	fmt.Println(res)
 }

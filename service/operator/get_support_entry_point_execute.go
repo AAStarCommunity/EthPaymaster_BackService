@@ -10,7 +10,7 @@ func GetSupportEntrypointExecute(networkStr string) (*[]model.EntrypointDomain, 
 	entrypoints = append(entrypoints, model.EntrypointDomain{
 		Address:    "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
 		Desc:       "desc",
-		NetWork:    types.ETHEREUM_SEPOLIA,
+		NetWork:    types.EthereumSepolia,
 		StrategyId: "1",
 	})
 	return &entrypoints, nil

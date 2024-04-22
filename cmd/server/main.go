@@ -1,6 +1,7 @@
 package main
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"AAStarCommunity/EthPaymaster_BackService/rpc_server/routers"
 	"flag"
 	"os"
@@ -37,6 +38,11 @@ func runMode() string {
 // @description Type 'Bearer \<TOKEN\>' to correctly set the AccessToken
 // @BasePath /api
 func main() {
+	Init()
 	port := runMode()
 	_ = routers.SetRouters().Run(port)
+}
+func Init() {
+	conf.BasicStrategyInit()
+	conf.BusinessConfigInit()
 }

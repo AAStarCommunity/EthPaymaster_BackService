@@ -16,9 +16,9 @@ var preVerificationGasFuncMap = map[types.NewWorkStack]PreVerificationGasFunc{}
 type PreVerificationGasFunc = func(op *userop.BaseUserOp, strategy *model.Strategy, gasFeeResult *model.GasPrice) (*big.Int, error)
 
 func init() {
-	preVerificationGasFuncMap[types.ARBSTACK] = ArbitrumPreVerificationGasFunc()
-	preVerificationGasFuncMap[types.DEFAULT_STACK] = DefaultPreVerificationGasFunc()
-	preVerificationGasFuncMap[types.OPSTACK] = OPStackPreVerificationGasFunc()
+	preVerificationGasFuncMap[types.ArbStack] = ArbitrumPreVerificationGasFunc()
+	preVerificationGasFuncMap[types.DefaultStack] = DefaultPreVerificationGasFunc()
+	preVerificationGasFuncMap[types.OpStack] = OPStackPreVerificationGasFunc()
 }
 func GetPreVerificationGasFunc(stack types.NewWorkStack) (PreVerificationGasFunc, error) {
 	function, ok := preVerificationGasFuncMap[stack]

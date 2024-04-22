@@ -25,7 +25,7 @@ func GetGasPrice(chain types.Network) (*model.GasPrice, error) {
 	if conf.IsEthereumAdaptableNetWork(chain) {
 		ethereumExecutor := network.GetEthereumExecutor(chain)
 		return ethereumExecutor.GetGasPrice()
-	} else if chain == types.STARKET_MAINNET || chain == types.STARKET_SEPOLIA {
+	} else if chain == types.StarketMainnet || chain == types.StarketSepolia {
 		starknetExecutor := network.GetStarknetExecutor()
 		return starknetExecutor.GetGasPrice()
 	} else {
