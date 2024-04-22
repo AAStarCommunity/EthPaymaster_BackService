@@ -31,7 +31,7 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 
 	preVerificationGas, err := chain_service.GetPreVerificationGas(strategy.GetNewWork(), userOp, strategy, gasPrice)
 
-	verificationGasLimit, err := EstimateVerificationGasLimit(strategy, simulateResult, preVerificationGas)
+	verificationGasLimit, err := EstimateVerificationGasLimit(simulateResult, preVerificationGas)
 
 	callGasLimit, err := EstimateCallGasLimit(strategy, simulateResult, userOp)
 
@@ -74,10 +74,6 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 }
 
 func GetNewUserOpAfterCompute(op *userop.BaseUserOp, gas model.UserOpEstimateGas) *userop.BaseUserOp {
-	return nil
-}
-
-func GetFeePerGas(strategy *model.Strategy) (gasFeeResult *model.GasFeePerGasResult) {
 	return nil
 }
 
@@ -132,8 +128,9 @@ func ValidateGas(userOp *userop.BaseUserOp, gasComputeResponse *model.ComputeGas
 	return nil
 }
 
-func EstimateVerificationGasLimit(strategy *model.Strategy, simulateOpResult *model.SimulateHandleOpResult, preVerificationGas *big.Int) (*big.Int, error) {
+func EstimateVerificationGasLimit(simulateOpResult *model.SimulateHandleOpResult, preVerificationGas *big.Int) (*big.Int, error) {
 	preOpGas := simulateOpResult.PreOpGas
+	// verificationGasLimit = (preOpGas - preVerificationGas) * 1.5
 	result := new(big.Int).Sub(preOpGas, preVerificationGas)
 	result = result.Mul(result, types.THREE_BIGINT)
 	result = result.Div(result, types.TWO_BIGINT)

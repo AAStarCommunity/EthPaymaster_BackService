@@ -26,7 +26,9 @@ var (
 	DUMMY_PAYMASTER_POSTOP_GASLIMIT_BIGINT      = big.NewInt(DUMMY_PAYMASTER_POSTOP_GASLIMIT)
 	DUMMY_VERIFICATIONGASLIMIT_BIGINT           = big.NewInt(DUMMY_VERIFICATIONGASLIMIT)
 	THREE_BIGINT                                = big.NewInt(3)
+	HUNDRED_BIGINT                              = big.NewInt(100)
 	TWO_BIGINT                                  = big.NewInt(2)
+	HUNDRED_PLUS_ONE_BIGINT                     = big.NewInt(110)
 	DUMMY_PRIVATE_KEY                           *ecdsa.PrivateKey
 	DUMMY_ADDRESS                               *common.Address
 )

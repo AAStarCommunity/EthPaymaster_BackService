@@ -171,8 +171,11 @@ func (executor EthereumExecutor) EstimateCreateSenderGas(entrypointAddress *comm
 	return new(big.Int).SetUint64(res), nil
 }
 
+// GetGasPrice uint256 gasFee = min(maxFeePerGas, maxPriorityFeePerGas + block.basefee);
+// maxPriorityFeePerGasBuffer = L1_fee / verificationGasLimit
 func (executor EthereumExecutor) GetGasPrice() (*model.GasPrice, error) {
-
+	//The Arbitrum sequencer ignores priority fees and eth_maxPriorityFeePerGas always returns 0
+	//On Optimism we set maxPriorityFeePerGas = l1_gas / l2_base_fee
 	client := executor.Client
 
 	priceWei, priceWeiErr := client.SuggestGasPrice(context.Background())

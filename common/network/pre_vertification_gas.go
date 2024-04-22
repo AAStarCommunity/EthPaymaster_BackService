@@ -6,18 +6,26 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
+	"golang.org/x/xerrors"
 	"math"
 	"math/big"
 )
 
-var PreVerificationGasFuncMap = map[types.NewWorkStack]PreVerificationGasFunc{}
+var preVerificationGasFuncMap = map[types.NewWorkStack]PreVerificationGasFunc{}
 
 type PreVerificationGasFunc = func(op *userop.BaseUserOp, strategy *model.Strategy, gasFeeResult *model.GasPrice) (*big.Int, error)
 
 func init() {
-	PreVerificationGasFuncMap[types.ARBSTACK] = ArbitrumPreVerificationGasFunc()
-	PreVerificationGasFuncMap[types.DEFAULT_STACK] = DefaultPreVerificationGasFunc()
-	PreVerificationGasFuncMap[types.OPSTACK] = OPStackPreVerificationGasFunc()
+	preVerificationGasFuncMap[types.ARBSTACK] = ArbitrumPreVerificationGasFunc()
+	preVerificationGasFuncMap[types.DEFAULT_STACK] = DefaultPreVerificationGasFunc()
+	preVerificationGasFuncMap[types.OPSTACK] = OPStackPreVerificationGasFunc()
+}
+func GetPreVerificationGasFunc(stack types.NewWorkStack) (PreVerificationGasFunc, error) {
+	function, ok := preVerificationGasFuncMap[stack]
+	if !ok {
+		return nil, xerrors.Errorf("stack %s not support", stack)
+	}
+	return function, nil
 }
 
 // https://medium.com/offchainlabs/understanding-arbitrum-2-dimensional-fees-fd1d582596c9.
@@ -62,14 +70,17 @@ func OPStackPreVerificationGasFunc() PreVerificationGasFunc {
 		if err != nil {
 			return nil, err
 		}
-		l2Price := gasFeeResult.MaxFeePerGas
-		l2Piroriry := big.NewInt(0).Add(gasFeeResult.MaxFeePerGas, gasFeeResult.BaseFee)
+		l2MaxFee := gasFeeResult.MaxFeePerGas
+		l2priorityFee := big.NewInt(0).Add(gasFeeResult.MaxFeePerGas, gasFeeResult.BaseFee)
 		// use smaller one
-		if utils.LeftIsLessTanRight(l2Piroriry, l2Price) {
-			l2Price = l2Piroriry
+		var l2Price *big.Int
+		if utils.LeftIsLessTanRight(l2MaxFee, l2priorityFee) {
+			l2Price = l2MaxFee
+		} else {
+			l2Price = l2priorityFee
 		}
 		//Return static + L1 buffer as PVG. L1 buffer is equal to L1Fee/L2Price.
-		return big.NewInt(0).Add(basicGas, big.NewInt(0).Mul(l1DataFee, l2Price)), nil
+		return big.NewInt(0).Add(basicGas, big.NewInt(0).Div(l1DataFee, l2Price)), nil
 	}
 }
 
