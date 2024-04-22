@@ -1,17 +1,25 @@
 package network
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/userop"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"context"
+	"fmt"
+	"github.com/stretchr/testify/assert"
+	"os"
 	"testing"
+)
+
+var (
+	op, _ = userop.NewUserOp(utils.GenerateMockUserv06Operation(), types.EntrypointV06)
 )
 
 func TestSimulateV06HandleOp(t *testing.T) {
 	sepoliaExector := GetEthereumExecutor(types.EthereumSepolia)
-	op, newErr := userop.NewUserOp(utils.GenerateMockUserOperation(), types.EntrypointV06)
+	op, newErr := userop.NewUserOp(utils.GenerateMockUserv06Operation(), types.EntrypointV06)
 	if newErr != nil {
 		return
 	}
@@ -27,9 +35,19 @@ func TestSimulateV06HandleOp(t *testing.T) {
 	}
 }
 func TestEthereumExecutorClientConnect(t *testing.T) {
-	conf.BasicStrategyInit()
+	conf.BasicStrategyInit("../../conf/basic_strategy_dev_config.json")
 	conf.BusinessConfigInit()
 	executor := GetEthereumExecutor(types.EthereumSepolia)
 	client := executor.Client
-	client.ChainID(context.Background())
+	chainId, err := client.ChainID(context.Background())
+	assert.NoError(t, err)
+	assert.NotNil(t, chainId)
+	assert.Equal(t, chainId, executor.ChainId)
+}
+func TestFile(t *testing.T) {
+	//TODO
+	fmt.Println(os.Getwd())
+	_, err := common.ReadFile("../../common/test_file.txt")
+	assert.NoError(t, err)
+
 }

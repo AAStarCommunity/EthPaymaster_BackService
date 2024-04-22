@@ -3,35 +3,21 @@ package conf
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
-	"AAStarCommunity/EthPaymaster_BackService/envirment"
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/xerrors"
 	"math/big"
 	"os"
-	"strings"
-	"sync"
 )
 
-var once sync.Once
 var basicStrategyConfig map[string]*model.Strategy
 var suitableStrategyMap map[types.Network]map[string]map[types.PayType]*model.Strategy
 
 func GetBasicStrategyConfig(key string) *model.Strategy {
-	once.Do(func() {
-		if basicStrategyConfig == nil {
-			BasicStrategyInit()
-		}
-	})
 	return basicStrategyConfig[key]
 }
 func GetSuitableStrategy(entrypoint string, chain types.Network, payType types.PayType) (*model.Strategy, error) {
-	once.Do(func() {
-		if basicStrategyConfig == nil {
-			BasicStrategyInit()
-		}
-	})
 	strategy := suitableStrategyMap[chain][entrypoint][payType]
 	if strategy == nil {
 		return nil, xerrors.Errorf("strategy not found")
@@ -39,10 +25,12 @@ func GetSuitableStrategy(entrypoint string, chain types.Network, payType types.P
 	return strategy, nil
 }
 
-func BasicStrategyInit() {
+func BasicStrategyInit(path string) {
+	if path == "" {
+		panic("pathParam is empty")
+	}
 	basicStrategyConfig = make(map[string]*model.Strategy)
 	suitableStrategyMap = make(map[types.Network]map[string]map[types.PayType]*model.Strategy)
-	path := fmt.Sprintf("../conf/basic_strategy_%s_config.json", strings.ToLower(envirment.Environment.Name))
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)

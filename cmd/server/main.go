@@ -2,8 +2,10 @@ package main
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/envirment"
 	"AAStarCommunity/EthPaymaster_BackService/rpc_server/routers"
 	"flag"
+	"fmt"
 	"os"
 	"strings"
 )
@@ -43,6 +45,7 @@ func main() {
 	_ = routers.SetRouters().Run(port)
 }
 func Init() {
-	conf.BasicStrategyInit()
+	strategyPath := fmt.Sprintf("../conf/basic_strategy_%s_config.json", strings.ToLower(envirment.Environment.Name))
+	conf.BasicStrategyInit(strategyPath)
 	conf.BusinessConfigInit()
 }
