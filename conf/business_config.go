@@ -2,26 +2,23 @@ package conf
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
-	"AAStarCommunity/EthPaymaster_BackService/envirment"
 	"encoding/json"
 	"fmt"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/ethereum/go-ethereum/common"
 	"os"
-	"strings"
 )
 
 var basicConfig *BusinessConfig
 
-func BusinessConfigInit() {
-	originConfig := initBusinessConfig()
+func BusinessConfigInit(path string) {
+	if path == "" {
+		panic("pathParam is empty")
+	}
+	originConfig := initBusinessConfig(path)
 	basicConfig = convertConfig(originConfig)
 }
-func getBasicConfigPath() *string {
-	path := fmt.Sprintf("../conf/business_%s_config.json", strings.ToLower(envirment.Environment.Name))
 
-	return &path
-}
 func convertConfig(originConfig *OriginBusinessConfig) *BusinessConfig {
 	basic := &BusinessConfig{}
 	basic.NetworkConfigMap = make(map[types.Network]NetWorkConfig)
@@ -48,13 +45,11 @@ func convertConfig(originConfig *OriginBusinessConfig) *BusinessConfig {
 	}
 	return basic
 }
-func initBusinessConfig() *OriginBusinessConfig {
+func initBusinessConfig(path string) *OriginBusinessConfig {
 	var config OriginBusinessConfig
-	filePath := getBasicConfigPath()
-	fmt.Println(*filePath)
-	file, err := os.Open(*filePath)
+	file, err := os.Open(path)
 	if err != nil {
-		panic(fmt.Sprintf("file not found: %s", *filePath))
+		panic(fmt.Sprintf("file not found: %s", path))
 	}
 	//var mapValue map[string]any
 	decoder := json.NewDecoder(file)

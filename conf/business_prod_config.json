@@ -10,31 +10,11 @@
         "USDC": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"
       }
     },
-    "sepolia": {
-      "chain_id": "11155111",
-      "is_test": true,
-      "rpc_url": "https://eth-sepolia.g.alchemy.com/v2",
-      "api_key": "wKeLycGxgYRykgf0aGfcpEkUtqyLQg4v",
-      "token_config": {
-        "USDT": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0",
-        "USDC": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"
-      }
-    },
     "optimism": {
       "chain_id": "1",
       "is_test": true,
       "rpc_url": "https://opt-mainnet.g.alchemy.com/v2",
       "api_key": "wKeLycGxgYRykgf0aGfcpEkUtqyLQg4v",
-      "token_config": {
-        "USDT": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0",
-        "USDC": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"
-      }
-    },
-    "optimism-sepolia": {
-      "chain_id": "1",
-      "is_test": true,
-      "rpc_url": "https://opt-sepolia.g.alchemy.com/v2",
-      "api_key": "_z0GaU6Zk8RfIR1guuli8nqMdb8RPdp0",
       "token_config": {
         "USDT": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0",
         "USDC": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"
@@ -50,41 +30,11 @@
         "USDC": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"
       }
     },
-    "arbitrum-sepolia": {
-      "chain_id": "421614",
-      "is_test": true,
-      "rpc_url": "https://arb-sepolia.g.alchemy.com/v2",
-      "api_key": "xSBkiidslrZmlcWUOSF3AluKx0A9g_kl",
-      "token_config": {
-        "USDT": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0",
-        "USDC": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"
-      }
-    },
-    "scroll-sepolia": {
-      "chain_id": "534351",
-      "is_test": true,
-      "rpc_url": "https://sepolia-rpc.scroll.io",
-      "api_key": "",
-      "token_config": {
-        "USDT": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0",
-        "USDC": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"
-      }
-    },
-    "scroll": {
+    "scroll-mainnet": {
       "chain_id": "534351",
       "is_test": false,
       "rpc_url": "https://rpc.scroll.io",
       "api_key": "",
-      "token_config": {
-        "USDT": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0",
-        "USDC": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"
-      }
-    },
-    "starknet-sepolia": {
-      "chain_id": "534351",
-      "is_test": false,
-      "rpc_url": "https://starknet-sepolia.g.alchemy.com/v2",
-      "api_key": "suCMhzhev596v1NCDOhhJzbR3KJ4CfZz",
       "token_config": {
         "USDT": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0",
         "USDC": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"

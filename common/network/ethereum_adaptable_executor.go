@@ -264,8 +264,7 @@ func (executor EthereumExecutor) SimulateV06HandleOp(v06 *userop.UserOperationV0
 	callData, err := abi.Pack("simulateHandleOp", packOp, nil, nil)
 	client := executor.Client
 	err = client.Client().Call(nil, "eth_call", &ethereum.CallMsg{
-		From: *entryPoint,
-		To:   conf.GetSimulateEntryPointAddress(executor.network),
+		To:   entryPoint,
 		Data: callData,
 	}, "latest")
 	simResult, simErr := contract_entrypoint_v06.NewExecutionResult(err)

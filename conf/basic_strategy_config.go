@@ -11,8 +11,10 @@ import (
 	"os"
 )
 
-var basicStrategyConfig map[string]*model.Strategy
-var suitableStrategyMap map[types.Network]map[string]map[types.PayType]*model.Strategy
+var basicStrategyConfig = make(map[string]*model.Strategy)
+
+// suitableStrategyMap[chain][entrypoint][payType]
+var suitableStrategyMap = make(map[types.Network]map[string]map[types.PayType]*model.Strategy)
 
 func GetBasicStrategyConfig(key string) *model.Strategy {
 	return basicStrategyConfig[key]
@@ -29,8 +31,7 @@ func BasicStrategyInit(path string) {
 	if path == "" {
 		panic("pathParam is empty")
 	}
-	basicStrategyConfig = make(map[string]*model.Strategy)
-	suitableStrategyMap = make(map[types.Network]map[string]map[types.PayType]*model.Strategy)
+
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -85,6 +86,12 @@ func convertMapToStrategyConfig(data map[string]map[string]any) (map[string]*mod
 		}
 
 		config[key] = strategy
+		if suitableStrategyMap[strategy.NetWorkInfo.NetWork] == nil {
+			suitableStrategyMap[strategy.NetWorkInfo.NetWork] = make(map[string]map[types.PayType]*model.Strategy)
+		}
+		if suitableStrategyMap[strategy.NetWorkInfo.NetWork][strategy.GetEntryPointAddress().String()] == nil {
+			suitableStrategyMap[strategy.NetWorkInfo.NetWork][strategy.GetEntryPointAddress().String()] = make(map[types.PayType]*model.Strategy)
+		}
 		suitableStrategyMap[strategy.NetWorkInfo.NetWork][strategy.GetEntryPointAddress().String()][strategy.GetPayType()] = strategy
 	}
 	return config, nil

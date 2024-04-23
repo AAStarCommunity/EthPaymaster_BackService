@@ -47,5 +47,6 @@ func main() {
 func Init() {
 	strategyPath := fmt.Sprintf("../conf/basic_strategy_%s_config.json", strings.ToLower(envirment.Environment.Name))
 	conf.BasicStrategyInit(strategyPath)
-	conf.BusinessConfigInit()
+	businessConfigPath := fmt.Sprintf("../conf/business_%s_config.json", strings.ToLower(envirment.Environment.Name))
+	conf.BusinessConfigInit(businessConfigPath)
 }
