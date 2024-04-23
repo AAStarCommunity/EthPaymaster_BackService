@@ -1,7 +1,6 @@
 package types
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"crypto/ecdsa"
 	"encoding/hex"
 	"github.com/ethereum/go-ethereum/common"
@@ -37,8 +36,6 @@ var (
 	DummyMaxPriorityFeePerGas                   = big.NewInt(1500000000)
 	DummyCallGasLimit                           = big.NewInt(21754)
 	DummyVerificationGasLimit                   = big.NewInt(391733)
-	DummyGasFees                                = utils.PackIntTo32Bytes(DummyMaxPriorityFeePerGas, DummyMaxFeePerGas)
-	DummyAccountGasLimits                       = utils.PackIntTo32Bytes(DummyVerificationGasLimit, DummyCallGasLimit)
 )
 
 func init() {

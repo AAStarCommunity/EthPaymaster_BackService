@@ -7,8 +7,8 @@ import (
 )
 
 func TestNewUserOpV06(t *testing.T) {
-	userOpV6 := utils.GenerateMockUservOperation()
-	userOp, err := NewUserOp(userOpV6, types.EntryPointV07)
+	userOpMap := utils.GenerateMockUservOperation()
+	userOp, err := NewUserOp(userOpMap, types.EntryPointV07)
 	t.Logf("userOp: %v", userOp)
 	t.Logf("PreVerificationGas %v", userOp.PreVerificationGas)
 
@@ -25,9 +25,5 @@ func TestNewUserOpV06(t *testing.T) {
 		t.Error("userOp is nil")
 		return
 	}
-	//userOpvalue := *userOp
-	//userOpvalueV6 := userOpvalue.(*UserOperationV07)
-	//t.Logf("userOpSender: %v", userOpvalueV6.Sender)
-	//t.Logf("PreVerificationGas: %v", userOpvalueV6.PreVerificationGas)
 
 }

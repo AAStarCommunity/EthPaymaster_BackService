@@ -6,12 +6,14 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"context"
+	"github.com/sirupsen/logrus"
 	"testing"
 )
 
 func TestEthereumAdaptableExecutor(t *testing.T) {
 	conf.BasicStrategyInit("../../conf/basic_strategy_dev_config.json")
 	conf.BusinessConfigInit("../../conf/business_dev_config.json")
+	logrus.SetLevel(logrus.DebugLevel)
 	tests := []struct {
 		name string
 		test func(t *testing.T)
@@ -57,14 +59,17 @@ func testSimulateV06HandleOp(t *testing.T, chain types.Network) {
 	op, newErr := user_op.NewUserOp(utils.GenerateMockUservOperation(), types.EntrypointV06)
 	if newErr != nil {
 		t.Error(newErr)
+		return
 	}
 	strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
 	simulataResult, err := sepoliaExector.SimulateV06HandleOp(op, strategy.GetEntryPointAddress())
 	if err != nil {
 		t.Error(err)
+		return
 	}
 	if simulataResult == nil {
 		t.Error("simulataResult is nil")
+		return
 	}
 	t.Logf("simulateResult: %v", simulataResult)
 }

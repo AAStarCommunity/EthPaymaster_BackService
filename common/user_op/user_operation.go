@@ -17,6 +17,8 @@ import (
 )
 
 var (
+	DummyGasFees              = utils.PackIntTo32Bytes(types.DummyMaxPriorityFeePerGas, types.DummyMaxFeePerGas)
+	DummyAccountGasLimits     = utils.PackIntTo32Bytes(types.DummyVerificationGasLimit, types.DummyCallGasLimit)
 	MinPreVerificationGas     *big.Int
 	validate                  = validator.New()
 	onlyOnce                  = sync.Once{}
@@ -273,7 +275,7 @@ func packUserOpV6ForUserOpHash(userOp *UserOperationV06) (string, []byte, error)
 func (userOp *UserOpInput) PackUserOpForMock(version types.EntrypointVersion) (string, []byte, error) {
 	if version == types.EntryPointV07 {
 		gasFee := utils.PackIntTo32Bytes(userOp.MaxPriorityFeePerGas, userOp.MaxFeePerGas)
-		encoded, err := UserOpV07PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, types.DummyAccountGasLimits, userOp.PreVerificationGas, gasFee, types.DUMMY_PAYMASTER_DATA, types.DUMMY_SIGNATURE)
+		encoded, err := UserOpV07PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, DummyAccountGasLimits, userOp.PreVerificationGas, gasFee, types.DUMMY_PAYMASTER_DATA, types.DUMMY_SIGNATURE)
 		if err != nil {
 			return "", nil, err
 		}

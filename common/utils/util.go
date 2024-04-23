@@ -2,15 +2,8 @@ package utils
 
 import (
 	"bytes"
-	"context"
-	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	go_ethereum_types "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"math/big"
 	"regexp"
@@ -121,57 +114,4 @@ func IsLessThanZero(value *big.Int) bool {
 }
 func LeftIsLessTanRight(a *big.Int, b *big.Int) bool {
 	return a.Cmp(b) < 0
-}
-
-func GetAuth(chainId *big.Int, privateKey *ecdsa.PrivateKey) (*bind.TransactOpts, error) {
-	signer := go_ethereum_types.LatestSignerForChainID(chainId)
-	address := crypto.PubkeyToAddress(privateKey.PublicKey)
-	return &bind.TransactOpts{
-		From: address,
-		Signer: func(address common.Address, tx *go_ethereum_types.Transaction) (*go_ethereum_types.Transaction, error) {
-			if address != address {
-				return nil, bind.ErrNotAuthorized
-			}
-			signature, err := crypto.Sign(signer.Hash(tx).Bytes(), privateKey)
-			if err != nil {
-				return nil, err
-			}
-			return tx.WithSignature(signer, signature)
-		},
-		Context: context.Background(),
-	}, nil
-}
-func ToCallArg(msg *ethereum.CallMsg) interface{} {
-	arg := map[string]interface{}{
-		"from": msg.From,
-		"to":   msg.To,
-	}
-	if len(msg.Data) > 0 {
-		arg["input"] = hexutil.Bytes(msg.Data)
-	}
-	if msg.Value != nil {
-		arg["value"] = (*hexutil.Big)(msg.Value)
-	}
-	if msg.Gas != 0 {
-		arg["gas"] = hexutil.Uint64(msg.Gas)
-	}
-	if msg.GasPrice != nil {
-		arg["gasPrice"] = (*hexutil.Big)(msg.GasPrice)
-	}
-	if msg.GasFeeCap != nil {
-		arg["maxFeePerGas"] = (*hexutil.Big)(msg.GasFeeCap)
-	}
-	if msg.GasTipCap != nil {
-		arg["maxPriorityFeePerGas"] = (*hexutil.Big)(msg.GasTipCap)
-	}
-	if msg.AccessList != nil {
-		arg["accessList"] = msg.AccessList
-	}
-	if msg.BlobGasFeeCap != nil {
-		arg["maxFeePerBlobGas"] = (*hexutil.Big)(msg.BlobGasFeeCap)
-	}
-	if msg.BlobHashes != nil {
-		arg["blobVersionedHashes"] = msg.BlobHashes
-	}
-	return arg
 }

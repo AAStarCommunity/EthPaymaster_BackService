@@ -59,7 +59,7 @@ func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy) (*model.C
 		usdCost, _ = utils.GetPriceUsd(strategy.GetUseToken())
 	}
 
-	updateUserOp := GetNewUserOpAfterCompute(userOp, opEstimateGas)
+	updateUserOp := GetNewUserOpAfterCompute(userOp, &opEstimateGas, entryPointVersion)
 	// TODO get PaymasterCallGasLimit
 	return &model.ComputeGasResponse{
 		GasInfo:       gasPrice,
@@ -72,8 +72,27 @@ func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy) (*model.C
 	}, updateUserOp, nil
 }
 
-func GetNewUserOpAfterCompute(op *user_op.UserOpInput, gas model.UserOpEstimateGas) *user_op.UserOpInput {
-	return nil
+func GetNewUserOpAfterCompute(op *user_op.UserOpInput, gas *model.UserOpEstimateGas, version types.EntrypointVersion) *user_op.UserOpInput {
+	var accountGasLimits [32]byte
+	var gasFee [32]byte
+	if version == types.EntryPointV07 {
+		accountGasLimits = utils.PackIntTo32Bytes(gas.PreVerificationGas, gas.CallGasLimit)
+		gasFee = utils.PackIntTo32Bytes(gas.MaxPriorityFeePerGas, gas.MaxFeePerGas)
+	}
+	result := &user_op.UserOpInput{
+		Sender:               op.Sender,
+		Nonce:                op.Nonce,
+		InitCode:             op.InitCode,
+		CallData:             op.CallData,
+		MaxFeePerGas:         op.MaxFeePerGas,
+		Signature:            op.Signature,
+		MaxPriorityFeePerGas: op.MaxPriorityFeePerGas,
+		CallGasLimit:         op.CallGasLimit,
+		VerificationGasLimit: op.VerificationGasLimit,
+		AccountGasLimits:     accountGasLimits,
+		GasFees:              gasFee,
+	}
+	return result
 }
 
 func EstimateCallGasLimit(strategy *model.Strategy, simulateOpResult *model.SimulateHandleOpResult, op *user_op.UserOpInput) (*big.Int, error) {

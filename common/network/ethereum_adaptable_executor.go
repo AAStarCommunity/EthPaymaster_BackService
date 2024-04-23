@@ -11,16 +11,19 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
-	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"context"
+	"crypto/ecdsa"
 	"encoding/hex"
 	"encoding/json"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	go_ethereum_types "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/ethclient/gethclient"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 	"math/big"
 	"sync"
@@ -267,11 +270,12 @@ func (executor EthereumExecutor) SimulateV06HandleOp(v06 *user_op.UserOpInput, e
 	_, packOp, _ := v06.PackUserOpForMock(types.EntrypointV06)
 	callData, err := abi.Pack("simulateHandleOp", packOp, nil, nil)
 	client := executor.Client
-	err = client.Client().Call(nil, "eth_call", &ethereum.CallMsg{
+	callErr := client.Client().Call(nil, "eth_call", &ethereum.CallMsg{
 		To:   entryPoint,
 		Data: callData,
 	}, "latest")
-	simResult, simErr := contract_entrypoint_v06.NewExecutionResult(err)
+	logrus.Debugf("simulateHandleOp callErr %v", callErr)
+	simResult, simErr := contract_entrypoint_v06.NewExecutionResult(callErr)
 	if simErr != nil {
 		return nil, simErr
 	}
@@ -403,5 +407,23 @@ func (executor EthereumExecutor) GetAuth() (*bind.TransactOpts, error) {
 	if executor.ChainId == nil {
 		return nil, xerrors.Errorf("chainId is nil")
 	}
-	return utils.GetAuth(executor.ChainId, types.DUMMY_PRIVATE_KEY)
+	return GetAuth(executor.ChainId, types.DUMMY_PRIVATE_KEY)
+}
+func GetAuth(chainId *big.Int, privateKey *ecdsa.PrivateKey) (*bind.TransactOpts, error) {
+	signer := go_ethereum_types.LatestSignerForChainID(chainId)
+	address := crypto.PubkeyToAddress(privateKey.PublicKey)
+	return &bind.TransactOpts{
+		From: address,
+		Signer: func(address common.Address, tx *go_ethereum_types.Transaction) (*go_ethereum_types.Transaction, error) {
+			if address != address {
+				return nil, bind.ErrNotAuthorized
+			}
+			signature, err := crypto.Sign(signer.Hash(tx).Bytes(), privateKey)
+			if err != nil {
+				return nil, err
+			}
+			return tx.WithSignature(signer, signature)
+		},
+		Context: context.Background(),
+	}, nil
 }

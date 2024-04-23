@@ -31,6 +31,7 @@ func executionResult() abi.Error {
 }
 
 func NewExecutionResult(err error) (*ExecutionResultRevert, error) {
+
 	rpcErr, ok := err.(rpc.DataError)
 	if !ok {
 		return nil, xerrors.Errorf("executionResult: cannot assert type: error is not of type rpc.DataError")
