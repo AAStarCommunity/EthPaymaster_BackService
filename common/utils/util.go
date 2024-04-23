@@ -51,6 +51,23 @@ func IsStringInUint64Range(s string) bool {
 	return num <= ^uint64(0)
 }
 
+func PackIntTo32Bytes(left *big.Int, right *big.Int) [32]byte {
+	leftBytes := left.Bytes()
+	rightBytes := right.Bytes()
+
+	leftHex := fmt.Sprintf("%016x", leftBytes)
+	rightHex := fmt.Sprintf("%016x", rightBytes)
+
+	leftBytes, _ = hex.DecodeString(leftHex)
+	rightBytes, _ = hex.DecodeString(rightHex)
+
+	var result [32]byte
+	copy(result[:16], leftBytes)
+	copy(result[16:], rightBytes)
+
+	return result
+}
+
 func EncodeToStringWithPrefix(data []byte) string {
 	res := hex.EncodeToString(data)
 	if res[:2] != "0x" {

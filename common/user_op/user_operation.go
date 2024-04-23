@@ -1,16 +1,11 @@
-package userop
+package user_op
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/contract_paymaster_verifying_v07"
-	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/paymater_verifying_erc20_v06"
 	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/paymaster_abi"
-	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
-	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"encoding/hex"
 	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
@@ -254,6 +249,8 @@ type UserOpInput struct {
 	CallGasLimit *big.Int `json:"callGasLimit"  mapstructure:"call_gas_limit"  binding:"required"`
 	//Gas limit for verification phase
 	VerificationGasLimit *big.Int `json:"verificationGasLimit"  mapstructure:"verification_gas_limit"  binding:"required"`
+	AccountGasLimits     [32]byte
+	GasFees              [32]byte
 }
 
 func packUserOpV6ForUserOpHash(userOp *UserOperationV06) (string, []byte, error) {
@@ -274,127 +271,23 @@ func packUserOpV6ForUserOpHash(userOp *UserOperationV06) (string, []byte, error)
 }
 
 func (userOp *UserOpInput) PackUserOpForMock(version types.EntrypointVersion) (string, []byte, error) {
-	// V07
-	//	encoded, err := UserOpV07PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, userOp.AccountGasLimit, userOp.PreVerificationGas, userOp.PreVerificationGas, userOp.GasFees, types.DUMMY_PAYMASTER_DATA, userOp.Signature)
-	//	if err != nil {
-	//		return "", nil, err
-	//	}
-	//	return hex.EncodeToString(encoded), encoded, nil
-
-	//TODO  UserMock
-	//v07
-	//encoded, err := userOpV06PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, userOp.CallGasLimit, userOp.VerificationGasLimit, userOp.PreVerificationGas, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, types.DUMMY_PAYMASTER_DATA, userOp.Sender)
-	//if err != nil {
-	//	return "", nil, err
-	//}
-	//return hex.EncodeToString(encoded), encoded, nil
-	//TODO
-	panic("implement me")
-}
-
-func (userOp *UserOpInput) GetUserOpHash(strategy *model.Strategy) ([]byte, string, error) {
-	//TODO
-	// V07
-	version := strategy.GetStrategyEntryPointVersion()
-	executor := network.GetEthereumExecutor(strategy.GetNewWork())
-	erc20Token := common.HexToAddress("0x")
-	paytype := strategy.GetPayType()
-	if paytype == types.PayTypeERC20 {
-		tokenType := strategy.GetUseToken()
-		tokenAddress := conf.GetTokenAddress(strategy.GetNewWork(), tokenType)
-		erc20Token = common.HexToAddress(tokenAddress)
-	}
-
-	if version == types.EntrypointV06 {
-		contract, err := executor.GetPaymasterErc20AndVerifyV06(strategy.GetPaymasterAddress())
+	if version == types.EntryPointV07 {
+		gasFee := utils.PackIntTo32Bytes(userOp.MaxPriorityFeePerGas, userOp.MaxFeePerGas)
+		encoded, err := UserOpV07PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, types.DummyAccountGasLimits, userOp.PreVerificationGas, gasFee, types.DUMMY_PAYMASTER_DATA, types.DUMMY_SIGNATURE)
 		if err != nil {
-			return nil, "", err
+			return "", nil, err
 		}
-		hash, err := contract.GetHash(&bind.CallOpts{}, paymater_verifying_erc20_v06.UserOperation{
-			Sender:               *userOp.Sender,
-			Nonce:                userOp.Nonce,
-			InitCode:             userOp.InitCode,
-			CallData:             userOp.CallData,
-			CallGasLimit:         userOp.CallGasLimit,
-			VerificationGasLimit: userOp.VerificationGasLimit,
-			PreVerificationGas:   userOp.PreVerificationGas,
-			MaxFeePerGas:         userOp.MaxFeePerGas,
-			MaxPriorityFeePerGas: userOp.MaxPriorityFeePerGas,
-			PaymasterAndData:     userOp.PaymasterAndData,
-			Signature:            userOp.Signature,
-		}, strategy.ExecuteRestriction.EffectiveEndTime, strategy.ExecuteRestriction.EffectiveStartTime, erc20Token, big.NewInt(0))
-		if err != nil {
-			return nil, "", err
-		}
-		return hash[:], "", nil
-	} else if version == types.EntryPointV07 {
-		if paytype == types.PayTypeVerifying {
-			contract, err := executor.GetPaymasterVerifyV07(strategy.GetPaymasterAddress())
-			if err != nil {
-				return nil, "", err
-			}
-			hash, err := contract.GetHash(&bind.CallOpts{}, contract_paymaster_verifying_v07.PackedUserOperation{
-				Sender:   *userOp.Sender,
-				Nonce:    userOp.Nonce,
-				InitCode: userOp.InitCode,
-				CallData: userOp.CallData,
-				//TODO
-			}, strategy.ExecuteRestriction.EffectiveEndTime, strategy.ExecuteRestriction.EffectiveStartTime)
-			if err != nil {
-				return nil, "", err
-			}
-			return hash[:], "", nil
-		} else if paytype == types.PayTypeERC20 {
-			//TODO
-			//contract, err := executor.GetPaymasterErc20V07(strategy.GetPaymasterAddress())
-			//if err != nil {
-			//	return nil, "", err
-			//}
-			//hash, err := contract.GetHash(&bind.CallOpts{}, contract_paymaster_e_v07.PackedUserOperation{}, strategy.ExecuteRestriction.EffectiveEndTime, strategy.ExecuteRestriction.EffectiveStartTime, erc20Token, big.NewInt(0))
-			//if err != nil {
-			//	return nil, "", err
-			//}
-			//return hash[:], "", nil
+		return hex.EncodeToString(encoded), encoded, nil
+	} else if version == types.EntrypointV06 {
 
-		} else {
-			return nil, "", xerrors.Errorf("paytype %s not support", paytype)
+		encoded, err := userOpV06PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, types.DummyCallGasLimit, types.DummyVerificationGasLimit, types.DUMMAY_PREVERIFICATIONGAS_BIGINT, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, types.DUMMY_PAYMASTER_DATA, userOp.Sender)
+		if err != nil {
+			return "", nil, err
 		}
+		return hex.EncodeToString(encoded), encoded, nil
 	} else {
-		return nil, "", xerrors.Errorf("entrypoint version %s not support", version)
+		return "", nil, xerrors.Errorf("should never be here ")
 	}
-	//paymasterGasValue := userOp.PaymasterPostOpGasLimit.Text(20) + userOp.PaymasterVerificationGasLimit.Text(20)
-	//byteRes, err := UserOpV07GetHashArguments.Pack(userOp.Sender, userOp.Nonce, crypto.Keccak256(userOp.InitCode),
-	//	crypto.Keccak256(userOp.CallData), userOp.AccountGasLimit,
-	//	paymasterGasValue, userOp.PreVerificationGas, userOp.GasFees, conf.GetChainId(strategy.GetNewWork()), strategy.GetPaymasterAddress())
-	//if err != nil {
-	//	return nil, "", err
-	//}
-	//userOpHash := crypto.Keccak256(byteRes)
-	//afterProcessUserOphash := utils.ToEthSignedMessageHash(userOpHash)
-	//return afterProcessUserOphash, hex.EncodeToString(byteRes), nil
-
-	// V06
-	//packUserOpStr, _, err := packUserOpV6ForUserOpHash(userOp)
-	//if err != nil {
-	//	return nil, "", err
-	//}
-	//
-	//packUserOpStrByteNew, err := hex.DecodeString(packUserOpStr)
-	//if err != nil {
-	//	return nil, "", err
-	//}
-	//
-	//bytesRes, err := userOPV06GetHashArguments.Pack(packUserOpStrByteNew, conf.GetChainId(strategy.GetNewWork()), strategy.GetPaymasterAddress(), userOp.Nonce, strategy.ExecuteRestriction.EffectiveStartTime, strategy.ExecuteRestriction.EffectiveEndTime)
-	//if err != nil {
-	//	return nil, "", err
-	//}
-	//
-	//userOpHash := crypto.Keccak256(bytesRes)
-	//afterProcessUserOphash := utils.ToEthSignedMessageHash(userOpHash)
-	//return afterProcessUserOphash, hex.EncodeToString(bytesRes), nil
-	//TODO
-	panic("implement me")
-
 }
 
 func (userOp *UserOpInput) GetFactoryAddress() *common.Address {

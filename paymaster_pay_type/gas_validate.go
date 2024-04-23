@@ -3,7 +3,7 @@ package paymaster_pay_type
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
-	"AAStarCommunity/EthPaymaster_BackService/common/userop"
+	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"golang.org/x/xerrors"
 	"math/big"
@@ -19,15 +19,15 @@ func init() {
 	GasValidateFuncMap[types.PayTypeSuperVerifying] = SuperGasValidate()
 }
 
-type ValidatePaymasterGasFunc = func(userOp *userop.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error
+type ValidatePaymasterGasFunc = func(userOp *user_op.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error
 
 func SuperGasValidate() ValidatePaymasterGasFunc {
-	return func(userOp *userop.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
+	return func(userOp *user_op.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
 		return xerrors.Errorf("never reach here")
 	}
 }
 func Erc20GasValidate() ValidatePaymasterGasFunc {
-	return func(userOp *userop.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
+	return func(userOp *user_op.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
 		userOpValue := *userOp
 		sender := userOpValue.Sender
 		tokenBalance, getTokenBalanceErr := chain_service.GetAddressTokenBalance(strategy.GetNewWork(), *sender, strategy.GetUseToken())
@@ -43,7 +43,7 @@ func Erc20GasValidate() ValidatePaymasterGasFunc {
 	}
 }
 func VerifyingGasValidate() ValidatePaymasterGasFunc {
-	return func(userOp *userop.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
+	return func(userOp *user_op.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
 		//Validate the account’s deposit in the entryPoint is high enough to cover the max possible cost (cover the already-done verification and max execution gas)
 		// Paymaster check paymaster balance
 

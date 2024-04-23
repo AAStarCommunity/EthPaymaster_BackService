@@ -3,7 +3,7 @@ package paymaster_pay_type
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
-	"AAStarCommunity/EthPaymaster_BackService/common/userop"
+	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"fmt"
 	"strconv"
@@ -17,10 +17,10 @@ func init() {
 	GenerateFuncMap[types.PayTypeSuperVerifying] = GenerateSuperContractPaymasterData()
 }
 
-type GeneratePaymasterDataFunc = func(strategy *model.Strategy, userOp *userop.UserOpInput, gasResponse *model.ComputeGasResponse) (string, error)
+type GeneratePaymasterDataFunc = func(strategy *model.Strategy, userOp *user_op.UserOpInput, gasResponse *model.ComputeGasResponse) (string, error)
 
 func GenerateBasicPaymasterData() GeneratePaymasterDataFunc {
-	return func(strategy *model.Strategy, userOp *userop.UserOpInput, gasResponse *model.ComputeGasResponse) (string, error) {
+	return func(strategy *model.Strategy, userOp *user_op.UserOpInput, gasResponse *model.ComputeGasResponse) (string, error) {
 		validStart, validEnd := getValidTime(strategy)
 		message := fmt.Sprintf("%s%s%s", strategy.GetPaymasterAddress().String(), validEnd, validStart)
 		return message, nil
@@ -28,7 +28,7 @@ func GenerateBasicPaymasterData() GeneratePaymasterDataFunc {
 }
 
 func GenerateSuperContractPaymasterData() GeneratePaymasterDataFunc {
-	return func(strategy *model.Strategy, userOp *userop.UserOpInput, gasResponse *model.ComputeGasResponse) (string, error) {
+	return func(strategy *model.Strategy, userOp *user_op.UserOpInput, gasResponse *model.ComputeGasResponse) (string, error) {
 		validStart, validEnd := getValidTime(strategy)
 		message := fmt.Sprintf("%s%s%s", strategy.GetPaymasterAddress().String(), validEnd, validStart)
 		return message, nil

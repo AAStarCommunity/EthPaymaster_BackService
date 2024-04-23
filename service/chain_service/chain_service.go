@@ -4,7 +4,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
-	"AAStarCommunity/EthPaymaster_BackService/common/userop"
+	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/xerrors"
@@ -39,7 +39,7 @@ func GetGasPrice(chain types.Network) (*model.GasPrice, error) {
 }
 
 // GetPreVerificationGas https://github.com/eth-infinitism/bundler/blob/main/packages/sdk/src/calcPreVerificationGas.ts
-func GetPreVerificationGas(chain types.Network, userOp *userop.UserOpInput, strategy *model.Strategy, gasFeeResult *model.GasPrice) (*big.Int, error) {
+func GetPreVerificationGas(chain types.Network, userOp *user_op.UserOpInput, strategy *model.Strategy, gasFeeResult *model.GasPrice) (*big.Int, error) {
 	stack := conf.GetNetWorkStack(chain)
 	preGasFunc, err := network.GetPreVerificationGasFunc(stack)
 	if err != nil {
@@ -66,7 +66,7 @@ func GetAddressTokenBalance(networkParam types.Network, address common.Address, 
 	return balanceResultFloat, nil
 
 }
-func SimulateHandleOp(networkParam types.Network, op *userop.UserOpInput, strategy *model.Strategy) (*model.SimulateHandleOpResult, error) {
+func SimulateHandleOp(networkParam types.Network, op *user_op.UserOpInput, strategy *model.Strategy) (*model.SimulateHandleOpResult, error) {
 	executor := network.GetEthereumExecutor(networkParam)
 	entrypointVersion := strategy.GetStrategyEntryPointVersion()
 	if entrypointVersion == types.EntryPointV07 {

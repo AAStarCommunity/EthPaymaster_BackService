@@ -10,7 +10,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/simulate_entrypoint"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
-	"AAStarCommunity/EthPaymaster_BackService/common/userop"
+	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"context"
@@ -148,7 +148,7 @@ func (executor EthereumExecutor) GetTokenContract(tokenAddress *common.Address) 
 	return contract, nil
 }
 
-func (executor EthereumExecutor) EstimateUserOpCallGas(entrypointAddress *common.Address, userOpParam *userop.UserOpInput) (*big.Int, error) {
+func (executor EthereumExecutor) EstimateUserOpCallGas(entrypointAddress *common.Address, userOpParam *user_op.UserOpInput) (*big.Int, error) {
 	client := executor.Client
 	userOpValue := *userOpParam
 	res, err := client.EstimateGas(context.Background(), ethereum.CallMsg{
@@ -161,7 +161,7 @@ func (executor EthereumExecutor) EstimateUserOpCallGas(entrypointAddress *common
 	}
 	return new(big.Int).SetUint64(res), nil
 }
-func (executor EthereumExecutor) EstimateCreateSenderGas(entrypointAddress *common.Address, userOpParam *userop.UserOpInput) (*big.Int, error) {
+func (executor EthereumExecutor) EstimateCreateSenderGas(entrypointAddress *common.Address, userOpParam *user_op.UserOpInput) (*big.Int, error) {
 	client := executor.Client
 	userOpValue := *userOpParam
 	res, err := client.EstimateGas(context.Background(), ethereum.CallMsg{
@@ -259,7 +259,7 @@ func (executor EthereumExecutor) GetL1DataFee(data []byte) (*big.Int, error) {
 	return fee, nil
 }
 
-func (executor EthereumExecutor) SimulateV06HandleOp(v06 *userop.UserOpInput, entryPoint *common.Address) (*model.SimulateHandleOpResult, error) {
+func (executor EthereumExecutor) SimulateV06HandleOp(v06 *user_op.UserOpInput, entryPoint *common.Address) (*model.SimulateHandleOpResult, error) {
 	abi, err := contract_entrypoint_v06.ContractMetaData.GetAbi()
 	if err != nil {
 		return nil, err
@@ -284,7 +284,7 @@ func (executor EthereumExecutor) SimulateV06HandleOp(v06 *userop.UserOpInput, en
 	}, nil
 }
 
-func (executor EthereumExecutor) SimulateV07HandleOp(userOpV07 *userop.UserOpInput, entryPoint *common.Address) (*model.SimulateHandleOpResult, error) {
+func (executor EthereumExecutor) SimulateV07HandleOp(userOpV07 *user_op.UserOpInput, entryPoint *common.Address) (*model.SimulateHandleOpResult, error) {
 	var result *simulate_entrypoint.IEntryPointSimulationsExecutionResult
 
 	simulateAbi, err := simulate_entrypoint.ContractMetaData.GetAbi()

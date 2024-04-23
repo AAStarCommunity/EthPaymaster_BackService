@@ -3,7 +3,7 @@ package operator
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
-	"AAStarCommunity/EthPaymaster_BackService/common/userop"
+	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
 	"bytes"
@@ -33,7 +33,7 @@ func getMockTryPayUserOpRequest() *model.UserOpRequest {
 
 func TestPackUserOp(t *testing.T) {
 	// give same len signuature and paymasteranddata
-	userOp, _ := userop.NewUserOp(utils.GenerateMockUservOperation(), types.EntrypointV06)
+	userOp, _ := user_op.NewUserOp(utils.GenerateMockUservOperation(), types.EntrypointV06)
 	userOpValue := *userOp
 
 	res, byteres, err := userOpValue.PackUserOpForMock(types.EntryPointV07)
@@ -51,7 +51,7 @@ func TestConvertHex(t *testing.T) {
 
 func TestSignPaymaster(t *testing.T) {
 
-	userOp, _ := userop.NewUserOp(utils.GenerateMockUservOperation(), types.EntrypointV06)
+	userOp, _ := user_op.NewUserOp(utils.GenerateMockUservOperation(), types.EntrypointV06)
 	strategy := dashboard_service.GetStrategyById("1")
 	//fmt.Printf("validStart: %s, validEnd: %s\n", validStart, validEnd)
 	//message := fmt.Sprintf("%s%s%s%s", strategy.PayMasterAddress, string(strategy.PayType), validStart, validEnd)
@@ -74,10 +74,10 @@ func TestSign(t *testing.T) {
 
 //	func TestUserOpHash(t *testing.T) {
 //		strategy := dashboard_service.GetStrategyById("1")
-//		op, _ := userop.NewUserOp(utils.GenerateMockUservOperation(), types.EntrypointV06)
+//		op, _ := user_op.NewUserOp(utils.GenerateMockUservOperation(), types.EntrypointV06)
 //		userOpValue := *op
 //
-//		userOpV1, ok := userOpValue.(*userop.UserOperationV06)
+//		userOpV1, ok := userOpValue.(*user_op.UserOperationV06)
 //		if !ok {
 //			return
 //		}

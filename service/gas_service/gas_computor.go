@@ -4,7 +4,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
-	"AAStarCommunity/EthPaymaster_BackService/common/userop"
+	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"AAStarCommunity/EthPaymaster_BackService/paymaster_pay_type"
@@ -14,7 +14,7 @@ import (
 )
 
 // https://blog.particle.network/bundler-predicting-gas/
-func ComputeGas(userOp *userop.UserOpInput, strategy *model.Strategy) (*model.ComputeGasResponse, *userop.UserOpInput, error) {
+func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy) (*model.ComputeGasResponse, *user_op.UserOpInput, error) {
 	gasPrice, gasPriceErr := chain_service.GetGasPrice(strategy.GetNewWork())
 	//TODO calculate the maximum possible fee the account needs to pay (based on validation and call gas limits, and current gas values)
 	if gasPriceErr != nil {
@@ -72,11 +72,11 @@ func ComputeGas(userOp *userop.UserOpInput, strategy *model.Strategy) (*model.Co
 	}, updateUserOp, nil
 }
 
-func GetNewUserOpAfterCompute(op *userop.UserOpInput, gas model.UserOpEstimateGas) *userop.UserOpInput {
+func GetNewUserOpAfterCompute(op *user_op.UserOpInput, gas model.UserOpEstimateGas) *user_op.UserOpInput {
 	return nil
 }
 
-func EstimateCallGasLimit(strategy *model.Strategy, simulateOpResult *model.SimulateHandleOpResult, op *userop.UserOpInput) (*big.Int, error) {
+func EstimateCallGasLimit(strategy *model.Strategy, simulateOpResult *model.SimulateHandleOpResult, op *user_op.UserOpInput) (*big.Int, error) {
 	ethereumExecutor := network.GetEthereumExecutor(strategy.GetNewWork())
 	opValue := *op
 	senderExist, _ := ethereumExecutor.CheckContractAddressAccess(opValue.Sender)
@@ -118,7 +118,7 @@ func getTokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Float, 
 
 }
 
-func ValidateGas(userOp *userop.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
+func ValidateGas(userOp *user_op.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
 	validateFunc := paymaster_pay_type.GasValidateFuncMap[strategy.GetPayType()]
 	err := validateFunc(userOp, gasComputeResponse, strategy)
 	if err != nil {

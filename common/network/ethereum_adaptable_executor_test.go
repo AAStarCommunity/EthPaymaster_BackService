@@ -2,7 +2,7 @@ package network
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
-	"AAStarCommunity/EthPaymaster_BackService/common/userop"
+	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"context"
@@ -54,7 +54,7 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 }
 func testSimulateV06HandleOp(t *testing.T, chain types.Network) {
 	sepoliaExector := GetEthereumExecutor(chain)
-	op, newErr := userop.NewUserOp(utils.GenerateMockUservOperation(), types.EntrypointV06)
+	op, newErr := user_op.NewUserOp(utils.GenerateMockUservOperation(), types.EntrypointV06)
 	if newErr != nil {
 		t.Error(newErr)
 	}

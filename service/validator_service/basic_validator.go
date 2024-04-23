@@ -3,7 +3,7 @@ package validator_service
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
-	"AAStarCommunity/EthPaymaster_BackService/common/userop"
+	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/xerrors"
@@ -29,7 +29,7 @@ func ValidateStrategy(strategy *model.Strategy) error {
 	return nil
 }
 
-func ValidateUserOp(userOpParam *userop.UserOpInput, strategy *model.Strategy) error {
+func ValidateUserOp(userOpParam *user_op.UserOpInput, strategy *model.Strategy) error {
 	if err := checkSender(userOpParam, strategy.GetNewWork()); err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func ValidateUserOp(userOpParam *userop.UserOpInput, strategy *model.Strategy) e
 
 	//TODO secure check https://github.com/eth-infinitism/account-abstraction/blob/develop/erc/ERCS/erc-7562.md
 }
-func checkSender(userOpParam *userop.UserOpInput, netWork types.Network) error {
+func checkSender(userOpParam *user_op.UserOpInput, netWork types.Network) error {
 	userOpValue := *userOpParam
 	checkOk, checkSenderErr := chain_service.CheckContractAddressAccess(userOpValue.Sender, netWork)
 	if !checkOk {
