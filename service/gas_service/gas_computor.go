@@ -14,13 +14,12 @@ import (
 )
 
 // https://blog.particle.network/bundler-predicting-gas/
-func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.ComputeGasResponse, *userop.BaseUserOp, error) {
+func ComputeGas(userOp *userop.UserOpInput, strategy *model.Strategy) (*model.ComputeGasResponse, *userop.UserOpInput, error) {
 	gasPrice, gasPriceErr := chain_service.GetGasPrice(strategy.GetNewWork())
 	//TODO calculate the maximum possible fee the account needs to pay (based on validation and call gas limits, and current gas values)
 	if gasPriceErr != nil {
 		return nil, nil, gasPriceErr
 	}
-	paymasterUserOp := *userOp
 	var maxFeePriceInEther *big.Float
 	var maxFee *big.Int
 
@@ -43,7 +42,7 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 	opEstimateGas.VerificationGasLimit = verificationGasLimit
 	opEstimateGas.CallGasLimit = callGasLimit
 
-	entryPointVersion := paymasterUserOp.GetEntrypointVersion()
+	entryPointVersion := strategy.GetStrategyEntryPointVersion()
 	if entryPointVersion == types.EntryPointV07 {
 		opEstimateGas.PaymasterPostOpGasLimit = types.DUMMY_PAYMASTER_POSTOP_GASLIMIT_BIGINT
 		opEstimateGas.PaymasterVerificationGasLimit = types.DUMMY_PAYMASTER_VERIFICATIONGASLIMIT_BIGINT
@@ -73,14 +72,14 @@ func ComputeGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Com
 	}, updateUserOp, nil
 }
 
-func GetNewUserOpAfterCompute(op *userop.BaseUserOp, gas model.UserOpEstimateGas) *userop.BaseUserOp {
+func GetNewUserOpAfterCompute(op *userop.UserOpInput, gas model.UserOpEstimateGas) *userop.UserOpInput {
 	return nil
 }
 
-func EstimateCallGasLimit(strategy *model.Strategy, simulateOpResult *model.SimulateHandleOpResult, op *userop.BaseUserOp) (*big.Int, error) {
+func EstimateCallGasLimit(strategy *model.Strategy, simulateOpResult *model.SimulateHandleOpResult, op *userop.UserOpInput) (*big.Int, error) {
 	ethereumExecutor := network.GetEthereumExecutor(strategy.GetNewWork())
 	opValue := *op
-	senderExist, _ := ethereumExecutor.CheckContractAddressAccess(opValue.GetSender())
+	senderExist, _ := ethereumExecutor.CheckContractAddressAccess(opValue.Sender)
 	if senderExist {
 		userOPCallGas, err := ethereumExecutor.EstimateUserOpCallGas(strategy.GetEntryPointAddress(), op)
 		if err != nil {
@@ -119,7 +118,7 @@ func getTokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Float, 
 
 }
 
-func ValidateGas(userOp *userop.BaseUserOp, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
+func ValidateGas(userOp *userop.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
 	validateFunc := paymaster_pay_type.GasValidateFuncMap[strategy.GetPayType()]
 	err := validateFunc(userOp, gasComputeResponse, strategy)
 	if err != nil {

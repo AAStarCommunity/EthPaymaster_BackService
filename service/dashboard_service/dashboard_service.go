@@ -32,16 +32,17 @@ func GetStrategyListByNetwork(chain types.Network) []model.Strategy {
 	panic("implement me")
 }
 func IsEntryPointsSupport(address string, chain types.Network) bool {
-	supportEntryPointSet, ok := conf.basicConfig.SupportEntryPoint[chain]
-	if !ok {
+	supportEntryPointSet, _ := conf.GetSupportEntryPoints(chain)
+	if supportEntryPointSet == nil {
 		return false
 	}
 	return supportEntryPointSet.Contains(address)
 }
 func IsPayMasterSupport(address string, chain types.Network) bool {
-	supportPayMasterSet, ok := conf.basicConfig.SupportPaymaster[chain]
-	if !ok {
+	supportPayMasterSet, _ := conf.GetSupportPaymaster(chain)
+	if supportPayMasterSet == nil {
 		return false
 	}
+
 	return supportPayMasterSet.Contains(address)
 }

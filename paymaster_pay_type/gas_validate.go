@@ -19,17 +19,17 @@ func init() {
 	GasValidateFuncMap[types.PayTypeSuperVerifying] = SuperGasValidate()
 }
 
-type ValidatePaymasterGasFunc = func(userOp *userop.BaseUserOp, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error
+type ValidatePaymasterGasFunc = func(userOp *userop.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error
 
 func SuperGasValidate() ValidatePaymasterGasFunc {
-	return func(userOp *userop.BaseUserOp, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
+	return func(userOp *userop.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
 		return xerrors.Errorf("never reach here")
 	}
 }
 func Erc20GasValidate() ValidatePaymasterGasFunc {
-	return func(userOp *userop.BaseUserOp, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
+	return func(userOp *userop.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
 		userOpValue := *userOp
-		sender := userOpValue.GetSender()
+		sender := userOpValue.Sender
 		tokenBalance, getTokenBalanceErr := chain_service.GetAddressTokenBalance(strategy.GetNewWork(), *sender, strategy.GetUseToken())
 		if getTokenBalanceErr != nil {
 			return getTokenBalanceErr
@@ -43,7 +43,7 @@ func Erc20GasValidate() ValidatePaymasterGasFunc {
 	}
 }
 func VerifyingGasValidate() ValidatePaymasterGasFunc {
-	return func(userOp *userop.BaseUserOp, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
+	return func(userOp *userop.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
 		//Validate the account’s deposit in the entryPoint is high enough to cover the max possible cost (cover the already-done verification and max execution gas)
 		// Paymaster check paymaster balance
 

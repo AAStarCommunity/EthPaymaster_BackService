@@ -6,14 +6,12 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"context"
-	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestEthereumAdaptableExecutor(t *testing.T) {
 	conf.BasicStrategyInit("../../conf/basic_strategy_dev_config.json")
 	conf.BusinessConfigInit("../../conf/business_dev_config.json")
-
 	tests := []struct {
 		name string
 		test func(t *testing.T)
@@ -24,16 +22,17 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 				testEthereumExecutorClientConnect(t, types.EthereumSepolia)
 			},
 		},
-		{
-			"TestOptimismSepoliaClientConnect",
-			func(t *testing.T) {
-				testEthereumExecutorClientConnect(t, types.OptimismSepolia)
-			},
-		},
+
 		{
 			"TestScrollSepoliaClientConnect",
 			func(t *testing.T) {
 				testEthereumExecutorClientConnect(t, types.ScrollSepolia)
+			},
+		},
+		{
+			"TestOptimismSepoliaClientConnect",
+			func(t *testing.T) {
+				testEthereumExecutorClientConnect(t, types.OptimismSepolia)
 			},
 		},
 		{
@@ -42,34 +41,49 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 				testEthereumExecutorClientConnect(t, types.ArbitrumSpeolia)
 			},
 		},
+		{
+			"TestSepoliaSimulateV06HandleOp",
+			func(t *testing.T) {
+				testSimulateV06HandleOp(t, types.ArbitrumSpeolia)
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, tt.test)
 	}
 }
-func TestSimulateV06HandleOp(t *testing.T) {
-	sepoliaExector := GetEthereumExecutor(types.EthereumSepolia)
-	op, newErr := userop.NewUserOp(utils.GenerateMockUserv06Operation(), types.EntrypointV06)
+func testSimulateV06HandleOp(t *testing.T, chain types.Network) {
+	sepoliaExector := GetEthereumExecutor(chain)
+	op, newErr := userop.NewUserOp(utils.GenerateMockUservOperation(), types.EntrypointV06)
 	if newErr != nil {
-		return
+		t.Error(newErr)
 	}
-	opValue := *op
 	strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
-	userOpV6 := opValue.(*userop.UserOperationV06)
-	simulataResult, err := sepoliaExector.SimulateV06HandleOp(userOpV6, strategy.GetEntryPointAddress())
+	simulataResult, err := sepoliaExector.SimulateV06HandleOp(op, strategy.GetEntryPointAddress())
 	if err != nil {
-		return
+		t.Error(err)
 	}
 	if simulataResult == nil {
-		return
+		t.Error("simulataResult is nil")
 	}
+	t.Logf("simulateResult: %v", simulataResult)
 }
 
 func testEthereumExecutorClientConnect(t *testing.T, chain types.Network) {
 	executor := GetEthereumExecutor(chain)
+	if executor == nil {
+		t.Error("executor is nil")
+	}
 	client := executor.Client
 	chainId, err := client.ChainID(context.Background())
-	assert.NoError(t, err)
-	assert.NotNil(t, chainId)
-	assert.Equal(t, chainId, executor.ChainId)
+	if err != nil {
+		t.Error(err)
+	}
+	if chainId == nil {
+		t.Error("chainId is nil")
+	}
+	if chainId.String() != executor.ChainId.String() {
+		t.Errorf(" %s chainId not equal %s", chainId.String(), executor.ChainId.String())
+	}
+	t.Logf("network %s chainId: %s", chain, chainId.String())
 }

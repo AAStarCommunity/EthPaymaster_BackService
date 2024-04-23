@@ -17,10 +17,10 @@ func init() {
 	GenerateFuncMap[types.PayTypeSuperVerifying] = GenerateSuperContractPaymasterData()
 }
 
-type GeneratePaymasterDataFunc = func(strategy *model.Strategy, userOp *userop.BaseUserOp, gasResponse *model.ComputeGasResponse) (string, error)
+type GeneratePaymasterDataFunc = func(strategy *model.Strategy, userOp *userop.UserOpInput, gasResponse *model.ComputeGasResponse) (string, error)
 
 func GenerateBasicPaymasterData() GeneratePaymasterDataFunc {
-	return func(strategy *model.Strategy, userOp *userop.BaseUserOp, gasResponse *model.ComputeGasResponse) (string, error) {
+	return func(strategy *model.Strategy, userOp *userop.UserOpInput, gasResponse *model.ComputeGasResponse) (string, error) {
 		validStart, validEnd := getValidTime(strategy)
 		message := fmt.Sprintf("%s%s%s", strategy.GetPaymasterAddress().String(), validEnd, validStart)
 		return message, nil
@@ -28,7 +28,7 @@ func GenerateBasicPaymasterData() GeneratePaymasterDataFunc {
 }
 
 func GenerateSuperContractPaymasterData() GeneratePaymasterDataFunc {
-	return func(strategy *model.Strategy, userOp *userop.BaseUserOp, gasResponse *model.ComputeGasResponse) (string, error) {
+	return func(strategy *model.Strategy, userOp *userop.UserOpInput, gasResponse *model.ComputeGasResponse) (string, error) {
 		validStart, validEnd := getValidTime(strategy)
 		message := fmt.Sprintf("%s%s%s", strategy.GetPaymasterAddress().String(), validEnd, validStart)
 		return message, nil

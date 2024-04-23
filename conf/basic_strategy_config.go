@@ -72,7 +72,7 @@ func convertMapToStrategyConfig(data map[string]map[string]any) (map[string]*mod
 			},
 			EntryPointInfo: &model.EntryPointInfo{
 				EntryPointAddress: &entryPointAddress,
-				EntryPointTag:     types.EntrypointVersion(value["entrypoint_tag"].(string)),
+				EntryPointVersion: types.EntrypointVersion(value["entrypoint_tag"].(string)),
 			},
 
 			ExecuteRestriction: model.StrategyExecuteRestriction{

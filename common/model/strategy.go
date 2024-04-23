@@ -26,7 +26,7 @@ type NetWorkInfo struct {
 }
 type EntryPointInfo struct {
 	EntryPointAddress *common.Address         `json:"entrypoint_address"`
-	EntryPointTag     types.EntrypointVersion `json:"entrypoint_tag"`
+	EntryPointVersion types.EntrypointVersion `json:"entrypoint_tag"`
 }
 
 func (strategy *Strategy) GetPaymasterAddress() *common.Address {
@@ -45,8 +45,8 @@ func (strategy *Strategy) GetUseToken() types.TokenType {
 func (strategy *Strategy) GetPayType() types.PayType {
 	return strategy.PaymasterInfo.PayType
 }
-func (strategy *Strategy) GetStrategyEntryPointTag() types.EntrypointVersion {
-	return strategy.EntryPointInfo.EntryPointTag
+func (strategy *Strategy) GetStrategyEntryPointVersion() types.EntrypointVersion {
+	return strategy.EntryPointInfo.EntryPointVersion
 }
 
 type StrategyExecuteRestriction struct {

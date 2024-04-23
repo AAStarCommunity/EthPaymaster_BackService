@@ -90,6 +90,21 @@ type NetWorkConfig struct {
 	GasOracleAddress common.Address
 }
 
+func GetSupportEntryPoints(network types.Network) (mapset.Set[string], error) {
+	res, ok := basicConfig.SupportEntryPoint[network]
+	if !ok {
+		return nil, fmt.Errorf("network not found")
+	}
+	return res, nil
+}
+func GetSupportPaymaster(network types.Network) (mapset.Set[string], error) {
+	res, ok := basicConfig.SupportPaymaster[network]
+	if !ok {
+		return nil, fmt.Errorf("network not found")
+	}
+	return res, nil
+}
+
 func GetTokenAddress(networkParam types.Network, tokenParam types.TokenType) string {
 	networkConfig := basicConfig.NetworkConfigMap[networkParam]
 

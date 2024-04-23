@@ -49,11 +49,11 @@ func TryPayUserOperation(c *gin.Context) {
 }
 func ValidateUserOpRequest(request model.UserOpRequest) error {
 	if len(request.ForceStrategyId) == 0 {
-		if len(request.ForceNetwork) == 0 || len(request.ForceToken) == 0 || len(request.ForceEntryPointAddress) == 0 {
+		if len(request.ForceNetwork) == 0 || len(request.Erc20Token) == 0 || len(request.ForceEntryPointAddress) == 0 {
 			return xerrors.Errorf("strategy configuration illegal")
 		}
 	}
-	if request.ForceStrategyId == "" && (request.ForceToken == "" || request.ForceNetwork == "") {
+	if request.ForceStrategyId == "" && (request.Erc20Token == "" || request.ForceNetwork == "") {
 		return xerrors.Errorf("Token And Network Must Set When ForceStrategyId Is Empty")
 	}
 	if envirment.Environment.IsDevelopment() && request.ForceNetwork != "" {

@@ -29,6 +29,7 @@ var (
 	HUNDRED_BIGINT                              = big.NewInt(100)
 	TWO_BIGINT                                  = big.NewInt(2)
 	HUNDRED_PLUS_ONE_BIGINT                     = big.NewInt(110)
+	ZERO_BIGINT                                 = big.NewInt(0)
 	DUMMY_PRIVATE_KEY                           *ecdsa.PrivateKey
 	DUMMY_ADDRESS                               *common.Address
 )

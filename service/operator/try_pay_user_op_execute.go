@@ -40,7 +40,7 @@ func TryPayUserOpExecute(request *model.UserOpRequest) (*model.TryPayUserOpRespo
 
 //sub Function ---------
 
-func prepareExecute(request *model.UserOpRequest) (*userop.BaseUserOp, *model.Strategy, error) {
+func prepareExecute(request *model.UserOpRequest) (*userop.UserOpInput, *model.Strategy, error) {
 
 	var strategy *model.Strategy
 
@@ -49,7 +49,7 @@ func prepareExecute(request *model.UserOpRequest) (*userop.BaseUserOp, *model.St
 		return nil, nil, generateErr
 	}
 
-	userOp, err := userop.NewUserOp(&request.UserOp, strategy.GetStrategyEntryPointTag())
+	userOp, err := userop.NewUserOp(&request.UserOp, strategy.GetStrategyEntryPointVersion())
 	if err != nil {
 		return nil, nil, err
 
@@ -63,7 +63,7 @@ func prepareExecute(request *model.UserOpRequest) (*userop.BaseUserOp, *model.St
 	return userOp, strategy, nil
 }
 
-func estimateGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.ComputeGasResponse, *userop.BaseUserOp, error) {
+func estimateGas(userOp *userop.UserOpInput, strategy *model.Strategy) (*model.ComputeGasResponse, *userop.UserOpInput, error) {
 	//base Strategy and UserOp computeGas
 	gasResponse, paymasterUserOp, gasComputeError := gas_service.ComputeGas(userOp, strategy)
 	if gasComputeError != nil {
@@ -77,7 +77,7 @@ func estimateGas(userOp *userop.BaseUserOp, strategy *model.Strategy) (*model.Co
 	return gasResponse, paymasterUserOp, nil
 }
 
-func executePay(strategy *model.Strategy, userOp *userop.BaseUserOp, gasResponse *model.ComputeGasResponse) (*model.PayReceipt, error) {
+func executePay(strategy *model.Strategy, userOp *userop.UserOpInput, gasResponse *model.ComputeGasResponse) (*model.PayReceipt, error) {
 	//1.Recharge
 	ethereumPayservice := pay_service.EthereumPayService{}
 	if err := ethereumPayservice.Pay(); err != nil {
@@ -93,7 +93,7 @@ func executePay(strategy *model.Strategy, userOp *userop.BaseUserOp, gasResponse
 	}, nil
 }
 
-func postExecute(userOp *userop.BaseUserOp, strategy *model.Strategy, gasResponse *model.ComputeGasResponse) (*model.TryPayUserOpResponse, error) {
+func postExecute(userOp *userop.UserOpInput, strategy *model.Strategy, gasResponse *model.ComputeGasResponse) (*model.TryPayUserOpResponse, error) {
 	var paymasterAndData string
 	var paymasterSignature string
 	if paymasterAndDataRes, paymasterSignatureRes, err := getPayMasterAndData(strategy, userOp, gasResponse); err != nil {
@@ -115,7 +115,7 @@ func postExecute(userOp *userop.BaseUserOp, strategy *model.Strategy, gasRespons
 	return result, nil
 }
 
-func getPayMasterAndData(strategy *model.Strategy, userOp *userop.BaseUserOp, gasResponse *model.ComputeGasResponse) (string, string, error) {
+func getPayMasterAndData(strategy *model.Strategy, userOp *userop.UserOpInput, gasResponse *model.ComputeGasResponse) (string, string, error) {
 	signatureByte, _, err := signPaymaster(userOp, strategy)
 	if err != nil {
 		return "", "", err
@@ -130,7 +130,7 @@ func getPayMasterAndData(strategy *model.Strategy, userOp *userop.BaseUserOp, ga
 	return paymasterDataResult, signatureStr, err
 }
 
-func signPaymaster(userOp *userop.BaseUserOp, strategy *model.Strategy) ([]byte, []byte, error) {
+func signPaymaster(userOp *userop.UserOpInput, strategy *model.Strategy) ([]byte, []byte, error) {
 	userOpValue := *userOp
 	userOpHash, _, err := userOpValue.GetUserOpHash(strategy)
 	if err != nil {

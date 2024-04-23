@@ -13,7 +13,7 @@ func GetEstimateUserOpGas(request *model.UserOpRequest) (*model.ComputeGasRespon
 		return nil, generateErr
 	}
 
-	userOp, err := userop.NewUserOp(&request.UserOp, strategy.GetStrategyEntryPointTag())
+	userOp, err := userop.NewUserOp(&request.UserOp, strategy.GetStrategyEntryPointVersion())
 	if err != nil {
 		return nil, err
 	}

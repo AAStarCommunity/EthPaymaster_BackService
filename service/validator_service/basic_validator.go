@@ -29,12 +29,12 @@ func ValidateStrategy(strategy *model.Strategy) error {
 	return nil
 }
 
-func ValidateUserOp(userOpParam *userop.BaseUserOp, strategy *model.Strategy) error {
+func ValidateUserOp(userOpParam *userop.UserOpInput, strategy *model.Strategy) error {
 	if err := checkSender(userOpParam, strategy.GetNewWork()); err != nil {
 		return err
 	}
 	userOpValue := *userOpParam
-	if !userOpValue.GetNonce().IsInt64() {
+	if !userOpValue.Nonce.IsInt64() {
 		return xerrors.Errorf("nonce is not in uint64 range")
 	}
 	return userOpValue.ValidateUserOp()
@@ -43,11 +43,11 @@ func ValidateUserOp(userOpParam *userop.BaseUserOp, strategy *model.Strategy) er
 
 	//TODO secure check https://github.com/eth-infinitism/account-abstraction/blob/develop/erc/ERCS/erc-7562.md
 }
-func checkSender(userOpParam *userop.BaseUserOp, netWork types.Network) error {
+func checkSender(userOpParam *userop.UserOpInput, netWork types.Network) error {
 	userOpValue := *userOpParam
-	checkOk, checkSenderErr := chain_service.CheckContractAddressAccess(userOpValue.GetSender(), netWork)
+	checkOk, checkSenderErr := chain_service.CheckContractAddressAccess(userOpValue.Sender, netWork)
 	if !checkOk {
-		if err := checkInitCode(userOpValue.GetInitCode(), netWork); err != nil {
+		if err := checkInitCode(userOpValue.InitCode, netWork); err != nil {
 			return xerrors.Errorf("%s and %s", checkSenderErr.Error(), err.Error())
 		}
 	}

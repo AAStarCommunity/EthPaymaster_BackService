@@ -7,7 +7,7 @@ import (
 type UserOpRequest struct {
 	ForceStrategyId        string         `json:"force_strategy_id"`
 	ForceNetwork           types.Network  `json:"force_network"`
-	ForceToken             string         `json:"force_token"`
+	Erc20Token             string         `json:"force_token"`
 	ForceEntryPointAddress string         `json:"force_entrypoint_address"`
 	UserOp                 map[string]any `json:"user_operation"`
 	Extra                  interface{}    `json:"extra"`
