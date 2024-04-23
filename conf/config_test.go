@@ -2,7 +2,6 @@ package conf
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
-	"fmt"
 	"testing"
 )
 
@@ -25,7 +24,11 @@ func TestConfigInit(t *testing.T) {
 	if chainid == "" {
 		t.Error("chainid is 0")
 	}
-	fmt.Println(chainid)
 	t.Log(chainid)
+	rpcUrl := GetEthereumRpcUrl(types.EthereumSepolia)
+	if rpcUrl == "" {
+		t.Error("rpcUrl is 0")
+	}
+	t.Log(rpcUrl)
 
 }

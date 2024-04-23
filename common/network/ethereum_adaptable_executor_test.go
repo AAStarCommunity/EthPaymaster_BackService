@@ -19,9 +19,27 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 		test func(t *testing.T)
 	}{
 		{
-			"TestEthereumExecutorClientConnect",
+			"TestEthereumSepoliaClientConnect",
 			func(t *testing.T) {
 				testEthereumExecutorClientConnect(t, types.EthereumSepolia)
+			},
+		},
+		{
+			"TestOptimismSepoliaClientConnect",
+			func(t *testing.T) {
+				testEthereumExecutorClientConnect(t, types.OptimismSepolia)
+			},
+		},
+		{
+			"TestScrollSepoliaClientConnect",
+			func(t *testing.T) {
+				testEthereumExecutorClientConnect(t, types.ScrollSepolia)
+			},
+		},
+		{
+			"TestArbitrumSpeoliaClientConnect",
+			func(t *testing.T) {
+				testEthereumExecutorClientConnect(t, types.ArbitrumSpeolia)
 			},
 		},
 	}
