@@ -13,11 +13,11 @@ func GetEstimateUserOpGas(request *model.UserOpRequest) (*model.ComputeGasRespon
 		return nil, generateErr
 	}
 
-	userOp, err := user_op.NewUserOp(&request.UserOp, strategy.GetStrategyEntryPointVersion())
+	userOp, err := user_op.NewUserOp(&request.UserOp)
 	if err != nil {
 		return nil, err
 	}
-	gasResponse, _, gasComputeError := gas_service.ComputeGas(userOp, strategy)
+	gasResponse, _, gasComputeError := gas_service.ComputeGas(userOp, strategy, model.NewPaymasterDataInput(strategy))
 	if gasComputeError != nil {
 		return nil, gasComputeError
 	}

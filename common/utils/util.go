@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"math/big"
 	"regexp"
@@ -11,6 +13,25 @@ import (
 )
 
 var HexPattern = regexp.MustCompile(`^0x[a-fA-F\d]*$`)
+
+type EthCallReq struct {
+	From common.Address `json:"from"`
+	To   common.Address `json:"to"`
+	Data hexutil.Bytes  `json:"data"`
+}
+
+type TraceCallOpts struct {
+	Tracer         string      `json:"tracer"`
+	StateOverrides OverrideSet `json:"stateOverrides"`
+}
+type OverrideSet map[common.Address]OverrideAccount
+type OverrideAccount struct {
+	Nonce     *hexutil.Uint64              `json:"nonce"`
+	Code      *hexutil.Bytes               `json:"code"`
+	Balance   *hexutil.Big                 `json:"balance"`
+	State     *map[common.Hash]common.Hash `json:"state"`
+	StateDiff *map[common.Hash]common.Hash `json:"stateDiff"`
+}
 
 func GenerateMockUservOperation() *map[string]any {
 	//TODO use config
@@ -114,4 +135,29 @@ func IsLessThanZero(value *big.Int) bool {
 }
 func LeftIsLessTanRight(a *big.Int, b *big.Int) bool {
 	return a.Cmp(b) < 0
+}
+func GetSign(message []byte) ([]byte, error) {
+	privateKey, err := crypto.HexToECDSA("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421")
+	if err != nil {
+		return nil, err
+	}
+	digest := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(message), message)
+	hash := crypto.Keccak256Hash([]byte(digest))
+	sig, err := crypto.Sign(hash.Bytes(), privateKey)
+	if err != nil {
+		return nil, err
+	}
+	sig[64] += 27
+
+	return sig, nil
+
+	//var signatureAfterProcess string
+	//if strings.HasSuffix(signatureStr, "00") {
+	//	signatureAfterProcess = ReplaceLastTwoChars(signatureStr, "1b")
+	//} else if strings.HasSuffix(signatureStr, "01") {
+	//	signatureAfterProcess = ReplaceLastTwoChars(signatureStr, "1c")
+	//} else {
+	//	signatureAfterProcess = signatureStr
+	//}
+	//return hex.DecodeString(signatureAfterProcess)
 }

@@ -14,7 +14,9 @@ import (
 )
 
 // https://blog.particle.network/bundler-predicting-gas/
-func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy) (*model.ComputeGasResponse, *user_op.UserOpInput, error) {
+func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *model.PaymasterData) (*model.ComputeGasResponse, *user_op.UserOpInput, error) {
+	//TODO
+	userOpInputForSimulate, err := GetUserOpWithPaymasterAndDataForSimulate(*userOp, strategy, paymasterDataInput)
 	gasPrice, gasPriceErr := chain_service.GetGasPrice(strategy.GetNewWork())
 	//TODO calculate the maximum possible fee the account needs to pay (based on validation and call gas limits, and current gas values)
 	if gasPriceErr != nil {
@@ -23,7 +25,7 @@ func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy) (*model.C
 	var maxFeePriceInEther *big.Float
 	var maxFee *big.Int
 
-	simulateResult, err := chain_service.SimulateHandleOp(strategy.GetNewWork(), userOp, strategy)
+	simulateResult, err := chain_service.SimulateHandleOp(strategy.GetNewWork(), userOpInputForSimulate, strategy)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -70,6 +72,17 @@ func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy) (*model.C
 		UsdCost:       usdCost,
 		MaxFee:        *maxFee,
 	}, updateUserOp, nil
+}
+
+func GetUserOpWithPaymasterAndDataForSimulate(op user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *model.PaymasterData) (*user_op.UserOpInput, error) {
+	executor := network.GetEthereumExecutor(strategy.GetNewWork())
+
+	paymasterData, err := executor.GetPaymasterData(&op, strategy, paymasterDataInput)
+	if err != nil {
+		return nil, err
+	}
+	op.PaymasterAndData = paymasterData
+	return &op, nil
 }
 
 func GetNewUserOpAfterCompute(op *user_op.UserOpInput, gas *model.UserOpEstimateGas, version types.EntrypointVersion) *user_op.UserOpInput {

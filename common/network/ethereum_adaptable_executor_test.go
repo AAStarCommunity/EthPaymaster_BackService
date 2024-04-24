@@ -1,12 +1,17 @@
 package network
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/contract_entrypoint_v06"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"context"
+	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient/gethclient"
 	"github.com/sirupsen/logrus"
+	"math/big"
 	"testing"
 )
 
@@ -46,7 +51,7 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 		{
 			"TestSepoliaSimulateV06HandleOp",
 			func(t *testing.T) {
-				testSimulateV06HandleOp(t, types.ArbitrumSpeolia)
+				testSimulateV06HandleOp(t, types.EthereumSepolia)
 			},
 		},
 	}
@@ -56,13 +61,14 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 }
 func testSimulateV06HandleOp(t *testing.T, chain types.Network) {
 	sepoliaExector := GetEthereumExecutor(chain)
-	op, newErr := user_op.NewUserOp(utils.GenerateMockUservOperation(), types.EntrypointV06)
+	op, newErr := user_op.NewUserOp(utils.GenerateMockUservOperation())
 	if newErr != nil {
 		t.Error(newErr)
 		return
 	}
 	strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
-	simulataResult, err := sepoliaExector.SimulateV06HandleOp(op, strategy.GetEntryPointAddress())
+	t.Logf("entryPoint Address %s", strategy.GetEntryPointAddress())
+	simulataResult, err := sepoliaExector.SimulateV06HandleOp(*op, strategy.GetEntryPointAddress())
 	if err != nil {
 		t.Error(err)
 		return
@@ -72,6 +78,75 @@ func testSimulateV06HandleOp(t *testing.T, chain types.Network) {
 		return
 	}
 	t.Logf("simulateResult: %v", simulataResult)
+}
+func TestSimulate(t *testing.T) {
+	conf.BasicStrategyInit("../../conf/basic_strategy_dev_config.json")
+	conf.BusinessConfigInit("../../conf/business_dev_config.json")
+	op, _ := user_op.NewUserOp(utils.GenerateMockUservOperation())
+	abi, _ := contract_entrypoint_v06.ContractMetaData.GetAbi()
+	var targetAddress common.Address = common.HexToAddress("0x")
+	callData, err := abi.Pack("simulateHandleOp", op, targetAddress, []byte{})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	executor := GetEthereumExecutor(types.EthereumSepolia)
+	//gClient := executor.GethClient
+	//client := executor.Client
+	gethClinet := executor.GethClient
+	entrypoint := common.HexToAddress("0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789")
+
+	//res, err := client.CallContract(context.Background(), ethereum.CallMsg{
+	//	From: types.DummyAddress,
+	//	To:   &entrypoint,
+	//	Data: callData,
+	//	Gas:  28072,
+	//}, nil)
+	//if err != nil {
+	//	t.Error(err)
+	//	return
+	//}
+
+	mapAcc := map[common.Address]gethclient.OverrideAccount{
+		entrypoint: {
+			Code: EntryPointV06DeployCode,
+		}, types.DummyAddress: {
+			Nonce:   1,
+			Balance: big.NewInt(38312000000001),
+		},
+	}
+	t.Logf("dummyAddress %s", types.DummyAddress.String())
+	//addre := common.HexToAddress("0xDf7093eF81fa23415bb703A685c6331584D30177")
+
+	res, err := gethClinet.CallContract(context.Background(), ethereum.CallMsg{
+		To:   &entrypoint,
+		Data: callData,
+	}, nil, &mapAcc)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Logf("simulate result: %v", res)
+	//var hex hexutil.Bytes
+	//req := utils.EthCallReq{
+	//	From: testAddr,
+	//	To:   entrypoint,
+	//	Data: callData,
+	//}
+	//
+	//a := struct {
+	//	Tracer         string                                        `json:"tracer"`
+	//	StateOverrides map[common.Address]gethclient.OverrideAccount `json:"stateOverrides"`
+	//}{
+	//	StateOverrides: mapAcc,
+	//}
+	//err = client.Client().CallContext(context.Background(), &hex, "debug_traceCall", &req, "latest", a)
+	////t.Logf("simulate result: %v", res)
+	//
+	//if err != nil {
+	//	t.Error(err)
+	//	return
+	//}
 }
 
 func testEthereumExecutorClientConnect(t *testing.T, chain types.Network) {

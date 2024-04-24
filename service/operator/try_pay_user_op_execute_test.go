@@ -33,7 +33,7 @@ func getMockTryPayUserOpRequest() *model.UserOpRequest {
 
 func TestPackUserOp(t *testing.T) {
 	// give same len signuature and paymasteranddata
-	userOp, _ := user_op.NewUserOp(utils.GenerateMockUservOperation(), types.EntrypointV06)
+	userOp, _ := user_op.NewUserOp(utils.GenerateMockUservOperation())
 	userOpValue := *userOp
 
 	res, byteres, err := userOpValue.PackUserOpForMock(types.EntryPointV07)
@@ -51,7 +51,7 @@ func TestConvertHex(t *testing.T) {
 
 func TestSignPaymaster(t *testing.T) {
 
-	userOp, _ := user_op.NewUserOp(utils.GenerateMockUservOperation(), types.EntrypointV06)
+	userOp, _ := user_op.NewUserOp(utils.GenerateMockUservOperation())
 	strategy := dashboard_service.GetStrategyById("1")
 	//fmt.Printf("validStart: %s, validEnd: %s\n", validStart, validEnd)
 	//message := fmt.Sprintf("%s%s%s%s", strategy.PayMasterAddress, string(strategy.PayType), validStart, validEnd)

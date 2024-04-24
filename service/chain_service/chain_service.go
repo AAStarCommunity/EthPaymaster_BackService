@@ -71,7 +71,7 @@ func SimulateHandleOp(networkParam types.Network, op *user_op.UserOpInput, strat
 	entrypointVersion := strategy.GetStrategyEntryPointVersion()
 	if entrypointVersion == types.EntryPointV07 {
 
-		return executor.SimulateV06HandleOp(op, strategy.GetEntryPointAddress())
+		return executor.SimulateV06HandleOp(*op, strategy.GetEntryPointAddress())
 
 	} else if entrypointVersion == types.EntrypointV06 {
 		return executor.SimulateV07HandleOp(op, strategy.GetEntryPointAddress())

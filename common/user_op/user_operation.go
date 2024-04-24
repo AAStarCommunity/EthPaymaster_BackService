@@ -119,6 +119,10 @@ func init() {
 			Type: paymaster_abi.Uint256Type,
 		},
 		{
+			Name: "MaxFeePerGas",
+			Type: paymaster_abi.Uint256Type,
+		},
+		{
 			Name: "MaxPriorityFeePerGas",
 			Type: paymaster_abi.Uint256Type,
 		},
@@ -150,7 +154,7 @@ func init() {
 		},
 		{
 			Name: "AccountGasLimits",
-			Type: paymaster_abi.Uint256Type,
+			Type: paymaster_abi.Bytes32Type,
 		},
 		{
 			Name: "PreVerificationGas",
@@ -158,7 +162,7 @@ func init() {
 		},
 		{
 			Name: "GasFees",
-			Type: paymaster_abi.Uint256Type,
+			Type: paymaster_abi.Bytes32Type,
 		},
 		{
 			Name: "PaymasterAndData",
@@ -186,7 +190,13 @@ type BaseUserOperation struct {
 // callGasLimit calldata Execute gas limit
 // preVerificationGas
 type UserOperationV06 struct {
-	BaseUserOperation
+	Sender             *common.Address `json:"sender"   mapstructure:"sender"  binding:"required,hexParam"`
+	Nonce              *big.Int        `json:"nonce"  mapstructure:"nonce"  binding:"required"`
+	InitCode           []byte          `json:"initCode"  mapstructure:"init_code" `
+	CallData           []byte          `json:"callData"  mapstructure:"call_data"  binding:"required"`
+	PreVerificationGas *big.Int        `json:"preVerificationGas"  mapstructure:"pre_verification_gas"  binding:"required"`
+	PaymasterAndData   []byte          `json:"paymasterAndData"  mapstructure:"paymaster_and_data"`
+	Signature          []byte          `json:"signature"  mapstructure:"signature"  binding:"required"`
 	//Maximum fee per gas (similar to EIP-1559  max_fee_per_gas)
 	MaxFeePerGas *big.Int `json:"maxFeePerGas"  mapstructure:"max_fee_per_gas"  binding:"required"`
 	//Maximum priority fee per gas (similar to EIP-1559 max_priority_fee_per_gas)
@@ -206,7 +216,7 @@ type UserOperationV07 struct {
 	GasFees                       [32]byte `json:"gas_fees" mapstructure:"gas_fees" binding:"required"`
 }
 
-func NewUserOp(userOp *map[string]any, entryPointVersion types.EntrypointVersion) (*UserOpInput, error) {
+func NewUserOp(userOp *map[string]any) (*UserOpInput, error) {
 	var result UserOpInput
 
 	// Convert map to struct
@@ -257,7 +267,7 @@ type UserOpInput struct {
 
 func packUserOpV6ForUserOpHash(userOp *UserOperationV06) (string, []byte, error) {
 	//TODO disgusting logic
-	encoded, err := userOpV06PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, userOp.CallGasLimit, userOp.VerificationGasLimit, userOp.PreVerificationGas, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, types.DUMMY_PAYMASTER_DATA, userOp.Sender)
+	encoded, err := userOpV06PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, userOp.CallGasLimit, userOp.VerificationGasLimit, userOp.PreVerificationGas, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, types.DummyPaymasterDataByte, userOp.Sender)
 	if err != nil {
 		return "", nil, err
 	}
@@ -275,14 +285,14 @@ func packUserOpV6ForUserOpHash(userOp *UserOperationV06) (string, []byte, error)
 func (userOp *UserOpInput) PackUserOpForMock(version types.EntrypointVersion) (string, []byte, error) {
 	if version == types.EntryPointV07 {
 		gasFee := utils.PackIntTo32Bytes(userOp.MaxPriorityFeePerGas, userOp.MaxFeePerGas)
-		encoded, err := UserOpV07PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, DummyAccountGasLimits, userOp.PreVerificationGas, gasFee, types.DUMMY_PAYMASTER_DATA, types.DUMMY_SIGNATURE)
+		encoded, err := UserOpV07PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, DummyAccountGasLimits, userOp.PreVerificationGas, gasFee, types.DummyPaymasterDataByte, types.DummySignatureByte)
 		if err != nil {
 			return "", nil, err
 		}
 		return hex.EncodeToString(encoded), encoded, nil
 	} else if version == types.EntrypointV06 {
+		encoded, err := userOpV06PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, types.DummyCallGasLimit, types.DummyVerificationGasLimit, types.DUMMAY_PREVERIFICATIONGAS_BIGINT, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, types.DummyPaymasterDataByte, userOp.Signature)
 
-		encoded, err := userOpV06PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, types.DummyCallGasLimit, types.DummyVerificationGasLimit, types.DUMMAY_PREVERIFICATIONGAS_BIGINT, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, types.DUMMY_PAYMASTER_DATA, userOp.Sender)
 		if err != nil {
 			return "", nil, err
 		}

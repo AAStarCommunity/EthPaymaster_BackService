@@ -12,7 +12,7 @@ const (
 	//dummy private key just for simulationUserOp
 	DUMMY_PRIVATE_KEY_TEXT               = "0a82406dc7fcf16090e05215ff394c7465608dd1a698632471b1eb37b8ece2f7"
 	DUMMY_SIGNATURE                      = "0x3054659b5e29460a8f3ac9afc3d5fcbe4b76f92aed454b944e9b29e55d80fde807716530b739540e95cfa4880d69f710a9d45910f2951a227675dc1fb0fdf2c71c"
-	DUMMY_PAYMASTER_DATA                 = "d93349Ee959d295B115Ee223aF10EF432A8E8523000000000000000000000000000000000000000000000000000000001710044496000000000000000000000000000000000000000000000000000000174158049605bea0bfb8539016420e76749fda407b74d3d35c539927a45000156335643827672fa359ee968d72db12d4b4768e8323cd47443505ab138a525c1f61c6abdac501"
+	DUMMY_PAYMASTER_DATA                 = "0xd93349Ee959d295B115Ee223aF10EF432A8E8523000000000000000000000000000000000000000000000000000000001710044496000000000000000000000000000000000000000000000000000000174158049605bea0bfb8539016420e76749fda407b74d3d35c539927a45000156335643827672fa359ee968d72db12d4b4768e8323cd47443505ab138a525c1f61c6abdac501"
 	DUMMYPREVERIFICATIONGAS              = 21000
 	DUMMY_PAYMASTER_POSTOP_GASLIMIT      = 2000000
 	DUMMY_PAYMASTER_VERIFICATIONGASLIMIT = 5000000
@@ -20,7 +20,7 @@ const (
 )
 
 var (
-	DUMMY_SIGNATURE_BYTE                        []byte
+	DummySignatureByte                          []byte
 	DUMMAY_PREVERIFICATIONGAS_BIGINT            = big.NewInt(DUMMYPREVERIFICATIONGAS)
 	DUMMY_PAYMASTER_VERIFICATIONGASLIMIT_BIGINT = big.NewInt(DUMMY_PAYMASTER_VERIFICATIONGASLIMIT)
 	DUMMY_PAYMASTER_POSTOP_GASLIMIT_BIGINT      = big.NewInt(DUMMY_PAYMASTER_POSTOP_GASLIMIT)
@@ -31,7 +31,8 @@ var (
 	HUNDRED_PLUS_ONE_BIGINT                     = big.NewInt(110)
 	ZERO_BIGINT                                 = big.NewInt(0)
 	DUMMY_PRIVATE_KEY                           *ecdsa.PrivateKey
-	DUMMY_ADDRESS                               *common.Address
+	DummyAddress                                common.Address
+	DummyPaymasterDataByte                      []byte
 	DummyMaxFeePerGas                           = big.NewInt(1500012654)
 	DummyMaxPriorityFeePerGas                   = big.NewInt(1500000000)
 	DummyCallGasLimit                           = big.NewInt(21754)
@@ -45,7 +46,11 @@ func init() {
 	}
 	DUMMY_PRIVATE_KEY = privateKey
 	address := crypto.PubkeyToAddress(DUMMY_PRIVATE_KEY.PublicKey)
-	DUMMY_ADDRESS = &address
+	DummyAddress = address
+	DummyPaymasterDataByte, err = hex.DecodeString(DUMMY_PAYMASTER_DATA[2:])
+	if err != nil {
+		panic(err)
+	}
 }
 
 var GasOverHand = struct {
@@ -78,5 +83,5 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	DUMMY_SIGNATURE_BYTE = signatureByte
+	DummySignatureByte = signatureByte
 }
