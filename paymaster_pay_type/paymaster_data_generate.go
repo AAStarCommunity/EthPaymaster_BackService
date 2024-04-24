@@ -2,7 +2,7 @@ package paymaster_pay_type
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/paymaster_abi"
-	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -29,10 +29,10 @@ func getAbiArgs() abi.Arguments {
 	}
 }
 
-type GeneratePaymasterDataFunc = func(data *model.PaymasterData, signature []byte) ([]byte, error)
+type GeneratePaymasterDataFunc = func(data *paymaster_data.PaymasterData, signature []byte) ([]byte, error)
 
 func GenerateBasicPaymasterData() GeneratePaymasterDataFunc {
-	return func(data *model.PaymasterData, signature []byte) ([]byte, error) {
+	return func(data *paymaster_data.PaymasterData, signature []byte) ([]byte, error) {
 		packed, err := BasicPaymasterDataAbi.Pack(data.ValidUntil, data.ValidAfter, data.ERC20Token, data.ExchangeRate)
 		if err != nil {
 			return nil, err
@@ -45,7 +45,7 @@ func GenerateBasicPaymasterData() GeneratePaymasterDataFunc {
 }
 
 func GenerateSuperContractPaymasterData() GeneratePaymasterDataFunc {
-	return func(data *model.PaymasterData, signature []byte) ([]byte, error) {
+	return func(data *paymaster_data.PaymasterData, signature []byte) ([]byte, error) {
 		packed, err := BasicPaymasterDataAbi.Pack(data.ValidUntil, data.ValidAfter, data.ERC20Token, data.ExchangeRate)
 		if err != nil {
 			return nil, err

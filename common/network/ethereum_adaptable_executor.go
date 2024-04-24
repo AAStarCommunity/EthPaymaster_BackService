@@ -9,6 +9,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/paymater_verifying_erc20_v06"
 	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/simulate_entrypoint"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
@@ -576,9 +577,10 @@ func (executor EthereumExecutor) GetUserOpHash(userOp *user_op.UserOpInput, stra
 	//TODO
 
 }
-func (executor EthereumExecutor) GetPaymasterData(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *model.PaymasterData) ([]byte, error) {
+func (executor EthereumExecutor) GetPaymasterData(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterData) ([]byte, error) {
 	userOpHash, _, err := executor.GetUserOpHash(userOp, strategy)
 	if err != nil {
+		logrus.Errorf("GetUserOpHash error [%v]", err)
 		return nil, err
 	}
 	signature, err := utils.GetSign(userOpHash)

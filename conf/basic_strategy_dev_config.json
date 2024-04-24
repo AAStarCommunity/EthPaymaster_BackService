@@ -5,7 +5,7 @@
     "entrypoint_tag": "v0.6",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xAEbF4C90b571e7D5cb949790C9b8Dc0280298b63",
+    "paymaster_address": "0x9D6AC51b972544251Fcc0F2902e633E3f9BD3f29",
     "paymaster_pay_type": "00",
     "access_project": "official"
   },
@@ -15,7 +15,7 @@
     "entrypoint_tag": "v0.6",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xAEbF4C90b571e7D5cb949790C9b8Dc0280298b63",
+    "paymaster_address": "0x9D6AC51b972544251Fcc0F2902e633E3f9BD3f29",
     "paymaster_pay_type": "00",
     "access_project": "official"
   }

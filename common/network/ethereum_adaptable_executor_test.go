@@ -2,11 +2,13 @@ package network
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/contract_entrypoint_v06"
+	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"context"
+	"encoding/hex"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient/gethclient"
@@ -19,6 +21,11 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 	conf.BasicStrategyInit("../../conf/basic_strategy_dev_config.json")
 	conf.BusinessConfigInit("../../conf/business_dev_config.json")
 	logrus.SetLevel(logrus.DebugLevel)
+	op, err := user_op.NewUserOp(utils.GenerateMockUservOperation())
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	tests := []struct {
 		name string
 		test func(t *testing.T)
@@ -49,15 +56,59 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 			},
 		},
 		{
+			"TestGetUseOpHash",
+			func(t *testing.T) {
+				testGetUserOpHash(t, types.EthereumSepolia, op)
+			},
+		},
+		{
 			"TestSepoliaSimulateV06HandleOp",
 			func(t *testing.T) {
 				testSimulateV06HandleOp(t, types.EthereumSepolia)
+			},
+		},
+		{
+			"TestGetPaymasterAndData",
+			func(t *testing.T) {
+				testGetPaymasterData(t, types.EthereumSepolia, op)
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, tt.test)
 	}
+}
+func testGetUserOpHash(t *testing.T, chain types.Network, input *user_op.UserOpInput) {
+	executor := GetEthereumExecutor(chain)
+	if executor == nil {
+		t.Error("executor is nil")
+	}
+	strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
+	t.Logf("paymaster Address %s", strategy.GetPaymasterAddress())
+
+	res, _, err := executor.GetUserOpHash(input, strategy)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Logf("userOpHash: %s", hex.EncodeToString(res))
+}
+
+func testGetPaymasterData(t *testing.T, chain types.Network, input *user_op.UserOpInput) {
+	executor := GetEthereumExecutor(chain)
+	if executor == nil {
+		t.Error("executor is nil")
+	}
+	strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
+	t.Logf("entryPoint Address %s", strategy.GetEntryPointAddress())
+	dataInput := paymaster_data.NewPaymasterDataInput(strategy)
+	paymasterData, err := executor.GetPaymasterData(input, strategy, dataInput)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Logf("paymasterData: %v", hex.EncodeToString(paymasterData))
+
 }
 func testSimulateV06HandleOp(t *testing.T, chain types.Network) {
 	sepoliaExector := GetEthereumExecutor(chain)
@@ -79,6 +130,7 @@ func testSimulateV06HandleOp(t *testing.T, chain types.Network) {
 	}
 	t.Logf("simulateResult: %v", simulataResult)
 }
+
 func TestSimulate(t *testing.T) {
 	conf.BasicStrategyInit("../../conf/basic_strategy_dev_config.json")
 	conf.BusinessConfigInit("../../conf/business_dev_config.json")
@@ -122,11 +174,13 @@ func TestSimulate(t *testing.T) {
 		To:   &entrypoint,
 		Data: callData,
 	}, nil, &mapAcc)
+	resStr := hex.EncodeToString(res)
+	t.Logf("simulate result: %v", resStr)
+
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	t.Logf("simulate result: %v", res)
 	//var hex hexutil.Bytes
 	//req := utils.EthCallReq{
 	//	From: testAddr,

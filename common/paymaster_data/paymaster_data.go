@@ -1,6 +1,7 @@
-package model
+package paymaster_data
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
@@ -14,7 +15,7 @@ type PaymasterData struct {
 	ExchangeRate *big.Int
 }
 
-func NewPaymasterDataInput(strategy *Strategy) *PaymasterData {
+func NewPaymasterDataInput(strategy *model.Strategy) *PaymasterData {
 	start := strategy.ExecuteRestriction.EffectiveStartTime
 	end := strategy.ExecuteRestriction.EffectiveEndTime
 	tokenAddress := conf.GetTokenAddress(strategy.GetNewWork(), strategy.GetUseToken())

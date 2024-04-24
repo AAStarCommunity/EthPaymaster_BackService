@@ -3,18 +3,19 @@ package gas_service
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
+	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
-	"AAStarCommunity/EthPaymaster_BackService/paymaster_pay_type"
+	"AAStarCommunity/EthPaymaster_BackService/gas_validate"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"golang.org/x/xerrors"
 	"math/big"
 )
 
 // https://blog.particle.network/bundler-predicting-gas/
-func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *model.PaymasterData) (*model.ComputeGasResponse, *user_op.UserOpInput, error) {
+func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterData) (*model.ComputeGasResponse, *user_op.UserOpInput, error) {
 	//TODO
 	userOpInputForSimulate, err := GetUserOpWithPaymasterAndDataForSimulate(*userOp, strategy, paymasterDataInput)
 	gasPrice, gasPriceErr := chain_service.GetGasPrice(strategy.GetNewWork())
@@ -74,7 +75,7 @@ func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymaster
 	}, updateUserOp, nil
 }
 
-func GetUserOpWithPaymasterAndDataForSimulate(op user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *model.PaymasterData) (*user_op.UserOpInput, error) {
+func GetUserOpWithPaymasterAndDataForSimulate(op user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterData) (*user_op.UserOpInput, error) {
 	executor := network.GetEthereumExecutor(strategy.GetNewWork())
 
 	paymasterData, err := executor.GetPaymasterData(&op, strategy, paymasterDataInput)
@@ -151,7 +152,7 @@ func getTokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Float, 
 }
 
 func ValidateGas(userOp *user_op.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
-	validateFunc := paymaster_pay_type.GasValidateFuncMap[strategy.GetPayType()]
+	validateFunc := gas_validate.GasValidateFuncMap[strategy.GetPayType()]
 	err := validateFunc(userOp, gasComputeResponse, strategy)
 	if err != nil {
 		return err

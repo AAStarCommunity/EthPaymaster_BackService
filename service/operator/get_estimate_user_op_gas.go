@@ -2,6 +2,7 @@ package operator
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/service/gas_service"
 )
@@ -17,7 +18,7 @@ func GetEstimateUserOpGas(request *model.UserOpRequest) (*model.ComputeGasRespon
 	if err != nil {
 		return nil, err
 	}
-	gasResponse, _, gasComputeError := gas_service.ComputeGas(userOp, strategy, model.NewPaymasterDataInput(strategy))
+	gasResponse, _, gasComputeError := gas_service.ComputeGas(userOp, strategy, paymaster_data.NewPaymasterDataInput(strategy))
 	if gasComputeError != nil {
 		return nil, gasComputeError
 	}

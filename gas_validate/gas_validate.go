@@ -1,4 +1,4 @@
-package paymaster_pay_type
+package gas_validate
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"

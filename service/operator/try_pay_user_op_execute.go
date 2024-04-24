@@ -3,10 +3,10 @@ package operator
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
+	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
 	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
-	"AAStarCommunity/EthPaymaster_BackService/paymaster_pay_type"
 	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/gas_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/pay_service"
@@ -40,7 +40,7 @@ func TryPayUserOpExecute(request *model.UserOpRequest) (*model.TryPayUserOpRespo
 
 //sub Function ---------
 
-func prepareExecute(request *model.UserOpRequest) (*user_op.UserOpInput, *model.Strategy, *model.PaymasterData, error) {
+func prepareExecute(request *model.UserOpRequest) (*user_op.UserOpInput, *model.Strategy, *paymaster_data.PaymasterData, error) {
 
 	var strategy *model.Strategy
 
@@ -60,12 +60,12 @@ func prepareExecute(request *model.UserOpRequest) (*user_op.UserOpInput, *model.
 	if err := validator_service.ValidateUserOp(userOp, strategy); err != nil {
 		return nil, nil, nil, err
 	}
-	paymasterDataIput := model.NewPaymasterDataInput(strategy)
-	model.NewPaymasterDataInput(strategy)
+	paymasterDataIput := paymaster_data.NewPaymasterDataInput(strategy)
+	paymaster_data.NewPaymasterDataInput(strategy)
 	return userOp, strategy, paymasterDataIput, nil
 }
 
-func estimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *model.PaymasterData) (*model.ComputeGasResponse, *user_op.UserOpInput, error) {
+func estimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterData) (*model.ComputeGasResponse, *user_op.UserOpInput, error) {
 	//base Strategy and UserOp computeGas
 	gasResponse, paymasterUserOp, gasComputeError := gas_service.ComputeGas(userOp, strategy, paymasterDataInput)
 	if gasComputeError != nil {
@@ -95,13 +95,12 @@ func executePay(strategy *model.Strategy, userOp *user_op.UserOpInput, gasRespon
 	}, nil
 }
 
-func postExecute(userOp *user_op.UserOpInput, strategy *model.Strategy, gasResponse *model.ComputeGasResponse, paymasterDataInput *model.PaymasterData) (*model.TryPayUserOpResponse, error) {
-	signatureByte, _, err := signPaymaster(userOp, strategy)
+func postExecute(userOp *user_op.UserOpInput, strategy *model.Strategy, gasResponse *model.ComputeGasResponse, paymasterDataInput *paymaster_data.PaymasterData) (*model.TryPayUserOpResponse, error) {
+	executor := network.GetEthereumExecutor(strategy.GetNewWork())
+	paymasterData, err := executor.GetPaymasterData(userOp, strategy, paymasterDataInput)
 	if err != nil {
 		return nil, err
 	}
-	dataGenerateFunc := paymaster_pay_type.GetGenerateFunc(strategy.GetPayType())
-	paymasterData, err := dataGenerateFunc(paymasterDataInput, signatureByte)
 	var result = &model.TryPayUserOpResponse{
 		StrategyId:        strategy.Id,
 		EntryPointAddress: strategy.GetEntryPointAddress().String(),
