@@ -73,22 +73,22 @@
   },
   "support_entrypoint": {
     "ethereum": [
-      "0x1",
-      "0x2"
+      "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+      "0x0000000071727De22E5E9d8BAf0edAc6f37da032"
     ],
     "sepolia": [
       "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-      "0x2"
+      "0x0000000071727De22E5E9d8BAf0edAc6f37da032"
     ]
   },
   "support_paymaster": {
     "ethereum": [
-      "0x1",
-      "0x2"
+      "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+      "0x0000000071727De22E5E9d8BAf0edAc6f37da032"
     ],
     "sepolia": [
       "0x0000000000325602a77416A16136FDafd04b299f",
-      "0x2"
+      "0x0000000071727De22E5E9d8BAf0edAc6f37da032"
     ]
   }
 }

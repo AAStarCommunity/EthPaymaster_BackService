@@ -11,7 +11,7 @@
   },
   "Ethereum_Sepolia_v07_verifyPaymaster": {
     "network": "ethereum-sepolia",
-    "entrypoint_address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+    "entrypoint_address": "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
     "entrypoint_tag": "v0.6",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
