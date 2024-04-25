@@ -1,8 +1,8 @@
 package conf
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -14,12 +14,12 @@ import (
 var basicStrategyConfig = make(map[string]*model.Strategy)
 
 // suitableStrategyMap[chain][entrypoint][payType]
-var suitableStrategyMap = make(map[types.Network]map[string]map[types.PayType]*model.Strategy)
+var suitableStrategyMap = make(map[global_const.Network]map[string]map[global_const.PayType]*model.Strategy)
 
 func GetBasicStrategyConfig(key string) *model.Strategy {
 	return basicStrategyConfig[key]
 }
-func GetSuitableStrategy(entrypoint string, chain types.Network, payType types.PayType) (*model.Strategy, error) {
+func GetSuitableStrategy(entrypoint string, chain global_const.Network, payType global_const.PayType) (*model.Strategy, error) {
 	strategy := suitableStrategyMap[chain][entrypoint][payType]
 	if strategy == nil {
 		return nil, xerrors.Errorf("strategy not found")
@@ -68,11 +68,11 @@ func convertMapToStrategyConfig(data map[string]map[string]any) (map[string]*mod
 			Id:           key,
 			StrategyCode: key,
 			NetWorkInfo: &model.NetWorkInfo{
-				NetWork: types.Network(value["network"].(string)),
+				NetWork: global_const.Network(value["network"].(string)),
 			},
 			EntryPointInfo: &model.EntryPointInfo{
 				EntryPointAddress: &entryPointAddress,
-				EntryPointVersion: types.EntrypointVersion(value["entrypoint_tag"].(string)),
+				EntryPointVersion: global_const.EntrypointVersion(value["entrypoint_tag"].(string)),
 			},
 
 			ExecuteRestriction: model.StrategyExecuteRestriction{
@@ -81,16 +81,16 @@ func convertMapToStrategyConfig(data map[string]map[string]any) (map[string]*mod
 			},
 			PaymasterInfo: &model.PaymasterInfo{
 				PayMasterAddress: &paymasterAddress,
-				PayType:          types.PayType(value["paymaster_pay_type"].(string)),
+				PayType:          global_const.PayType(value["paymaster_pay_type"].(string)),
 			},
 		}
 
 		config[key] = strategy
 		if suitableStrategyMap[strategy.NetWorkInfo.NetWork] == nil {
-			suitableStrategyMap[strategy.NetWorkInfo.NetWork] = make(map[string]map[types.PayType]*model.Strategy)
+			suitableStrategyMap[strategy.NetWorkInfo.NetWork] = make(map[string]map[global_const.PayType]*model.Strategy)
 		}
 		if suitableStrategyMap[strategy.NetWorkInfo.NetWork][strategy.GetEntryPointAddress().String()] == nil {
-			suitableStrategyMap[strategy.NetWorkInfo.NetWork][strategy.GetEntryPointAddress().String()] = make(map[types.PayType]*model.Strategy)
+			suitableStrategyMap[strategy.NetWorkInfo.NetWork][strategy.GetEntryPointAddress().String()] = make(map[global_const.PayType]*model.Strategy)
 		}
 		suitableStrategyMap[strategy.NetWorkInfo.NetWork][strategy.GetEntryPointAddress().String()][strategy.GetPayType()] = strategy
 	}

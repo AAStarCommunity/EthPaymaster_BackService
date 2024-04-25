@@ -1,7 +1,7 @@
 package model
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
@@ -17,16 +17,16 @@ type Strategy struct {
 	ExecuteRestriction StrategyExecuteRestriction `json:"execute_restriction"`
 }
 type PaymasterInfo struct {
-	PayMasterAddress *common.Address `json:"paymaster_address"`
-	PayType          types.PayType   `json:"pay_type"`
+	PayMasterAddress *common.Address      `json:"paymaster_address"`
+	PayType          global_const.PayType `json:"pay_type"`
 }
 type NetWorkInfo struct {
-	NetWork types.Network   `json:"network"`
-	Token   types.TokenType `json:"tokens"`
+	NetWork global_const.Network   `json:"network"`
+	Token   global_const.TokenType `json:"tokens"`
 }
 type EntryPointInfo struct {
-	EntryPointAddress *common.Address         `json:"entrypoint_address"`
-	EntryPointVersion types.EntrypointVersion `json:"entrypoint_tag"`
+	EntryPointAddress *common.Address                `json:"entrypoint_address"`
+	EntryPointVersion global_const.EntrypointVersion `json:"entrypoint_tag"`
 }
 
 func (strategy *Strategy) GetPaymasterAddress() *common.Address {
@@ -35,17 +35,17 @@ func (strategy *Strategy) GetPaymasterAddress() *common.Address {
 func (strategy *Strategy) GetEntryPointAddress() *common.Address {
 	return strategy.EntryPointInfo.EntryPointAddress
 }
-func (strategy *Strategy) GetNewWork() types.Network {
+func (strategy *Strategy) GetNewWork() global_const.Network {
 	return strategy.NetWorkInfo.NetWork
 }
 
-func (strategy *Strategy) GetUseToken() types.TokenType {
+func (strategy *Strategy) GetUseToken() global_const.TokenType {
 	return strategy.NetWorkInfo.Token
 }
-func (strategy *Strategy) GetPayType() types.PayType {
+func (strategy *Strategy) GetPayType() global_const.PayType {
 	return strategy.PaymasterInfo.PayType
 }
-func (strategy *Strategy) GetStrategyEntryPointVersion() types.EntrypointVersion {
+func (strategy *Strategy) GetStrategyEntryPointVersion() global_const.EntrypointVersion {
 	return strategy.EntryPointInfo.EntryPointVersion
 }
 

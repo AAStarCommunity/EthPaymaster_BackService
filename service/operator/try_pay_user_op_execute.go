@@ -1,12 +1,11 @@
 package operator
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
-	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/gas_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/pay_service"
@@ -111,20 +110,6 @@ func postExecute(userOp *user_op.UserOpInput, strategy *model.Strategy, gasRespo
 	return result, nil
 }
 
-func signPaymaster(userOp *user_op.UserOpInput, strategy *model.Strategy) ([]byte, []byte, error) {
-	executor := network.GetEthereumExecutor(strategy.GetNewWork())
-	userOpHash, _, err := executor.GetUserOpHash(userOp, strategy)
-	if err != nil {
-		return nil, nil, err
-	}
-	signature, err := utils.GetSign(userOpHash)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return signature, userOpHash[:], err
-}
-
 func StrategyGenerate(request *model.UserOpRequest) (*model.Strategy, error) {
 	if forceStrategyId := request.ForceStrategyId; forceStrategyId != "" {
 		//force strategy
@@ -135,7 +120,7 @@ func StrategyGenerate(request *model.UserOpRequest) (*model.Strategy, error) {
 		}
 	}
 
-	suitableStrategy, err := dashboard_service.GetSuitableStrategy(request.ForceEntryPointAddress, request.ForceNetwork, types.PayTypeSuperVerifying) //TODO
+	suitableStrategy, err := dashboard_service.GetSuitableStrategy(request.ForceEntryPointAddress, request.ForceNetwork, global_const.PayTypeSuperVerifying) //TODO
 	if err != nil {
 		return nil, err
 	}

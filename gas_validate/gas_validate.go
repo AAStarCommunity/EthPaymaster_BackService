@@ -1,8 +1,8 @@
 package gas_validate
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"golang.org/x/xerrors"
@@ -10,13 +10,13 @@ import (
 )
 
 var (
-	GasValidateFuncMap = map[types.PayType]ValidatePaymasterGasFunc{}
+	GasValidateFuncMap = map[global_const.PayType]ValidatePaymasterGasFunc{}
 )
 
 func init() {
-	GasValidateFuncMap[types.PayTypeVerifying] = VerifyingGasValidate()
-	GasValidateFuncMap[types.PayTypeERC20] = Erc20GasValidate()
-	GasValidateFuncMap[types.PayTypeSuperVerifying] = SuperGasValidate()
+	GasValidateFuncMap[global_const.PayTypeVerifying] = VerifyingGasValidate()
+	GasValidateFuncMap[global_const.PayTypeERC20] = Erc20GasValidate()
+	GasValidateFuncMap[global_const.PayTypeSuperVerifying] = SuperGasValidate()
 }
 
 type ValidatePaymasterGasFunc = func(userOp *user_op.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error

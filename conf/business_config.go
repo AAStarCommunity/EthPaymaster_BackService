@@ -1,7 +1,7 @@
 package conf
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"encoding/json"
 	"fmt"
 	mapset "github.com/deckarep/golang-set/v2"
@@ -21,9 +21,9 @@ func BusinessConfigInit(path string) {
 
 func convertConfig(originConfig *OriginBusinessConfig) *BusinessConfig {
 	basic := &BusinessConfig{}
-	basic.NetworkConfigMap = make(map[types.Network]NetWorkConfig)
-	basic.SupportEntryPoint = make(map[types.Network]mapset.Set[string])
-	basic.SupportPaymaster = make(map[types.Network]mapset.Set[string])
+	basic.NetworkConfigMap = make(map[global_const.Network]NetWorkConfig)
+	basic.SupportEntryPoint = make(map[global_const.Network]mapset.Set[string])
+	basic.SupportPaymaster = make(map[global_const.Network]mapset.Set[string])
 	for network, originNetWorkConfig := range originConfig.NetworkConfigMap {
 		//TODO valid
 		basic.NetworkConfigMap[network] = NetWorkConfig{
@@ -62,42 +62,42 @@ func initBusinessConfig(path string) *OriginBusinessConfig {
 }
 
 type OriginBusinessConfig struct {
-	NetworkConfigMap  map[types.Network]*OriginNetWorkConfig `json:"network_config"`
-	SupportEntryPoint map[types.Network][]string             `json:"support_entrypoint"`
-	SupportPaymaster  map[types.Network][]string             `json:"support_paymaster"`
+	NetworkConfigMap  map[global_const.Network]*OriginNetWorkConfig `json:"network_config"`
+	SupportEntryPoint map[global_const.Network][]string             `json:"support_entrypoint"`
+	SupportPaymaster  map[global_const.Network][]string             `json:"support_paymaster"`
 }
 type OriginNetWorkConfig struct {
-	ChainId          string                     `json:"chain_id"`
-	IsTest           bool                       `json:"is_test"`
-	RpcUrl           string                     `json:"rpc_url"`
-	ApiKey           string                     `json:"api_key"`
-	TokenConfig      map[types.TokenType]string `json:"token_config"`
-	GasToken         types.TokenType
+	ChainId          string                            `json:"chain_id"`
+	IsTest           bool                              `json:"is_test"`
+	RpcUrl           string                            `json:"rpc_url"`
+	ApiKey           string                            `json:"api_key"`
+	TokenConfig      map[global_const.TokenType]string `json:"token_config"`
+	GasToken         global_const.TokenType
 	GasOracleAddress string
 }
 
 type BusinessConfig struct {
-	NetworkConfigMap  map[types.Network]NetWorkConfig      `json:"network_config"`
-	SupportEntryPoint map[types.Network]mapset.Set[string] `json:"support_entrypoint"`
-	SupportPaymaster  map[types.Network]mapset.Set[string] `json:"support_paymaster"`
+	NetworkConfigMap  map[global_const.Network]NetWorkConfig      `json:"network_config"`
+	SupportEntryPoint map[global_const.Network]mapset.Set[string] `json:"support_entrypoint"`
+	SupportPaymaster  map[global_const.Network]mapset.Set[string] `json:"support_paymaster"`
 }
 type NetWorkConfig struct {
-	ChainId          string                     `json:"chain_id"`
-	IsTest           bool                       `json:"is_test"`
-	RpcUrl           string                     `json:"rpc_url"`
-	TokenConfig      map[types.TokenType]string `json:"token_config"`
-	GasToken         types.TokenType
+	ChainId          string                            `json:"chain_id"`
+	IsTest           bool                              `json:"is_test"`
+	RpcUrl           string                            `json:"rpc_url"`
+	TokenConfig      map[global_const.TokenType]string `json:"token_config"`
+	GasToken         global_const.TokenType
 	GasOracleAddress common.Address
 }
 
-func GetSupportEntryPoints(network types.Network) (mapset.Set[string], error) {
+func GetSupportEntryPoints(network global_const.Network) (mapset.Set[string], error) {
 	res, ok := basicConfig.SupportEntryPoint[network]
 	if !ok {
 		return nil, fmt.Errorf("network not found")
 	}
 	return res, nil
 }
-func GetSupportPaymaster(network types.Network) (mapset.Set[string], error) {
+func GetSupportPaymaster(network global_const.Network) (mapset.Set[string], error) {
 	res, ok := basicConfig.SupportPaymaster[network]
 	if !ok {
 		return nil, fmt.Errorf("network not found")
@@ -105,70 +105,70 @@ func GetSupportPaymaster(network types.Network) (mapset.Set[string], error) {
 	return res, nil
 }
 
-func GetTokenAddress(networkParam types.Network, tokenParam types.TokenType) string {
+func GetTokenAddress(networkParam global_const.Network, tokenParam global_const.TokenType) string {
 	networkConfig := basicConfig.NetworkConfigMap[networkParam]
 
 	return networkConfig.TokenConfig[tokenParam]
 }
-func CheckEntryPointExist(network2 types.Network, address string) bool {
+func CheckEntryPointExist(network2 global_const.Network, address string) bool {
 	entryPointSet := basicConfig.SupportEntryPoint[network2]
 	entryPointSetValue := entryPointSet
 	return entryPointSetValue.Contains(address)
 }
-func GetGasToken(networkParam types.Network) types.TokenType {
+func GetGasToken(networkParam global_const.Network) global_const.TokenType {
 	networkConfig := basicConfig.NetworkConfigMap[networkParam]
 	return networkConfig.GasToken
 }
 
-func GetChainId(newworkParam types.Network) string {
+func GetChainId(newworkParam global_const.Network) string {
 	networkConfig := basicConfig.NetworkConfigMap[newworkParam]
 	return networkConfig.ChainId
 }
-func GetEthereumRpcUrl(network types.Network) string {
+func GetEthereumRpcUrl(network global_const.Network) string {
 	networkConfig := basicConfig.NetworkConfigMap[network]
 	return networkConfig.RpcUrl
 }
 
 var (
 	TestNetWork = mapset.NewSet(
-		types.EthereumSepolia, types.OptimismSepolia, types.ArbitrumSpeolia, types.ScrollSepolia, types.StarketSepolia, types.BaseSepolia)
+		global_const.EthereumSepolia, global_const.OptimismSepolia, global_const.ArbitrumSpeolia, global_const.ScrollSepolia, global_const.StarketSepolia, global_const.BaseSepolia)
 	OpeStackNetWork = mapset.NewSet(
-		types.OptimismMainnet, types.OptimismSepolia, types.BaseMainnet, types.BaseSepolia)
+		global_const.OptimismMainnet, global_const.OptimismSepolia, global_const.BaseMainnet, global_const.BaseSepolia)
 	EthereumAdaptableNetWork = mapset.NewSet(
-		types.OptimismMainnet, types.OptimismSepolia, types.EthereumSepolia)
+		global_const.OptimismMainnet, global_const.OptimismSepolia, global_const.EthereumSepolia)
 	ArbStackNetWork = mapset.NewSet(
-		types.ArbitrumSpeolia, types.ArbitrumOne, types.ArbitrumNova)
+		global_const.ArbitrumSpeolia, global_const.ArbitrumOne, global_const.ArbitrumNova)
 
-	L1GasOracleInL2 = map[types.Network]common.Address{
-		types.OptimismMainnet: common.HexToAddress("0x420000000000000000000000000000000000000F"),
-		types.OptimismSepolia: common.HexToAddress("0x420000000000000000000000000000000000000F"),
-		types.ScrollSepolia:   common.HexToAddress("0x5300000000000000000000000000000000000002"),
-		types.ScrollMainnet:   common.HexToAddress("0x5300000000000000000000000000000000000002"),
+	L1GasOracleInL2 = map[global_const.Network]common.Address{
+		global_const.OptimismMainnet: common.HexToAddress("0x420000000000000000000000000000000000000F"),
+		global_const.OptimismSepolia: common.HexToAddress("0x420000000000000000000000000000000000000F"),
+		global_const.ScrollSepolia:   common.HexToAddress("0x5300000000000000000000000000000000000002"),
+		global_const.ScrollMainnet:   common.HexToAddress("0x5300000000000000000000000000000000000002"),
 	}
 )
 
-func GetNetWorkStack(network types.Network) types.NewWorkStack {
+func GetNetWorkStack(network global_const.Network) global_const.NewWorkStack {
 	if IsOpStackNetWork(network) {
-		return types.OpStack
+		return global_const.OpStack
 	}
 	if IsArbNetWork(network) {
-		return types.ArbStack
+		return global_const.ArbStack
 	}
-	return types.DefaultStack
+	return global_const.DefaultStack
 }
 
-func IsTestNet(network types.Network) bool {
+func IsTestNet(network global_const.Network) bool {
 	return TestNetWork.Contains(network)
 }
-func IsOpStackNetWork(network types.Network) bool {
+func IsOpStackNetWork(network global_const.Network) bool {
 	return OpeStackNetWork.Contains(network)
 }
-func IsEthereumAdaptableNetWork(network types.Network) bool {
+func IsEthereumAdaptableNetWork(network global_const.Network) bool {
 	return EthereumAdaptableNetWork.Contains(network)
 }
-func IsArbNetWork(network types.Network) bool {
+func IsArbNetWork(network global_const.Network) bool {
 	return ArbStackNetWork.Contains(network)
 }
-func GetSimulateEntryPointAddress(network types.Network) *common.Address {
+func GetSimulateEntryPointAddress(network global_const.Network) *common.Address {
 	panic("implement me")
 }

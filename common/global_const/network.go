@@ -1,4 +1,4 @@
-package types
+package global_const
 
 type NetworkInfo struct {
 	Name     string    `json:"main_net_name"`

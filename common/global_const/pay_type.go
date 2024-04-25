@@ -1,4 +1,4 @@
-package types
+package global_const
 
 type PayType string
 

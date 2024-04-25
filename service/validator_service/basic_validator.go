@@ -1,8 +1,8 @@
 package validator_service
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"github.com/ethereum/go-ethereum/common"
@@ -43,7 +43,7 @@ func ValidateUserOp(userOpParam *user_op.UserOpInput, strategy *model.Strategy) 
 
 	//TODO secure check https://github.com/eth-infinitism/account-abstraction/blob/develop/erc/ERCS/erc-7562.md
 }
-func checkSender(userOpParam *user_op.UserOpInput, netWork types.Network) error {
+func checkSender(userOpParam *user_op.UserOpInput, netWork global_const.Network) error {
 	userOpValue := *userOpParam
 	checkOk, checkSenderErr := chain_service.CheckContractAddressAccess(userOpValue.Sender, netWork)
 	if !checkOk {
@@ -53,7 +53,7 @@ func checkSender(userOpParam *user_op.UserOpInput, netWork types.Network) error 
 	}
 	return nil
 }
-func checkInitCode(initCode []byte, network types.Network) error {
+func checkInitCode(initCode []byte, network global_const.Network) error {
 	if len(initCode) < 20 {
 		return xerrors.Errorf("initCode length is less than 20 do not have factory address")
 	}

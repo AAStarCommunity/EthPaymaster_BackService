@@ -2,22 +2,22 @@ package paymaster_pay_type
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/paymaster_abi"
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 )
 
-var GenerateFuncMap = map[types.PayType]GeneratePaymasterDataFunc{}
+var GenerateFuncMap = map[global_const.PayType]GeneratePaymasterDataFunc{}
 var BasicPaymasterDataAbi abi.Arguments
 
 func init() {
-	GenerateFuncMap[types.PayTypeVerifying] = GenerateBasicPaymasterData()
-	GenerateFuncMap[types.PayTypeERC20] = GenerateBasicPaymasterData()
-	GenerateFuncMap[types.PayTypeSuperVerifying] = GenerateSuperContractPaymasterData()
+	GenerateFuncMap[global_const.PayTypeVerifying] = GenerateBasicPaymasterData()
+	GenerateFuncMap[global_const.PayTypeERC20] = GenerateBasicPaymasterData()
+	GenerateFuncMap[global_const.PayTypeSuperVerifying] = GenerateSuperContractPaymasterData()
 	BasicPaymasterDataAbi = getAbiArgs()
 }
-func GetGenerateFunc(payType types.PayType) GeneratePaymasterDataFunc {
+func GetGenerateFunc(payType global_const.PayType) GeneratePaymasterDataFunc {
 	return GenerateFuncMap[payType]
 }
 func getAbiArgs() abi.Arguments {

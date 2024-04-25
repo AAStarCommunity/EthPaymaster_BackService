@@ -5,7 +5,7 @@ import (
 )
 
 func TestComputeGas(t *testing.T) {
-	//userOp, newErr := user_op.NewUserOp(utils.GenerateMockUservOperation(), types.EntrypointV06)
+	//userOp, newErr := user_op.NewUserOp(utils.GenerateMockUservOperation(), global_const.EntrypointV06)
 	//assert.NoError(t, newErr)
 	//strategy := dashboard_service.GetStrategyById("1")
 	//gas, _, err := ComputeGas(userOp, strategy)

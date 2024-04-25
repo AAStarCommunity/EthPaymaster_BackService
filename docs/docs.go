@@ -207,7 +207,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "force_network": {
-                    "$ref": "#/definitions/types.Network"
+                    "$ref": "#/definitions/global_const.Network"
                 },
                 "force_strategy_id": {
                     "type": "string"
@@ -221,7 +221,7 @@ const docTemplate = `{
                 }
             }
         },
-        "types.Network": {
+        "global_const.Network": {
             "type": "string",
             "enum": [
                 "ethereum",

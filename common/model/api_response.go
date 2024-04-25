@@ -1,7 +1,7 @@
 package model
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"math/big"
 )
 
@@ -16,14 +16,14 @@ type TryPayUserOpResponse struct {
 }
 
 type ComputeGasResponse struct {
-	GasInfo       *GasPrice          `json:"gas_info"`
-	TokenCost     *big.Float         `json:"token_cost"`
-	Network       types.Network      `json:"network"`
-	Token         types.TokenType    `json:"tokens"`
-	UsdCost       float64            `json:"usd_cost"`
-	BlobEnable    bool               `json:"blob_enable"`
-	MaxFee        big.Int            `json:"max_fee"`
-	OpEstimateGas *UserOpEstimateGas `json:"op_estimate_gas"`
+	GasInfo       *GasPrice              `json:"gas_info"`
+	TokenCost     *big.Float             `json:"token_cost"`
+	Network       global_const.Network   `json:"network"`
+	Token         global_const.TokenType `json:"tokens"`
+	UsdCost       float64                `json:"usd_cost"`
+	BlobEnable    bool                   `json:"blob_enable"`
+	MaxFee        big.Int                `json:"max_fee"`
+	OpEstimateGas *UserOpEstimateGas     `json:"op_estimate_gas"`
 }
 type UserOpEstimateGas struct {
 	//common
@@ -50,10 +50,10 @@ type GetSupportEntryPointResponse struct {
 	EntrypointDomains *[]EntrypointDomain `json:"entrypoints"`
 }
 type EntrypointDomain struct {
-	Address    string        `json:"address"`
-	Desc       string        `json:"desc"`
-	NetWork    types.Network `json:"network"`
-	StrategyId string        `json:"strategy_id"`
+	Address    string               `json:"address"`
+	Desc       string               `json:"desc"`
+	NetWork    global_const.Network `json:"network"`
+	StrategyId string               `json:"strategy_id"`
 }
 
 type GetSupportStrategyResponse struct {

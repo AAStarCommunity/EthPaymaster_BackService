@@ -1,8 +1,8 @@
 package operator
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
 )
 
 func GetSupportEntrypointExecute(networkStr string) (*[]model.EntrypointDomain, error) {
@@ -10,7 +10,7 @@ func GetSupportEntrypointExecute(networkStr string) (*[]model.EntrypointDomain, 
 	entrypoints = append(entrypoints, model.EntrypointDomain{
 		Address:    "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
 		Desc:       "desc",
-		NetWork:    types.EthereumSepolia,
+		NetWork:    global_const.EthereumSepolia,
 		StrategyId: "1",
 	})
 	return &entrypoints, nil

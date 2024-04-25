@@ -1,10 +1,10 @@
 package gas_service
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
@@ -46,9 +46,9 @@ func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymaster
 	opEstimateGas.CallGasLimit = callGasLimit
 
 	entryPointVersion := strategy.GetStrategyEntryPointVersion()
-	if entryPointVersion == types.EntryPointV07 {
-		opEstimateGas.PaymasterPostOpGasLimit = types.DUMMY_PAYMASTER_POSTOP_GASLIMIT_BIGINT
-		opEstimateGas.PaymasterVerificationGasLimit = types.DUMMY_PAYMASTER_VERIFICATIONGASLIMIT_BIGINT
+	if entryPointVersion == global_const.EntryPointV07 {
+		opEstimateGas.PaymasterPostOpGasLimit = global_const.DUMMY_PAYMASTER_POSTOP_GASLIMIT_BIGINT
+		opEstimateGas.PaymasterVerificationGasLimit = global_const.DUMMY_PAYMASTER_VERIFICATIONGASLIMIT_BIGINT
 	}
 
 	tokenCost, err := getTokenCost(strategy, maxFeePriceInEther)
@@ -56,7 +56,7 @@ func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymaster
 		return nil, nil, err
 	}
 	var usdCost float64
-	if types.IsStableToken(strategy.GetUseToken()) {
+	if global_const.IsStableToken(strategy.GetUseToken()) {
 		usdCost, _ = tokenCost.Float64()
 	} else {
 		usdCost, _ = utils.GetPriceUsd(strategy.GetUseToken())
@@ -86,10 +86,10 @@ func GetUserOpWithPaymasterAndDataForSimulate(op user_op.UserOpInput, strategy *
 	return &op, nil
 }
 
-func GetNewUserOpAfterCompute(op *user_op.UserOpInput, gas *model.UserOpEstimateGas, version types.EntrypointVersion) *user_op.UserOpInput {
+func GetNewUserOpAfterCompute(op *user_op.UserOpInput, gas *model.UserOpEstimateGas, version global_const.EntrypointVersion) *user_op.UserOpInput {
 	var accountGasLimits [32]byte
 	var gasFee [32]byte
-	if version == types.EntryPointV07 {
+	if version == global_const.EntryPointV07 {
 		accountGasLimits = utils.PackIntTo32Bytes(gas.PreVerificationGas, gas.CallGasLimit)
 		gasFee = utils.PackIntTo32Bytes(gas.MaxPriorityFeePerGas, gas.MaxFeePerGas)
 	}
@@ -133,7 +133,7 @@ func EstimateCallGasLimit(strategy *model.Strategy, simulateOpResult *model.Simu
 }
 
 func getTokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Float, error) {
-	if strategy.GetPayType() == types.PayTypeERC20 {
+	if strategy.GetPayType() == global_const.PayTypeERC20 {
 
 		formTokenType := conf.GetGasToken(strategy.GetNewWork())
 		toTokenType := strategy.GetUseToken()
@@ -164,10 +164,10 @@ func EstimateVerificationGasLimit(simulateOpResult *model.SimulateHandleOpResult
 	preOpGas := simulateOpResult.PreOpGas
 	// verificationGasLimit = (preOpGas - preVerificationGas) * 1.5
 	result := new(big.Int).Sub(preOpGas, preVerificationGas)
-	result = result.Mul(result, types.THREE_BIGINT)
-	result = result.Div(result, types.TWO_BIGINT)
-	if utils.LeftIsLessTanRight(result, types.DUMMY_VERIFICATIONGASLIMIT_BIGINT) {
-		return types.DUMMY_VERIFICATIONGASLIMIT_BIGINT, nil
+	result = result.Mul(result, global_const.THREE_BIGINT)
+	result = result.Div(result, global_const.TWO_BIGINT)
+	if utils.LeftIsLessTanRight(result, global_const.DUMMY_VERIFICATIONGASLIMIT_BIGINT) {
+		return global_const.DUMMY_VERIFICATIONGASLIMIT_BIGINT, nil
 	}
 	return result, nil
 }

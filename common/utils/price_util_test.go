@@ -1,19 +1,19 @@
 package utils
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"fmt"
 	"strconv"
 	"testing"
 )
 
 func TestGetPriceUsd(t *testing.T) {
-	price, _ := GetPriceUsd(types.OP)
+	price, _ := GetPriceUsd(global_const.OP)
 	fmt.Println(price)
 }
 
 func TestGetToken(t *testing.T) {
-	price, _ := GetToken(types.ETH, types.OP)
+	price, _ := GetToken(global_const.ETH, global_const.OP)
 	fmt.Println(price)
 }
 func TestDemo(t *testing.T) {

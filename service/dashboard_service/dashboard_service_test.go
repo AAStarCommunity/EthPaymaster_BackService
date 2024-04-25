@@ -1,12 +1,12 @@
 package dashboard_service
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"fmt"
 	"testing"
 )
 
 func TestGetSuitableStrategy(t *testing.T) {
-	x := types.Network("Ethereum")
+	x := global_const.Network("Ethereum")
 	fmt.Println(x)
 }

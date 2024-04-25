@@ -6,6 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 	"math/big"
 )
@@ -19,12 +20,12 @@ type ExecutionResultRevert struct {
 	TargetResult  []byte
 }
 
-func executionResult() abi.Error {
+func ExecutionResult() abi.Error {
 	return abi.NewError("ExecutionResult", abi.Arguments{
 		{Name: "preOpGas", Type: paymaster_abi.Uint256Type},
 		{Name: "paid", Type: paymaster_abi.Uint256Type},
 		{Name: "validAfter", Type: paymaster_abi.Uint48Type},
-		{Name: "validUntil", Type: paymaster_abi.Uint64Type},
+		{Name: "validUntil", Type: paymaster_abi.Uint48Type},
 		{Name: "targetSuccess", Type: paymaster_abi.BooleanType},
 		{Name: "targetResult", Type: paymaster_abi.BytesType},
 	})
@@ -34,15 +35,17 @@ func NewExecutionResult(err error) (*ExecutionResultRevert, error) {
 
 	rpcErr, ok := err.(rpc.DataError)
 	if !ok {
-		return nil, xerrors.Errorf("executionResult: cannot assert type: error is not of type rpc.DataError")
+		return nil, xerrors.Errorf("ExecutionResult: cannot assert type: error is not of type rpc.DataError")
 	}
 
 	data, ok := rpcErr.ErrorData().(string)
+
+	logrus.Debug("data: ", data)
 	if !ok {
-		return nil, xerrors.Errorf("executionResult: cannot assert type: data is not of type string")
+		return nil, xerrors.Errorf("ExecutionResult: cannot assert type: data is not of type string")
 	}
 
-	sim := executionResult()
+	sim := ExecutionResult()
 	revert, err := sim.Unpack(common.Hex2Bytes(data[2:]))
 	if err != nil {
 		return nil, fmt.Errorf("executionResult err: [%s]", err)

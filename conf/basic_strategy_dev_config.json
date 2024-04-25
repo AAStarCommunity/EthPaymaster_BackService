@@ -9,6 +9,16 @@
     "paymaster_pay_type": "00",
     "access_project": "official"
   },
+  "Ethereum_Sepolia_v07_verifyPaymaster": {
+    "network": "ethereum-sepolia",
+    "entrypoint_address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+    "entrypoint_tag": "v0.6",
+    "effective_start_time": "1710044496",
+    "effective_end_time": "1820044496",
+    "paymaster_address": "0x9D6AC51b972544251Fcc0F2902e633E3f9BD3f29",
+    "paymaster_pay_type": "00",
+    "access_project": "official"
+  },
   "Optimism_Sepolia_v06_verifyPaymaster": {
     "network": "optimism-sepolia",
     "entrypoint_address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",

@@ -1,9 +1,9 @@
 package chain_service
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"github.com/ethereum/go-ethereum/common"
@@ -14,18 +14,18 @@ import (
 
 const balanceOfAbi = `[{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}]`
 
-func CheckContractAddressAccess(contract *common.Address, chain types.Network) (bool, error) {
+func CheckContractAddressAccess(contract *common.Address, chain global_const.Network) (bool, error) {
 	//todo needcache
 	executor := network.GetEthereumExecutor(chain)
 	return executor.CheckContractAddressAccess(contract)
 }
 
 // GetGasPrice return gas price in wei, gwei, ether
-func GetGasPrice(chain types.Network) (*model.GasPrice, error) {
+func GetGasPrice(chain global_const.Network) (*model.GasPrice, error) {
 	if conf.IsEthereumAdaptableNetWork(chain) {
 		ethereumExecutor := network.GetEthereumExecutor(chain)
 		return ethereumExecutor.GetGasPrice()
-	} else if chain == types.StarketMainnet || chain == types.StarketSepolia {
+	} else if chain == global_const.StarketMainnet || chain == global_const.StarketSepolia {
 		starknetExecutor := network.GetStarknetExecutor()
 		return starknetExecutor.GetGasPrice()
 	} else {
@@ -39,7 +39,7 @@ func GetGasPrice(chain types.Network) (*model.GasPrice, error) {
 }
 
 // GetPreVerificationGas https://github.com/eth-infinitism/bundler/blob/main/packages/sdk/src/calcPreVerificationGas.ts
-func GetPreVerificationGas(chain types.Network, userOp *user_op.UserOpInput, strategy *model.Strategy, gasFeeResult *model.GasPrice) (*big.Int, error) {
+func GetPreVerificationGas(chain global_const.Network, userOp *user_op.UserOpInput, strategy *model.Strategy, gasFeeResult *model.GasPrice) (*big.Int, error) {
 	stack := conf.GetNetWorkStack(chain)
 	preGasFunc, err := network.GetPreVerificationGasFunc(stack)
 	if err != nil {
@@ -50,12 +50,12 @@ func GetPreVerificationGas(chain types.Network, userOp *user_op.UserOpInput, str
 		return nil, err
 	}
 	// add 10% buffer
-	preGas = preGas.Mul(preGas, types.HUNDRED_PLUS_ONE_BIGINT)
-	preGas = preGas.Div(preGas, types.HUNDRED_BIGINT)
+	preGas = preGas.Mul(preGas, global_const.HUNDRED_PLUS_ONE_BIGINT)
+	preGas = preGas.Div(preGas, global_const.HUNDRED_BIGINT)
 	return preGas, nil
 }
 
-func GetAddressTokenBalance(networkParam types.Network, address common.Address, tokenTypeParam types.TokenType) (float64, error) {
+func GetAddressTokenBalance(networkParam global_const.Network, address common.Address, tokenTypeParam global_const.TokenType) (float64, error) {
 	executor := network.GetEthereumExecutor(networkParam)
 	bananceResult, err := executor.GetUserTokenBalance(address, tokenTypeParam)
 	if err != nil {
@@ -66,15 +66,15 @@ func GetAddressTokenBalance(networkParam types.Network, address common.Address, 
 	return balanceResultFloat, nil
 
 }
-func SimulateHandleOp(networkParam types.Network, op *user_op.UserOpInput, strategy *model.Strategy) (*model.SimulateHandleOpResult, error) {
+func SimulateHandleOp(networkParam global_const.Network, op *user_op.UserOpInput, strategy *model.Strategy) (*model.SimulateHandleOpResult, error) {
 	executor := network.GetEthereumExecutor(networkParam)
 	entrypointVersion := strategy.GetStrategyEntryPointVersion()
-	if entrypointVersion == types.EntryPointV07 {
+	if entrypointVersion == global_const.EntryPointV07 {
 
 		return executor.SimulateV06HandleOp(*op, strategy.GetEntryPointAddress())
 
-	} else if entrypointVersion == types.EntrypointV06 {
-		return executor.SimulateV07HandleOp(op, strategy.GetEntryPointAddress())
+	} else if entrypointVersion == global_const.EntrypointV06 {
+		return executor.SimulateV07HandleOp(*op, strategy.GetEntryPointAddress())
 	}
 	return nil, xerrors.Errorf("[never be here]entrypoint version %s not support", entrypointVersion)
 	//TODO Starknet

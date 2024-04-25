@@ -2,7 +2,7 @@ package user_op
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/paymaster_abi"
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"encoding/hex"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -17,8 +17,8 @@ import (
 )
 
 var (
-	DummyGasFees              = utils.PackIntTo32Bytes(types.DummyMaxPriorityFeePerGas, types.DummyMaxFeePerGas)
-	DummyAccountGasLimits     = utils.PackIntTo32Bytes(types.DummyVerificationGasLimit, types.DummyCallGasLimit)
+	DummyGasFees              = utils.PackIntTo32Bytes(global_const.DummyMaxPriorityFeePerGas, global_const.DummyMaxFeePerGas)
+	DummyAccountGasLimits     = utils.PackIntTo32Bytes(global_const.DummyVerificationGasLimit, global_const.DummyCallGasLimit)
 	MinPreVerificationGas     *big.Int
 	validate                  = validator.New()
 	onlyOnce                  = sync.Once{}
@@ -261,13 +261,13 @@ type UserOpInput struct {
 	CallGasLimit *big.Int `json:"callGasLimit"  mapstructure:"call_gas_limit"  binding:"required"`
 	//Gas limit for verification phase
 	VerificationGasLimit *big.Int `json:"verificationGasLimit"  mapstructure:"verification_gas_limit"  binding:"required"`
-	AccountGasLimits     [32]byte
-	GasFees              [32]byte
+	AccountGasLimits     [32]byte `json:"accountGasLimits"  mapstructure:"account_gas_limits"  binding:"required"`
+	GasFees              [32]byte `json:"gasFees"  mapstructure:"gas_fees"  binding:"required"`
 }
 
 func packUserOpV6ForUserOpHash(userOp *UserOperationV06) (string, []byte, error) {
 	//TODO disgusting logic
-	encoded, err := userOpV06PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, userOp.CallGasLimit, userOp.VerificationGasLimit, userOp.PreVerificationGas, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, types.DummyPaymasterDataByte, userOp.Sender)
+	encoded, err := userOpV06PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, userOp.CallGasLimit, userOp.VerificationGasLimit, userOp.PreVerificationGas, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, global_const.DummyPaymasterDataByte, userOp.Sender)
 	if err != nil {
 		return "", nil, err
 	}
@@ -282,16 +282,16 @@ func packUserOpV6ForUserOpHash(userOp *UserOperationV06) (string, []byte, error)
 	return hexString, encoded, nil
 }
 
-func (userOp *UserOpInput) PackUserOpForMock(version types.EntrypointVersion) (string, []byte, error) {
-	if version == types.EntryPointV07 {
+func (userOp *UserOpInput) PackUserOpForMock(version global_const.EntrypointVersion) (string, []byte, error) {
+	if version == global_const.EntryPointV07 {
 		gasFee := utils.PackIntTo32Bytes(userOp.MaxPriorityFeePerGas, userOp.MaxFeePerGas)
-		encoded, err := UserOpV07PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, DummyAccountGasLimits, userOp.PreVerificationGas, gasFee, types.DummyPaymasterDataByte, types.DummySignatureByte)
+		encoded, err := UserOpV07PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, DummyAccountGasLimits, userOp.PreVerificationGas, gasFee, global_const.DummyPaymasterDataByte, global_const.DummySignatureByte)
 		if err != nil {
 			return "", nil, err
 		}
 		return hex.EncodeToString(encoded), encoded, nil
-	} else if version == types.EntrypointV06 {
-		encoded, err := userOpV06PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, types.DummyCallGasLimit, types.DummyVerificationGasLimit, types.DUMMAY_PREVERIFICATIONGAS_BIGINT, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, types.DummyPaymasterDataByte, userOp.Signature)
+	} else if version == global_const.EntrypointV06 {
+		encoded, err := userOpV06PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, global_const.DummyCallGasLimit, global_const.DummyVerificationGasLimit, global_const.DUMMAY_PREVERIFICATIONGAS_BIGINT, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, global_const.DummyPaymasterDataByte, userOp.Signature)
 
 		if err != nil {
 			return "", nil, err

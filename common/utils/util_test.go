@@ -31,3 +31,26 @@ func TestToEthSignedMessageHash(t *testing.T) {
 	afterStr := hex.EncodeToString(afterStrByte)
 	fmt.Printf("afterStr: %s\n", afterStr)
 }
+
+//func TestEthereumSign(t *testing.T) {
+//	messageStr := "hello world"
+//	messageByte := []byte(messageStr)
+//	privateKey, _ := crypto.GenerateKey()
+//	publicKey := privateKey.Public()
+//	publicKeyBytes := crypto.FromECDSAPub(publicKey.(*ecdsa.PublicKey))
+//
+//	sign, err := GetSign(messageByte, privateKey)
+//	if err != nil {
+//		t.Errorf("has Error %s", err)
+//		return
+//	}
+//	t.Logf("sign: %x\n", sign)
+//
+//	sigPublicKey, err := crypto.Ecrecover(hash.Bytes(), sign)
+//	if err != nil {
+//		t.Errorf("has Error %s", err)
+//		return
+//	}
+//	matches := bytes.Equal(sigPublicKey, publicKeyBytes)
+//	t.Logf("matches: %t\n", matches)
+//}

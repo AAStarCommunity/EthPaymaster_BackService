@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -136,28 +137,14 @@ func IsLessThanZero(value *big.Int) bool {
 func LeftIsLessTanRight(a *big.Int, b *big.Int) bool {
 	return a.Cmp(b) < 0
 }
-func GetSign(message []byte) ([]byte, error) {
-	privateKey, err := crypto.HexToECDSA("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421")
-	if err != nil {
-		return nil, err
-	}
+func GetSign(message []byte, privateKey *ecdsa.PrivateKey) ([]byte, error) {
 	digest := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(message), message)
 	hash := crypto.Keccak256Hash([]byte(digest))
 	sig, err := crypto.Sign(hash.Bytes(), privateKey)
 	if err != nil {
 		return nil, err
 	}
+	//In Ethereum, the last byte of the signature result represents the recovery ID of the signature, and by adding 27 to ensure it conforms to Ethereum's specification.
 	sig[64] += 27
-
 	return sig, nil
-
-	//var signatureAfterProcess string
-	//if strings.HasSuffix(signatureStr, "00") {
-	//	signatureAfterProcess = ReplaceLastTwoChars(signatureStr, "1b")
-	//} else if strings.HasSuffix(signatureStr, "01") {
-	//	signatureAfterProcess = ReplaceLastTwoChars(signatureStr, "1c")
-	//} else {
-	//	signatureAfterProcess = signatureStr
-	//}
-	//return hex.DecodeString(signatureAfterProcess)
 }

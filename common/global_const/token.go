@@ -1,4 +1,4 @@
-package types
+package global_const
 
 import (
 	mapset "github.com/deckarep/golang-set/v2"
