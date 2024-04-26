@@ -31,7 +31,7 @@ func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymaster
 		return nil, nil, err
 	}
 
-	preVerificationGas, err := chain_service.GetPreVerificationGas(strategy.GetNewWork(), userOp, strategy, gasPrice)
+	preVerificationGas, err := chain_service.GetPreVerificationGas(userOp, strategy, gasPrice)
 
 	verificationGasLimit, err := EstimateVerificationGasLimit(simulateResult, preVerificationGas)
 
@@ -40,7 +40,7 @@ func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymaster
 	opEstimateGas := model.UserOpEstimateGas{}
 	opEstimateGas.PreVerificationGas = preVerificationGas
 	opEstimateGas.MaxFeePerGas = gasPrice.MaxFeePerGas
-	opEstimateGas.MaxPriorityFeePerGas = gasPrice.MaxPriorityPriceWei
+	opEstimateGas.MaxPriorityFeePerGas = gasPrice.MaxPriorityPerGas
 	opEstimateGas.BaseFee = gasPrice.BaseFee
 	opEstimateGas.VerificationGasLimit = verificationGasLimit
 	opEstimateGas.CallGasLimit = callGasLimit

@@ -91,9 +91,103 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 				testGetBalance(t, global_const.EthereumSepolia, userAddresss)
 			},
 		},
+		{
+			"checkContractAddressAccess",
+			func(t *testing.T) {
+				testCheckContractAddressAccess(t, global_const.EthereumSepolia)
+			},
+		},
+		{
+			"TestEstimateUserOpCallGas",
+			func(t *testing.T) {
+				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
+				entrypointAddress := strategy.GetEntryPointAddress()
+				testEstimateUserOpCallGas(t, global_const.EthereumSepolia, op, entrypointAddress)
+			},
+		},
+		{
+			"TestEstimateCreateSenderGas",
+			func(t *testing.T) {
+				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
+				entrypointAddress := strategy.GetEntryPointAddress()
+				testEstimateCreateSenderGas(t, global_const.EthereumSepolia, op, entrypointAddress)
+			},
+		},
+		{
+			"TestOptimismGetL1DataFee",
+			func(t *testing.T) {
+				stategy := conf.GetBasicStrategyConfig("Optimism_Sepolia_v06_verifyPaymaster")
+
+				testGetL1DataFee(t, global_const.OptimismSepolia, *op, stategy.GetStrategyEntryPointVersion())
+			},
+		},
+		{
+			"TestOpPreVerificationGasFunc",
+			func(t *testing.T) {
+
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, tt.test)
+	}
+}
+
+func testGetL1DataFee(t *testing.T, chain global_const.Network, input user_op.UserOpInput, version global_const.EntrypointVersion) {
+	executor := GetEthereumExecutor(chain)
+	if executor == nil {
+		t.Error("executor is nil")
+	}
+	_, data, err := input.PackUserOpForMock(version)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	l1DataFee, err := executor.GetL1DataFee(data)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Logf("l1DataFee: %v", l1DataFee)
+}
+func testEstimateUserOpCallGas(t *testing.T, chain global_const.Network, userOpParam *user_op.UserOpInput, entpointAddress *common.Address) {
+	executor := GetEthereumExecutor(chain)
+	if executor == nil {
+		t.Error("executor is nil")
+	}
+	gasResult, err := executor.EstimateUserOpCallGas(entpointAddress, userOpParam)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Logf("gasResult: %v", gasResult)
+}
+func testEstimateCreateSenderGas(t *testing.T, chain global_const.Network, userOpParam *user_op.UserOpInput, entrypointAddress *common.Address) {
+	executor := GetEthereumExecutor(chain)
+	if executor == nil {
+		t.Error("executor is nil")
+	}
+	gasResult, err := executor.EstimateCreateSenderGas(entrypointAddress, userOpParam)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Logf("gasResult: %v", gasResult)
+}
+func testCheckContractAddressAccess(t *testing.T, chain global_const.Network) {
+	executor := GetEthereumExecutor(chain)
+	if executor == nil {
+		t.Error("executor is nil")
+	}
+	addressStr := "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"
+	address := common.HexToAddress(addressStr)
+	res, err := executor.CheckContractAddressAccess(&address)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if !res {
+		t.Error("checkContractAddressAccess failed")
 	}
 }
 func testGetBalance(t *testing.T, chain global_const.Network, address common.Address) {

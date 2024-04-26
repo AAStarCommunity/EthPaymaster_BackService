@@ -302,8 +302,13 @@ func (userOp *UserOpInput) PackUserOpForMock(version global_const.EntrypointVers
 	}
 }
 
-func (userOp *UserOpInput) GetFactoryAddress() *common.Address {
-	panic("implement me")
+func (userOp *UserOpInput) GetFactoryAddress() (*common.Address, error) {
+	initCode := userOp.InitCode
+	if len(initCode) < 20 {
+		return nil, xerrors.Errorf("initCode length is less than 20")
+	}
+	address := common.BytesToAddress(initCode[:42])
+	return &address, nil
 }
 
 func (userOp *UserOpInput) ValidateUserOp() error {

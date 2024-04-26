@@ -148,7 +148,7 @@ var (
 	OpeStackNetWork = mapset.NewSet(
 		global_const.OptimismMainnet, global_const.OptimismSepolia, global_const.BaseMainnet, global_const.BaseSepolia)
 	EthereumAdaptableNetWork = mapset.NewSet(
-		global_const.OptimismMainnet, global_const.OptimismSepolia, global_const.EthereumSepolia)
+		global_const.OptimismMainnet, global_const.OptimismSepolia, global_const.EthereumSepolia, global_const.EthereumMainnet, global_const.ScrollSepolia, global_const.ScrollMainnet, global_const.BaseMainnet, global_const.BaseSepolia)
 	ArbStackNetWork = mapset.NewSet(
 		global_const.ArbitrumSpeolia, global_const.ArbitrumOne, global_const.ArbitrumNova)
 

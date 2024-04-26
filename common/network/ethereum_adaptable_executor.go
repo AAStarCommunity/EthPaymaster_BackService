@@ -127,6 +127,9 @@ func (executor EthereumExecutor) GetEntryPointV7Deposit(entryPoint *common.Addre
 
 func (executor EthereumExecutor) GetUserTokenBalance(userAddress common.Address, token global_const.TokenType) (*big.Int, error) {
 	tokenAddress := conf.GetTokenAddress(executor.network, token) //TODO
+	if tokenAddress == "" {
+		return nil, xerrors.Errorf("tokenType [%s] is not supported in [%s] network", token, executor.network)
+	}
 	ethTokenAddress := common.HexToAddress(tokenAddress)
 	tokenInstance, err := executor.GetTokenContract(&ethTokenAddress)
 	if err != nil {
@@ -177,9 +180,13 @@ func (executor EthereumExecutor) EstimateUserOpCallGas(entrypointAddress *common
 func (executor EthereumExecutor) EstimateCreateSenderGas(entrypointAddress *common.Address, userOpParam *user_op.UserOpInput) (*big.Int, error) {
 	client := executor.Client
 	userOpValue := *userOpParam
+	factoryAddress, err := userOpValue.GetFactoryAddress()
+	if err != nil {
+		return nil, err
+	}
 	res, err := client.EstimateGas(context.Background(), ethereum.CallMsg{
 		From: *entrypointAddress,
-		To:   userOpValue.GetFactoryAddress(),
+		To:   factoryAddress,
 		Data: userOpValue.InitCode,
 	})
 	if err != nil {
@@ -205,7 +212,7 @@ func (executor EthereumExecutor) GetGasPrice() (*model.GasPrice, error) {
 	}
 	result := model.GasPrice{}
 	result.MaxFeePerGas = priceWei
-	result.MaxPriorityPriceWei = priorityPriceWei
+	result.MaxPriorityPerGas = priorityPriceWei
 
 	head, err := client.HeaderByNumber(context.Background(), nil)
 	if err != nil {
@@ -230,15 +237,6 @@ func (executor EthereumExecutor) GetGasPrice() (*model.GasPrice, error) {
 	//result.MaxPriorityPriceGwei = priorityPriceInGweiFloat
 	//result.MaxPriorityPriceEther = gasPriceInEther
 	//return &result, nil
-}
-func (executor EthereumExecutor) GetPreVerificationGas() (uint64, error) {
-	if conf.ArbStackNetWork.Contains(executor.network) {
-		return 0, nil
-	}
-	if conf.OpeStackNetWork.Contains(executor.network) {
-		return 0, nil
-	}
-	return PreVerificationGas.Uint64(), nil
 }
 
 // GetL1DataFee
