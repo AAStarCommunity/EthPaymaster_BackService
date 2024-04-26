@@ -31,4 +31,14 @@ func TestConfigInit(t *testing.T) {
 	}
 	t.Log(rpcUrl)
 
+	eoa := GetSigner(global_const.EthereumSepolia)
+	if eoa == nil {
+		t.Error("eoa is nil")
+	}
+	t.Log(eoa.Address.Hex())
+	scrollEoa := GetSigner(global_const.ScrollSepolia)
+	if scrollEoa == nil {
+		t.Error("eoa is nil")
+	}
+	t.Log(scrollEoa.Address.Hex())
 }

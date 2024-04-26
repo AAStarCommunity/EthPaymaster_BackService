@@ -10,6 +10,9 @@ import (
 )
 
 var basicConfig *BusinessConfig
+var signerConfig = make(SignerConfigMap)
+
+type SignerConfigMap map[global_const.Network]*global_const.EOA
 
 func BusinessConfigInit(path string) {
 	if path == "" {
@@ -17,6 +20,10 @@ func BusinessConfigInit(path string) {
 	}
 	originConfig := initBusinessConfig(path)
 	basicConfig = convertConfig(originConfig)
+
+}
+func GetSigner(network global_const.Network) *global_const.EOA {
+	return signerConfig[network]
 }
 
 func convertConfig(originConfig *OriginBusinessConfig) *BusinessConfig {
@@ -32,7 +39,6 @@ func convertConfig(originConfig *OriginBusinessConfig) *BusinessConfig {
 			RpcUrl:      fmt.Sprintf("%s/%s", originNetWorkConfig.RpcUrl, originNetWorkConfig.ApiKey),
 			TokenConfig: originNetWorkConfig.TokenConfig,
 		}
-
 		paymasterArr := originConfig.SupportPaymaster[network]
 		paymasterSet := mapset.NewSet[string]()
 		paymasterSet.Append(paymasterArr...)
@@ -42,6 +48,12 @@ func convertConfig(originConfig *OriginBusinessConfig) *BusinessConfig {
 		entryPointSet := mapset.NewSet[string]()
 		entryPointSet.Append(entryPointArr...)
 		basic.SupportEntryPoint[network] = entryPointSet
+		//TODO starknet
+		eoa, err := global_const.NewEoa(originNetWorkConfig.SignerKey)
+		if err != nil {
+			panic(fmt.Sprintf("signer key error: %s", err))
+		}
+		signerConfig[network] = eoa
 	}
 	return basic
 }
@@ -71,6 +83,7 @@ type OriginNetWorkConfig struct {
 	IsTest           bool                              `json:"is_test"`
 	RpcUrl           string                            `json:"rpc_url"`
 	ApiKey           string                            `json:"api_key"`
+	SignerKey        string                            `json:"signer_key"`
 	TokenConfig      map[global_const.TokenType]string `json:"token_config"`
 	GasToken         global_const.TokenType
 	GasOracleAddress string

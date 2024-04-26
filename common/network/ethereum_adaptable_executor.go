@@ -534,7 +534,8 @@ func (executor EthereumExecutor) GetPaymasterData(userOp *user_op.UserOpInput, s
 		logrus.Errorf("GetUserOpHash error [%v]", err)
 		return nil, err
 	}
-	signature, err := utils.GetSign(userOpHash, global_const.SignerEoa.PrivateKey)
+	signer := conf.GetSigner(strategy.GetNewWork())
+	signature, err := utils.GetSign(userOpHash, signer.PrivateKey)
 	if err != nil {
 		return nil, err
 	}

@@ -28,3 +28,4 @@ config/*.json
 vendor
 
 conf/appsettings.*.yaml
+conf/secret_*_config.json

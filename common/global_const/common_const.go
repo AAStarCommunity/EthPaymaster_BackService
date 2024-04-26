@@ -38,7 +38,6 @@ var (
 	DummyCallGasLimit                           = big.NewInt(21754)
 	DummyVerificationGasLimit                   = big.NewInt(391733)
 	EmptyAddress                                = common.HexToAddress("0x0000000000000000000000000000000000000000")
-	SignerEoa                                   *EOA
 )
 
 func init() {
@@ -50,10 +49,6 @@ func init() {
 	address := crypto.PubkeyToAddress(DUMMY_PRIVATE_KEY.PublicKey)
 	DummyAddress = address
 	DummyPaymasterDataByte, err = hex.DecodeString(DUMMY_PAYMASTER_DATA[2:])
-	if err != nil {
-		panic(err)
-	}
-	SignerEoa, err = NewEoa("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421")
 	if err != nil {
 		panic(err)
 	}
