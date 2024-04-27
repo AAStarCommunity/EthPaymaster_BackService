@@ -15,6 +15,12 @@ import (
 	"math/big"
 )
 
+type TotalGasDetail struct {
+	MaxTxGasLimit *big.Int
+	MaxTxGasCost  *big.Int
+	GasPrice      *big.Int
+}
+
 // https://blog.particle.network/bundler-predicting-gas/
 func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterData) (*model.ComputeGasResponse, *user_op.UserOpInput, error) {
 
@@ -23,11 +29,41 @@ func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymaster
 		return nil, nil, err
 	}
 
+	totalGasDetail := GetTotalCostByEstimateGas(opEstimateGas)
 	updateUserOp := getNewUserOpAfterCompute(userOp, opEstimateGas, strategy.GetStrategyEntrypointVersion())
 	// TODO get PaymasterCallGasLimit
 	return &model.ComputeGasResponse{
 		OpEstimateGas: opEstimateGas,
+		MaxTxGasLimit: totalGasDetail.MaxTxGasLimit,
+		MaxTxGasFee:   totalGasDetail.MaxTxGasCost,
+		GasPrice:      totalGasDetail.GasPrice,
 	}, updateUserOp, nil
+}
+func GetTotalCostByEstimateGas(userOpGas *model.UserOpEstimateGas) *TotalGasDetail {
+	gasPrice := GetUserOpGasPrice(userOpGas)
+	totalGasLimit := new(big.Int)
+	totalGasLimit.Add(totalGasLimit, userOpGas.VerificationGasLimit)
+	totalGasLimit.Add(totalGasLimit, userOpGas.CallGasLimit)
+	totalGasLimit.Add(totalGasLimit, userOpGas.PreVerificationGas)
+
+	totalGasGost := gasPrice.Mul(gasPrice, totalGasLimit)
+
+	return &TotalGasDetail{
+		MaxTxGasLimit: totalGasLimit,
+		MaxTxGasCost:  totalGasGost,
+		GasPrice:      gasPrice,
+	}
+}
+
+// GetUserOpGasPrice if network not Support EIP1559 will set MaxFeePerGas And  MaxPriorityFeePerGas to the same value
+func GetUserOpGasPrice(userOpGas *model.UserOpEstimateGas) *big.Int {
+	maxFeePerGas := userOpGas.MaxFeePerGas
+	maxPriorityFeePerGas := userOpGas.MaxPriorityFeePerGas
+	if maxFeePerGas == maxPriorityFeePerGas {
+		return maxFeePerGas
+	}
+	combineFee := new(big.Int).Add(userOpGas.BaseFee, maxPriorityFeePerGas)
+	return utils.GetMinValue(maxFeePerGas, combineFee)
 }
 
 func getUserOpEstimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterData) (*model.UserOpEstimateGas, error) {

@@ -148,3 +148,10 @@ func GetSign(message []byte, privateKey *ecdsa.PrivateKey) ([]byte, error) {
 	sig[64] += 27
 	return sig, nil
 }
+
+func GetMinValue(int2 *big.Int, int3 *big.Int) *big.Int {
+	if int2.Cmp(int3) == -1 {
+		return int2
+	}
+	return int3
+}

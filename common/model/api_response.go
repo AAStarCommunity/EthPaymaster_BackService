@@ -20,6 +20,7 @@ type ComputeGasResponse struct {
 	OpEstimateGas *UserOpEstimateGas `json:"op_estimate_gas"`
 	MaxTxGasLimit *big.Int           `json:"maxTxGasLimit"`
 	MaxTxGasFee   *big.Int           `json:"maxTxGasFee"`
+	GasPrice      *big.Int           `json:"gasPrice"`
 }
 type UserOpEstimateGas struct {
 	//common
