@@ -5,8 +5,10 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
+	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 	"math"
 	"math/big"
@@ -64,6 +66,20 @@ func GetAddressTokenBalance(networkParam global_const.Network, address common.Ad
 	balanceResultFloat := float64(bananceResult.Int64()) * math.Pow(10, -6)
 	return balanceResultFloat, nil
 
+}
+func GetPaymasterEntryPointBalance(strategy *model.Strategy) (*big.Float, error) {
+	networkParam := strategy.GetNewWork()
+	paymasterAddress := strategy.GetPaymasterAddress()
+	logrus.Debug("paymasterAddress", paymasterAddress)
+	executor := network.GetEthereumExecutor(networkParam)
+	balance, err := executor.GetPaymasterDeposit(paymasterAddress)
+	if err != nil {
+		return nil, err
+	}
+	logrus.Debug("balance", balance)
+	balanceResultFloat := utils.ConvertBalanceToEther(balance)
+
+	return balanceResultFloat, nil
 }
 func SimulateHandleOp(op *user_op.UserOpInput, strategy *model.Strategy) (*model.SimulateHandleOpResult, error) {
 	networkParam := strategy.GetNewWork()

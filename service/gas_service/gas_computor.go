@@ -11,15 +11,15 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"AAStarCommunity/EthPaymaster_BackService/gas_validate"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 	"math/big"
 )
 
-type TotalGasDetail struct {
-	MaxTxGasLimit *big.Int
-	MaxTxGasCost  *big.Int
-	GasPrice      *big.Int
-}
+var (
+	GweiFactor   = new(big.Float).SetInt(big.NewInt(1e9))
+	EthWeiFactor = new(big.Float).SetInt(big.NewInt(1e18))
+)
 
 // https://blog.particle.network/bundler-predicting-gas/
 func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterData) (*model.ComputeGasResponse, *user_op.UserOpInput, error) {
@@ -31,27 +31,35 @@ func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymaster
 
 	totalGasDetail := GetTotalCostByEstimateGas(opEstimateGas)
 	updateUserOp := getNewUserOpAfterCompute(userOp, opEstimateGas, strategy.GetStrategyEntrypointVersion())
-	// TODO get PaymasterCallGasLimit
 	return &model.ComputeGasResponse{
-		OpEstimateGas: opEstimateGas,
-		MaxTxGasLimit: totalGasDetail.MaxTxGasLimit,
-		MaxTxGasFee:   totalGasDetail.MaxTxGasCost,
-		GasPrice:      totalGasDetail.GasPrice,
+		OpEstimateGas:  opEstimateGas,
+		TotalGasDetail: totalGasDetail,
 	}, updateUserOp, nil
 }
-func GetTotalCostByEstimateGas(userOpGas *model.UserOpEstimateGas) *TotalGasDetail {
+func GetTotalCostByEstimateGas(userOpGas *model.UserOpEstimateGas) *model.TotalGasDetail {
 	gasPrice := GetUserOpGasPrice(userOpGas)
 	totalGasLimit := new(big.Int)
-	totalGasLimit.Add(totalGasLimit, userOpGas.VerificationGasLimit)
-	totalGasLimit.Add(totalGasLimit, userOpGas.CallGasLimit)
-	totalGasLimit.Add(totalGasLimit, userOpGas.PreVerificationGas)
+	totalGasLimit = totalGasLimit.Add(totalGasLimit, userOpGas.VerificationGasLimit)
+	totalGasLimit = totalGasLimit.Add(totalGasLimit, userOpGas.CallGasLimit)
+	totalGasLimit = totalGasLimit.Add(totalGasLimit, userOpGas.PreVerificationGas)
+	totalGasGost := new(big.Int).Mul(gasPrice, totalGasLimit)
 
-	totalGasGost := gasPrice.Mul(gasPrice, totalGasLimit)
+	gasPriceInGwei := new(big.Float).SetInt(gasPrice)
+	gasPriceInGwei.Quo(gasPriceInGwei, GweiFactor)
 
-	return &TotalGasDetail{
-		MaxTxGasLimit: totalGasLimit,
-		MaxTxGasCost:  totalGasGost,
-		GasPrice:      gasPrice,
+	totalGasGostInGwei := new(big.Float).SetInt(totalGasGost)
+	totalGasGostInGwei.Quo(totalGasGostInGwei, GweiFactor)
+	logrus.Debug("totalGasGostInGwei: ", totalGasGostInGwei)
+
+	totalGasGostInEther := new(big.Float).SetInt(totalGasGost)
+	totalGasGostInEther.Quo(totalGasGostInEther, EthWeiFactor)
+	logrus.Debug("totalGasGostInEther: ", totalGasGostInEther)
+
+	return &model.TotalGasDetail{
+		MaxTxGasLimit:       totalGasLimit,
+		MaxTxGasCostGwei:    totalGasGostInGwei,
+		MaxTxGasCostInEther: totalGasGostInEther,
+		GasPriceGwei:        gasPriceInGwei,
 	}
 }
 
@@ -67,14 +75,22 @@ func GetUserOpGasPrice(userOpGas *model.UserOpEstimateGas) *big.Int {
 }
 
 func getUserOpEstimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterData) (*model.UserOpEstimateGas, error) {
-	userOpInputForSimulate, err := data_utils.GetUserOpWithPaymasterAndDataForSimulate(*userOp, strategy, paymasterDataInput)
-	if err != nil {
-		return nil, xerrors.Errorf("GetUserOpWithPaymasterAndDataForSimulate error: %v", err)
+	gasPriceResult, gasPriceErr := chain_service.GetGasPrice(strategy.GetNewWork())
+	if userOp.MaxFeePerGas != nil {
+		gasPriceResult.MaxFeePerGas = userOp.MaxFeePerGas
 	}
-	gasPrice, gasPriceErr := chain_service.GetGasPrice(strategy.GetNewWork())
+	if userOp.MaxPriorityFeePerGas != nil {
+		gasPriceResult.MaxPriorityFeePerGas = userOp.MaxPriorityFeePerGas
+	}
+
 	//TODO calculate the maximum possible fee the account needs to pay (based on validation and call gas limits, and current gas values)
 	if gasPriceErr != nil {
 		return nil, xerrors.Errorf("get gas price error: %v", gasPriceErr)
+	}
+	userOpInputForSimulate, err := data_utils.GetUserOpWithPaymasterAndDataForSimulate(*userOp, strategy, paymasterDataInput, gasPriceResult)
+	simulateGasPrice := utils.GetGasEntryPointGasGrace(gasPriceResult.MaxFeePerGas, gasPriceResult.MaxPriorityFeePerGas, gasPriceResult.BaseFee)
+	if err != nil {
+		return nil, xerrors.Errorf("GetUserOpWithPaymasterAndDataForSimulate error: %v", err)
 	}
 
 	simulateResult, err := chain_service.SimulateHandleOp(userOpInputForSimulate, strategy)
@@ -82,22 +98,24 @@ func getUserOpEstimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy,
 		return nil, xerrors.Errorf("SimulateHandleOp error: %v", err)
 	}
 
-	preVerificationGas, err := chain_service.GetPreVerificationGas(userOp, strategy, gasPrice)
+	preVerificationGas, err := chain_service.GetPreVerificationGas(userOp, strategy, gasPriceResult)
 
 	verificationGasLimit, err := estimateVerificationGasLimit(simulateResult, preVerificationGas)
 
-	callGasLimit, err := EstimateCallGasLimit(strategy, simulateResult, userOp)
+	callGasLimit, err := EstimateCallGasLimit(strategy, simulateResult, userOp, simulateGasPrice)
 
 	opEstimateGas := model.UserOpEstimateGas{}
 	opEstimateGas.PreVerificationGas = preVerificationGas
-	opEstimateGas.MaxFeePerGas = gasPrice.MaxFeePerGas
-	opEstimateGas.MaxPriorityFeePerGas = gasPrice.MaxPriorityFeePerGas
-	opEstimateGas.BaseFee = gasPrice.BaseFee
+	opEstimateGas.MaxFeePerGas = gasPriceResult.MaxFeePerGas
+	opEstimateGas.MaxPriorityFeePerGas = gasPriceResult.MaxPriorityFeePerGas
+	opEstimateGas.BaseFee = gasPriceResult.BaseFee
 	opEstimateGas.VerificationGasLimit = verificationGasLimit
 	opEstimateGas.CallGasLimit = callGasLimit
 
 	entryPointVersion := strategy.GetStrategyEntrypointVersion()
 	if entryPointVersion == global_const.EntryPointV07 {
+		opEstimateGas.AccountGasLimit = utils.PackIntTo32Bytes(verificationGasLimit, callGasLimit)
+		opEstimateGas.GasFees = utils.PackIntTo32Bytes(gasPriceResult.MaxPriorityFeePerGas, gasPriceResult.MaxFeePerGas)
 		opEstimateGas.PaymasterPostOpGasLimit = global_const.DummyPaymasterPostopGaslimitBigint
 		opEstimateGas.PaymasterVerificationGasLimit = global_const.DummyPaymasterVerificationgaslimitBigint
 	}
@@ -127,7 +145,7 @@ func getNewUserOpAfterCompute(op *user_op.UserOpInput, gas *model.UserOpEstimate
 	return result
 }
 
-func EstimateCallGasLimit(strategy *model.Strategy, simulateOpResult *model.SimulateHandleOpResult, op *user_op.UserOpInput) (*big.Int, error) {
+func EstimateCallGasLimit(strategy *model.Strategy, simulateOpResult *model.SimulateHandleOpResult, op *user_op.UserOpInput, simulateGasPrice *big.Int) (*big.Int, error) {
 	ethereumExecutor := network.GetEthereumExecutor(strategy.GetNewWork())
 	opValue := *op
 	senderExist, _ := ethereumExecutor.CheckContractAddressAccess(opValue.Sender)
@@ -145,7 +163,7 @@ func EstimateCallGasLimit(strategy *model.Strategy, simulateOpResult *model.Simu
 		if err != nil {
 			return nil, err
 		}
-		executeUserOpGas := simulateOpResult.GasPaid
+		executeUserOpGas := new(big.Int).Div(simulateOpResult.GasPaid, simulateGasPrice)
 		return big.NewInt(0).Sub(executeUserOpGas, initGas), nil
 	}
 }

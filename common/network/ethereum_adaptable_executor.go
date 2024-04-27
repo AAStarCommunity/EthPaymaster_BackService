@@ -29,15 +29,12 @@ import (
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 	"math/big"
-	"sync"
 )
 
 var PreVerificationGas = new(big.Int).SetInt64(21000)
 
 // GweiFactor Each gwei is equal to one-billionth of an ETH (0.000000001 ETH or 10-9 ETH).
-var GweiFactor = new(big.Float).SetInt(big.NewInt(1e9))
-var EthWeiFactor = new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil))
-var once sync.Once
+
 var executorMap map[global_const.Network]*EthereumExecutor = make(map[global_const.Network]*EthereumExecutor)
 var TokenContractCache map[*common.Address]*contract_erc20.Contract
 var V06EntryPointContractCache map[global_const.Network]map[common.Address]*contract_entrypoint_v06.Contract
@@ -221,8 +218,7 @@ func (executor EthereumExecutor) GetGasPrice() (*model.GasPrice, error) {
 	result.BaseFee = head.BaseFee
 	return &result, nil
 	//
-	//gasPriceInGwei := new(big.Float).SetInt(priceWei)
-	//gasPriceInGwei.Quo(gasPriceInGwei, GweiFactor)
+
 	//gasPriceInEther := new(big.Float).SetInt(priceWei)
 	//gasPriceInEther.Quo(gasPriceInEther, EthWeiFactor)
 	//gasPriceInGweiFloat, _ := gasPriceInGwei.Float64()
@@ -356,6 +352,17 @@ func (executor EthereumExecutor) GetSimulateEntryPoint() (*simulate_entrypoint.C
 		return contractInstance, nil
 	}
 	return contract, nil
+}
+func (executor EthereumExecutor) GetPaymasterDeposit(paymasterAddress *common.Address) (*big.Int, error) {
+	contract, err := executor.GetPaymasterErc20AndVerifyV06(paymasterAddress)
+	if err != nil {
+		return nil, err
+	}
+	deposit, err := contract.GetDeposit(&bind.CallOpts{})
+	if err != nil {
+		return nil, err
+	}
+	return deposit, nil
 }
 
 func (executor EthereumExecutor) GetEntryPoint07(entryPoint *common.Address) (*contract_entrypoint_v07.Contract, error) {
@@ -493,12 +500,17 @@ func (executor EthereumExecutor) GetUserOpHash(userOp *user_op.UserOpInput, stra
 			if err != nil {
 				return nil, "", err
 			}
+			accountGasLimit := utils.PackIntTo32Bytes(userOp.VerificationGasLimit, userOp.CallGasLimit)
+			gasFee := utils.PackIntTo32Bytes(userOp.MaxPriorityFeePerGas, userOp.MaxFeePerGas)
 			hash, err := contract.GetHash(&bind.CallOpts{}, contract_paymaster_verifying_v07.PackedUserOperation{
-				Sender:   *userOp.Sender,
-				Nonce:    userOp.Nonce,
-				InitCode: userOp.InitCode,
-				CallData: userOp.CallData,
-				//TODO
+				Sender:           *userOp.Sender,
+				Nonce:            userOp.Nonce,
+				InitCode:         userOp.InitCode,
+				CallData:         userOp.CallData,
+				AccountGasLimits: accountGasLimit,
+				GasFees:          gasFee,
+				PaymasterAndData: userOp.PaymasterAndData,
+				Signature:        userOp.Signature,
 			}, strategy.ExecuteRestriction.EffectiveEndTime, strategy.ExecuteRestriction.EffectiveStartTime)
 			if err != nil {
 				return nil, "", err
@@ -523,7 +535,6 @@ func (executor EthereumExecutor) GetUserOpHash(userOp *user_op.UserOpInput, stra
 	} else {
 		return nil, "", xerrors.Errorf("entrypoint version %s not support", version)
 	}
-	//TODO
 
 }
 func (executor EthereumExecutor) GetPaymasterData(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterData) ([]byte, error) {

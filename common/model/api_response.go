@@ -16,11 +16,9 @@ type TryPayUserOpResponse struct {
 }
 
 type ComputeGasResponse struct {
-	TokenCost     *big.Float         `json:"token_cost"`
-	OpEstimateGas *UserOpEstimateGas `json:"op_estimate_gas"`
-	MaxTxGasLimit *big.Int           `json:"maxTxGasLimit"`
-	MaxTxGasFee   *big.Int           `json:"maxTxGasFee"`
-	GasPrice      *big.Int           `json:"gasPrice"`
+	TokenCost      *big.Float         `json:"token_cost"`
+	OpEstimateGas  *UserOpEstimateGas `json:"op_estimate_gas"`
+	TotalGasDetail *TotalGasDetail    `json:"total_gas_detail"`
 }
 type UserOpEstimateGas struct {
 	//common
@@ -33,10 +31,10 @@ type UserOpEstimateGas struct {
 	MaxFeePerGas         *big.Int `json:"maxFeePerGas"`
 	MaxPriorityFeePerGas *big.Int `json:"maxPriorityFeePerGas"`
 	//v0.7
-	AccountGasLimit               []byte   `json:"account_gas_limit" binding:"required"`
+	AccountGasLimit               [32]byte `json:"account_gas_limit" binding:"required"`
 	PaymasterVerificationGasLimit *big.Int `json:"paymaster_verification_gas_limit" binding:"required"`
 	PaymasterPostOpGasLimit       *big.Int `json:"paymaster_post_op_gas_limit" binding:"required"`
-	GasFees                       []byte   `json:"gasFees" binding:"required"`
+	GasFees                       [32]byte `json:"gasFees" binding:"required"`
 }
 type PayReceipt struct {
 	TransactionHash string `json:"transaction_hash"`

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"bytes"
 	"crypto/ecdsa"
 	"encoding/hex"
@@ -83,6 +84,14 @@ func PackIntTo32Bytes(left *big.Int, right *big.Int) [32]byte {
 	return result
 }
 
+func GetGasEntryPointGasGrace(maxFeePerGas *big.Int, maxPriorityFeePerGas *big.Int, baseFee *big.Int) *big.Int {
+	if maxFeePerGas == maxPriorityFeePerGas {
+		return maxFeePerGas
+	}
+	combineFee := new(big.Int).Add(baseFee, maxPriorityFeePerGas)
+	return GetMinValue(maxFeePerGas, combineFee)
+}
+
 func EncodeToStringWithPrefix(data []byte) string {
 	res := hex.EncodeToString(data)
 	if res[:2] != "0x" {
@@ -154,4 +163,9 @@ func GetMinValue(int2 *big.Int, int3 *big.Int) *big.Int {
 		return int2
 	}
 	return int3
+}
+func ConvertBalanceToEther(balance *big.Int) *big.Float {
+	balanceFloat := new(big.Float).SetInt(balance)
+	balanceFloat = new(big.Float).Quo(balanceFloat, global_const.EthWeiFactor)
+	return balanceFloat
 }

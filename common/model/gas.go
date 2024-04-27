@@ -13,6 +13,13 @@ var (
 	}
 )
 
+type TotalGasDetail struct {
+	MaxTxGasLimit       *big.Int
+	MaxTxGasCostGwei    *big.Float
+	MaxTxGasCostInEther *big.Float
+	GasPriceGwei        *big.Float
+}
+
 type GasPrice struct {
 	MaxFeePerGas *big.Int `json:"max_base_price_wei"`
 	//MaxBasePriceGwei      float64    `json:"max_base_price_gwei"`
@@ -25,12 +32,13 @@ type GasPrice struct {
 type SimulateHandleOpResult struct {
 	// PreOpGas = preGas - gasleft() + userOp.preVerificationGas;
 	// PreOpGas = verificationGasLimit + userOp.preVerificationGas;
-	PreOpGas      *big.Int `json:"preOpGas"`
-	GasPaid       *big.Int `json:"paid"`
-	ValidAfter    *big.Int `json:"validAfter"`
-	ValidUntil    *big.Int `json:"validUntil"`
-	TargetSuccess bool
-	TargetResult  []byte
+	PreOpGas         *big.Int `json:"preOpGas"`
+	GasPaid          *big.Int `json:"paid"`
+	ValidAfter       *big.Int `json:"validAfter"`
+	ValidUntil       *big.Int `json:"validUntil"`
+	TargetSuccess    bool
+	TargetResult     []byte
+	SimulateGasPrice *big.Int
 }
 
 type GasFeePerGasResult struct {

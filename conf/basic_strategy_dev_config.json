@@ -5,7 +5,7 @@
     "entrypoint_tag": "v0.6",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0x9D6AC51b972544251Fcc0F2902e633E3f9BD3f29",
+    "paymaster_address": "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
     "paymaster_pay_type": "00",
     "access_project": "official"
   },
@@ -15,7 +15,7 @@
     "entrypoint_tag": "v0.6",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0x9D6AC51b972544251Fcc0F2902e633E3f9BD3f29",
+    "paymaster_address": "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
     "paymaster_pay_type": "00",
     "access_project": "official"
   },
@@ -25,7 +25,7 @@
     "entrypoint_tag": "v0.6",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0x9D6AC51b972544251Fcc0F2902e633E3f9BD3f29",
+    "paymaster_address": "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
     "paymaster_pay_type": "00",
     "access_project": "official"
   }

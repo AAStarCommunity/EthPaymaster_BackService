@@ -37,10 +37,9 @@ func ValidateUserOp(userOpParam *user_op.UserOpInput, strategy *model.Strategy) 
 	if !userOpValue.Nonce.IsInt64() {
 		return xerrors.Errorf("nonce is not in uint64 range")
 	}
-	return userOpValue.ValidateUserOp()
 	//If initCode is not empty, parse its first 20 bytes as a factory address. Record whether the factory is staked, in case the later simulation indicates that it needs to be. If the factory accesses global state, it must be staked - see reputation, throttling and banning section for details.
 	//The verificationGasLimit is sufficiently low (<= MAX_VERIFICATION_GAS) and the preVerificationGas is sufficiently high (enough to pay for the calldata gas cost of serializing the UserOperationV06 plus PRE_VERIFICATION_OVERHEAD_GAS)
-
+	return nil
 	//TODO secure check https://github.com/eth-infinitism/account-abstraction/blob/develop/erc/ERCS/erc-7562.md
 }
 func checkSender(userOpParam *user_op.UserOpInput, netWork global_const.Network) error {

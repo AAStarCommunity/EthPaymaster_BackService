@@ -21,6 +21,7 @@ const (
 )
 
 var (
+	EthWeiFactor                             = new(big.Float).SetInt(big.NewInt(1e18))
 	DummySignatureByte                       []byte
 	DummyInitCodeByte                        []byte
 	DummayPreverificationgasBigint           = big.NewInt(DUMMYPREVERIFICATIONGAS)

@@ -7,9 +7,10 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 )
 
-func GetUserOpWithPaymasterAndDataForSimulate(op user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterData) (*user_op.UserOpInput, error) {
+func GetUserOpWithPaymasterAndDataForSimulate(op user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterData, gasPriceResult *model.GasPrice) (*user_op.UserOpInput, error) {
 	executor := network.GetEthereumExecutor(strategy.GetNewWork())
-
+	op.MaxFeePerGas = gasPriceResult.MaxFeePerGas
+	op.MaxPriorityFeePerGas = gasPriceResult.MaxPriorityFeePerGas
 	paymasterData, err := executor.GetPaymasterData(&op, strategy, paymasterDataInput)
 	if err != nil {
 		return nil, err

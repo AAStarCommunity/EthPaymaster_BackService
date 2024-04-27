@@ -8,6 +8,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/sirupsen/logrus"
@@ -76,10 +77,27 @@ func TestChainService(t *testing.T) {
 				testSimulateHandleOp(t, op, strategy)
 			},
 		},
+		{
+			"testGetpaymasterEntryPointBalance",
+			func(t *testing.T) {
+				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
+				testGetPaymasterEntryPointBalance(t, *strategy)
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, tt.test)
 	}
+}
+func testGetPaymasterEntryPointBalance(t *testing.T, strategy model.Strategy) {
+	res, err := GetPaymasterEntryPointBalance(&strategy)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	fmt.Println(res)
+	t.Logf("paymasterEntryPointBalance:%v", res)
+
 }
 func testGetPreVerificationGas(t *testing.T, userOp *user_op.UserOpInput, strategy *model.Strategy, gasFeeResult *model.GasPrice) {
 	res, err := GetPreVerificationGas(userOp, strategy, gasFeeResult)
@@ -91,7 +109,7 @@ func testGetPreVerificationGas(t *testing.T, userOp *user_op.UserOpInput, strate
 }
 func testSimulateHandleOp(t *testing.T, userOp *user_op.UserOpInput, strategy *model.Strategy) {
 	paymasterDataInput := paymaster_data.NewPaymasterDataInput(strategy)
-	userOpInputForSimulate, err := data_utils.GetUserOpWithPaymasterAndDataForSimulate(*userOp, strategy, paymasterDataInput)
+	userOpInputForSimulate, err := data_utils.GetUserOpWithPaymasterAndDataForSimulate(*userOp, strategy, paymasterDataInput, &model.GasPrice{})
 	if err != nil {
 		t.Error(err)
 		return
@@ -101,5 +119,8 @@ func testSimulateHandleOp(t *testing.T, userOp *user_op.UserOpInput, strategy *m
 		t.Error(err)
 		return
 	}
-	t.Logf("simulateHandleOp:%v", res)
+	jsonRes, _ := json.Marshal(res)
+	t.Logf("simulateHandleOp:%v", string(jsonRes))
+	callGasCount := new(big.Int).Div(res.GasPaid, res.PreOpGas)
+	t.Logf("callGasCount:%v", callGasCount)
 }

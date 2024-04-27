@@ -48,15 +48,19 @@ func VerifyingGasValidate() ValidatePaymasterGasFunc {
 		// Paymaster check paymaster balance
 
 		//check EntryPoint paymasterAddress balance
-		paymasterAddress := strategy.GetPaymasterAddress()
-		tokenBalance, getTokenBalanceErr := chain_service.GetAddressTokenBalance(strategy.GetNewWork(), *paymasterAddress, strategy.GetUseToken())
-		if getTokenBalanceErr != nil {
-			return getTokenBalanceErr
+		balance, err := chain_service.GetPaymasterEntryPointBalance(strategy)
+		if err != nil {
+			return err
 		}
-		tokenBalanceBigFloat := new(big.Float).SetFloat64(tokenBalance)
-		if tokenBalanceBigFloat.Cmp(gasComputeResponse.TokenCost) > 0 {
-			return xerrors.Errorf("paymaster Token Not Enough tokenBalance %s < tokenCost %s", tokenBalance, gasComputeResponse.TokenCost)
+		// if balance < 0
+		if balance.Cmp(big.NewFloat(0)) < 0 {
+			return xerrors.Errorf("paymaster EntryPoint balance < 0")
+		}
+		ethercost := gasComputeResponse.TotalGasDetail.MaxTxGasCostInEther
+		if balance.Cmp(ethercost) < 0 {
+			return xerrors.Errorf("paymaster EntryPoint Not Enough balance %s < %s", balance, ethercost)
 		}
 		return nil
+
 	}
 }
