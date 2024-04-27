@@ -12,8 +12,6 @@ import (
 	"math/big"
 )
 
-const balanceOfAbi = `[{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}]`
-
 func CheckContractAddressAccess(contract *common.Address, chain global_const.Network) (bool, error) {
 	//todo needcache
 	executor := network.GetEthereumExecutor(chain)
@@ -51,8 +49,8 @@ func GetPreVerificationGas(userOp *user_op.UserOpInput, strategy *model.Strategy
 		return nil, err
 	}
 	// add 10% buffer
-	preGas = preGas.Mul(preGas, global_const.HUNDRED_PLUS_ONE_BIGINT)
-	preGas = preGas.Div(preGas, global_const.HUNDRED_BIGINT)
+	preGas = preGas.Mul(preGas, global_const.HundredPlusOneBigint)
+	preGas = preGas.Div(preGas, global_const.HundredBigint)
 	return preGas, nil
 }
 
@@ -67,14 +65,15 @@ func GetAddressTokenBalance(networkParam global_const.Network, address common.Ad
 	return balanceResultFloat, nil
 
 }
-func SimulateHandleOp(networkParam global_const.Network, op *user_op.UserOpInput, strategy *model.Strategy) (*model.SimulateHandleOpResult, error) {
+func SimulateHandleOp(op *user_op.UserOpInput, strategy *model.Strategy) (*model.SimulateHandleOpResult, error) {
+	networkParam := strategy.GetNewWork()
 	executor := network.GetEthereumExecutor(networkParam)
-	entrypointVersion := strategy.GetStrategyEntryPointVersion()
-	if entrypointVersion == global_const.EntryPointV07 {
+	entrypointVersion := strategy.GetStrategyEntrypointVersion()
+	if entrypointVersion == global_const.EntrypointV06 {
 
 		return executor.SimulateV06HandleOp(*op, strategy.GetEntryPointAddress())
 
-	} else if entrypointVersion == global_const.EntrypointV06 {
+	} else if entrypointVersion == global_const.EntryPointV07 {
 		return executor.SimulateV07HandleOp(*op, strategy.GetEntryPointAddress())
 	}
 	return nil, xerrors.Errorf("[never be here]entrypoint version %s not support", entrypointVersion)

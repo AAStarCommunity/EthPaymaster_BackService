@@ -45,8 +45,11 @@ func (strategy *Strategy) GetUseToken() global_const.TokenType {
 func (strategy *Strategy) GetPayType() global_const.PayType {
 	return strategy.PaymasterInfo.PayType
 }
-func (strategy *Strategy) GetStrategyEntryPointVersion() global_const.EntrypointVersion {
+func (strategy *Strategy) GetStrategyEntrypointVersion() global_const.EntrypointVersion {
 	return strategy.EntryPointInfo.EntryPointVersion
+}
+func (strategy Strategy) IsCurrencyPayEnable() bool {
+	return false
 }
 
 type StrategyExecuteRestriction struct {

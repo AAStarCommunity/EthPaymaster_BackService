@@ -16,14 +16,10 @@ type TryPayUserOpResponse struct {
 }
 
 type ComputeGasResponse struct {
-	GasInfo       *GasPrice              `json:"gas_info"`
-	TokenCost     *big.Float             `json:"token_cost"`
-	Network       global_const.Network   `json:"network"`
-	Token         global_const.TokenType `json:"tokens"`
-	UsdCost       float64                `json:"usd_cost"`
-	BlobEnable    bool                   `json:"blob_enable"`
-	MaxFee        big.Int                `json:"max_fee"`
-	OpEstimateGas *UserOpEstimateGas     `json:"op_estimate_gas"`
+	TokenCost     *big.Float         `json:"token_cost"`
+	OpEstimateGas *UserOpEstimateGas `json:"op_estimate_gas"`
+	MaxTxGasLimit *big.Int           `json:"maxTxGasLimit"`
+	MaxTxGasFee   *big.Int           `json:"maxTxGasFee"`
 }
 type UserOpEstimateGas struct {
 	//common
@@ -36,7 +32,7 @@ type UserOpEstimateGas struct {
 	MaxFeePerGas         *big.Int `json:"maxFeePerGas"`
 	MaxPriorityFeePerGas *big.Int `json:"maxPriorityFeePerGas"`
 	//v0.7
-	AccountGasLimit               *big.Int `json:"account_gas_limit" binding:"required"`
+	AccountGasLimit               []byte   `json:"account_gas_limit" binding:"required"`
 	PaymasterVerificationGasLimit *big.Int `json:"paymaster_verification_gas_limit" binding:"required"`
 	PaymasterPostOpGasLimit       *big.Int `json:"paymaster_post_op_gas_limit" binding:"required"`
 	GasFees                       []byte   `json:"gasFees" binding:"required"`

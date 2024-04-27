@@ -291,7 +291,7 @@ func (userOp *UserOpInput) PackUserOpForMock(version global_const.EntrypointVers
 		}
 		return hex.EncodeToString(encoded), encoded, nil
 	} else if version == global_const.EntrypointV06 {
-		encoded, err := userOpV06PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, global_const.DummyCallGasLimit, global_const.DummyVerificationGasLimit, global_const.DUMMAY_PREVERIFICATIONGAS_BIGINT, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, global_const.DummyPaymasterDataByte, userOp.Signature)
+		encoded, err := userOpV06PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, global_const.DummyCallGasLimit, global_const.DummyVerificationGasLimit, global_const.DummayPreverificationgasBigint, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, global_const.DummyPaymasterDataByte, userOp.Signature)
 
 		if err != nil {
 			return "", nil, err

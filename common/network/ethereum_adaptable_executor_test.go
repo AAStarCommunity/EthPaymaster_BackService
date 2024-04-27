@@ -118,7 +118,7 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 			func(t *testing.T) {
 				stategy := conf.GetBasicStrategyConfig("Optimism_Sepolia_v06_verifyPaymaster")
 
-				testGetL1DataFee(t, global_const.OptimismSepolia, *op, stategy.GetStrategyEntryPointVersion())
+				testGetL1DataFee(t, global_const.OptimismSepolia, *op, stategy.GetStrategyEntrypointVersion())
 			},
 		},
 		{
@@ -262,7 +262,7 @@ func testSimulateHandleOp(t *testing.T, chain global_const.Network, strategy *mo
 	}
 	op.PaymasterAndData = paymasterData
 	t.Logf("entryPoint Address %s", strategy.GetEntryPointAddress())
-	version := strategy.GetStrategyEntryPointVersion()
+	version := strategy.GetStrategyEntrypointVersion()
 	var simulataResult *model.SimulateHandleOpResult
 	if version == global_const.EntrypointV06 {
 		simulataResult, err = sepoliaExector.SimulateV06HandleOp(*op, strategy.GetEntryPointAddress())

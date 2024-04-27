@@ -62,7 +62,7 @@ func OPStackPreVerificationGasFunc() PreVerificationGasFunc {
 			return nil, err
 		}
 		executor := GetEthereumExecutor(strategy.GetNewWork())
-		_, data, err := op.PackUserOpForMock(strategy.GetStrategyEntryPointVersion())
+		_, data, err := op.PackUserOpForMock(strategy.GetStrategyEntrypointVersion())
 		if err != nil {
 			return nil, err
 		}
@@ -96,7 +96,7 @@ func getBasicPreVerificationGas(op *user_op.UserOpInput, strategy *model.Strateg
 	//op.SetSignature(global_const.DUMMY_SIGNATURE_BYTE)
 	//Simulate the `packUserOp(p)` function and return a byte slice.
 	opValue := *op
-	_, userOPPack, err := opValue.PackUserOpForMock(strategy.GetStrategyEntryPointVersion())
+	_, userOPPack, err := opValue.PackUserOpForMock(strategy.GetStrategyEntrypointVersion())
 	if err != nil {
 		return nil, err
 	}

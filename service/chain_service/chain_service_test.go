@@ -1,8 +1,10 @@
 package chain_service
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/data_utils"
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
@@ -46,9 +48,9 @@ func TestChainService(t *testing.T) {
 		return
 	}
 	mockGasPrice := &model.GasPrice{
-		MaxFeePerGas:      big.NewInt(2053608903),
-		MaxPriorityPerGas: big.NewInt(1000000000),
-		BaseFee:           big.NewInt(1053608903),
+		MaxFeePerGas:         big.NewInt(2053608903),
+		MaxPriorityFeePerGas: big.NewInt(1000000000),
+		BaseFee:              big.NewInt(1053608903),
 	}
 	tests := []struct {
 		name string
@@ -67,6 +69,13 @@ func TestChainService(t *testing.T) {
 				testGetPreVerificationGas(t, op, strategy, mockGasPrice)
 			},
 		},
+		{
+			"TestSepoliaSimulateHandleOp",
+			func(t *testing.T) {
+				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
+				testSimulateHandleOp(t, op, strategy)
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, tt.test)
@@ -79,4 +88,18 @@ func testGetPreVerificationGas(t *testing.T, userOp *user_op.UserOpInput, strate
 		return
 	}
 	t.Logf("preVerificationGas:%v", res)
+}
+func testSimulateHandleOp(t *testing.T, userOp *user_op.UserOpInput, strategy *model.Strategy) {
+	paymasterDataInput := paymaster_data.NewPaymasterDataInput(strategy)
+	userOpInputForSimulate, err := data_utils.GetUserOpWithPaymasterAndDataForSimulate(*userOp, strategy, paymasterDataInput)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	res, err := SimulateHandleOp(userOpInputForSimulate, strategy)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Logf("simulateHandleOp:%v", res)
 }

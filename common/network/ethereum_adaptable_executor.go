@@ -212,7 +212,7 @@ func (executor EthereumExecutor) GetGasPrice() (*model.GasPrice, error) {
 	}
 	result := model.GasPrice{}
 	result.MaxFeePerGas = priceWei
-	result.MaxPriorityPerGas = priorityPriceWei
+	result.MaxPriorityFeePerGas = priorityPriceWei
 
 	head, err := client.HeaderByNumber(context.Background(), nil)
 	if err != nil {
@@ -435,7 +435,7 @@ func (executor EthereumExecutor) GetAuth() (*bind.TransactOpts, error) {
 	if executor.ChainId == nil {
 		return nil, xerrors.Errorf("chainId is nil")
 	}
-	return GetAuth(executor.ChainId, global_const.DUMMY_PRIVATE_KEY)
+	return GetAuth(executor.ChainId, global_const.DummyPrivateKey)
 }
 func GetAuth(chainId *big.Int, privateKey *ecdsa.PrivateKey) (*bind.TransactOpts, error) {
 	signer := go_ethereum_types.LatestSignerForChainID(chainId)
@@ -456,7 +456,7 @@ func GetAuth(chainId *big.Int, privateKey *ecdsa.PrivateKey) (*bind.TransactOpts
 	}, nil
 }
 func (executor EthereumExecutor) GetUserOpHash(userOp *user_op.UserOpInput, strategy *model.Strategy) ([]byte, string, error) {
-	version := strategy.GetStrategyEntryPointVersion()
+	version := strategy.GetStrategyEntrypointVersion()
 	erc20Token := common.HexToAddress("0x")
 	paytype := strategy.GetPayType()
 	if paytype == global_const.PayTypeERC20 {
