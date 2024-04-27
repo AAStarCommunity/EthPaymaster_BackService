@@ -107,7 +107,7 @@ func testGetPaymasterEntryPointBalance(t *testing.T, strategy model.Strategy) {
 
 }
 func testGetPreVerificationGas(t *testing.T, userOp *user_op.UserOpInput, strategy *model.Strategy, gasFeeResult *model.GasPrice) {
-	res, err := GetPreVerificationGas(userOp, strategy, gasFeeResult)
+	res, err := GetPreVerificationGas(userOp, strategy, gasFeeResult, nil)
 	if err != nil {
 		t.Error(err)
 		return

@@ -98,7 +98,7 @@ func getUserOpEstimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy,
 		return nil, xerrors.Errorf("SimulateHandleOp error: %v", err)
 	}
 
-	preVerificationGas, err := chain_service.GetPreVerificationGas(userOp, strategy, gasPriceResult)
+	preVerificationGas, err := chain_service.GetPreVerificationGas(userOp, strategy, gasPriceResult, simulateResult)
 
 	verificationGasLimit, err := estimateVerificationGasLimit(simulateResult, preVerificationGas)
 

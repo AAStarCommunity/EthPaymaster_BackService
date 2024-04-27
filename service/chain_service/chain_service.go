@@ -39,14 +39,19 @@ func GetGasPrice(chain global_const.Network) (*model.GasPrice, error) {
 }
 
 // GetPreVerificationGas https://github.com/eth-infinitism/bundler/blob/main/packages/sdk/src/calcPreVerificationGas.ts
-func GetPreVerificationGas(userOp *user_op.UserOpInput, strategy *model.Strategy, gasFeeResult *model.GasPrice) (*big.Int, error) {
+func GetPreVerificationGas(userOp *user_op.UserOpInput, strategy *model.Strategy, gasFeeResult *model.GasPrice, simulateOpResult *model.SimulateHandleOpResult) (*big.Int, error) {
 	chain := strategy.GetNewWork()
 	stack := conf.GetNetWorkStack(chain)
 	preGasFunc, err := network.GetPreVerificationGasFunc(stack)
 	if err != nil {
 		return nil, err
 	}
-	preGas, err := preGasFunc(userOp, strategy, gasFeeResult)
+	preGas, err := preGasFunc(&network.PreVerificationEstimateInput{
+		Strategy:         strategy,
+		Op:               userOp,
+		GasFeeResult:     gasFeeResult,
+		SimulateOpResult: simulateOpResult,
+	})
 	if err != nil {
 		return nil, err
 	}

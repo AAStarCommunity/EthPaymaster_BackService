@@ -11,9 +11,16 @@ import (
 	"math/big"
 )
 
+type PreVerificationEstimateInput struct {
+	Strategy         *model.Strategy
+	Op               *user_op.UserOpInput
+	SimulateOpResult *model.SimulateHandleOpResult
+	GasFeeResult     *model.GasPrice
+}
+
 var preVerificationGasFuncMap = map[global_const.NewWorkStack]PreVerificationGasFunc{}
 
-type PreVerificationGasFunc = func(op *user_op.UserOpInput, strategy *model.Strategy, gasFeeResult *model.GasPrice) (*big.Int, error)
+type PreVerificationGasFunc = func(preVerificationEstimateInput *PreVerificationEstimateInput) (*big.Int, error)
 
 func init() {
 	preVerificationGasFuncMap[global_const.ArbStack] = ArbitrumPreVerificationGasFunc()
@@ -31,13 +38,14 @@ func GetPreVerificationGasFunc(stack global_const.NewWorkStack) (PreVerification
 // https://medium.com/offchainlabs/understanding-arbitrum-2-dimensional-fees-fd1d582596c9.
 // https://docs.arbitrum.io/build-decentralized-apps/nodeinterface/reference
 func ArbitrumPreVerificationGasFunc() PreVerificationGasFunc {
-	return func(op *user_op.UserOpInput, strategy *model.Strategy, gasFeeResult *model.GasPrice) (*big.Int, error) {
-		base, err := getBasicPreVerificationGas(op, strategy)
+	return func(preVerificationEstimateInput *PreVerificationEstimateInput) (*big.Int, error) {
+		strategy := preVerificationEstimateInput.Strategy
+		base, err := getBasicPreVerificationGas(preVerificationEstimateInput.Op, strategy)
 		if err != nil {
 			return nil, err
 		}
 		executor := GetEthereumExecutor(strategy.GetNewWork())
-		estimateOutPut, err := arbitrum.GetEstimateL1ComponentMethod(executor.Client)
+		estimateOutPut, err := arbitrum.GetArbEstimateOutPut(executor.Client, preVerificationEstimateInput)
 		if err != nil {
 			return nil, err
 		}
@@ -46,8 +54,8 @@ func ArbitrumPreVerificationGasFunc() PreVerificationGasFunc {
 	}
 }
 func DefaultPreVerificationGasFunc() PreVerificationGasFunc {
-	return func(op *user_op.UserOpInput, strategy *model.Strategy, gasFeeResult *model.GasPrice) (*big.Int, error) {
-		return getBasicPreVerificationGas(op, strategy)
+	return func(preVerificationEstimateInput *PreVerificationEstimateInput) (*big.Int, error) {
+		return getBasicPreVerificationGas(preVerificationEstimateInput.Op, preVerificationEstimateInput.Strategy)
 	}
 }
 
@@ -56,7 +64,10 @@ func DefaultPreVerificationGasFunc() PreVerificationGasFunc {
 // https://docs.optimism.io/builders/app-developers/transactions/estimates#execution-gas-fee
 // https://docs.optimism.io/stack/transactions/fees#the-l1-data-fee
 func OPStackPreVerificationGasFunc() PreVerificationGasFunc {
-	return func(op *user_op.UserOpInput, strategy *model.Strategy, gasFeeResult *model.GasPrice) (*big.Int, error) {
+	return func(preVerificationEstimateInput *PreVerificationEstimateInput) (*big.Int, error) {
+		op := preVerificationEstimateInput.Op
+		strategy := preVerificationEstimateInput.Strategy
+		gasFeeResult := preVerificationEstimateInput.GasFeeResult
 		basicGas, err := getBasicPreVerificationGas(op, strategy)
 		if err != nil {
 			return nil, err

@@ -292,12 +292,13 @@ func (executor EthereumExecutor) SimulateV06HandleOp(v06 user_op.UserOpInput, en
 	}
 
 	return &model.SimulateHandleOpResult{
-		PreOpGas:      simResult.PreOpGas,
-		GasPaid:       simResult.Paid,
-		ValidAfter:    simResult.ValidAfter,
-		ValidUntil:    simResult.ValidUntil,
-		TargetSuccess: simResult.TargetSuccess,
-		TargetResult:  simResult.TargetResult,
+		PreOpGas:               simResult.PreOpGas,
+		GasPaid:                simResult.Paid,
+		ValidAfter:             simResult.ValidAfter,
+		ValidUntil:             simResult.ValidUntil,
+		TargetSuccess:          simResult.TargetSuccess,
+		TargetResult:           simResult.TargetResult,
+		SimulateUserOpCallData: callData,
 	}, nil
 }
 

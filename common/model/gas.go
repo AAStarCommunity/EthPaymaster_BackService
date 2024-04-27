@@ -32,13 +32,14 @@ type GasPrice struct {
 type SimulateHandleOpResult struct {
 	// PreOpGas = preGas - gasleft() + userOp.preVerificationGas;
 	// PreOpGas = verificationGasLimit + userOp.preVerificationGas;
-	PreOpGas         *big.Int `json:"preOpGas"`
-	GasPaid          *big.Int `json:"paid"`
-	ValidAfter       *big.Int `json:"validAfter"`
-	ValidUntil       *big.Int `json:"validUntil"`
-	TargetSuccess    bool
-	TargetResult     []byte
-	SimulateGasPrice *big.Int
+	PreOpGas               *big.Int `json:"preOpGas"`
+	GasPaid                *big.Int `json:"paid"`
+	ValidAfter             *big.Int `json:"validAfter"`
+	ValidUntil             *big.Int `json:"validUntil"`
+	TargetSuccess          bool
+	TargetResult           []byte
+	SimulateGasPrice       *big.Int
+	SimulateUserOpCallData []byte
 }
 
 type GasFeePerGasResult struct {
