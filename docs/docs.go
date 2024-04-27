@@ -188,6 +188,39 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "global_const.Network": {
+            "type": "string",
+            "enum": [
+                "ethereum-mainnet",
+                "ethereum-sepolia",
+                "optimism-mainnet",
+                "optimism-sepolia",
+                "arbitrum-one",
+                "arbitrum-nova",
+                "arbitrum-sepolia",
+                "scroll-mainnet",
+                "scroll-sepolia",
+                "starknet-mainnet",
+                "starknet-sepolia",
+                "base-mainnet",
+                "base-sepolia"
+            ],
+            "x-enum-varnames": [
+                "EthereumMainnet",
+                "EthereumSepolia",
+                "OptimismMainnet",
+                "OptimismSepolia",
+                "ArbitrumOne",
+                "ArbitrumNova",
+                "ArbitrumSpeolia",
+                "ScrollMainnet",
+                "ScrollSepolia",
+                "StarketMainnet",
+                "StarketSepolia",
+                "BaseMainnet",
+                "BaseSepolia"
+            ]
+        },
         "model.ClientCredential": {
             "type": "object",
             "properties": {
@@ -220,37 +253,6 @@ const docTemplate = `{
                     "additionalProperties": {}
                 }
             }
-        },
-        "global_const.Network": {
-            "type": "string",
-            "enum": [
-                "ethereum",
-                "sepolia",
-                "optimism",
-                "optimism-sepolia",
-                "arbitrum-one",
-                "arbitrum-sepolia",
-                "scroll",
-                "scroll-sepolia",
-                "starknet",
-                "starknet-sepolia",
-                "base",
-                "base-sepolia"
-            ],
-            "x-enum-varnames": [
-                "Ethereum",
-                "Sepolia",
-                "Optimism",
-                "OptimismSepolia",
-                "ArbitrumOne",
-                "ArbitrumSeplia",
-                "Scroll",
-                "ScrollSepolia",
-                "Starknet",
-                "StarknetSepolia",
-                "Base",
-                "BaseSepolia"
-            ]
         }
     },
     "securityDefinitions": {

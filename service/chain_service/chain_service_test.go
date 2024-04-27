@@ -17,13 +17,6 @@ import (
 	"testing"
 )
 
-func TestCheckContractAddressAccess(t *testing.T) {
-	addressStr := "0x0576a174D229E3cFA37253523E645A78A0C91B57"
-	address := common.HexToAddress(addressStr)
-	res, err := CheckContractAddressAccess(&address, global_const.EthereumSepolia)
-	assert.NoError(t, err)
-	assert.True(t, res)
-}
 func testGetGasPrice(t *testing.T, chain global_const.Network) {
 	gasprice, err := GetGasPrice(chain)
 	if err != nil {
@@ -84,10 +77,24 @@ func TestChainService(t *testing.T) {
 				testGetPaymasterEntryPointBalance(t, *strategy)
 			},
 		},
+		{
+			"testCheckContractAddressAccess",
+			func(t *testing.T) {
+				testCheckContractAddressAccess(t)
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, tt.test)
 	}
+}
+
+func testCheckContractAddressAccess(t *testing.T) {
+	addressStr := "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f"
+	address := common.HexToAddress(addressStr)
+	res, err := CheckContractAddressAccess(&address, global_const.EthereumSepolia)
+	assert.NoError(t, err)
+	assert.True(t, res)
 }
 func testGetPaymasterEntryPointBalance(t *testing.T, strategy model.Strategy) {
 	res, err := GetPaymasterEntryPointBalance(&strategy)

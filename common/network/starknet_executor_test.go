@@ -8,7 +8,7 @@ import (
 )
 
 func TestDemo(t *testing.T) {
-	starkProvider, err := rpc.NewProvider("https://starknet-sepolia.g.alchemy.com/v2/uuXjaVAZy6-uzgoobtYd1IIX-IfjvXBc")
+	starkProvider, err := rpc.NewProvider("https://starknet-sepolia.infura.io/v3/0284f5a9fc55476698079b24e2f97909")
 	if err != nil {
 		t.Errorf("Error: %v", err)
 		return

@@ -1,4 +1,34 @@
 definitions:
+  global_const.Network:
+    enum:
+    - ethereum-mainnet
+    - ethereum-sepolia
+    - optimism-mainnet
+    - optimism-sepolia
+    - arbitrum-one
+    - arbitrum-nova
+    - arbitrum-sepolia
+    - scroll-mainnet
+    - scroll-sepolia
+    - starknet-mainnet
+    - starknet-sepolia
+    - base-mainnet
+    - base-sepolia
+    type: string
+    x-enum-varnames:
+    - EthereumMainnet
+    - EthereumSepolia
+    - OptimismMainnet
+    - OptimismSepolia
+    - ArbitrumOne
+    - ArbitrumNova
+    - ArbitrumSpeolia
+    - ScrollMainnet
+    - ScrollSepolia
+    - StarketMainnet
+    - StarketSepolia
+    - BaseMainnet
+    - BaseSepolia
   model.ClientCredential:
     properties:
       apiKey:
@@ -12,7 +42,7 @@ definitions:
       force_entrypoint_address:
         type: string
       force_network:
-        $ref: '#/definitions/types.Network'
+        $ref: '#/definitions/global_const.Network'
       force_strategy_id:
         type: string
       force_token:
@@ -21,34 +51,6 @@ definitions:
         additionalProperties: {}
         type: object
     type: object
-  types.Network:
-    enum:
-    - ethereum
-    - sepolia
-    - optimism
-    - optimism-sepolia
-    - arbitrum-one
-    - arbitrum-sepolia
-    - scroll
-    - scroll-sepolia
-    - starknet
-    - starknet-sepolia
-    - base
-    - base-sepolia
-    type: string
-    x-enum-varnames:
-    - Ethereum
-    - Sepolia
-    - Optimism
-    - OptimismSepolia
-    - ArbitrumOne
-    - ArbitrumSeplia
-    - Scroll
-    - ScrollSepolia
-    - Starknet
-    - StarknetSepolia
-    - Base
-    - BaseSepolia
 info:
   contact:
     name: AAStar Support

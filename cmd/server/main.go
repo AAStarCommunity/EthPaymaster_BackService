@@ -6,6 +6,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/rpc_server/routers"
 	"flag"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"os"
 	"strings"
 )
@@ -45,8 +46,14 @@ func main() {
 	_ = routers.SetRouters().Run(port)
 }
 func Init() {
+
 	strategyPath := fmt.Sprintf("./conf/basic_strategy_%s_config.json", strings.ToLower(envirment.Environment.Name))
 	conf.BasicStrategyInit(strategyPath)
 	businessConfigPath := fmt.Sprintf("./conf/business_%s_config.json", strings.ToLower(envirment.Environment.Name))
 	conf.BusinessConfigInit(businessConfigPath)
+	if envirment.Environment.IsDevelopment() {
+		logrus.SetLevel(logrus.DebugLevel)
+	} else {
+		logrus.SetLevel(logrus.InfoLevel)
+	}
 }

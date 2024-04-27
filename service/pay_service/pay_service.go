@@ -30,15 +30,15 @@ type StarkNetPayService struct {
 
 func (s StarkNetPayService) Pay() error {
 	//TODO implement me
-	panic("implement me")
+	return nil
 }
 
 func (s StarkNetPayService) RecordAccount() {
 	//TODO implement me
-	panic("implement me")
+	return
 }
 
 func (s StarkNetPayService) getReceipt() {
 	//TODO implement me
-	panic("implement me")
+	return
 }

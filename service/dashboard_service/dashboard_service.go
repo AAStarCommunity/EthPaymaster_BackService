@@ -29,7 +29,8 @@ func GetSuitableStrategy(entrypoint string, chain global_const.Network, payType 
 	return strategy, nil
 }
 func GetStrategyListByNetwork(chain global_const.Network) []model.Strategy {
-	panic("implement me")
+	return nil
+	//TODO
 }
 func IsEntryPointsSupport(address string, chain global_const.Network) bool {
 	supportEntryPointSet, _ := conf.GetSupportEntryPoints(chain)
