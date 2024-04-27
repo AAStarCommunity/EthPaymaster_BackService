@@ -38,7 +38,7 @@ func TestOperator(t *testing.T) {
 			},
 		},
 		{
-			"TestTryPayUserOpExecute",
+			"TestVerifyTryPayUserOpExecute",
 			func(t *testing.T) {
 				testTryPayUserOpExecute(t)
 			},

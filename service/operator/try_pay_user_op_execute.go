@@ -6,11 +6,12 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
+	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/gas_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/pay_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/validator_service"
-	"encoding/hex"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 )
 
@@ -29,10 +30,12 @@ func TryPayUserOpExecute(request *model.UserOpRequest) (*model.TryPayUserOpRespo
 	if err != nil {
 		return nil, err
 	}
+	logrus.Debug("payReceipt:", payReceipt)
 	result, err := postExecute(paymasterUserOp, strategy, gasResponse, paymasterDtataIput)
 	if err != nil {
 		return nil, err
 	}
+	logrus.Debug("postExecute result:", result)
 	result.PayReceipt = payReceipt
 	return result, nil
 }
@@ -98,13 +101,14 @@ func postExecute(userOp *user_op.UserOpInput, strategy *model.Strategy, gasRespo
 	executor := network.GetEthereumExecutor(strategy.GetNewWork())
 	paymasterData, err := executor.GetPaymasterData(userOp, strategy, paymasterDataInput)
 	if err != nil {
-		return nil, err
+		return nil, xerrors.Errorf("postExecute GetPaymasterData Error: [%w]", err)
 	}
+	logrus.Debug("postExecute paymasterData:", paymasterData)
 	var result = &model.TryPayUserOpResponse{
 		StrategyId:        strategy.Id,
 		EntryPointAddress: strategy.GetEntryPointAddress().String(),
 		PayMasterAddress:  strategy.GetPaymasterAddress().String(),
-		PayMasterAndData:  hex.EncodeToString(paymasterData),
+		PayMasterAndData:  utils.EncodeToStringWithPrefix(paymasterData),
 		GasInfo:           gasResponse,
 	}
 	return result, nil

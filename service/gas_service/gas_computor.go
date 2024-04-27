@@ -141,6 +141,7 @@ func getNewUserOpAfterCompute(op *user_op.UserOpInput, gas *model.UserOpEstimate
 		VerificationGasLimit: op.VerificationGasLimit,
 		AccountGasLimits:     accountGasLimits,
 		GasFees:              gasFee,
+		PreVerificationGas:   op.PreVerificationGas,
 	}
 	return result
 }

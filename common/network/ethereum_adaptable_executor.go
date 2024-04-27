@@ -477,7 +477,7 @@ func (executor EthereumExecutor) GetUserOpHash(userOp *user_op.UserOpInput, stra
 		if err != nil {
 			return nil, "", err
 		}
-		hash, err := contract.GetHash(&bind.CallOpts{}, paymater_verifying_erc20_v06.UserOperation{
+		conTractuserOp := paymater_verifying_erc20_v06.UserOperation{
 			Sender:               *userOp.Sender,
 			Nonce:                userOp.Nonce,
 			InitCode:             userOp.InitCode,
@@ -489,7 +489,10 @@ func (executor EthereumExecutor) GetUserOpHash(userOp *user_op.UserOpInput, stra
 			MaxPriorityFeePerGas: userOp.MaxPriorityFeePerGas,
 			PaymasterAndData:     userOp.PaymasterAndData,
 			Signature:            userOp.Signature,
-		}, strategy.ExecuteRestriction.EffectiveEndTime, strategy.ExecuteRestriction.EffectiveStartTime, erc20Token, big.NewInt(0))
+		}
+		jsonString, _ := json.Marshal(conTractuserOp)
+		logrus.Debug("conTractuserOp:", string(jsonString))
+		hash, err := contract.GetHash(&bind.CallOpts{}, conTractuserOp, strategy.ExecuteRestriction.EffectiveEndTime, strategy.ExecuteRestriction.EffectiveStartTime, erc20Token, big.NewInt(0))
 		if err != nil {
 			return nil, "", err
 		}
