@@ -15,6 +15,7 @@ type Strategy struct {
 	EntryPointInfo     *EntryPointInfo            `json:"entrypoint_info"`
 	Description        string                     `json:"description"`
 	ExecuteRestriction StrategyExecuteRestriction `json:"execute_restriction"`
+	Erc20TokenType     global_const.TokenType
 }
 type PaymasterInfo struct {
 	PayMasterAddress *common.Address      `json:"paymaster_address"`

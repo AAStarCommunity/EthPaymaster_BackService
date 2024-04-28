@@ -18,7 +18,7 @@ import (
 )
 
 func TestGetAddressTokenBalance(t *testing.T) {
-	res, err := GetAddressTokenBalance(global_const.EthereumSepolia, common.HexToAddress("0xDf7093eF81fa23415bb703A685c6331584D30177"), global_const.USDC)
+	res, err := GetAddressTokenBalance(global_const.EthereumSepolia, common.HexToAddress("0xDf7093eF81fa23415bb703A685c6331584D30177"), global_const.TokenTypeUSDC)
 	assert.NoError(t, err)
 	fmt.Println(res)
 }

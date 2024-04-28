@@ -12,8 +12,8 @@ var StableCoinSet mapset.Set[TokenType]
 
 func init() {
 	StableCoinSet = mapset.NewSet[TokenType]()
-	StableCoinSet.Add(USDT)
-	StableCoinSet.Add(USDC)
+	StableCoinSet.Add(TokenTypeUSDT)
+	StableCoinSet.Add(TokenTypeUSDC)
 
 }
 func IsStableToken(token TokenType) bool {
@@ -22,8 +22,8 @@ func IsStableToken(token TokenType) bool {
 }
 
 const (
-	USDT TokenType = "USDT"
-	USDC TokenType = "USDC"
-	ETH  TokenType = "ETH"
-	OP   TokenType = "OP"
+	TokenTypeUSDT TokenType = "USDT"
+	TokenTypeUSDC TokenType = "USDC"
+	ETH           TokenType = "ETH"
+	OP            TokenType = "OP"
 )

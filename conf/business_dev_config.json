@@ -56,10 +56,10 @@
       }
     },
     "base-sepolia": {
-      "chain_id": "testnet",
-      "is_test": false,
-      "rpc_url": "https://starknet-mainnet.g.alchemy.com/v2",
-      "api_key": "suCMhzhev596v1NCDOhhJzbR3KJ4CfZz",
+      "chain_id": "84532",
+      "is_test": true,
+      "rpc_url": "https://base-sepolia.g.alchemy.com/v2",
+      "api_key": "zUhtd18b2ZOTIJME6rv2Uwz9q7PBnnsa",
       "signer_key" : "752d81d71afd0b25a09f24718baf82c0846cc3b68122cfb3a1d41529c8a46b05",
       "token_config": {
         "USDT": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0",

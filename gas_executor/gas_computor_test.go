@@ -7,7 +7,9 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"context"
 	"encoding/json"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/sirupsen/logrus"
 	"math/big"
 	"testing"
@@ -42,8 +44,8 @@ func TestComputeGas(t *testing.T) {
 	//assert.NotNil(t, gas)
 	//jsonBypte, _ := json.Marshal(gas)
 	//fmt.Println(string(jsonBypte))
-	conf.BasicStrategyInit("../../conf/basic_strategy_dev_config.json")
-	conf.BusinessConfigInit("../../conf/business_dev_config.json")
+	conf.BasicStrategyInit("../conf/basic_strategy_dev_config.json")
+	conf.BusinessConfigInit("../conf/business_dev_config.json")
 	logrus.SetLevel(logrus.DebugLevel)
 	op, err := user_op.NewUserOp(utils.GenerateMockUservOperation())
 	if err != nil {
@@ -91,15 +93,57 @@ func TestComputeGas(t *testing.T) {
 			},
 		},
 		{
-			"testComputeGas_StrategyCodeEthereumSepoliaVo6Verify",
+			"testComputeGas_StrategyCodeOpSepoliaVo6Verify",
 			func(*testing.T) {
-				testComputeGas(t, op, conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV06Verify))
+				testComputeGas(t, op, conf.GetBasicStrategyConfig(global_const.StrategyCodeOptimismSepoliaV06Verify))
+			},
+		},
+		{
+			"testComputeGas_StrategyCodeOpSepoliaVo6Verify",
+			func(*testing.T) {
+				testComputeGas(t, op, conf.GetBasicStrategyConfig(global_const.StrategyCodeOptimismSepoliaV06Verify))
+			},
+		},
+		{
+			"testComputeGas_StrategyCodeArbSepoliaVo6Verify",
+			func(*testing.T) {
+				testComputeGas(t, op, conf.GetBasicStrategyConfig(global_const.StrategyCodeArbitrumSpeoliaV06Verify))
+			},
+		},
+		{
+			"testComputeGas_StrategyCodeScrollSepoliaVo6Verify",
+			func(*testing.T) {
+				testComputeGas(t, op, conf.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify))
+			},
+		},
+		{
+			"testComputeGas_StrategyCodeBaseSepoliaVo6Verify",
+			func(*testing.T) {
+				testComputeGas(t, op, conf.GetBasicStrategyConfig(global_const.StrategyCodeBaseSepoliaV06Verify))
+			},
+		},
+		{
+			"TestScrollEstimateCallGasLimit",
+			func(t *testing.T) {
+				testEstimateCallGasLimit(t, conf.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify), model.MockSimulateHandleOpResult, op, global_const.DummayPreverificationgasBigint)
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, tt.test)
 	}
+}
+func testEstimateCallGasLimit(t *testing.T, strategy *model.Strategy, simulateOpResult *model.SimulateHandleOpResult, op *user_op.UserOpInput, simulateGasPrice *big.Int) {
+	callGasLimit, err := EstimateCallGasLimit(strategy, simulateOpResult, op, simulateGasPrice)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if callGasLimit == nil {
+		t.Error("callGasLimit is nil")
+		return
+	}
+	t.Logf("callGasLimit: %v", callGasLimit)
 
 }
 func testGetPreVerificationGas(t *testing.T, userOp *user_op.UserOpInput, strategy *model.Strategy, gasFeeResult *model.GasPrice) {
@@ -111,14 +155,15 @@ func testGetPreVerificationGas(t *testing.T, userOp *user_op.UserOpInput, strate
 	t.Logf("preVerificationGas:%v", res)
 }
 func testComputeGas(t *testing.T, input *user_op.UserOpInput, strategy *model.Strategy) {
+	t.Logf("strategy: %v", strategy)
 	paymasterDataInput := paymaster_data.NewPaymasterDataInput(strategy)
 	res, _, err := ComputeGas(input, strategy, paymasterDataInput)
 	if err != nil {
-		logrus.Error(err)
+		t.Error(err)
 		return
 	}
 	if res == nil {
-		logrus.Error("res is nil")
+		t.Error("res is nil")
 		return
 	}
 	jsonRes, _ := json.Marshal(res)
@@ -150,4 +195,17 @@ func testGetUserOpEstimateGas(t *testing.T, input *user_op.UserOpInput, strategy
 	}
 	jsonRes, _ := json.Marshal(res)
 	t.Logf("res: %v", string(jsonRes))
+}
+func testBase(t *testing.T) {
+	client, err := ethclient.Dial(conf.GetEthereumRpcUrl("https://base-sepolia.g.alchemy.com/v2/zUhtd18b2ZOTIJME6rv2Uwz9q7PBnnsa"))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	gasPrice, err := client.SuggestGasPrice(context.Background())
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Logf("gasPrice:%v", gasPrice)
 }

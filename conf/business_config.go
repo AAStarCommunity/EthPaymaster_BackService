@@ -148,6 +148,7 @@ var (
 	OpeStackNetWork = mapset.NewSet(
 		global_const.OptimismMainnet, global_const.OptimismSepolia, global_const.BaseMainnet, global_const.BaseSepolia)
 	EthereumAdaptableNetWork = mapset.NewSet(
+		global_const.ArbitrumOne, global_const.ArbitrumNova, global_const.ArbitrumSpeolia,
 		global_const.OptimismMainnet, global_const.OptimismSepolia, global_const.EthereumSepolia, global_const.EthereumMainnet, global_const.ScrollSepolia, global_const.ScrollMainnet, global_const.BaseMainnet, global_const.BaseSepolia)
 	ArbStackNetWork = mapset.NewSet(
 		global_const.ArbitrumSpeolia, global_const.ArbitrumOne, global_const.ArbitrumNova)
@@ -155,6 +156,8 @@ var (
 	L1GasOracleInL2 = map[global_const.Network]common.Address{
 		global_const.OptimismMainnet: common.HexToAddress("0x420000000000000000000000000000000000000F"),
 		global_const.OptimismSepolia: common.HexToAddress("0x420000000000000000000000000000000000000F"),
+		global_const.BaseSepolia:     common.HexToAddress("0x420000000000000000000000000000000000000F"),
+		global_const.BaseMainnet:     common.HexToAddress("0x420000000000000000000000000000000000000F"),
 		global_const.ScrollSepolia:   common.HexToAddress("0x5300000000000000000000000000000000000002"),
 		global_const.ScrollMainnet:   common.HexToAddress("0x5300000000000000000000000000000000000002"),
 	}

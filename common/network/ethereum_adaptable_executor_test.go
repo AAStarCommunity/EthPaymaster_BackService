@@ -9,6 +9,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/sirupsen/logrus"
 	"testing"
@@ -62,8 +63,15 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 		{
 			"TestSepoliaSimulateV06HandleOp",
 			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig(string(global_const.StrategyCodeEthereumSepoliaV06Verify))
+				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV06Verify)
 				testSimulateHandleOp(t, global_const.EthereumSepolia, strategy)
+			},
+		},
+		{
+			"TestSepoliaSimulateV06HandleOp",
+			func(t *testing.T) {
+				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeOptimismSepoliaV06Verify)
+				testSimulateHandleOp(t, global_const.OptimismSepolia, strategy)
 			},
 		},
 		//{
@@ -86,6 +94,12 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 			},
 		},
 		{
+			"TestScrollExecutorGetPrice",
+			func(t *testing.T) {
+				testGetPrice(t, global_const.ScrollSepolia)
+			},
+		},
+		{
 			"TestSepoliaGetUserTokenBalance",
 			func(t *testing.T) {
 				testGetBalance(t, global_const.EthereumSepolia, userAddresss)
@@ -94,7 +108,15 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 		{
 			"checkContractAddressAccess",
 			func(t *testing.T) {
-				testCheckContractAddressAccess(t, global_const.EthereumSepolia)
+				address := common.HexToAddress("0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789")
+				testCheckContractAddressAccess(t, global_const.EthereumSepolia, address)
+			},
+		},
+		{
+			"checkContractAddressAccess",
+			func(t *testing.T) {
+				address := common.HexToAddress("0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789")
+				testCheckContractAddressAccess(t, global_const.ScrollSepolia, address)
 			},
 		},
 		{
@@ -174,13 +196,11 @@ func testEstimateCreateSenderGas(t *testing.T, chain global_const.Network, userO
 	}
 	t.Logf("gasResult: %v", gasResult)
 }
-func testCheckContractAddressAccess(t *testing.T, chain global_const.Network) {
+func testCheckContractAddressAccess(t *testing.T, chain global_const.Network, address common.Address) {
 	executor := GetEthereumExecutor(chain)
 	if executor == nil {
 		t.Error("executor is nil")
 	}
-	addressStr := "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"
-	address := common.HexToAddress(addressStr)
 	res, err := executor.CheckContractAddressAccess(&address)
 	if err != nil {
 		t.Error(err)
@@ -195,7 +215,7 @@ func testGetBalance(t *testing.T, chain global_const.Network, address common.Add
 	if executor == nil {
 		t.Error("executor is nil")
 	}
-	balance, err := executor.GetUserTokenBalance(address, global_const.USDC)
+	balance, err := executor.GetUserTokenBalance(address, global_const.TokenTypeUSDC)
 	if err != nil {
 		t.Error(err)
 		return
@@ -300,4 +320,19 @@ func testEthereumExecutorClientConnect(t *testing.T, chain global_const.Network)
 		t.Errorf(" %s chainId not equal %s", chainId.String(), executor.ChainId.String())
 	}
 	t.Logf("network %s chainId: %s", chain, chainId.String())
+}
+
+func TestStr(t *testing.T) {
+
+	res, err := hex.DecodeString("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000001e41413331207061796d6173746572206465706f73697420746f6f206c6f770000")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Logf("res: %v", res)
+	var resStr string
+
+	json.Unmarshal(res, &resStr)
+	t.Logf("resStr: %v", resStr)
 }

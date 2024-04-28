@@ -54,7 +54,7 @@ func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {
 	return strconv.ParseFloat(usdstr, 64)
 }
 func GetToken(fromToken global_const.TokenType, toToken global_const.TokenType) (float64, error) {
-	if toToken == global_const.USDT {
+	if toToken == global_const.TokenTypeUSDT {
 		return GetPriceUsd(fromToken)
 	}
 	formTokenPrice, _ := GetPriceUsd(fromToken)

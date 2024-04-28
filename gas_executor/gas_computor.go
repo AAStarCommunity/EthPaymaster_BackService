@@ -75,6 +75,9 @@ func GetUserOpGasPrice(userOpGas *model.UserOpEstimateGas) *big.Int {
 
 func getUserOpEstimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterData) (*model.UserOpEstimateGas, error) {
 	gasPriceResult, gasPriceErr := GetGasPrice(strategy.GetNewWork())
+	if gasPriceErr != nil {
+		return nil, xerrors.Errorf("get gas price error: %v", gasPriceErr)
+	}
 	if userOp.MaxFeePerGas != nil {
 		gasPriceResult.MaxFeePerGas = userOp.MaxFeePerGas
 	}
@@ -83,25 +86,32 @@ func getUserOpEstimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy,
 	}
 
 	//TODO calculate the maximum possible fee the account needs to pay (based on validation and call gas limits, and current gas values)
-	if gasPriceErr != nil {
-		return nil, xerrors.Errorf("get gas price error: %v", gasPriceErr)
-	}
+
 	userOpInputForSimulate, err := data_utils.GetUserOpWithPaymasterAndDataForSimulate(*userOp, strategy, paymasterDataInput, gasPriceResult)
-	simulateGasPrice := utils.GetGasEntryPointGasGrace(gasPriceResult.MaxFeePerGas, gasPriceResult.MaxPriorityFeePerGas, gasPriceResult.BaseFee)
 	if err != nil {
 		return nil, xerrors.Errorf("GetUserOpWithPaymasterAndDataForSimulate error: %v", err)
 	}
+	logrus.Debugf("userOpInputForSimulate: %v", userOpInputForSimulate)
+	logrus.Debugf("getUserOpEstimateGas gasPriceResult: %v", gasPriceResult)
+	simulateGasPrice := utils.GetGasEntryPointGasGrace(gasPriceResult.MaxFeePerGas, gasPriceResult.MaxPriorityFeePerGas, gasPriceResult.BaseFee)
 
 	simulateResult, err := chain_service.SimulateHandleOp(userOpInputForSimulate, strategy)
 	if err != nil {
 		return nil, xerrors.Errorf("SimulateHandleOp error: %v", err)
 	}
-
 	preVerificationGas, err := GetPreVerificationGas(userOp, strategy, gasPriceResult, simulateResult)
-
+	if err != nil {
+		return nil, xerrors.Errorf("GetPreVerificationGas error: %v", err)
+	}
 	verificationGasLimit, err := estimateVerificationGasLimit(simulateResult, preVerificationGas)
+	if err != nil {
+		return nil, xerrors.Errorf("estimateVerificationGasLimit error: %v", err)
+	}
 
 	callGasLimit, err := EstimateCallGasLimit(strategy, simulateResult, userOp, simulateGasPrice)
+	if err != nil {
+		return nil, xerrors.Errorf("EstimateCallGasLimit error: %v", err)
+	}
 
 	opEstimateGas := model.UserOpEstimateGas{}
 	opEstimateGas.PreVerificationGas = preVerificationGas
@@ -189,6 +199,8 @@ func getTokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Float, 
 
 func estimateVerificationGasLimit(simulateOpResult *model.SimulateHandleOpResult, preVerificationGas *big.Int) (*big.Int, error) {
 	preOpGas := simulateOpResult.PreOpGas
+	logrus.Debugf("preOpGas: %v", preOpGas)
+	logrus.Debugf("preVerificationGas: %v", preVerificationGas)
 	// verificationGasLimit = (preOpGas - preVerificationGas) * 1.5
 	result := new(big.Int).Sub(preOpGas, preVerificationGas)
 	result = result.Mul(result, global_const.ThreeBigint)
@@ -237,5 +249,6 @@ func GetPreVerificationGas(userOp *user_op.UserOpInput, strategy *model.Strategy
 	// add 10% buffer
 	preGas = preGas.Mul(preGas, global_const.HundredPlusOneBigint)
 	preGas = preGas.Div(preGas, global_const.HundredBigint)
+	logrus.Debugf("GetPreVerificationGas preVerificationGas: %v", preGas)
 	return preGas, nil
 }

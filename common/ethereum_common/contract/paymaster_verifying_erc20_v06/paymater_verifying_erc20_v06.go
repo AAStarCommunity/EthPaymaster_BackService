@@ -1,7 +1,7 @@
 // Code generated - DO NOT EDIT.
 // This file is a generated binding and any manual changes will be lost.
 
-package contract_paymaster_verifying_v07
+package paymaster_verifying_erc20_v06
 
 import (
 	"errors"
@@ -29,22 +29,24 @@ var (
 	_ = abi.ConvertType
 )
 
-// PackedUserOperation is an auto generated low-level Go binding around an user-defined struct.
-type PackedUserOperation struct {
-	Sender             common.Address
-	Nonce              *big.Int
-	InitCode           []byte
-	CallData           []byte
-	AccountGasLimits   [32]byte
-	PreVerificationGas *big.Int
-	GasFees            [32]byte
-	PaymasterAndData   []byte
-	Signature          []byte
+// UserOperation is an auto generated low-level Go binding around an user-defined struct.
+type UserOperation struct {
+	Sender               common.Address
+	Nonce                *big.Int
+	InitCode             []byte
+	CallData             []byte
+	CallGasLimit         *big.Int
+	VerificationGasLimit *big.Int
+	PreVerificationGas   *big.Int
+	MaxFeePerGas         *big.Int
+	MaxPriorityFeePerGas *big.Int
+	PaymasterAndData     []byte
+	Signature            []byte
 }
 
 // ContractMetaData contains all meta data concerning the Contract contract.
 var ContractMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"contractIEntryPoint\",\"name\":\"_entryPoint\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_verifyingSigner\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"ECDSAInvalidSignature\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"}],\"name\":\"ECDSAInvalidSignatureLength\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"ECDSAInvalidSignatureS\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"unstakeDelaySec\",\"type\":\"uint32\"}],\"name\":\"addStake\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"deposit\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"entryPoint\",\"outputs\":[{\"internalType\":\"contractIEntryPoint\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getDeposit\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"initCode\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"callData\",\"type\":\"bytes\"},{\"internalType\":\"bytes32\",\"name\":\"accountGasLimits\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"preVerificationGas\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"gasFees\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"paymasterAndData\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"internalType\":\"structPackedUserOperation\",\"name\":\"userOp\",\"type\":\"tuple\"},{\"internalType\":\"uint48\",\"name\":\"validUntil\",\"type\":\"uint48\"},{\"internalType\":\"uint48\",\"name\":\"validAfter\",\"type\":\"uint48\"}],\"name\":\"getHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"paymasterAndData\",\"type\":\"bytes\"}],\"name\":\"parsePaymasterAndData\",\"outputs\":[{\"internalType\":\"uint48\",\"name\":\"validUntil\",\"type\":\"uint48\"},{\"internalType\":\"uint48\",\"name\":\"validAfter\",\"type\":\"uint48\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"enumIPaymaster.PostOpMode\",\"name\":\"mode\",\"type\":\"uint8\"},{\"internalType\":\"bytes\",\"name\":\"context\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"actualGasCost\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"actualUserOpFeePerGas\",\"type\":\"uint256\"}],\"name\":\"postOp\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unlockStake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"initCode\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"callData\",\"type\":\"bytes\"},{\"internalType\":\"bytes32\",\"name\":\"accountGasLimits\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"preVerificationGas\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"gasFees\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"paymasterAndData\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"internalType\":\"structPackedUserOperation\",\"name\":\"userOp\",\"type\":\"tuple\"},{\"internalType\":\"bytes32\",\"name\":\"userOpHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"maxCost\",\"type\":\"uint256\"}],\"name\":\"validatePaymasterUserOp\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"context\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"validationData\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"verifyingSigner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"addresspayable\",\"name\":\"withdrawAddress\",\"type\":\"address\"}],\"name\":\"withdrawStake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"addresspayable\",\"name\":\"withdrawAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"withdrawTo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"contractIEntryPoint\",\"name\":\"_entryPoint\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_owner\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"POST_OP_GAS\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"unstakeDelaySec\",\"type\":\"uint32\"}],\"name\":\"addStake\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"deposit\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"entryPoint\",\"outputs\":[{\"internalType\":\"contractIEntryPoint\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getDeposit\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"initCode\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"callData\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"callGasLimit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"verificationGasLimit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"preVerificationGas\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"maxFeePerGas\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"maxPriorityFeePerGas\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"paymasterAndData\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"internalType\":\"structUserOperation\",\"name\":\"userOp\",\"type\":\"tuple\"},{\"internalType\":\"uint48\",\"name\":\"validUntil\",\"type\":\"uint48\"},{\"internalType\":\"uint48\",\"name\":\"validAfter\",\"type\":\"uint48\"},{\"internalType\":\"address\",\"name\":\"erc20Token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"exchangeRate\",\"type\":\"uint256\"}],\"name\":\"getHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"paymasterAndData\",\"type\":\"bytes\"}],\"name\":\"parsePaymasterAndData\",\"outputs\":[{\"internalType\":\"uint48\",\"name\":\"validUntil\",\"type\":\"uint48\"},{\"internalType\":\"uint48\",\"name\":\"validAfter\",\"type\":\"uint48\"},{\"internalType\":\"address\",\"name\":\"erc20Token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"exchangeRate\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"enumIPaymaster.PostOpMode\",\"name\":\"mode\",\"type\":\"uint8\"},{\"internalType\":\"bytes\",\"name\":\"context\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"actualGasCost\",\"type\":\"uint256\"}],\"name\":\"postOp\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_vault\",\"type\":\"address\"}],\"name\":\"setVault\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_verifier\",\"type\":\"address\"}],\"name\":\"setVerifier\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unlockStake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"initCode\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"callData\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"callGasLimit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"verificationGasLimit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"preVerificationGas\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"maxFeePerGas\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"maxPriorityFeePerGas\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"paymasterAndData\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"internalType\":\"structUserOperation\",\"name\":\"userOp\",\"type\":\"tuple\"},{\"internalType\":\"bytes32\",\"name\":\"userOpHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"maxCost\",\"type\":\"uint256\"}],\"name\":\"validatePaymasterUserOp\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"context\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"validationData\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"vault\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"verifier\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"addresspayable\",\"name\":\"withdrawAddress\",\"type\":\"address\"}],\"name\":\"withdrawStake\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"addresspayable\",\"name\":\"withdrawAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"withdrawTo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // ContractABI is the input ABI used to generate the binding from.
@@ -193,6 +195,37 @@ func (_Contract *ContractTransactorRaw) Transact(opts *bind.TransactOpts, method
 	return _Contract.Contract.contract.Transact(opts, method, params...)
 }
 
+// POSTOPGAS is a free data retrieval call binding the contract method 0xb8202d8f.
+//
+// Solidity: function POST_OP_GAS() view returns(uint256)
+func (_Contract *ContractCaller) POSTOPGAS(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _Contract.contract.Call(opts, &out, "POST_OP_GAS")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// POSTOPGAS is a free data retrieval call binding the contract method 0xb8202d8f.
+//
+// Solidity: function POST_OP_GAS() view returns(uint256)
+func (_Contract *ContractSession) POSTOPGAS() (*big.Int, error) {
+	return _Contract.Contract.POSTOPGAS(&_Contract.CallOpts)
+}
+
+// POSTOPGAS is a free data retrieval call binding the contract method 0xb8202d8f.
+//
+// Solidity: function POST_OP_GAS() view returns(uint256)
+func (_Contract *ContractCallerSession) POSTOPGAS() (*big.Int, error) {
+	return _Contract.Contract.POSTOPGAS(&_Contract.CallOpts)
+}
+
 // EntryPoint is a free data retrieval call binding the contract method 0xb0d691fe.
 //
 // Solidity: function entryPoint() view returns(address)
@@ -255,12 +288,12 @@ func (_Contract *ContractCallerSession) GetDeposit() (*big.Int, error) {
 	return _Contract.Contract.GetDeposit(&_Contract.CallOpts)
 }
 
-// GetHash is a free data retrieval call binding the contract method 0x5829c5f5.
+// GetHash is a free data retrieval call binding the contract method 0x290da2ad.
 //
-// Solidity: function getHash((address,uint256,bytes,bytes,bytes32,uint256,bytes32,bytes,bytes) userOp, uint48 validUntil, uint48 validAfter) view returns(bytes32)
-func (_Contract *ContractCaller) GetHash(opts *bind.CallOpts, userOp PackedUserOperation, validUntil *big.Int, validAfter *big.Int) ([32]byte, error) {
+// Solidity: function getHash((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes) userOp, uint48 validUntil, uint48 validAfter, address erc20Token, uint256 exchangeRate) view returns(bytes32)
+func (_Contract *ContractCaller) GetHash(opts *bind.CallOpts, userOp UserOperation, validUntil *big.Int, validAfter *big.Int, erc20Token common.Address, exchangeRate *big.Int) ([32]byte, error) {
 	var out []interface{}
-	err := _Contract.contract.Call(opts, &out, "getHash", userOp, validUntil, validAfter)
+	err := _Contract.contract.Call(opts, &out, "getHash", userOp, validUntil, validAfter, erc20Token, exchangeRate)
 
 	if err != nil {
 		return *new([32]byte), err
@@ -272,18 +305,18 @@ func (_Contract *ContractCaller) GetHash(opts *bind.CallOpts, userOp PackedUserO
 
 }
 
-// GetHash is a free data retrieval call binding the contract method 0x5829c5f5.
+// GetHash is a free data retrieval call binding the contract method 0x290da2ad.
 //
-// Solidity: function getHash((address,uint256,bytes,bytes,bytes32,uint256,bytes32,bytes,bytes) userOp, uint48 validUntil, uint48 validAfter) view returns(bytes32)
-func (_Contract *ContractSession) GetHash(userOp PackedUserOperation, validUntil *big.Int, validAfter *big.Int) ([32]byte, error) {
-	return _Contract.Contract.GetHash(&_Contract.CallOpts, userOp, validUntil, validAfter)
+// Solidity: function getHash((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes) userOp, uint48 validUntil, uint48 validAfter, address erc20Token, uint256 exchangeRate) view returns(bytes32)
+func (_Contract *ContractSession) GetHash(userOp UserOperation, validUntil *big.Int, validAfter *big.Int, erc20Token common.Address, exchangeRate *big.Int) ([32]byte, error) {
+	return _Contract.Contract.GetHash(&_Contract.CallOpts, userOp, validUntil, validAfter, erc20Token, exchangeRate)
 }
 
-// GetHash is a free data retrieval call binding the contract method 0x5829c5f5.
+// GetHash is a free data retrieval call binding the contract method 0x290da2ad.
 //
-// Solidity: function getHash((address,uint256,bytes,bytes,bytes32,uint256,bytes32,bytes,bytes) userOp, uint48 validUntil, uint48 validAfter) view returns(bytes32)
-func (_Contract *ContractCallerSession) GetHash(userOp PackedUserOperation, validUntil *big.Int, validAfter *big.Int) ([32]byte, error) {
-	return _Contract.Contract.GetHash(&_Contract.CallOpts, userOp, validUntil, validAfter)
+// Solidity: function getHash((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes) userOp, uint48 validUntil, uint48 validAfter, address erc20Token, uint256 exchangeRate) view returns(bytes32)
+func (_Contract *ContractCallerSession) GetHash(userOp UserOperation, validUntil *big.Int, validAfter *big.Int, erc20Token common.Address, exchangeRate *big.Int) ([32]byte, error) {
+	return _Contract.Contract.GetHash(&_Contract.CallOpts, userOp, validUntil, validAfter, erc20Token, exchangeRate)
 }
 
 // Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
@@ -319,19 +352,23 @@ func (_Contract *ContractCallerSession) Owner() (common.Address, error) {
 
 // ParsePaymasterAndData is a free data retrieval call binding the contract method 0x94d4ad60.
 //
-// Solidity: function parsePaymasterAndData(bytes paymasterAndData) pure returns(uint48 validUntil, uint48 validAfter, bytes signature)
+// Solidity: function parsePaymasterAndData(bytes paymasterAndData) pure returns(uint48 validUntil, uint48 validAfter, address erc20Token, uint256 exchangeRate, bytes signature)
 func (_Contract *ContractCaller) ParsePaymasterAndData(opts *bind.CallOpts, paymasterAndData []byte) (struct {
-	ValidUntil *big.Int
-	ValidAfter *big.Int
-	Signature  []byte
+	ValidUntil   *big.Int
+	ValidAfter   *big.Int
+	Erc20Token   common.Address
+	ExchangeRate *big.Int
+	Signature    []byte
 }, error) {
 	var out []interface{}
 	err := _Contract.contract.Call(opts, &out, "parsePaymasterAndData", paymasterAndData)
 
 	outstruct := new(struct {
-		ValidUntil *big.Int
-		ValidAfter *big.Int
-		Signature  []byte
+		ValidUntil   *big.Int
+		ValidAfter   *big.Int
+		Erc20Token   common.Address
+		ExchangeRate *big.Int
+		Signature    []byte
 	})
 	if err != nil {
 		return *outstruct, err
@@ -339,7 +376,9 @@ func (_Contract *ContractCaller) ParsePaymasterAndData(opts *bind.CallOpts, paym
 
 	outstruct.ValidUntil = *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
 	outstruct.ValidAfter = *abi.ConvertType(out[1], new(*big.Int)).(**big.Int)
-	outstruct.Signature = *abi.ConvertType(out[2], new([]byte)).(*[]byte)
+	outstruct.Erc20Token = *abi.ConvertType(out[2], new(common.Address)).(*common.Address)
+	outstruct.ExchangeRate = *abi.ConvertType(out[3], new(*big.Int)).(**big.Int)
+	outstruct.Signature = *abi.ConvertType(out[4], new([]byte)).(*[]byte)
 
 	return *outstruct, err
 
@@ -347,32 +386,36 @@ func (_Contract *ContractCaller) ParsePaymasterAndData(opts *bind.CallOpts, paym
 
 // ParsePaymasterAndData is a free data retrieval call binding the contract method 0x94d4ad60.
 //
-// Solidity: function parsePaymasterAndData(bytes paymasterAndData) pure returns(uint48 validUntil, uint48 validAfter, bytes signature)
+// Solidity: function parsePaymasterAndData(bytes paymasterAndData) pure returns(uint48 validUntil, uint48 validAfter, address erc20Token, uint256 exchangeRate, bytes signature)
 func (_Contract *ContractSession) ParsePaymasterAndData(paymasterAndData []byte) (struct {
-	ValidUntil *big.Int
-	ValidAfter *big.Int
-	Signature  []byte
+	ValidUntil   *big.Int
+	ValidAfter   *big.Int
+	Erc20Token   common.Address
+	ExchangeRate *big.Int
+	Signature    []byte
 }, error) {
 	return _Contract.Contract.ParsePaymasterAndData(&_Contract.CallOpts, paymasterAndData)
 }
 
 // ParsePaymasterAndData is a free data retrieval call binding the contract method 0x94d4ad60.
 //
-// Solidity: function parsePaymasterAndData(bytes paymasterAndData) pure returns(uint48 validUntil, uint48 validAfter, bytes signature)
+// Solidity: function parsePaymasterAndData(bytes paymasterAndData) pure returns(uint48 validUntil, uint48 validAfter, address erc20Token, uint256 exchangeRate, bytes signature)
 func (_Contract *ContractCallerSession) ParsePaymasterAndData(paymasterAndData []byte) (struct {
-	ValidUntil *big.Int
-	ValidAfter *big.Int
-	Signature  []byte
+	ValidUntil   *big.Int
+	ValidAfter   *big.Int
+	Erc20Token   common.Address
+	ExchangeRate *big.Int
+	Signature    []byte
 }, error) {
 	return _Contract.Contract.ParsePaymasterAndData(&_Contract.CallOpts, paymasterAndData)
 }
 
-// VerifyingSigner is a free data retrieval call binding the contract method 0x23d9ac9b.
+// Vault is a free data retrieval call binding the contract method 0xfbfa77cf.
 //
-// Solidity: function verifyingSigner() view returns(address)
-func (_Contract *ContractCaller) VerifyingSigner(opts *bind.CallOpts) (common.Address, error) {
+// Solidity: function vault() view returns(address)
+func (_Contract *ContractCaller) Vault(opts *bind.CallOpts) (common.Address, error) {
 	var out []interface{}
-	err := _Contract.contract.Call(opts, &out, "verifyingSigner")
+	err := _Contract.contract.Call(opts, &out, "vault")
 
 	if err != nil {
 		return *new(common.Address), err
@@ -384,18 +427,49 @@ func (_Contract *ContractCaller) VerifyingSigner(opts *bind.CallOpts) (common.Ad
 
 }
 
-// VerifyingSigner is a free data retrieval call binding the contract method 0x23d9ac9b.
+// Vault is a free data retrieval call binding the contract method 0xfbfa77cf.
 //
-// Solidity: function verifyingSigner() view returns(address)
-func (_Contract *ContractSession) VerifyingSigner() (common.Address, error) {
-	return _Contract.Contract.VerifyingSigner(&_Contract.CallOpts)
+// Solidity: function vault() view returns(address)
+func (_Contract *ContractSession) Vault() (common.Address, error) {
+	return _Contract.Contract.Vault(&_Contract.CallOpts)
 }
 
-// VerifyingSigner is a free data retrieval call binding the contract method 0x23d9ac9b.
+// Vault is a free data retrieval call binding the contract method 0xfbfa77cf.
 //
-// Solidity: function verifyingSigner() view returns(address)
-func (_Contract *ContractCallerSession) VerifyingSigner() (common.Address, error) {
-	return _Contract.Contract.VerifyingSigner(&_Contract.CallOpts)
+// Solidity: function vault() view returns(address)
+func (_Contract *ContractCallerSession) Vault() (common.Address, error) {
+	return _Contract.Contract.Vault(&_Contract.CallOpts)
+}
+
+// Verifier is a free data retrieval call binding the contract method 0x2b7ac3f3.
+//
+// Solidity: function verifier() view returns(address)
+func (_Contract *ContractCaller) Verifier(opts *bind.CallOpts) (common.Address, error) {
+	var out []interface{}
+	err := _Contract.contract.Call(opts, &out, "verifier")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// Verifier is a free data retrieval call binding the contract method 0x2b7ac3f3.
+//
+// Solidity: function verifier() view returns(address)
+func (_Contract *ContractSession) Verifier() (common.Address, error) {
+	return _Contract.Contract.Verifier(&_Contract.CallOpts)
+}
+
+// Verifier is a free data retrieval call binding the contract method 0x2b7ac3f3.
+//
+// Solidity: function verifier() view returns(address)
+func (_Contract *ContractCallerSession) Verifier() (common.Address, error) {
+	return _Contract.Contract.Verifier(&_Contract.CallOpts)
 }
 
 // AddStake is a paid mutator transaction binding the contract method 0x0396cb60.
@@ -440,25 +514,25 @@ func (_Contract *ContractTransactorSession) Deposit() (*types.Transaction, error
 	return _Contract.Contract.Deposit(&_Contract.TransactOpts)
 }
 
-// PostOp is a paid mutator transaction binding the contract method 0x7c627b21.
+// PostOp is a paid mutator transaction binding the contract method 0xa9a23409.
 //
-// Solidity: function postOp(uint8 mode, bytes context, uint256 actualGasCost, uint256 actualUserOpFeePerGas) returns()
-func (_Contract *ContractTransactor) PostOp(opts *bind.TransactOpts, mode uint8, context []byte, actualGasCost *big.Int, actualUserOpFeePerGas *big.Int) (*types.Transaction, error) {
-	return _Contract.contract.Transact(opts, "postOp", mode, context, actualGasCost, actualUserOpFeePerGas)
+// Solidity: function postOp(uint8 mode, bytes context, uint256 actualGasCost) returns()
+func (_Contract *ContractTransactor) PostOp(opts *bind.TransactOpts, mode uint8, context []byte, actualGasCost *big.Int) (*types.Transaction, error) {
+	return _Contract.contract.Transact(opts, "postOp", mode, context, actualGasCost)
 }
 
-// PostOp is a paid mutator transaction binding the contract method 0x7c627b21.
+// PostOp is a paid mutator transaction binding the contract method 0xa9a23409.
 //
-// Solidity: function postOp(uint8 mode, bytes context, uint256 actualGasCost, uint256 actualUserOpFeePerGas) returns()
-func (_Contract *ContractSession) PostOp(mode uint8, context []byte, actualGasCost *big.Int, actualUserOpFeePerGas *big.Int) (*types.Transaction, error) {
-	return _Contract.Contract.PostOp(&_Contract.TransactOpts, mode, context, actualGasCost, actualUserOpFeePerGas)
+// Solidity: function postOp(uint8 mode, bytes context, uint256 actualGasCost) returns()
+func (_Contract *ContractSession) PostOp(mode uint8, context []byte, actualGasCost *big.Int) (*types.Transaction, error) {
+	return _Contract.Contract.PostOp(&_Contract.TransactOpts, mode, context, actualGasCost)
 }
 
-// PostOp is a paid mutator transaction binding the contract method 0x7c627b21.
+// PostOp is a paid mutator transaction binding the contract method 0xa9a23409.
 //
-// Solidity: function postOp(uint8 mode, bytes context, uint256 actualGasCost, uint256 actualUserOpFeePerGas) returns()
-func (_Contract *ContractTransactorSession) PostOp(mode uint8, context []byte, actualGasCost *big.Int, actualUserOpFeePerGas *big.Int) (*types.Transaction, error) {
-	return _Contract.Contract.PostOp(&_Contract.TransactOpts, mode, context, actualGasCost, actualUserOpFeePerGas)
+// Solidity: function postOp(uint8 mode, bytes context, uint256 actualGasCost) returns()
+func (_Contract *ContractTransactorSession) PostOp(mode uint8, context []byte, actualGasCost *big.Int) (*types.Transaction, error) {
+	return _Contract.Contract.PostOp(&_Contract.TransactOpts, mode, context, actualGasCost)
 }
 
 // RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
@@ -480,6 +554,48 @@ func (_Contract *ContractSession) RenounceOwnership() (*types.Transaction, error
 // Solidity: function renounceOwnership() returns()
 func (_Contract *ContractTransactorSession) RenounceOwnership() (*types.Transaction, error) {
 	return _Contract.Contract.RenounceOwnership(&_Contract.TransactOpts)
+}
+
+// SetVault is a paid mutator transaction binding the contract method 0x6817031b.
+//
+// Solidity: function setVault(address _vault) returns()
+func (_Contract *ContractTransactor) SetVault(opts *bind.TransactOpts, _vault common.Address) (*types.Transaction, error) {
+	return _Contract.contract.Transact(opts, "setVault", _vault)
+}
+
+// SetVault is a paid mutator transaction binding the contract method 0x6817031b.
+//
+// Solidity: function setVault(address _vault) returns()
+func (_Contract *ContractSession) SetVault(_vault common.Address) (*types.Transaction, error) {
+	return _Contract.Contract.SetVault(&_Contract.TransactOpts, _vault)
+}
+
+// SetVault is a paid mutator transaction binding the contract method 0x6817031b.
+//
+// Solidity: function setVault(address _vault) returns()
+func (_Contract *ContractTransactorSession) SetVault(_vault common.Address) (*types.Transaction, error) {
+	return _Contract.Contract.SetVault(&_Contract.TransactOpts, _vault)
+}
+
+// SetVerifier is a paid mutator transaction binding the contract method 0x5437988d.
+//
+// Solidity: function setVerifier(address _verifier) returns()
+func (_Contract *ContractTransactor) SetVerifier(opts *bind.TransactOpts, _verifier common.Address) (*types.Transaction, error) {
+	return _Contract.contract.Transact(opts, "setVerifier", _verifier)
+}
+
+// SetVerifier is a paid mutator transaction binding the contract method 0x5437988d.
+//
+// Solidity: function setVerifier(address _verifier) returns()
+func (_Contract *ContractSession) SetVerifier(_verifier common.Address) (*types.Transaction, error) {
+	return _Contract.Contract.SetVerifier(&_Contract.TransactOpts, _verifier)
+}
+
+// SetVerifier is a paid mutator transaction binding the contract method 0x5437988d.
+//
+// Solidity: function setVerifier(address _verifier) returns()
+func (_Contract *ContractTransactorSession) SetVerifier(_verifier common.Address) (*types.Transaction, error) {
+	return _Contract.Contract.SetVerifier(&_Contract.TransactOpts, _verifier)
 }
 
 // TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
@@ -524,24 +640,24 @@ func (_Contract *ContractTransactorSession) UnlockStake() (*types.Transaction, e
 	return _Contract.Contract.UnlockStake(&_Contract.TransactOpts)
 }
 
-// ValidatePaymasterUserOp is a paid mutator transaction binding the contract method 0x52b7512c.
+// ValidatePaymasterUserOp is a paid mutator transaction binding the contract method 0xf465c77e.
 //
-// Solidity: function validatePaymasterUserOp((address,uint256,bytes,bytes,bytes32,uint256,bytes32,bytes,bytes) userOp, bytes32 userOpHash, uint256 maxCost) returns(bytes context, uint256 validationData)
-func (_Contract *ContractTransactor) ValidatePaymasterUserOp(opts *bind.TransactOpts, userOp PackedUserOperation, userOpHash [32]byte, maxCost *big.Int) (*types.Transaction, error) {
+// Solidity: function validatePaymasterUserOp((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes) userOp, bytes32 userOpHash, uint256 maxCost) returns(bytes context, uint256 validationData)
+func (_Contract *ContractTransactor) ValidatePaymasterUserOp(opts *bind.TransactOpts, userOp UserOperation, userOpHash [32]byte, maxCost *big.Int) (*types.Transaction, error) {
 	return _Contract.contract.Transact(opts, "validatePaymasterUserOp", userOp, userOpHash, maxCost)
 }
 
-// ValidatePaymasterUserOp is a paid mutator transaction binding the contract method 0x52b7512c.
+// ValidatePaymasterUserOp is a paid mutator transaction binding the contract method 0xf465c77e.
 //
-// Solidity: function validatePaymasterUserOp((address,uint256,bytes,bytes,bytes32,uint256,bytes32,bytes,bytes) userOp, bytes32 userOpHash, uint256 maxCost) returns(bytes context, uint256 validationData)
-func (_Contract *ContractSession) ValidatePaymasterUserOp(userOp PackedUserOperation, userOpHash [32]byte, maxCost *big.Int) (*types.Transaction, error) {
+// Solidity: function validatePaymasterUserOp((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes) userOp, bytes32 userOpHash, uint256 maxCost) returns(bytes context, uint256 validationData)
+func (_Contract *ContractSession) ValidatePaymasterUserOp(userOp UserOperation, userOpHash [32]byte, maxCost *big.Int) (*types.Transaction, error) {
 	return _Contract.Contract.ValidatePaymasterUserOp(&_Contract.TransactOpts, userOp, userOpHash, maxCost)
 }
 
-// ValidatePaymasterUserOp is a paid mutator transaction binding the contract method 0x52b7512c.
+// ValidatePaymasterUserOp is a paid mutator transaction binding the contract method 0xf465c77e.
 //
-// Solidity: function validatePaymasterUserOp((address,uint256,bytes,bytes,bytes32,uint256,bytes32,bytes,bytes) userOp, bytes32 userOpHash, uint256 maxCost) returns(bytes context, uint256 validationData)
-func (_Contract *ContractTransactorSession) ValidatePaymasterUserOp(userOp PackedUserOperation, userOpHash [32]byte, maxCost *big.Int) (*types.Transaction, error) {
+// Solidity: function validatePaymasterUserOp((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes) userOp, bytes32 userOpHash, uint256 maxCost) returns(bytes context, uint256 validationData)
+func (_Contract *ContractTransactorSession) ValidatePaymasterUserOp(userOp UserOperation, userOpHash [32]byte, maxCost *big.Int) (*types.Transaction, error) {
 	return _Contract.Contract.ValidatePaymasterUserOp(&_Contract.TransactOpts, userOp, userOpHash, maxCost)
 }
 

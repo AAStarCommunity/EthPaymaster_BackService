@@ -34,7 +34,7 @@ func Erc20GasValidate() ValidatePaymasterGasFunc {
 		if getTokenBalanceErr != nil {
 			return getTokenBalanceErr
 		}
-		tokenCost := gasComputeResponse.TokenCost
+		tokenCost := gasComputeResponse.Erc20TokenCost
 		bigFloatValue := new(big.Float).SetFloat64(tokenBalance)
 		if bigFloatValue.Cmp(tokenCost) < 0 {
 			return xerrors.Errorf("user Token Not Enough tokenBalance %s < tokenCost %s", tokenBalance, tokenCost)

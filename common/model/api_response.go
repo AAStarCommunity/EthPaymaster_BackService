@@ -16,7 +16,7 @@ type TryPayUserOpResponse struct {
 }
 
 type ComputeGasResponse struct {
-	TokenCost      *big.Float         `json:"token_cost"`
+	Erc20TokenCost *big.Float         `json:"Erc20TokenCost"`
 	OpEstimateGas  *UserOpEstimateGas `json:"op_estimate_gas"`
 	TotalGasDetail *TotalGasDetail    `json:"total_gas_detail"`
 }
