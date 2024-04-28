@@ -11,6 +11,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.19.0
 	github.com/mitchellh/mapstructure v1.5.0
+	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
@@ -27,7 +28,6 @@ require (
 	github.com/holiman/uint256 v1.2.4 // indirect
 	github.com/huin/goupnp v1.3.0 // indirect
 	github.com/jackpal/go-nat-pmp v1.0.2 // indirect
-	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 // indirect
 	github.com/test-go/testify v1.1.4 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
