@@ -17,15 +17,6 @@ import (
 	"testing"
 )
 
-func testGetGasPrice(t *testing.T, chain global_const.Network) {
-	gasprice, err := GetGasPrice(chain)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	t.Logf("gasprice:%v", gasprice)
-}
-
 func TestGetAddressTokenBalance(t *testing.T) {
 	res, err := GetAddressTokenBalance(global_const.EthereumSepolia, common.HexToAddress("0xDf7093eF81fa23415bb703A685c6331584D30177"), global_const.USDC)
 	assert.NoError(t, err)
@@ -41,28 +32,12 @@ func TestChainService(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	mockGasPrice := &model.GasPrice{
-		MaxFeePerGas:         big.NewInt(2053608903),
-		MaxPriorityFeePerGas: big.NewInt(1000000000),
-		BaseFee:              big.NewInt(1053608903),
-	}
+
 	tests := []struct {
 		name string
 		test func(t *testing.T)
 	}{
-		{
-			"TestEthereumSepoliaGetPrice",
-			func(t *testing.T) {
-				testGetGasPrice(t, global_const.EthereumSepolia)
-			},
-		},
-		{
-			"TestGetPreVerificationGas",
-			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig("Optimism_Sepolia_v06_verifyPaymaster")
-				testGetPreVerificationGas(t, op, strategy, mockGasPrice)
-			},
-		},
+
 		{
 			"TestSepoliaSimulateHandleOp",
 			func(t *testing.T) {
@@ -106,14 +81,7 @@ func testGetPaymasterEntryPointBalance(t *testing.T, strategy model.Strategy) {
 	t.Logf("paymasterEntryPointBalance:%v", res)
 
 }
-func testGetPreVerificationGas(t *testing.T, userOp *user_op.UserOpInput, strategy *model.Strategy, gasFeeResult *model.GasPrice) {
-	res, err := GetPreVerificationGas(userOp, strategy, gasFeeResult, nil)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	t.Logf("preVerificationGas:%v", res)
-}
+
 func testSimulateHandleOp(t *testing.T, userOp *user_op.UserOpInput, strategy *model.Strategy) {
 	paymasterDataInput := paymaster_data.NewPaymasterDataInput(strategy)
 	userOpInputForSimulate, err := data_utils.GetUserOpWithPaymasterAndDataForSimulate(*userOp, strategy, paymasterDataInput, &model.GasPrice{})

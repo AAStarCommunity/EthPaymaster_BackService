@@ -65,7 +65,6 @@ func convertMapToStrategyConfig(data map[string]map[string]any) (map[string]*mod
 			return nil, xerrors.Errorf("effective_end_time illegal")
 		}
 		accessProjectStr := value["access_project"].(string)
-		erc20TokenStr := value["access_erc20"].(string)
 		strategy := &model.Strategy{
 			Id:           key,
 			StrategyCode: key,
@@ -81,12 +80,16 @@ func convertMapToStrategyConfig(data map[string]map[string]any) (map[string]*mod
 				EffectiveStartTime: effectiveStartTime,
 				EffectiveEndTime:   effectiveEndTime,
 				AccessProject:      utils.ConvertStringToSet(accessProjectStr, ","),
-				AccessErc20:        utils.ConvertStringToSet(erc20TokenStr, ","),
 			},
 			PaymasterInfo: &model.PaymasterInfo{
 				PayMasterAddress: &paymasterAddress,
 				PayType:          global_const.PayType(value["paymaster_pay_type"].(string)),
 			},
+		}
+		if strategy.GetPayType() == global_const.PayTypeERC20 {
+			erc20TokenStr := value["access_erc20"].(string)
+			strategy.NetWorkInfo.Token = global_const.TokenType(erc20TokenStr)
+			strategy.ExecuteRestriction.AccessErc20 = utils.ConvertStringToSet(erc20TokenStr, ",")
 		}
 
 		config[key] = strategy

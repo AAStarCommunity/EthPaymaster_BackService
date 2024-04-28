@@ -6,8 +6,6 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
-	"AAStarCommunity/EthPaymaster_BackService/conf"
-	"AAStarCommunity/EthPaymaster_BackService/service/gas_service"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
@@ -19,47 +17,6 @@ func CheckContractAddressAccess(contract *common.Address, chain global_const.Net
 	//todo needcache
 	executor := network.GetEthereumExecutor(chain)
 	return executor.CheckContractAddressAccess(contract)
-}
-
-// GetGasPrice return gas price in wei, gwei, ether
-func GetGasPrice(chain global_const.Network) (*model.GasPrice, error) {
-	if conf.IsEthereumAdaptableNetWork(chain) {
-		ethereumExecutor := network.GetEthereumExecutor(chain)
-		return ethereumExecutor.GetGasPrice()
-	} else if chain == global_const.StarketMainnet || chain == global_const.StarketSepolia {
-		starknetExecutor := network.GetStarknetExecutor()
-		return starknetExecutor.GetGasPrice()
-	} else {
-		return nil, xerrors.Errorf("chain %s not support", chain)
-	}
-	//MaxFeePerGas
-	//MaxPriorityPrice
-	//preOpGas (get verificationGasLimit from preOpGas)
-	//
-
-}
-
-// GetPreVerificationGas https://github.com/eth-infinitism/bundler/blob/main/packages/sdk/src/calcPreVerificationGas.ts
-func GetPreVerificationGas(userOp *user_op.UserOpInput, strategy *model.Strategy, gasFeeResult *model.GasPrice, simulateOpResult *model.SimulateHandleOpResult) (*big.Int, error) {
-	chain := strategy.GetNewWork()
-	stack := conf.GetNetWorkStack(chain)
-	preGasFunc, err := gas_service.GetPreVerificationGasFunc(stack)
-	if err != nil {
-		return nil, err
-	}
-	preGas, err := preGasFunc(&model.PreVerificationGasEstimateInput{
-		Strategy:         strategy,
-		Op:               userOp,
-		GasFeeResult:     gasFeeResult,
-		SimulateOpResult: simulateOpResult,
-	})
-	if err != nil {
-		return nil, err
-	}
-	// add 10% buffer
-	preGas = preGas.Mul(preGas, global_const.HundredPlusOneBigint)
-	preGas = preGas.Div(preGas, global_const.HundredBigint)
-	return preGas, nil
 }
 
 func GetAddressTokenBalance(networkParam global_const.Network, address common.Address, tokenTypeParam global_const.TokenType) (float64, error) {

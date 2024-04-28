@@ -7,8 +7,8 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
+	"AAStarCommunity/EthPaymaster_BackService/gas_executor"
 	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
-	"AAStarCommunity/EthPaymaster_BackService/service/gas_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/pay_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/validator_service"
 	"github.com/sirupsen/logrus"
@@ -69,16 +69,25 @@ func prepareExecute(request *model.UserOpRequest) (*user_op.UserOpInput, *model.
 
 func estimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterData) (*model.ComputeGasResponse, *user_op.UserOpInput, error) {
 	//base Strategy and UserOp computeGas
-	gasResponse, paymasterUserOp, gasComputeError := gas_service.ComputeGas(userOp, strategy, paymasterDataInput)
+	gasResponse, paymasterUserOp, gasComputeError := gas_executor.ComputeGas(userOp, strategy, paymasterDataInput)
 	if gasComputeError != nil {
 		return nil, nil, gasComputeError
 	}
 	//The maxFeePerGas and maxPriorityFeePerGas are above a configurable minimum value that the client is willing to accept. At the minimum, they are sufficiently high to be included with the current block.basefee.
 	//validate gas
-	if err := gas_service.ValidateGas(userOp, gasResponse, strategy); err != nil {
+	if err := ValidateGas(userOp, gasResponse, strategy); err != nil {
 		return nil, nil, err
 	}
 	return gasResponse, paymasterUserOp, nil
+}
+
+func ValidateGas(userOp *user_op.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
+	validateFunc := gas_executor.GasValidateFuncMap[strategy.GetPayType()]
+	err := validateFunc(userOp, gasComputeResponse, strategy)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func executePay(strategy *model.Strategy, userOp *user_op.UserOpInput, gasResponse *model.ComputeGasResponse) (*model.PayReceipt, error) {

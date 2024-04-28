@@ -1,4 +1,4 @@
-package gas_service
+package gas_executor
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
@@ -24,6 +24,15 @@ var (
 	}
 )
 
+func testGetGasPrice(t *testing.T, chain global_const.Network) {
+	gasprice, err := GetGasPrice(chain)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Logf("gasprice:%v", gasprice)
+}
+
 func TestComputeGas(t *testing.T) {
 	//userOp, newErr := user_op.NewUserOp(utils.GenerateMockUservOperation(), global_const.EntrypointV06)
 	//assert.NoError(t, newErr)
@@ -47,6 +56,12 @@ func TestComputeGas(t *testing.T) {
 		test func(t *testing.T)
 	}{
 		{
+			"TestEthereumSepoliaGetPrice",
+			func(t *testing.T) {
+				testGetGasPrice(t, global_const.EthereumSepolia)
+			},
+		},
+		{
 			"testEstimateVerificationGasLimit",
 			func(*testing.T) {
 				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
@@ -63,6 +78,13 @@ func TestComputeGas(t *testing.T) {
 			},
 		},
 		{
+			"TestGetPreVerificationGas",
+			func(t *testing.T) {
+				strategy := conf.GetBasicStrategyConfig("Optimism_Sepolia_v06_verifyPaymaster")
+				testGetPreVerificationGas(t, op, strategy, model.MockGasPrice)
+			},
+		},
+		{
 			"testComputeGas",
 			func(*testing.T) {
 				testComputeGas(t, op, conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster"))
@@ -73,6 +95,14 @@ func TestComputeGas(t *testing.T) {
 		t.Run(tt.name, tt.test)
 	}
 
+}
+func testGetPreVerificationGas(t *testing.T, userOp *user_op.UserOpInput, strategy *model.Strategy, gasFeeResult *model.GasPrice) {
+	res, err := GetPreVerificationGas(userOp, strategy, gasFeeResult, nil)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Logf("preVerificationGas:%v", res)
 }
 func testComputeGas(t *testing.T, input *user_op.UserOpInput, strategy *model.Strategy) {
 	paymasterDataInput := paymaster_data.NewPaymasterDataInput(strategy)

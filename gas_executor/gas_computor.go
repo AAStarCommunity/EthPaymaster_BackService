@@ -1,4 +1,4 @@
-package gas_service
+package gas_executor
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/data_utils"
@@ -9,7 +9,6 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
-	"AAStarCommunity/EthPaymaster_BackService/gas_validate"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
@@ -75,7 +74,7 @@ func GetUserOpGasPrice(userOpGas *model.UserOpEstimateGas) *big.Int {
 }
 
 func getUserOpEstimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterData) (*model.UserOpEstimateGas, error) {
-	gasPriceResult, gasPriceErr := chain_service.GetGasPrice(strategy.GetNewWork())
+	gasPriceResult, gasPriceErr := GetGasPrice(strategy.GetNewWork())
 	if userOp.MaxFeePerGas != nil {
 		gasPriceResult.MaxFeePerGas = userOp.MaxFeePerGas
 	}
@@ -98,7 +97,7 @@ func getUserOpEstimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy,
 		return nil, xerrors.Errorf("SimulateHandleOp error: %v", err)
 	}
 
-	preVerificationGas, err := chain_service.GetPreVerificationGas(userOp, strategy, gasPriceResult, simulateResult)
+	preVerificationGas, err := GetPreVerificationGas(userOp, strategy, gasPriceResult, simulateResult)
 
 	verificationGasLimit, err := estimateVerificationGasLimit(simulateResult, preVerificationGas)
 
@@ -188,15 +187,6 @@ func getTokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Float, 
 
 }
 
-func ValidateGas(userOp *user_op.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
-	validateFunc := gas_validate.GasValidateFuncMap[strategy.GetPayType()]
-	err := validateFunc(userOp, gasComputeResponse, strategy)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func estimateVerificationGasLimit(simulateOpResult *model.SimulateHandleOpResult, preVerificationGas *big.Int) (*big.Int, error) {
 	preOpGas := simulateOpResult.PreOpGas
 	// verificationGasLimit = (preOpGas - preVerificationGas) * 1.5
@@ -207,4 +197,45 @@ func estimateVerificationGasLimit(simulateOpResult *model.SimulateHandleOpResult
 		return global_const.DummyVerificationgaslimitBigint, nil
 	}
 	return result, nil
+}
+
+// GetGasPrice return gas price in wei, gwei, ether
+func GetGasPrice(chain global_const.Network) (*model.GasPrice, error) {
+	if conf.IsEthereumAdaptableNetWork(chain) {
+		ethereumExecutor := network.GetEthereumExecutor(chain)
+		return ethereumExecutor.GetGasPrice()
+	} else if chain == global_const.StarketMainnet || chain == global_const.StarketSepolia {
+		starknetExecutor := network.GetStarknetExecutor()
+		return starknetExecutor.GetGasPrice()
+	} else {
+		return nil, xerrors.Errorf("chain %s not support", chain)
+	}
+	//MaxFeePerGas
+	//MaxPriorityPrice
+	//preOpGas (get verificationGasLimit from preOpGas)
+	//
+
+}
+
+// GetPreVerificationGas https://github.com/eth-infinitism/bundler/blob/main/packages/sdk/src/calcPreVerificationGas.ts
+func GetPreVerificationGas(userOp *user_op.UserOpInput, strategy *model.Strategy, gasFeeResult *model.GasPrice, simulateOpResult *model.SimulateHandleOpResult) (*big.Int, error) {
+	chain := strategy.GetNewWork()
+	stack := conf.GetNetWorkStack(chain)
+	preGasFunc, err := GetPreVerificationGasFunc(stack)
+	if err != nil {
+		return nil, err
+	}
+	preGas, err := preGasFunc(&model.PreVerificationGasEstimateInput{
+		Strategy:         strategy,
+		Op:               userOp,
+		GasFeeResult:     gasFeeResult,
+		SimulateOpResult: simulateOpResult,
+	})
+	if err != nil {
+		return nil, err
+	}
+	// add 10% buffer
+	preGas = preGas.Mul(preGas, global_const.HundredPlusOneBigint)
+	preGas = preGas.Div(preGas, global_const.HundredBigint)
+	return preGas, nil
 }
