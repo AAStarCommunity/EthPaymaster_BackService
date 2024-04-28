@@ -7,6 +7,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/service/gas_service"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
@@ -42,11 +43,11 @@ func GetGasPrice(chain global_const.Network) (*model.GasPrice, error) {
 func GetPreVerificationGas(userOp *user_op.UserOpInput, strategy *model.Strategy, gasFeeResult *model.GasPrice, simulateOpResult *model.SimulateHandleOpResult) (*big.Int, error) {
 	chain := strategy.GetNewWork()
 	stack := conf.GetNetWorkStack(chain)
-	preGasFunc, err := network.GetPreVerificationGasFunc(stack)
+	preGasFunc, err := gas_service.GetPreVerificationGasFunc(stack)
 	if err != nil {
 		return nil, err
 	}
-	preGas, err := preGasFunc(&network.PreVerificationEstimateInput{
+	preGas, err := preGasFunc(&model.PreVerificationGasEstimateInput{
 		Strategy:         strategy,
 		Op:               userOp,
 		GasFeeResult:     gasFeeResult,

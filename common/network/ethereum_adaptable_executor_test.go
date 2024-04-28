@@ -62,7 +62,7 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 		{
 			"TestSepoliaSimulateV06HandleOp",
 			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
+				strategy := conf.GetBasicStrategyConfig(string(global_const.StrategyCodeEthereumSepoliaVo6Verify))
 				testSimulateHandleOp(t, global_const.EthereumSepolia, strategy)
 			},
 		},
@@ -279,6 +279,8 @@ func testSimulateHandleOp(t *testing.T, chain global_const.Network, strategy *mo
 		return
 	}
 	t.Logf("simulateResult: %v", simulataResult)
+	callData := simulataResult.SimulateUserOpCallData
+	t.Logf("callData: %v", hex.EncodeToString(callData))
 }
 
 func testEthereumExecutorClientConnect(t *testing.T, chain global_const.Network) {

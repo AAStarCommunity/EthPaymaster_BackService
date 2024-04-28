@@ -6,12 +6,14 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"math/big"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 var HexPattern = regexp.MustCompile(`^0x[a-fA-F\d]*$`)
@@ -168,4 +170,12 @@ func ConvertBalanceToEther(balance *big.Int) *big.Float {
 	balanceFloat := new(big.Float).SetInt(balance)
 	balanceFloat = new(big.Float).Quo(balanceFloat, global_const.EthWeiFactor)
 	return balanceFloat
+}
+func ConvertStringToSet(input string, split string) mapset.Set[string] {
+	set := mapset.NewSet[string]()
+	arr := strings.Split(input, split)
+	for _, value := range arr {
+		set.Add(value)
+	}
+	return set
 }

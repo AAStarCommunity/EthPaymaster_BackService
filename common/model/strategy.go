@@ -26,7 +26,7 @@ type NetWorkInfo struct {
 }
 type EntryPointInfo struct {
 	EntryPointAddress *common.Address                `json:"entrypoint_address"`
-	EntryPointVersion global_const.EntrypointVersion `json:"entrypoint_tag"`
+	EntryPointVersion global_const.EntrypointVersion `json:"entrypoint_version"`
 }
 
 func (strategy *Strategy) GetPaymasterAddress() *common.Address {
@@ -62,6 +62,7 @@ type StrategyExecuteRestriction struct {
 	StartTime          int64              `json:"start_time"`
 	EndTime            int64              `json:"end_time"`
 	AccessProject      mapset.Set[string] `json:"access_project"`
+	AccessErc20        mapset.Set[string] `json:"access_erc20"`
 }
 
 type StrategyValidateConfig struct {

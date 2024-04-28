@@ -3,6 +3,7 @@ package conf
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -63,7 +64,8 @@ func convertMapToStrategyConfig(data map[string]map[string]any) (map[string]*mod
 		if !ok {
 			return nil, xerrors.Errorf("effective_end_time illegal")
 		}
-
+		accessProjectStr := value["access_project"].(string)
+		erc20TokenStr := value["access_erc20"].(string)
 		strategy := &model.Strategy{
 			Id:           key,
 			StrategyCode: key,
@@ -72,12 +74,14 @@ func convertMapToStrategyConfig(data map[string]map[string]any) (map[string]*mod
 			},
 			EntryPointInfo: &model.EntryPointInfo{
 				EntryPointAddress: &entryPointAddress,
-				EntryPointVersion: global_const.EntrypointVersion(value["entrypoint_tag"].(string)),
+				EntryPointVersion: global_const.EntrypointVersion(value["entrypoint_version"].(string)),
 			},
 
 			ExecuteRestriction: model.StrategyExecuteRestriction{
 				EffectiveStartTime: effectiveStartTime,
 				EffectiveEndTime:   effectiveEndTime,
+				AccessProject:      utils.ConvertStringToSet(accessProjectStr, ","),
+				AccessErc20:        utils.ConvertStringToSet(erc20TokenStr, ","),
 			},
 			PaymasterInfo: &model.PaymasterInfo{
 				PayMasterAddress: &paymasterAddress,

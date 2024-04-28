@@ -31,6 +31,11 @@ func TestToEthSignedMessageHash(t *testing.T) {
 	afterStr := hex.EncodeToString(afterStrByte)
 	fmt.Printf("afterStr: %s\n", afterStr)
 }
+func TestConvertStringToSet(t *testing.T) {
+	str := "a,b,c,d"
+	set := ConvertStringToSet(str, ",")
+	fmt.Printf("set: %v\n", set)
+}
 
 //func TestEthereumSign(t *testing.T) {
 //	messageStr := "hello world"

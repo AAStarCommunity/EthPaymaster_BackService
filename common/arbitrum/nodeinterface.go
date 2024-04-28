@@ -3,7 +3,7 @@ package arbitrum
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/paymaster_abi"
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
-	"AAStarCommunity/EthPaymaster_BackService/common/network"
+	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -46,7 +46,7 @@ type GasEstimateL1ComponentOutput struct {
 	L1BaseFeeEstimate *big.Int
 }
 
-func GetArbEstimateOutPut(client *ethclient.Client, preVerificationEstimateInput *network.PreVerificationEstimateInput) (*GasEstimateL1ComponentOutput, error) {
+func GetArbEstimateOutPut(client *ethclient.Client, preVerificationEstimateInput *model.PreVerificationGasEstimateInput) (*GasEstimateL1ComponentOutput, error) {
 	strategy := preVerificationEstimateInput.Strategy
 	simulteaOpCallData := preVerificationEstimateInput.SimulateOpResult.SimulateUserOpCallData
 	methodIputeData, err := GasEstimateL1ComponentMethod.Inputs.Pack(strategy.GetEntryPointAddress(), false, append(simulteaOpCallData))
