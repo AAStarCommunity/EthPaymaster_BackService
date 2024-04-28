@@ -85,9 +85,15 @@ func TestComputeGas(t *testing.T) {
 			},
 		},
 		{
-			"testComputeGas",
+			"testComputeGas_StrategyCodeEthereumSepoliaVo6Verify",
 			func(*testing.T) {
-				testComputeGas(t, op, conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster"))
+				testComputeGas(t, op, conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV06Verify))
+			},
+		},
+		{
+			"testComputeGas_StrategyCodeEthereumSepoliaVo6Verify",
+			func(*testing.T) {
+				testComputeGas(t, op, conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV06Verify))
 			},
 		},
 	}

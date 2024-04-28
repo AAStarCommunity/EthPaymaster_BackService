@@ -62,7 +62,7 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 		{
 			"TestSepoliaSimulateV06HandleOp",
 			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig(string(global_const.StrategyCodeEthereumSepoliaVo6Verify))
+				strategy := conf.GetBasicStrategyConfig(string(global_const.StrategyCodeEthereumSepoliaV06Verify))
 				testSimulateHandleOp(t, global_const.EthereumSepolia, strategy)
 			},
 		},

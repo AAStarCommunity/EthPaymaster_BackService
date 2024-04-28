@@ -17,8 +17,8 @@ var basicStrategyConfig = make(map[string]*model.Strategy)
 // suitableStrategyMap[chain][entrypoint][payType]
 var suitableStrategyMap = make(map[global_const.Network]map[string]map[global_const.PayType]*model.Strategy)
 
-func GetBasicStrategyConfig(key string) *model.Strategy {
-	return basicStrategyConfig[key]
+func GetBasicStrategyConfig(strategyCode global_const.BasicStrategyCode) *model.Strategy {
+	return basicStrategyConfig[string(strategyCode)]
 }
 func GetSuitableStrategy(entrypoint string, chain global_const.Network, payType global_const.PayType) (*model.Strategy, error) {
 	strategy := suitableStrategyMap[chain][entrypoint][payType]

@@ -7,13 +7,8 @@ import (
 	"errors"
 )
 
-var MockStrategyMap = map[string]*model.Strategy{}
-
-func init() {
-
-}
-func GetStrategyById(strategyId string) *model.Strategy {
-	return conf.GetBasicStrategyConfig(strategyId)
+func GetStrategyByCode(strategyCode string) *model.Strategy {
+	return conf.GetBasicStrategyConfig(global_const.BasicStrategyCode(strategyCode))
 
 }
 

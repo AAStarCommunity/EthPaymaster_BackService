@@ -126,7 +126,7 @@ func postExecute(userOp *user_op.UserOpInput, strategy *model.Strategy, gasRespo
 func StrategyGenerate(request *model.UserOpRequest) (*model.Strategy, error) {
 	if forceStrategyId := request.ForceStrategyId; forceStrategyId != "" {
 		//force strategy
-		if strategy := dashboard_service.GetStrategyById(forceStrategyId); strategy == nil {
+		if strategy := dashboard_service.GetStrategyByCode(forceStrategyId); strategy == nil {
 			return nil, xerrors.Errorf("Not Support Strategy ID: [%w]", forceStrategyId)
 		} else {
 			return strategy, nil
