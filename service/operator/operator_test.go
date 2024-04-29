@@ -75,6 +75,30 @@ func TestOperator(t *testing.T) {
 			},
 		},
 		{
+			"Test_OpSepoliaV06Erc20_TryPayUserOpExecute",
+			func(t *testing.T) {
+				mockRequest.Erc20Token = global_const.TokenTypeUSDT
+				mockRequest.ForceStrategyId = string(global_const.StrategyCodeOptimismSepoliaV06Erc20)
+				testTryPayUserOpExecute(t, mockRequest)
+			},
+		},
+		{
+			"Test_ArbSepoliaV06Erc20_TryPayUserOpExecute",
+			func(t *testing.T) {
+				mockRequest.Erc20Token = global_const.TokenTypeUSDT
+				mockRequest.ForceStrategyId = string(global_const.StrategyCodeArbitrumSpeoliaV06Erc20)
+				testTryPayUserOpExecute(t, mockRequest)
+			},
+		},
+		{
+			"Test_BaseSepoliaV06Erc20_TryPayUserOpExecute",
+			func(t *testing.T) {
+				mockRequest.Erc20Token = global_const.TokenTypeUSDT
+				mockRequest.ForceStrategyId = string(global_const.StrategyCodeBaseSepoliaV06Erc20)
+				testTryPayUserOpExecute(t, mockRequest)
+			},
+		},
+		{
 			"testGetSupportStrategyExecute",
 			func(t *testing.T) {
 				testGetSupportStrategyExecute(t)

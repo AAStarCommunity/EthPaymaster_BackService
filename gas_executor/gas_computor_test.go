@@ -129,7 +129,7 @@ func TestComputeGas(t *testing.T) {
 			},
 		},
 		{
-			"TestUSDTTokenCost",
+			"TestErc20",
 			func(t *testing.T) {
 				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV06Erc20)
 				strategy.Erc20TokenType = global_const.TokenTypeUSDT
@@ -137,7 +137,7 @@ func TestComputeGas(t *testing.T) {
 			},
 		},
 		{
-			"TestErc20",
+			"TestUSDTTokenCost",
 			func(t *testing.T) {
 				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV06Erc20)
 				strategy.Erc20TokenType = global_const.TokenTypeUSDT
