@@ -123,6 +123,38 @@ func TestComputeGas(t *testing.T) {
 			},
 		},
 		{
+			"testComputeGas_StrategyCodeEthereumSepoliaV06Erc20",
+			func(*testing.T) {
+				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV06Erc20)
+				strategy.Erc20TokenType = global_const.TokenTypeUSDT
+				testComputeGas(t, op, strategy)
+			},
+		},
+		{
+			"testComputeGas_StrategyCodeOptimismSepoliaV06Erc20",
+			func(*testing.T) {
+				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeOptimismSepoliaV06Erc20)
+				strategy.Erc20TokenType = global_const.TokenTypeUSDT
+				testComputeGas(t, op, strategy)
+			},
+		},
+		{
+			"testComputeGas_StrategyCodeArbitrumSpeoliaV06Erc20",
+			func(*testing.T) {
+				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeArbitrumSpeoliaV06Erc20)
+				strategy.Erc20TokenType = global_const.TokenTypeUSDT
+				testComputeGas(t, op, strategy)
+			},
+		},
+		{
+			"testComputeGas_StrategyCodeBaseSepoliaV06Erc20",
+			func(*testing.T) {
+				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeBaseSepoliaV06Erc20)
+				strategy.Erc20TokenType = global_const.TokenTypeUSDT
+				testComputeGas(t, op, strategy)
+			},
+		},
+		{
 			"TestScrollEstimateCallGasLimit",
 			func(t *testing.T) {
 				testEstimateCallGasLimit(t, conf.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify), model.MockSimulateHandleOpResult, op, global_const.DummayPreverificationgasBigint)
