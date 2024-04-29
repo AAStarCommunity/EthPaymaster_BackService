@@ -128,10 +128,35 @@ func TestComputeGas(t *testing.T) {
 				testEstimateCallGasLimit(t, conf.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify), model.MockSimulateHandleOpResult, op, global_const.DummayPreverificationgasBigint)
 			},
 		},
+		{
+			"TestUSDTTokenCost",
+			func(t *testing.T) {
+				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV06Erc20)
+				strategy.Erc20TokenType = global_const.TokenTypeUSDT
+				testErc20TokenCost(t, strategy, big.NewFloat(0.0001))
+			},
+		},
+		{
+			"TestErc20",
+			func(t *testing.T) {
+				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV06Erc20)
+				strategy.Erc20TokenType = global_const.TokenTypeUSDT
+				testErc20TokenCost(t, strategy, big.NewFloat(0.0001))
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, tt.test)
 	}
+}
+func testErc20TokenCost(t *testing.T, strategy *model.Strategy, tokenCount *big.Float) {
+	erc20TokenCost, err := getErc20TokenCost(strategy, tokenCount)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Logf("erc20TokenCost:%v", erc20TokenCost)
+
 }
 func testEstimateCallGasLimit(t *testing.T, strategy *model.Strategy, simulateOpResult *model.SimulateHandleOpResult, op *user_op.UserOpInput, simulateGasPrice *big.Int) {
 	callGasLimit, err := EstimateCallGasLimit(strategy, simulateOpResult, op, simulateGasPrice)

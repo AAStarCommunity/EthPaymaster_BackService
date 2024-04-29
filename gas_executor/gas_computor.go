@@ -30,11 +30,20 @@ func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymaster
 
 	totalGasDetail := GetTotalCostByEstimateGas(opEstimateGas)
 	updateUserOp := getNewUserOpAfterCompute(userOp, opEstimateGas, strategy.GetStrategyEntrypointVersion())
+	var erc20TokenCost *big.Float
+	if !userOp.ComputeGasOnly {
+		erc20TokenCost, err = getErc20TokenCost(strategy, totalGasDetail.MaxTxGasCostInEther)
+		if err != nil {
+			return nil, nil, xerrors.Errorf("getErc20TokenCost error: %v", err)
+		}
+	}
 	return &model.ComputeGasResponse{
 		OpEstimateGas:  opEstimateGas,
 		TotalGasDetail: totalGasDetail,
+		Erc20TokenCost: erc20TokenCost,
 	}, updateUserOp, nil
 }
+
 func GetTotalCostByEstimateGas(userOpGas *model.UserOpEstimateGas) *model.TotalGasDetail {
 	gasPrice := GetUserOpGasPrice(userOpGas)
 	totalGasLimit := new(big.Int)
@@ -178,11 +187,13 @@ func EstimateCallGasLimit(strategy *model.Strategy, simulateOpResult *model.Simu
 	}
 }
 
-func getTokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Float, error) {
+func getErc20TokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Float, error) {
 	if strategy.GetPayType() == global_const.PayTypeERC20 {
-
+		if strategy.Erc20TokenType == "" {
+			return nil, xerrors.Errorf("strategy.Erc20TokenType is nil")
+		}
 		formTokenType := conf.GetGasToken(strategy.GetNewWork())
-		toTokenType := strategy.GetUseToken()
+		toTokenType := strategy.Erc20TokenType
 		toTokenPrice, err := utils.GetToken(formTokenType, toTokenType)
 		if err != nil {
 			return nil, err
@@ -190,10 +201,11 @@ func getTokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Float, 
 		if toTokenPrice == 0 {
 			return nil, xerrors.Errorf("toTokenPrice can not be 0")
 		}
+		logrus.Debugf("toTokenPrice: %v", toTokenPrice)
 		tokenCost := new(big.Float).Mul(tokenCount, big.NewFloat(toTokenPrice))
 		return tokenCost, nil
 	}
-	return tokenCount, nil
+	return nil, nil
 
 }
 

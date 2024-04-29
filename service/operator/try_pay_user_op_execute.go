@@ -43,9 +43,7 @@ func TryPayUserOpExecute(request *model.UserOpRequest) (*model.TryPayUserOpRespo
 //sub Function ---------
 
 func prepareExecute(request *model.UserOpRequest) (*user_op.UserOpInput, *model.Strategy, *paymaster_data.PaymasterData, error) {
-
 	var strategy *model.Strategy
-
 	strategy, generateErr := StrategyGenerate(request)
 	if generateErr != nil {
 		return nil, nil, nil, generateErr
@@ -54,7 +52,6 @@ func prepareExecute(request *model.UserOpRequest) (*user_op.UserOpInput, *model.
 	userOp, err := user_op.NewUserOp(&request.UserOp)
 	if err != nil {
 		return nil, nil, nil, err
-
 	}
 	if err := validator_service.ValidateStrategy(strategy); err != nil {
 		return nil, nil, nil, err
@@ -124,21 +121,31 @@ func postExecute(userOp *user_op.UserOpInput, strategy *model.Strategy, gasRespo
 }
 
 func StrategyGenerate(request *model.UserOpRequest) (*model.Strategy, error) {
+	var strategyResult *model.Strategy
 	if forceStrategyId := request.ForceStrategyId; forceStrategyId != "" {
 		//force strategy
 		if strategy := dashboard_service.GetStrategyByCode(forceStrategyId); strategy == nil {
 			return nil, xerrors.Errorf("Not Support Strategy ID: [%w]", forceStrategyId)
 		} else {
-			return strategy, nil
+			strategyResult = strategy
 		}
-	}
+	} else {
+		suitableStrategy, err := dashboard_service.GetSuitableStrategy(request.ForceEntryPointAddress, request.ForceNetwork, global_const.PayTypeSuperVerifying) //TODO
+		if err != nil {
+			return nil, err
+		}
+		if suitableStrategy == nil {
+			return nil, xerrors.Errorf("Empty Strategies")
+		}
 
-	suitableStrategy, err := dashboard_service.GetSuitableStrategy(request.ForceEntryPointAddress, request.ForceNetwork, global_const.PayTypeSuperVerifying) //TODO
-	if err != nil {
-		return nil, err
+		strategyResult = suitableStrategy
 	}
-	if suitableStrategy == nil {
-		return nil, xerrors.Errorf("Empty Strategies")
+	if strategyResult.GetPayType() == global_const.PayTypeERC20 {
+		if request.Erc20Token == "" {
+			return nil, xerrors.Errorf("Empty Erc20Token")
+		}
+		strategyResult.Erc20TokenType = request.Erc20Token
+
 	}
-	return suitableStrategy, nil
+	return strategyResult, nil
 }

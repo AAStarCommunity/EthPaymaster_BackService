@@ -38,6 +38,7 @@ func convertConfig(originConfig *OriginBusinessConfig) *BusinessConfig {
 			IsTest:      originNetWorkConfig.IsTest,
 			RpcUrl:      fmt.Sprintf("%s/%s", originNetWorkConfig.RpcUrl, originNetWorkConfig.ApiKey),
 			TokenConfig: originNetWorkConfig.TokenConfig,
+			GasToken:    originNetWorkConfig.GasToken,
 		}
 		paymasterArr := originConfig.SupportPaymaster[network]
 		paymasterSet := mapset.NewSet[string]()
@@ -85,7 +86,7 @@ type OriginNetWorkConfig struct {
 	ApiKey           string                            `json:"api_key"`
 	SignerKey        string                            `json:"signer_key"`
 	TokenConfig      map[global_const.TokenType]string `json:"token_config"`
-	GasToken         global_const.TokenType
+	GasToken         global_const.TokenType            `json:"gas_token"`
 	GasOracleAddress string
 }
 

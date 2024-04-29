@@ -18,7 +18,7 @@ type PaymasterData struct {
 func NewPaymasterDataInput(strategy *model.Strategy) *PaymasterData {
 	start := strategy.ExecuteRestriction.EffectiveStartTime
 	end := strategy.ExecuteRestriction.EffectiveEndTime
-	tokenAddress := conf.GetTokenAddress(strategy.GetNewWork(), strategy.GetUseToken())
+	tokenAddress := conf.GetTokenAddress(strategy.GetNewWork(), strategy.Erc20TokenType)
 	return &PaymasterData{
 		Paymaster:    *strategy.GetPaymasterAddress(),
 		ValidUntil:   big.NewInt(end.Int64()),

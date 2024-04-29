@@ -18,6 +18,7 @@ func GetEstimateUserOpGas(request *model.UserOpRequest) (*model.ComputeGasRespon
 	if err != nil {
 		return nil, err
 	}
+	userOp.ComputeGasOnly = true
 	gasResponse, _, gasComputeError := gas_executor.ComputeGas(userOp, strategy, paymaster_data.NewPaymasterDataInput(strategy))
 	if gasComputeError != nil {
 		return nil, gasComputeError

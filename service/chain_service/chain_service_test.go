@@ -17,12 +17,6 @@ import (
 	"testing"
 )
 
-func TestGetAddressTokenBalance(t *testing.T) {
-	res, err := GetAddressTokenBalance(global_const.EthereumSepolia, common.HexToAddress("0xDf7093eF81fa23415bb703A685c6331584D30177"), global_const.TokenTypeUSDC)
-	assert.NoError(t, err)
-	fmt.Println(res)
-}
-
 func TestChainService(t *testing.T) {
 	conf.BasicStrategyInit("../../conf/basic_strategy_dev_config.json")
 	conf.BusinessConfigInit("../../conf/business_dev_config.json")
@@ -58,12 +52,23 @@ func TestChainService(t *testing.T) {
 				testCheckContractAddressAccess(t)
 			},
 		},
+		{
+
+			"testGetAddressTokenBalance",
+			func(t *testing.T) {
+				testGetAddressTokenBalance(t)
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, tt.test)
 	}
 }
-
+func testGetAddressTokenBalance(t *testing.T) {
+	res, err := GetAddressTokenBalance(global_const.EthereumSepolia, common.HexToAddress("0xFD44DF0Fe211d5EFDBe1423483Fcb3FDeF84540f"), global_const.TokenTypeUSDC)
+	assert.NoError(t, err)
+	fmt.Println(res)
+}
 func testCheckContractAddressAccess(t *testing.T) {
 	addressStr := "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f"
 	address := common.HexToAddress(addressStr)

@@ -455,7 +455,7 @@ func (executor EthereumExecutor) GetUserOpHash(userOp *user_op.UserOpInput, stra
 	erc20Token := common.HexToAddress("0x")
 	paytype := strategy.GetPayType()
 	if paytype == global_const.PayTypeERC20 {
-		tokenType := strategy.GetUseToken()
+		tokenType := strategy.Erc20TokenType
 		tokenAddress := conf.GetTokenAddress(strategy.GetNewWork(), tokenType)
 		erc20Token = common.HexToAddress(tokenAddress)
 	}

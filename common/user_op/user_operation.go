@@ -263,6 +263,8 @@ type UserOpInput struct {
 	VerificationGasLimit *big.Int `json:"verificationGasLimit"  mapstructure:"verification_gas_limit"  binding:"required"`
 	AccountGasLimits     [32]byte `json:"accountGasLimits"  mapstructure:"account_gas_limits"  binding:"required"`
 	GasFees              [32]byte `json:"gasFees"  mapstructure:"gas_fees"  binding:"required"`
+
+	ComputeGasOnly bool
 }
 
 func packUserOpV6ForUserOpHash(userOp *UserOperationV06) (string, []byte, error) {

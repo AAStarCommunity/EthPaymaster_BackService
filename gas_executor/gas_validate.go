@@ -30,7 +30,7 @@ func Erc20GasValidate() ValidatePaymasterGasFunc {
 	return func(userOp *user_op.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
 		userOpValue := *userOp
 		sender := userOpValue.Sender
-		tokenBalance, getTokenBalanceErr := chain_service.GetAddressTokenBalance(strategy.GetNewWork(), *sender, strategy.GetUseToken())
+		tokenBalance, getTokenBalanceErr := chain_service.GetAddressTokenBalance(strategy.GetNewWork(), *sender, strategy.Erc20TokenType)
 		if getTokenBalanceErr != nil {
 			return getTokenBalanceErr
 		}

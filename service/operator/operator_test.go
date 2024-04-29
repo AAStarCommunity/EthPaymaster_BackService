@@ -1,6 +1,7 @@
 package operator
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
@@ -38,9 +39,39 @@ func TestOperator(t *testing.T) {
 			},
 		},
 		{
-			"TestVerifyTryPayUserOpExecute",
+			"Test_EthereumSepoliaV06Verify_TryPayUserOpExecute",
 			func(t *testing.T) {
-				testTryPayUserOpExecute(t)
+				mockRequest.ForceStrategyId = string(global_const.StrategyCodeEthereumSepoliaV06Verify)
+				testTryPayUserOpExecute(t, mockRequest)
+			},
+		},
+		{
+			"Test_OptimismSepoliaV06Verify_TryPayUserOpExecute",
+			func(t *testing.T) {
+				mockRequest.ForceStrategyId = string(global_const.StrategyCodeOptimismSepoliaV06Verify)
+				testTryPayUserOpExecute(t, mockRequest)
+			},
+		},
+		{
+			"Test_ArbitrumSpeoliaV06Verify_TryPayUserOpExecute",
+			func(t *testing.T) {
+				mockRequest.ForceStrategyId = string(global_const.StrategyCodeArbitrumSpeoliaV06Verify)
+				testTryPayUserOpExecute(t, mockRequest)
+			},
+		},
+		{
+			"Test_BaseSepoliaV06Verify_TryPayUserOpExecute",
+			func(t *testing.T) {
+				mockRequest.ForceStrategyId = string(global_const.StrategyCodeArbitrumSpeoliaV06Verify)
+				testTryPayUserOpExecute(t, mockRequest)
+			},
+		},
+		{
+			"Test_EthereumSepoliaV06Erc20_TryPayUserOpExecute",
+			func(t *testing.T) {
+				mockRequest.Erc20Token = global_const.TokenTypeUSDT
+				mockRequest.ForceStrategyId = string(global_const.StrategyCodeEthereumSepoliaV06Erc20)
+				testTryPayUserOpExecute(t, mockRequest)
 			},
 		},
 		{
@@ -81,15 +112,14 @@ func testGetSupportEntrypointExecute(t *testing.T) {
 	}
 	t.Log(res)
 }
-func testTryPayUserOpExecute(t *testing.T) {
-	request := getMockTryPayUserOpRequest()
+func testTryPayUserOpExecute(t *testing.T, request *model.UserOpRequest) {
 	result, err := TryPayUserOpExecute(request)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	resultJson, _ := json.Marshal(result)
-	fmt.Printf("Result: %v", string(resultJson))
+	t.Logf("Result: %v", string(resultJson))
 }
 
 func getMockTryPayUserOpRequest() *model.UserOpRequest {

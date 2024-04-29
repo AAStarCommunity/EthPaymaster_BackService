@@ -34,7 +34,7 @@ func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {
 		return 1, nil
 	}
 	if tokenType == global_const.ETH {
-		return 4000, nil
+		return 3100, nil
 	}
 	url, ok := URLMap[tokenType]
 	if !ok {

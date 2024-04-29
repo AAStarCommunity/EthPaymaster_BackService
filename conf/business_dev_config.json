@@ -6,9 +6,10 @@
       "rpc_url": "https://eth-sepolia.g.alchemy.com/v2",
       "api_key": "wKeLycGxgYRykgf0aGfcpEkUtqyLQg4v",
       "signer_key" : "1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421",
+      "gas_token": "ETH",
       "token_config": {
-        "USDT": "0xd6ad2fa83f2012d5296b58dfad6e8c9567138035",
-        "USDC": "0x8d7b4d4b876dfd8ae031f13978890119cf0da9b1"
+        "USDT": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B",
+        "USDC": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B"
       }
     },
     "optimism-sepolia": {
@@ -17,9 +18,10 @@
       "rpc_url": "https://opt-sepolia.g.alchemy.com/v2",
       "api_key": "_z0GaU6Zk8RfIR1guuli8nqMdb8RPdp0",
       "signer_key" : "1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421",
+      "gas_token": "ETH",
       "token_config": {
-        "USDT": "0xebca682b6c15d539284432edc5b960771f0009e8",
-        "USDC": "0x87350147a24099bf1e7e677576f01c1415857c75"
+        "USDT": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B",
+        "USDC": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B"
       }
     },
     "arbitrum-sepolia": {
@@ -28,20 +30,22 @@
       "rpc_url": "https://arb-sepolia.g.alchemy.com/v2",
       "api_key": "xSBkiidslrZmlcWUOSF3AluKx0A9g_kl",
       "signer_key" : "752d81d71afd0b25a09f24718baf82c0846cc3b68122cfb3a1d41529c8a46b05",
+      "gas_token": "ETH",
       "token_config": {
-        "USDT": "0xA552958397146e081C8358cd63db64d3555Ec4f8",
-        "USDC": "0xe7E15A3027b6A08d2a6a3a9dc9250E711c206767"
+        "USDT": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B",
+        "USDC": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B"
       }
     },
     "scroll-sepolia": {
       "chain_id": "534351",
       "is_test": true,
       "rpc_url": "https://sepolia-rpc.scroll.io",
-      "api_key": "",
+      "api_key": "9DGRNUARDVGDPZWN2G55I3Y5NG7HQJBUTH",
       "signer_key" : "752d81d71afd0b25a09f24718baf82c0846cc3b68122cfb3a1d41529c8a46b05",
+      "gas_token": "ETH",
       "token_config": {
-        "USDT": "0x87027e19837264cd35b73b90ac10b9ce4b06b4f2",
-        "USDC": "0x29a840decf91547db4ed77f1e59542c4d1986915"
+        "USDT": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B",
+        "USDC": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B"
       }
     },
     "starknet-sepolia": {
@@ -50,9 +54,10 @@
       "rpc_url": "https://starknet-sepolia.infura.io/v3",
       "api_key": "0284f5a9fc55476698079b24e2f97909",
       "signer_key" : "752d81d71afd0b25a09f24718baf82c0846cc3b68122cfb3a1d41529c8a46b05",
+      "gas_token": "ETH",
       "token_config": {
-        "USDT": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0",
-        "USDC": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"
+        "USDT": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B",
+        "USDC": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B"
       }
     },
     "base-sepolia": {
@@ -61,9 +66,10 @@
       "rpc_url": "https://base-sepolia.g.alchemy.com/v2",
       "api_key": "zUhtd18b2ZOTIJME6rv2Uwz9q7PBnnsa",
       "signer_key" : "752d81d71afd0b25a09f24718baf82c0846cc3b68122cfb3a1d41529c8a46b05",
+      "gas_token": "ETH",
       "token_config": {
-        "USDT": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0",
-        "USDC": "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"
+        "USDT": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B",
+        "USDC": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B"
       }
     }
   },
