@@ -162,8 +162,12 @@ var (
 		global_const.ScrollSepolia:   common.HexToAddress("0x5300000000000000000000000000000000000002"),
 		global_const.ScrollMainnet:   common.HexToAddress("0x5300000000000000000000000000000000000002"),
 	}
+	Disable1559Chain = mapset.NewSet(global_const.ScrollSepolia, global_const.ScrollMainnet)
 )
 
+func IsDisable1559Chain(network global_const.Network) bool {
+	return Disable1559Chain.Contains(network)
+}
 func GetNetWorkStack(network global_const.Network) global_const.NewWorkStack {
 	if IsOpStackNetWork(network) {
 		return global_const.OpStack

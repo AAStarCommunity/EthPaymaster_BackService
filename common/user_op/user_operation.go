@@ -178,8 +178,8 @@ func init() {
 type BaseUserOperation struct {
 	Sender             *common.Address `json:"sender"   mapstructure:"sender"  binding:"required,hexParam"`
 	Nonce              *big.Int        `json:"nonce"  mapstructure:"nonce"  binding:"required"`
-	InitCode           []byte          `json:"initCode"  mapstructure:"init_code" `
-	CallData           []byte          `json:"callData"  mapstructure:"call_data"  binding:"required"`
+	InitCode           []byte          `json:"initCode"  mapstructure:"initCode" `
+	CallData           []byte          `json:"callData"  mapstructure:"callData"  binding:"required"`
 	PreVerificationGas *big.Int        `json:"preVerificationGas"  mapstructure:"pre_verification_gas"  binding:"required"`
 	PaymasterAndData   []byte          `json:"paymasterAndData"  mapstructure:"paymaster_and_data"`
 	Signature          []byte          `json:"signature"  mapstructure:"signature"  binding:"required"`
@@ -192,13 +192,13 @@ type BaseUserOperation struct {
 type UserOperationV06 struct {
 	Sender             *common.Address `json:"sender"   mapstructure:"sender"  binding:"required,hexParam"`
 	Nonce              *big.Int        `json:"nonce"  mapstructure:"nonce"  binding:"required"`
-	InitCode           []byte          `json:"initCode"  mapstructure:"init_code" `
-	CallData           []byte          `json:"callData"  mapstructure:"call_data"  binding:"required"`
+	InitCode           []byte          `json:"initCode"  mapstructure:"initCode" `
+	CallData           []byte          `json:"callData"  mapstructure:"callData"  binding:"required"`
 	PreVerificationGas *big.Int        `json:"preVerificationGas"  mapstructure:"pre_verification_gas"  binding:"required"`
 	PaymasterAndData   []byte          `json:"paymasterAndData"  mapstructure:"paymaster_and_data"`
 	Signature          []byte          `json:"signature"  mapstructure:"signature"  binding:"required"`
 	//Maximum fee per gas (similar to EIP-1559  max_fee_per_gas)
-	MaxFeePerGas *big.Int `json:"maxFeePerGas"  mapstructure:"max_fee_per_gas"  binding:"required"`
+	MaxFeePerGas *big.Int `json:"maxFeePerGas"  mapstructure:"maxFeePerGas"  binding:"required"`
 	//Maximum priority fee per gas (similar to EIP-1559 max_priority_fee_per_gas)
 	MaxPriorityFeePerGas *big.Int `json:"maxPriorityFeePerGas"  mapstructure:"max_priority_fee_per_gas"  binding:"required"`
 	//Gas limit for execution phase
@@ -248,20 +248,20 @@ func NewUserOp(userOp *map[string]any) (*UserOpInput, error) {
 type UserOpInput struct {
 	Sender             *common.Address `json:"sender"   mapstructure:"sender"  binding:"required,hexParam"`
 	Nonce              *big.Int        `json:"nonce"  mapstructure:"nonce"  binding:"required"`
-	InitCode           []byte          `json:"initCode"  mapstructure:"init_code" `
-	CallData           []byte          `json:"callData"  mapstructure:"call_data"  binding:"required"`
-	PreVerificationGas *big.Int        `json:"preVerificationGas"  mapstructure:"pre_verification_gas"  binding:"required"`
-	PaymasterAndData   []byte          `json:"paymasterAndData"  mapstructure:"paymaster_and_data"`
+	InitCode           []byte          `json:"initCode"  mapstructure:"initCode" `
+	CallData           []byte          `json:"callData"  mapstructure:"callData"  binding:"required"`
+	PreVerificationGas *big.Int        `json:"preVerificationGas"  mapstructure:"preVerificationGas"  binding:"required"`
+	PaymasterAndData   []byte          `json:"paymasterAndData"  mapstructure:"paymasterAndData"`
 	Signature          []byte          `json:"signature"  mapstructure:"signature"  binding:"required"`
 	//Maximum fee per gas (similar to EIP-1559  max_fee_per_gas)
-	MaxFeePerGas *big.Int `json:"maxFeePerGas"  mapstructure:"max_fee_per_gas"  binding:"required"`
+	MaxFeePerGas *big.Int `json:"maxFeePerGas"  mapstructure:"maxFeePerGas"  binding:"required"`
 	//Maximum priority fee per gas (similar to EIP-1559 max_priority_fee_per_gas)
-	MaxPriorityFeePerGas *big.Int `json:"maxPriorityFeePerGas"  mapstructure:"max_priority_fee_per_gas"  binding:"required"`
+	MaxPriorityFeePerGas *big.Int `json:"maxPriorityFeePerGas"  mapstructure:"maxPriorityFeePerGas"  binding:"required"`
 	//Gas limit for execution phase
-	CallGasLimit *big.Int `json:"callGasLimit"  mapstructure:"call_gas_limit"  binding:"required"`
+	CallGasLimit *big.Int `json:"callGasLimit"  mapstructure:"callGasLimit"  binding:"required"`
 	//Gas limit for verification phase
-	VerificationGasLimit *big.Int `json:"verificationGasLimit"  mapstructure:"verification_gas_limit"  binding:"required"`
-	AccountGasLimits     [32]byte `json:"accountGasLimits"  mapstructure:"account_gas_limits"  binding:"required"`
+	VerificationGasLimit *big.Int `json:"verificationGasLimit"  mapstructure:"verificationGasLimit"  binding:"required"`
+	AccountGasLimits     [32]byte `json:"accountGasLimits"  mapstructure:"accountGasLimits"  binding:"required"`
 	GasFees              [32]byte `json:"gasFees"  mapstructure:"gas_fees"  binding:"required"`
 
 	ComputeGasOnly bool

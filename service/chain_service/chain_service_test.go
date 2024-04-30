@@ -26,6 +26,12 @@ func TestChainService(t *testing.T) {
 		t.Error(err)
 		return
 	}
+	opFor1559NotSupport, err := user_op.NewUserOp(utils.GenerateMockUservOperation())
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	opFor1559NotSupport.MaxPriorityFeePerGas = opFor1559NotSupport.MaxFeePerGas
 
 	tests := []struct {
 		name string
@@ -36,6 +42,13 @@ func TestChainService(t *testing.T) {
 			"TestSepoliaSimulateHandleOp",
 			func(t *testing.T) {
 				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
+				testSimulateHandleOp(t, op, strategy)
+			},
+		},
+		{
+			"TestScrollSepoliaSimulateHandleOp",
+			func(t *testing.T) {
+				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify)
 				testSimulateHandleOp(t, op, strategy)
 			},
 		},
@@ -96,7 +109,7 @@ func testGetPaymasterEntryPointBalance(t *testing.T, strategy model.Strategy) {
 
 func testSimulateHandleOp(t *testing.T, userOp *user_op.UserOpInput, strategy *model.Strategy) {
 	paymasterDataInput := paymaster_data.NewPaymasterDataInput(strategy)
-	userOpInputForSimulate, err := data_utils.GetUserOpWithPaymasterAndDataForSimulate(*userOp, strategy, paymasterDataInput, &model.GasPrice{})
+	userOpInputForSimulate, err := data_utils.GetUserOpWithPaymasterAndDataForSimulate(*userOp, strategy, paymasterDataInput, model.MockGasPrice)
 	if err != nil {
 		t.Error(err)
 		return

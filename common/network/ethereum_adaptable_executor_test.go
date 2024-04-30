@@ -75,17 +75,17 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 			},
 		},
 		//{
-		//	"TestSepoliaSimulateV07HandleOp",
+		//	"TestScrollSepoliaSimulateV06HandleOp",
 		//	func(t *testing.T) {
-		//		strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v07_verifyPaymaster")
-		//		testSimulateHandleOp(t, global_const.EthereumSepolia, strategy)
+		//		strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify)
+		//		testSimulateHandleOp(t, global_const.ScrollSepolia, strategy)
 		//	},
 		//},
 		{
-			"TestGetPaymasterAndDataV07",
+			"TestSepoliaSimulateV07HandleOp",
 			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
-				testGetPaymasterData(t, global_const.EthereumSepolia, op, strategy)
+				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV07Verify)
+				testSimulateHandleOp(t, global_const.EthereumSepolia, strategy)
 			},
 		},
 		{
@@ -292,6 +292,7 @@ func testSimulateHandleOp(t *testing.T, chain global_const.Network, strategy *mo
 	op.PaymasterAndData = paymasterData
 	t.Logf("entryPoint Address %s", strategy.GetEntryPointAddress())
 	version := strategy.GetStrategyEntrypointVersion()
+	t.Logf("version: %s", version)
 	var simulataResult *model.SimulateHandleOpResult
 	if version == global_const.EntrypointV06 {
 		simulataResult, err = sepoliaExector.SimulateV06HandleOp(*op, strategy.GetEntryPointAddress())

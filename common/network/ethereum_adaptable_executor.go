@@ -213,7 +213,11 @@ func (executor EthereumExecutor) GetGasPrice() (*model.GasPrice, error) {
 		return nil, err
 	}
 	if head.BaseFee == nil {
-		head.BaseFee = big.NewInt(0)
+		if executor.network == global_const.ScrollSepolia || executor.network == global_const.ScrollMainnet {
+			head.BaseFee = big.NewInt(0)
+		} else {
+			return nil, xerrors.Errorf("baseFee is nil in [%s] network", executor.network)
+		}
 	}
 	result.BaseFee = head.BaseFee
 	return &result, nil
@@ -330,6 +334,8 @@ func (executor EthereumExecutor) SimulateV07HandleOp(userOpV07 user_op.UserOpInp
 	gClient := executor.GethClient
 	byteResult, err := gClient.CallContractWithBlockOverrides(context.Background(), msg, nil, mapAcc, gethclient.BlockOverrides{})
 	if err != nil {
+		logrus.Debugf("SimulateV07HandleOp error [%v]", err)
+		logrus.Debugf("SimulateV07HandleOp Res [%s]", string(byteResult))
 		return nil, err
 	}
 	err = json.Unmarshal(byteResult, &result)

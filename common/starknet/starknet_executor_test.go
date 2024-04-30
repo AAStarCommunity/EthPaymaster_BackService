@@ -1,4 +1,4 @@
-package network
+package starknet
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 )
 
 func TestDemo(t *testing.T) {
+	//only read
 	starkProvider, err := rpc.NewProvider("https://starknet-sepolia.infura.io/v3/0284f5a9fc55476698079b24e2f97909")
 	if err != nil {
 		t.Errorf("Error: %v", err)
@@ -18,5 +19,6 @@ func TestDemo(t *testing.T) {
 		t.Errorf("Error: %v", chainIdError)
 		return
 	}
+	//starkProvider.SimulateTransactions()
 	fmt.Println(chainId)
 }

@@ -16,6 +16,8 @@ func TestOperator(t *testing.T) {
 	conf.BusinessConfigInit("../../conf/business_dev_config.json")
 	logrus.SetLevel(logrus.DebugLevel)
 	mockRequest := getMockTryPayUserOpRequest()
+	mockReuqetNotSupport1559 := getMockTryPayUserOpRequest()
+	mockReuqetNotSupport1559.UserOp["maxPriorityFeePerGas"] = mockReuqetNotSupport1559.UserOp["maxFeePerGas"]
 	tests := []struct {
 		name string
 		test func(t *testing.T)
@@ -36,6 +38,13 @@ func TestOperator(t *testing.T) {
 			"testGetSupportEntrypointExecute",
 			func(t *testing.T) {
 				testGetSupportEntrypointExecute(t)
+			},
+		},
+		{
+			"Test_ScrollSepoliaV06Verify_TryPayUserOpExecute",
+			func(t *testing.T) {
+				mockReuqetNotSupport1559.ForceStrategyId = string(global_const.StrategyCodeScrollSepoliaV06Verify)
+				testTryPayUserOpExecute(t, mockRequest)
 			},
 		},
 		{

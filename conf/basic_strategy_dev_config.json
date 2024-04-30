@@ -12,7 +12,7 @@
   "Ethereum_Sepolia_v07_verifyPaymaster": {
     "network": "ethereum-sepolia",
     "entrypoint_address": "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
-    "entrypoint_version": "v0.6",
+    "entrypoint_version": "v0.7",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
     "paymaster_address": "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
@@ -33,7 +33,7 @@
   "Ethereum_Sepolia_v07_erc20Paymaster": {
     "network": "ethereum-sepolia",
     "entrypoint_address": "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
-    "entrypoint_version": "v0.6",
+    "entrypoint_version": "v0.7",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
     "paymaster_address": "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",

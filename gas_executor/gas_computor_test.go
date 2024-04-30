@@ -52,6 +52,12 @@ func TestComputeGas(t *testing.T) {
 		t.Error(err)
 		return
 	}
+	opFor1559NotSupport, err := user_op.NewUserOp(utils.GenerateMockUservOperation())
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	opFor1559NotSupport.MaxPriorityFeePerGas = opFor1559NotSupport.MaxFeePerGas
 
 	tests := []struct {
 		name string
@@ -68,6 +74,14 @@ func TestComputeGas(t *testing.T) {
 			func(*testing.T) {
 				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
 				testGetUserOpEstimateGas(t, op, strategy)
+			},
+		},
+		{
+			"testScrollGetUserOpEstimateGas",
+			func(*testing.T) {
+				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify)
+
+				testGetUserOpEstimateGas(t, opFor1559NotSupport, strategy)
 			},
 		},
 		{
@@ -113,7 +127,7 @@ func TestComputeGas(t *testing.T) {
 		{
 			"testComputeGas_StrategyCodeScrollSepoliaVo6Verify",
 			func(*testing.T) {
-				testComputeGas(t, op, conf.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify))
+				testComputeGas(t, opFor1559NotSupport, conf.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify))
 			},
 		},
 		{
@@ -157,7 +171,7 @@ func TestComputeGas(t *testing.T) {
 		{
 			"TestScrollEstimateCallGasLimit",
 			func(t *testing.T) {
-				testEstimateCallGasLimit(t, conf.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify), model.MockSimulateHandleOpResult, op, global_const.DummayPreverificationgasBigint)
+				testEstimateCallGasLimit(t, conf.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify), model.MockSimulateHandleOpResult, opFor1559NotSupport, global_const.DummayPreverificationgasBigint)
 			},
 		},
 		{

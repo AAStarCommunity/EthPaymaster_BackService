@@ -87,6 +87,11 @@ func getUserOpEstimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy,
 	if gasPriceErr != nil {
 		return nil, xerrors.Errorf("get gas price error: %v", gasPriceErr)
 	}
+	if userOp.MaxFeePerGas != nil && userOp.MaxPriorityFeePerGas != nil {
+		if conf.IsDisable1559Chain(strategy.GetNewWork()) && userOp.MaxFeePerGas.Cmp(userOp.MaxPriorityFeePerGas) != 0 {
+			return nil, xerrors.Errorf("[%v] is not support 1559 MaxFeePerGas and MaxPriorityFeePerGas can not be same  at the same time", strategy.GetNewWork())
+		}
+	}
 	if userOp.MaxFeePerGas != nil {
 		gasPriceResult.MaxFeePerGas = userOp.MaxFeePerGas
 	}
