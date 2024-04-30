@@ -82,9 +82,17 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 		//	},
 		//},
 		{
-			"TestGetPaymasterAndData",
+			"TestGetPaymasterAndDataV07",
 			func(t *testing.T) {
-				testGetPaymasterData(t, global_const.EthereumSepolia, op)
+				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
+				testGetPaymasterData(t, global_const.EthereumSepolia, op, strategy)
+			},
+		},
+		{
+			"TestGetPaymasterAndDataV07",
+			func(t *testing.T) {
+				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV07Verify)
+				testGetPaymasterData(t, global_const.EthereumSepolia, op, strategy)
 			},
 		},
 		{
@@ -251,14 +259,15 @@ func testGetUserOpHash(t *testing.T, chain global_const.Network, input *user_op.
 	t.Logf("userOpHash: %s", hex.EncodeToString(res))
 }
 
-func testGetPaymasterData(t *testing.T, chain global_const.Network, input *user_op.UserOpInput) {
+func testGetPaymasterData(t *testing.T, chain global_const.Network, input *user_op.UserOpInput, strategy *model.Strategy) {
 	executor := GetEthereumExecutor(chain)
 	if executor == nil {
 		t.Error("executor is nil")
 	}
-	strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
 	t.Logf("entryPoint Address %s", strategy.GetEntryPointAddress())
 	dataInput := paymaster_data.NewPaymasterDataInput(strategy)
+	dataInput.PaymasterPostOpGasLimit = global_const.DummyPaymasterPostopGaslimitBigint
+	dataInput.PaymasterVerificationGasLimit = global_const.DummyPaymasterVerificationgaslimitBigint
 	paymasterData, err := executor.GetPaymasterData(input, strategy, dataInput)
 	if err != nil {
 		t.Error(err)
@@ -286,7 +295,7 @@ func testSimulateHandleOp(t *testing.T, chain global_const.Network, strategy *mo
 	var simulataResult *model.SimulateHandleOpResult
 	if version == global_const.EntrypointV06 {
 		simulataResult, err = sepoliaExector.SimulateV06HandleOp(*op, strategy.GetEntryPointAddress())
-	} else if version == global_const.EntryPointV07 {
+	} else if version == global_const.EntrypointV07 {
 		simulataResult, err = sepoliaExector.SimulateV07HandleOp(*op, strategy.GetEntryPointAddress())
 	}
 

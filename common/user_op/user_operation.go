@@ -285,7 +285,7 @@ func packUserOpV6ForUserOpHash(userOp *UserOperationV06) (string, []byte, error)
 }
 
 func (userOp *UserOpInput) PackUserOpForMock(version global_const.EntrypointVersion) (string, []byte, error) {
-	if version == global_const.EntryPointV07 {
+	if version == global_const.EntrypointV07 {
 		gasFee := utils.PackIntTo32Bytes(userOp.MaxPriorityFeePerGas, userOp.MaxFeePerGas)
 		encoded, err := UserOpV07PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, DummyAccountGasLimits, userOp.PreVerificationGas, gasFee, global_const.DummyPaymasterDataByte, global_const.DummySignatureByte)
 		if err != nil {

@@ -40,6 +40,13 @@ func TestChainService(t *testing.T) {
 			},
 		},
 		{
+			"TestSepoliaSimulateHandleOp",
+			func(t *testing.T) {
+				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV07Verify)
+				testSimulateHandleOp(t, op, strategy)
+			},
+		},
+		{
 			"testGetpaymasterEntryPointBalance",
 			func(t *testing.T) {
 				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")

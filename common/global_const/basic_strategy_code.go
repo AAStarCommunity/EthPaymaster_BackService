@@ -14,4 +14,6 @@ const (
 	StrategyCodeArbitrumSpeoliaV06Erc20 BasicStrategyCode = "Arbitrum_Sepolia_v06_erc20Paymaster"
 	StrategyCodeScrollSepoliaV06Erc20   BasicStrategyCode = "Scroll_Sepolia_v06_erc20Paymaster"
 	StrategyCodeBaseSepoliaV06Erc20     BasicStrategyCode = "Base_Sepolia_v06_erc20Paymaster"
+
+	StrategyCodeEthereumSepoliaV07Verify BasicStrategyCode = "Ethereum_Sepolia_v07_verifyPaymaster"
 )

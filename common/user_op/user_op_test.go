@@ -32,7 +32,7 @@ func TestUserOp(t *testing.T) {
 		{
 			"TestPackUserOpV7",
 			func(t *testing.T) {
-				testPackUserOp(t, userOp, global_const.EntryPointV07)
+				testPackUserOp(t, userOp, global_const.EntrypointV07)
 			},
 		},
 	}

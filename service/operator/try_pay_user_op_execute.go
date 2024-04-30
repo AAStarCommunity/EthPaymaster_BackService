@@ -26,6 +26,9 @@ func TryPayUserOpExecute(request *model.UserOpRequest) (*model.TryPayUserOpRespo
 		return nil, err
 	}
 
+	paymasterDtataIput.PaymasterVerificationGasLimit = gasResponse.OpEstimateGas.PaymasterVerificationGasLimit
+	paymasterDtataIput.PaymasterPostOpGasLimit = gasResponse.OpEstimateGas.PaymasterPostOpGasLimit
+
 	payReceipt, err := executePay(strategy, paymasterUserOp, gasResponse)
 	if err != nil {
 		return nil, err
@@ -42,7 +45,7 @@ func TryPayUserOpExecute(request *model.UserOpRequest) (*model.TryPayUserOpRespo
 
 //sub Function ---------
 
-func prepareExecute(request *model.UserOpRequest) (*user_op.UserOpInput, *model.Strategy, *paymaster_data.PaymasterData, error) {
+func prepareExecute(request *model.UserOpRequest) (*user_op.UserOpInput, *model.Strategy, *paymaster_data.PaymasterDataInput, error) {
 	var strategy *model.Strategy
 	strategy, generateErr := StrategyGenerate(request)
 	if generateErr != nil {
@@ -64,7 +67,7 @@ func prepareExecute(request *model.UserOpRequest) (*user_op.UserOpInput, *model.
 	return userOp, strategy, paymasterDataIput, nil
 }
 
-func estimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterData) (*model.ComputeGasResponse, *user_op.UserOpInput, error) {
+func estimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterDataInput) (*model.ComputeGasResponse, *user_op.UserOpInput, error) {
 	//base Strategy and UserOp computeGas
 	gasResponse, paymasterUserOp, gasComputeError := gas_executor.ComputeGas(userOp, strategy, paymasterDataInput)
 	if gasComputeError != nil {
@@ -103,7 +106,7 @@ func executePay(strategy *model.Strategy, userOp *user_op.UserOpInput, gasRespon
 	}, nil
 }
 
-func postExecute(userOp *user_op.UserOpInput, strategy *model.Strategy, gasResponse *model.ComputeGasResponse, paymasterDataInput *paymaster_data.PaymasterData) (*model.TryPayUserOpResponse, error) {
+func postExecute(userOp *user_op.UserOpInput, strategy *model.Strategy, gasResponse *model.ComputeGasResponse, paymasterDataInput *paymaster_data.PaymasterDataInput) (*model.TryPayUserOpResponse, error) {
 	executor := network.GetEthereumExecutor(strategy.GetNewWork())
 	paymasterData, err := executor.GetPaymasterData(userOp, strategy, paymasterDataInput)
 	if err != nil {

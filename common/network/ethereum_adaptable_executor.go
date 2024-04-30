@@ -485,7 +485,7 @@ func (executor EthereumExecutor) GetUserOpHash(userOp *user_op.UserOpInput, stra
 			return nil, "", err
 		}
 		return hash[:], "", nil
-	} else if version == global_const.EntryPointV07 {
+	} else if version == global_const.EntrypointV07 {
 		contract, err := executor.GetPaymasterErc20AndVerifyV07(strategy.GetPaymasterAddress())
 		if err != nil {
 			return nil, "", err
@@ -515,7 +515,7 @@ func (executor EthereumExecutor) GetUserOpHash(userOp *user_op.UserOpInput, stra
 	}
 
 }
-func (executor EthereumExecutor) GetPaymasterData(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterData) ([]byte, error) {
+func (executor EthereumExecutor) GetPaymasterData(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterDataInput) ([]byte, error) {
 	userOpHash, _, err := executor.GetUserOpHash(userOp, strategy)
 	if err != nil {
 		logrus.Errorf("GetUserOpHash error [%v]", err)

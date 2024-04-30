@@ -21,7 +21,7 @@ var (
 )
 
 // https://blog.particle.network/bundler-predicting-gas/
-func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterData) (*model.ComputeGasResponse, *user_op.UserOpInput, error) {
+func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterDataInput) (*model.ComputeGasResponse, *user_op.UserOpInput, error) {
 
 	opEstimateGas, err := getUserOpEstimateGas(userOp, strategy, paymasterDataInput)
 	if err != nil {
@@ -82,7 +82,7 @@ func GetUserOpGasPrice(userOpGas *model.UserOpEstimateGas) *big.Int {
 	return utils.GetMinValue(maxFeePerGas, combineFee)
 }
 
-func getUserOpEstimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterData) (*model.UserOpEstimateGas, error) {
+func getUserOpEstimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterDataInput) (*model.UserOpEstimateGas, error) {
 	gasPriceResult, gasPriceErr := GetGasPrice(strategy.GetNewWork())
 	if gasPriceErr != nil {
 		return nil, xerrors.Errorf("get gas price error: %v", gasPriceErr)
@@ -131,7 +131,7 @@ func getUserOpEstimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy,
 	opEstimateGas.CallGasLimit = callGasLimit
 
 	entryPointVersion := strategy.GetStrategyEntrypointVersion()
-	if entryPointVersion == global_const.EntryPointV07 {
+	if entryPointVersion == global_const.EntrypointV07 {
 		opEstimateGas.AccountGasLimit = utils.PackIntTo32Bytes(verificationGasLimit, callGasLimit)
 		opEstimateGas.GasFees = utils.PackIntTo32Bytes(gasPriceResult.MaxPriorityFeePerGas, gasPriceResult.MaxFeePerGas)
 		opEstimateGas.PaymasterPostOpGasLimit = global_const.DummyPaymasterPostopGaslimitBigint
@@ -143,7 +143,7 @@ func getUserOpEstimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy,
 func getNewUserOpAfterCompute(op *user_op.UserOpInput, gas *model.UserOpEstimateGas, version global_const.EntrypointVersion) *user_op.UserOpInput {
 	var accountGasLimits [32]byte
 	var gasFee [32]byte
-	if version == global_const.EntryPointV07 {
+	if version == global_const.EntrypointV07 {
 		accountGasLimits = utils.PackIntTo32Bytes(gas.PreVerificationGas, gas.CallGasLimit)
 		gasFee = utils.PackIntTo32Bytes(gas.MaxPriorityFeePerGas, gas.MaxFeePerGas)
 	}

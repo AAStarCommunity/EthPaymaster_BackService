@@ -52,7 +52,7 @@ func SimulateHandleOp(op *user_op.UserOpInput, strategy *model.Strategy) (*model
 
 		return executor.SimulateV06HandleOp(*op, strategy.GetEntryPointAddress())
 
-	} else if entrypointVersion == global_const.EntryPointV07 {
+	} else if entrypointVersion == global_const.EntrypointV07 {
 		return executor.SimulateV07HandleOp(*op, strategy.GetEntryPointAddress())
 	}
 	return nil, xerrors.Errorf("[never be here]entrypoint version %s not support", entrypointVersion)
