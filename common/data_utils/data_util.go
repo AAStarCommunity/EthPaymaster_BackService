@@ -14,6 +14,8 @@ func GetUserOpWithPaymasterAndDataForSimulate(op user_op.UserOpInput, strategy *
 	op.MaxPriorityFeePerGas = gasPriceResult.MaxPriorityFeePerGas
 	paymasterDataInput.PaymasterPostOpGasLimit = global_const.DummyPaymasterPostopGaslimitBigint
 	paymasterDataInput.PaymasterVerificationGasLimit = global_const.DummyPaymasterVerificationgaslimitBigint
+	op.AccountGasLimits = user_op.DummyAccountGasLimits
+	op.GasFees = user_op.DummyGasFees
 	paymasterData, err := executor.GetPaymasterData(&op, strategy, paymasterDataInput)
 	if err != nil {
 		return nil, err

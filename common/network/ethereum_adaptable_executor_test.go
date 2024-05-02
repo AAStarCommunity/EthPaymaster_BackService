@@ -57,7 +57,17 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 		{
 			"TestGetUseOpHash",
 			func(t *testing.T) {
-				testGetUserOpHash(t, global_const.EthereumSepolia, op)
+				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
+				t.Logf("paymaster Address %s", strategy.GetPaymasterAddress())
+				testGetUserOpHash(t, *op, strategy)
+			},
+		},
+		{
+			"TestGetUseOpHashV07",
+			func(t *testing.T) {
+				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v07_verifyPaymaster")
+				t.Logf("paymaster Address %s", strategy.GetPaymasterAddress())
+				testGetUserOpHash(t, *op, strategy)
 			},
 		},
 		{
@@ -85,6 +95,7 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 			"TestSepoliaSimulateV07HandleOp",
 			func(t *testing.T) {
 				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV07Verify)
+
 				testSimulateHandleOp(t, global_const.EthereumSepolia, strategy)
 			},
 		},
@@ -243,15 +254,17 @@ func testGetPrice(t *testing.T, chain global_const.Network) {
 	}
 	t.Logf("price: %v", price)
 }
-func testGetUserOpHash(t *testing.T, chain global_const.Network, input *user_op.UserOpInput) {
-	executor := GetEthereumExecutor(chain)
+func testGetUserOpHash(t *testing.T, input user_op.UserOpInput, strategy *model.Strategy) {
+	executor := GetEthereumExecutor(strategy.GetNewWork())
 	if executor == nil {
 		t.Error("executor is nil")
 	}
-	strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
-	t.Logf("paymaster Address %s", strategy.GetPaymasterAddress())
 
-	res, _, err := executor.GetUserOpHash(input, strategy)
+	if strategy.GetStrategyEntrypointVersion() == global_const.EntrypointV07 {
+		input.AccountGasLimits = user_op.DummyAccountGasLimits
+		input.GasFees = user_op.DummyGasFees
+	}
+	res, _, err := executor.GetUserOpHash(&input, strategy)
 	if err != nil {
 		t.Error(err)
 		return
@@ -284,12 +297,15 @@ func testSimulateHandleOp(t *testing.T, chain global_const.Network, strategy *mo
 		return
 	}
 	dataInput := paymaster_data.NewPaymasterDataInput(strategy)
+	op.AccountGasLimits = user_op.DummyAccountGasLimits
+	op.GasFees = user_op.DummyGasFees
 	paymasterData, err := sepoliaExector.GetPaymasterData(op, strategy, dataInput)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	op.PaymasterAndData = paymasterData
+
 	t.Logf("entryPoint Address %s", strategy.GetEntryPointAddress())
 	version := strategy.GetStrategyEntrypointVersion()
 	t.Logf("version: %s", version)
@@ -297,6 +313,40 @@ func testSimulateHandleOp(t *testing.T, chain global_const.Network, strategy *mo
 	if version == global_const.EntrypointV06 {
 		simulataResult, err = sepoliaExector.SimulateV06HandleOp(*op, strategy.GetEntryPointAddress())
 	} else if version == global_const.EntrypointV07 {
+		//userOpMap := map[string]string{
+		//	"sender":             op.Sender.String(),
+		//	"nonce":              op.Nonce.String(),
+		//	"initCode":           hex.EncodeToString(op.InitCode),
+		//	"callData":           hex.EncodeToString(op.CallData),
+		//	"accountGasLimits":   hex.EncodeToString(op.AccountGasLimits[:]),
+		//	"preVerificationGas": op.PreVerificationGas.String(),
+		//	"gasFees":            hex.EncodeToString(op.GasFees[:]),
+		//	"paymasterAndData":   hex.EncodeToString(paymasterData),
+		//	"signature":          hex.EncodeToString(op.Signature),
+		//}
+		//abi, _ := contract_entrypoint_v07.ContractMetaData.GetAbi()
+		//var userOps [1]user_op.UserOpInput
+		//userOps[0] = *op
+		//handleOpsCallDat, abiErr := abi.Pack("handleOps", userOps, global_const.DummyAddress)
+		//if abiErr != nil {
+		//	t.Error(abiErr)
+		//	return
+		//}
+		//t.Logf("handleOpsCallDat: %v", hex.EncodeToString(handleOpsCallDat))
+		//userOpMapJson, _ := json.Marshal(userOpMap)
+		//t.Logf("userOpMapJson: %v", string(userOpMapJson))
+		//
+		//t.Logf("userOpMap: %v", userOpMap)
+		//t.Logf("Sender [%s]", op.Sender)
+		//t.Logf("Nonce [%d]", op.Nonce)
+		//t.Logf("InitCode [%v]", op.InitCode)
+		//t.Logf("CallData [%v]", op.CallData)
+		//t.Logf("AccountGasLimits [%v]", op.AccountGasLimits)
+		//t.Logf("PreVerificationGas [%v]", op.PreVerificationGas)
+		//t.Logf("GasFees [%v]", op.GasFees)
+		//t.Logf("PaymasterAndData [%v]", op.PaymasterAndData)
+		//t.Logf("Signature [%v]", op.Signature)
+
 		simulataResult, err = sepoliaExector.SimulateV07HandleOp(*op, strategy.GetEntryPointAddress())
 	}
 

@@ -309,34 +309,42 @@ func (executor EthereumExecutor) SimulateV06HandleOp(v06 user_op.UserOpInput, en
 
 func (executor EthereumExecutor) SimulateV07HandleOp(userOpV07 user_op.UserOpInput, entryPoint *common.Address) (*model.SimulateHandleOpResult, error) {
 	var result *simulate_entrypoint.IEntryPointSimulationsExecutionResult
-
 	simulateAbi, err := simulate_entrypoint.ContractMetaData.GetAbi()
 	if err != nil {
 		return nil, err
 	}
 
 	callData, err := simulateAbi.Pack("simulateHandleOp", &userOpV07, global_const.EmptyAddress, []byte{})
+	logrus.Debugf("simulateHandleOp callData :[%s]", hex.EncodeToString(callData))
 	if err != nil {
 		return nil, err
 	}
-	//client := executor.Client
-	msg := ethereum.CallMsg{
+	req := ethereum.CallMsg{
 		From: global_const.EmptyAddress,
 		To:   entryPoint,
 		Data: callData,
 	}
-	//callMsg := utils.ToCallArg(&msg)
 	mapAcc := &map[common.Address]gethclient.OverrideAccount{
 		*entryPoint: {
 			Code: EntryPointSimulationsDeployCode,
 		},
 	}
+	logrus.Debugf("simulateHandleOp req :[%v]", req)
+
 	gClient := executor.GethClient
-	byteResult, err := gClient.CallContractWithBlockOverrides(context.Background(), msg, nil, mapAcc, gethclient.BlockOverrides{})
+	byteResult, err := gClient.CallContractWithBlockOverrides(context.Background(), req, nil, mapAcc, gethclient.BlockOverrides{})
+
 	if err != nil {
-		logrus.Debugf("SimulateV07HandleOp error [%v]", err)
-		logrus.Debugf("SimulateV07HandleOp Res [%s]", string(byteResult))
-		return nil, err
+		abi, abiErr := simulate_entrypoint.ContractMetaData.GetAbi()
+		if abiErr != nil {
+			return nil, abiErr
+		}
+		errStr, parseErr := utils.ParseCallError(err, abi)
+		if parseErr != nil {
+			return nil, parseErr
+		}
+		return nil, xerrors.Errorf("SimulateV07HandleOp error [%v]  Res [%s]", errStr, string(byteResult))
+
 	}
 	err = json.Unmarshal(byteResult, &result)
 	if err != nil {

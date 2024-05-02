@@ -4,6 +4,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/paymaster_abi"
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
+	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"golang.org/x/xerrors"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -18,8 +19,7 @@ func init() {
 	GenerateFuncMap[global_const.PayTypeERC20] = GenerateBasicPaymasterData()
 	GenerateFuncMap[global_const.PayTypeSuperVerifying] = GenerateSuperContractPaymasterData()
 	BasicPaymasterDataAbiV07 = abi.Arguments{
-		{Name: "paymasterValidationGasLimit", Type: paymaster_abi.Uint256Type},
-		{Name: "paymasterPostOpGasLimit", Type: paymaster_abi.Uint256Type},
+		{Name: "accountGasLimit", Type: paymaster_abi.Bytes32Type},
 		{Name: "validUntil", Type: paymaster_abi.Uint48Type},
 		{Name: "validAfter", Type: paymaster_abi.Uint48Type},
 		{Name: "erc20Token", Type: paymaster_abi.AddressType},
@@ -49,7 +49,8 @@ func GenerateBasicPaymasterData() GeneratePaymasterDataFunc {
 			}
 			packedRes = v06Packed
 		} else if data.EntryPointVersion == global_const.EntrypointV07 {
-			v07Packed, err := BasicPaymasterDataAbiV07.Pack(data.PaymasterVerificationGasLimit, data.PaymasterPostOpGasLimit, data.ValidUntil, data.ValidAfter, data.ERC20Token, data.ExchangeRate)
+			accountGasLimit := utils.PackIntTo32Bytes(data.PaymasterVerificationGasLimit, data.PaymasterPostOpGasLimit)
+			v07Packed, err := BasicPaymasterDataAbiV07.Pack(accountGasLimit, data.ValidUntil, data.ValidAfter, data.ERC20Token, data.ExchangeRate)
 			if err != nil {
 				return nil, err
 			}

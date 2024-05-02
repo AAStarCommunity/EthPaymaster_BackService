@@ -9,7 +9,7 @@ import (
 
 func TestDemo(t *testing.T) {
 	//only read
-	starkProvider, err := rpc.NewProvider("https://starknet-sepolia.infura.io/v3/0284f5a9fc55476698079b24e2f97909")
+	starkProvider, err := rpc.NewProvider("https://starknet-sepolia.public.blastapi.io/rpc/v0_7")
 	if err != nil {
 		t.Errorf("Error: %v", err)
 		return

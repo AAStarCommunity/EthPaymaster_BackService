@@ -50,4 +50,5 @@ func testPackUserOp(t *testing.T, userOp *UserOpInput, version global_const.Entr
 		t.Error("res is nil")
 		return
 	}
+
 }

@@ -7,9 +7,13 @@ import (
 	"encoding/hex"
 	"fmt"
 	mapset "github.com/deckarep/golang-set/v2"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sirupsen/logrus"
+	"golang.org/x/xerrors"
 	"math/big"
 	"regexp"
 	"strconv"
@@ -178,4 +182,27 @@ func ConvertStringToSet(input string, split string) mapset.Set[string] {
 		set.Add(value)
 	}
 	return set
+}
+func ParseCallError(err error, abi *abi.ABI) (string, error) {
+	rpcErr, ok := err.(rpc.DataError)
+	if !ok {
+		return "", xerrors.Errorf("ExecutionResult: cannot assert type: error is not of type rpc.DataError")
+	}
+	data, ok := rpcErr.ErrorData().(string)
+	if !ok {
+		return "", xerrors.Errorf("ExecutionResult: cannot assert type: data is not of type string")
+	}
+	logrus.Debugf("data :[%s]", data)
+
+	for _, abiErr := range abi.Errors {
+		logrus.Debugf("abiErr :[%v]", abiErr)
+		revert, uppackErr := abiErr.Unpack(common.Hex2Bytes(data[2:]))
+		if uppackErr != nil {
+			logrus.Debugf("executionResult err: [%s]", uppackErr.Error())
+		} else {
+			logrus.Debugf("has revert :[%v]", revert)
+			return revert.(string), nil
+		}
+	}
+	return "", nil
 }

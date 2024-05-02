@@ -15,7 +15,7 @@
     "entrypoint_version": "v0.7",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
+    "paymaster_address": "0x3Da96267B98a33267249734FD8FFeC75093D3085",
     "paymaster_pay_type": "PayTypeVerifying",
     "access_project": "official"
   },
@@ -36,7 +36,7 @@
     "entrypoint_version": "v0.7",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
+    "paymaster_address": "0x3Da96267B98a33267249734FD8FFeC75093D3085",
     "paymaster_pay_type": "PayTypeERC20",
     "access_erc20": "USDT,USDC",
     "access_project": "official"
