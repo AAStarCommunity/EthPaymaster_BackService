@@ -16,30 +16,29 @@ import (
 )
 
 func TryPayUserOpExecute(request *model.UserOpRequest) (*model.TryPayUserOpResponse, error) {
-	userOp, strategy, paymasterDtataIput, err := prepareExecute(request)
+	userOp, strategy, paymasterDataInput, err := prepareExecute(request)
 	if err != nil {
 		return nil, err
 	}
 
-	gasResponse, paymasterUserOp, err := estimateGas(userOp, strategy, paymasterDtataIput)
+	gasResponse, paymasterUserOp, err := estimateGas(userOp, strategy, paymasterDataInput)
 	if err != nil {
 		return nil, err
 	}
 
-	paymasterDtataIput.PaymasterVerificationGasLimit = gasResponse.OpEstimateGas.PaymasterVerificationGasLimit
-	paymasterDtataIput.PaymasterPostOpGasLimit = gasResponse.OpEstimateGas.PaymasterPostOpGasLimit
+	paymasterDataInput.PaymasterVerificationGasLimit = gasResponse.OpEstimateGas.PaymasterVerificationGasLimit
+	paymasterDataInput.PaymasterPostOpGasLimit = gasResponse.OpEstimateGas.PaymasterPostOpGasLimit
 
 	payReceipt, err := executePay(strategy, paymasterUserOp, gasResponse)
 	if err != nil {
 		return nil, err
 	}
 	logrus.Debug("payReceipt:", payReceipt)
-	result, err := postExecute(paymasterUserOp, strategy, gasResponse, paymasterDtataIput)
+	result, err := postExecute(paymasterUserOp, strategy, gasResponse, paymasterDataInput)
 	if err != nil {
 		return nil, err
 	}
 	logrus.Debug("postExecute result:", result)
-	result.PayReceipt = payReceipt
 	return result, nil
 }
 
@@ -113,13 +112,30 @@ func postExecute(userOp *user_op.UserOpInput, strategy *model.Strategy, gasRespo
 		return nil, xerrors.Errorf("postExecute GetPaymasterData Error: [%w]", err)
 	}
 	logrus.Debug("postExecute paymasterData:", paymasterData)
+
 	var result = &model.TryPayUserOpResponse{
 		StrategyId:        strategy.Id,
 		EntryPointAddress: strategy.GetEntryPointAddress().String(),
 		PayMasterAddress:  strategy.GetPaymasterAddress().String(),
-		PayMasterAndData:  utils.EncodeToStringWithPrefix(paymasterData),
-		GasInfo:           gasResponse,
+		Erc20TokenCost:    gasResponse.Erc20TokenCost,
+
+		UserOpResponse: &model.UserOpResponse{
+			PayMasterAndData:     utils.EncodeToStringWithPrefix(paymasterData),
+			PreVerificationGas:   gasResponse.OpEstimateGas.PreVerificationGas,
+			MaxFeePerGas:         gasResponse.OpEstimateGas.MaxFeePerGas,
+			MaxPriorityFeePerGas: gasResponse.OpEstimateGas.MaxPriorityFeePerGas,
+			VerificationGasLimit: gasResponse.OpEstimateGas.VerificationGasLimit,
+			CallGasLimit:         gasResponse.OpEstimateGas.CallGasLimit,
+		},
 	}
+
+	if strategy.GetStrategyEntrypointVersion() == global_const.EntrypointV07 {
+		result.UserOpResponse.AccountGasLimit = utils.EncodeToStringWithPrefix(gasResponse.OpEstimateGas.AccountGasLimit[:])
+		result.UserOpResponse.GasFees = utils.EncodeToStringWithPrefix(gasResponse.OpEstimateGas.GasFees[:])
+		result.UserOpResponse.PaymasterVerificationGasLimit = gasResponse.OpEstimateGas.PaymasterVerificationGasLimit
+		result.UserOpResponse.PaymasterPostOpGasLimit = gasResponse.OpEstimateGas.PaymasterPostOpGasLimit
+	}
+
 	return result, nil
 }
 

@@ -1,10 +1,14 @@
 package v1
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/service/operator"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/xerrors"
 	"net/http"
 	"runtime"
 )
@@ -16,8 +20,8 @@ type MethodFunctionFunc = func(ctx *gin.Context, jsonRpcRequest model.JsonRpcReq
 func init() {
 	PaymasterAPIMethods["pm_sponsorUserOperation"] = TryPayUserOperationMethod()
 	PaymasterAPIMethods["pm_supportEntrypoint"] = GetSupportEntryPointFunc()
-	PaymasterAPIMethods["pm_strategyInfo"] = GetSupportStrategyFunc()
 	PaymasterAPIMethods["pm_estimateUserOperationGas"] = EstimateUserOpGasFunc()
+	PaymasterAPIMethods["pm_paymasterAccount"] = GetSupportPaymaster()
 }
 
 const (
@@ -81,4 +85,117 @@ func Paymaster(ctx *gin.Context) {
 		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, errStr)
 		return
 	}
+}
+
+func GetSupportPaymaster() MethodFunctionFunc {
+	return func(ctx *gin.Context, jsonRpcRequest model.JsonRpcRequest) (result interface{}, err error) {
+		if jsonRpcRequest.Params[0] == nil {
+			return nil, xerrors.Errorf("Request Error [network is empty]")
+		}
+		networkStr, ok := jsonRpcRequest.Params[0].(string)
+		if !ok {
+			return nil, xerrors.Errorf("Request Error [network is not string]")
+		}
+		paymasterSet, err := conf.GetSupportPaymaster(global_const.Network(networkStr))
+		if err != nil {
+			return nil, err
+		}
+		return paymasterSet.ToSlice(), nil
+	}
+}
+
+func GetSupportEntryPointFunc() MethodFunctionFunc {
+	return func(ctx *gin.Context, jsonRpcRequest model.JsonRpcRequest) (result interface{}, err error) {
+		if jsonRpcRequest.Params[0] == nil {
+			return nil, xerrors.Errorf("Request Error [network is empty]")
+		}
+		networkStr, ok := jsonRpcRequest.Params[0].(string)
+		if !ok {
+			return nil, xerrors.Errorf("Request Error [network is not string]")
+		}
+		entryPoints, err := conf.GetSupportEntryPoints(global_const.Network(networkStr))
+		if err != nil {
+			return nil, err
+		}
+		return entryPoints.ToSlice(), nil
+	}
+}
+func EstimateUserOpGasFunc() MethodFunctionFunc {
+	return func(ctx *gin.Context, jsonRpcRequest model.JsonRpcRequest) (result interface{}, err error) {
+		request, err := parseTryPayUserOperationParams(jsonRpcRequest.Params)
+		if err != nil {
+			return nil, xerrors.Errorf("parseTryPayUserOperationParams ERROR [%v]", err)
+		}
+		if err := validateUserOpRequest(request); err != nil {
+			return nil, xerrors.Errorf("Request Error [%v]", err)
+		}
+		if result, err := operator.GetEstimateUserOpGas(request); err != nil {
+			return nil, xerrors.Errorf("GetEstimateUserOpGas ERROR [%v]", err)
+		} else {
+			return result, nil
+		}
+	}
+}
+
+func TryPayUserOperationMethod() MethodFunctionFunc {
+	return func(ctx *gin.Context, jsonRpcRequest model.JsonRpcRequest) (result interface{}, err error) {
+		request, err := parseTryPayUserOperationParams(jsonRpcRequest.Params)
+		logrus.Debug("parseTryPayUserOperationParams result: ", request)
+
+		if err != nil {
+			return nil, xerrors.Errorf("parseTryPayUserOperationParams ERROR [%v]", err)
+		}
+		if err := validateUserOpRequest(request); err != nil {
+			return nil, xerrors.Errorf("Request Error [%v]", err)
+		}
+		logrus.Debugf("After Validate ")
+
+		if result, err := operator.TryPayUserOpExecute(request); err != nil {
+			return nil, xerrors.Errorf("TryPayUserOpExecute ERROR [%v]", err)
+		} else {
+			return result, nil
+		}
+	}
+}
+func parseTryPayUserOperationParams(params []interface{}) (*model.UserOpRequest, error) {
+	if len(params) < 2 {
+		return nil, xerrors.Errorf("params length is less than 2")
+	}
+	result := model.UserOpRequest{}
+	userInputParam := params[0]
+	if userInputParam == nil {
+		return nil, xerrors.Errorf("user input is nil")
+	}
+	userOpInput := userInputParam.(map[string]any)
+	result.UserOp = userOpInput
+
+	extraParam := params[1]
+	if extraParam == nil {
+		return nil, xerrors.Errorf("extra is nil")
+	}
+	extra := extraParam.(map[string]any)
+	if extra["strategy_code"] != nil {
+		result.ForceStrategyId = extra["strategy_code"].(string)
+	}
+	if extra["network"] != nil {
+		result.ForceNetwork = extra["network"].(global_const.Network)
+	}
+	if extra["token"] != nil {
+		result.Erc20Token = extra["token"].(global_const.TokenType)
+	}
+	if extra["version"] != nil {
+		result.EntryPointVersion = extra["version"].(global_const.EntrypointVersion)
+	}
+	return &result, nil
+}
+
+func validateUserOpRequest(request *model.UserOpRequest) error {
+	if request.ForceStrategyId != "" {
+		return nil
+	}
+	if request.ForceNetwork == "" {
+		return xerrors.Errorf("ForceNetwork is empty")
+	}
+
+	return nil
 }

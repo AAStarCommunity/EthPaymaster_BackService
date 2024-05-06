@@ -26,10 +26,7 @@ func GetSuitableStrategy(entryPointVersion global_const.EntrypointVersion, chain
 	}
 	return strategy, nil
 }
-func GetStrategyListByNetwork(chain global_const.Network) []model.Strategy {
-	return nil
-	//TODO
-}
+
 func IsEntryPointsSupport(address string, chain global_const.Network) bool {
 	supportEntryPointSet, _ := conf.GetSupportEntryPoints(chain)
 	if supportEntryPointSet == nil {

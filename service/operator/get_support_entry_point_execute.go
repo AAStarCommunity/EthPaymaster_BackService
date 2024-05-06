@@ -2,16 +2,20 @@ package operator
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
-	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/conf"
 )
 
-func GetSupportEntrypointExecute(networkStr string) (*[]model.EntrypointDomain, error) {
-	entrypoints := make([]model.EntrypointDomain, 0)
-	entrypoints = append(entrypoints, model.EntrypointDomain{
-		Address:    "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-		Desc:       "desc",
-		NetWork:    global_const.EthereumSepolia,
-		StrategyId: "1",
-	})
-	return &entrypoints, nil
+func GetSupportEntrypointExecute(networkStr string) ([]string, error) {
+
+	entryPoints, err := conf.GetSupportEntryPoints(global_const.Network(networkStr))
+	if err != nil {
+		return nil, err
+	}
+
+	it := entryPoints.Iterator()
+	var entrypointArr []string
+	for entry := range it.C {
+		entrypointArr = append(entrypointArr, entry)
+	}
+	return entrypointArr, nil
 }

@@ -107,12 +107,6 @@ func TestOperator(t *testing.T) {
 				testTryPayUserOpExecute(t, mockRequest)
 			},
 		},
-		{
-			"testGetSupportStrategyExecute",
-			func(t *testing.T) {
-				testGetSupportStrategyExecute(t)
-			},
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, tt.test)
@@ -138,7 +132,7 @@ func testStrategyGenerate(t *testing.T, request *model.UserOpRequest) {
 	fmt.Printf("Strategy: %v", string(strategyJson))
 }
 func testGetSupportEntrypointExecute(t *testing.T) {
-	res, err := GetSupportEntrypointExecute("network")
+	res, err := GetSupportEntrypointExecute("ethereum-sepolia")
 	if err != nil {
 		t.Error(err)
 		return
@@ -160,14 +154,4 @@ func getMockTryPayUserOpRequest() *model.UserOpRequest {
 		ForceStrategyId: "Ethereum_Sepolia_v06_verifyPaymaster",
 		UserOp:          *utils.GenerateMockUservOperation(),
 	}
-}
-
-func testGetSupportStrategyExecute(t *testing.T) {
-	res, err := GetSupportStrategyExecute("network")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	t.Log(res)
-
 }

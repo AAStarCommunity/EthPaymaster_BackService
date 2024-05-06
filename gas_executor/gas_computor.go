@@ -137,8 +137,10 @@ func getUserOpEstimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy,
 
 	entryPointVersion := strategy.GetStrategyEntrypointVersion()
 	if entryPointVersion == global_const.EntrypointV07 {
-		opEstimateGas.AccountGasLimit = utils.PackIntTo32Bytes(verificationGasLimit, callGasLimit)
-		opEstimateGas.GasFees = utils.PackIntTo32Bytes(gasPriceResult.MaxPriorityFeePerGas, gasPriceResult.MaxFeePerGas)
+		accountGasLimit := utils.PackIntTo32Bytes(verificationGasLimit, callGasLimit)
+		opEstimateGas.AccountGasLimit = &accountGasLimit
+		gasFees := utils.PackIntTo32Bytes(gasPriceResult.MaxPriorityFeePerGas, gasPriceResult.MaxFeePerGas)
+		opEstimateGas.GasFees = &gasFees
 		opEstimateGas.PaymasterPostOpGasLimit = global_const.DummyPaymasterPostoperativelyBigint
 		opEstimateGas.PaymasterVerificationGasLimit = global_const.DummyPaymasterOversimplificationBigint
 	}
