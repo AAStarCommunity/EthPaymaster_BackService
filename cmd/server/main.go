@@ -34,6 +34,8 @@ func runMode() string {
 	return *aPort
 }
 
+var Engine *gin.Engine
+
 // @contact.name   AAStar Support
 // @contact.url    https://aastar.xyz
 // @securityDefinitions.apikey JWT
@@ -41,8 +43,6 @@ func runMode() string {
 // @name Authorization
 // @description Type 'Bearer \<TOKEN\>' to correctly set the AccessToken
 // @BasePath /api
-var Engine *gin.Engine
-
 func main() {
 	strategyPath := fmt.Sprintf("./conf/basic_strategy_%s_config.json", strings.ToLower(envirment.Environment.Name))
 	businessConfigPath := fmt.Sprintf("./conf/business_%s_config.json", strings.ToLower(envirment.Environment.Name))

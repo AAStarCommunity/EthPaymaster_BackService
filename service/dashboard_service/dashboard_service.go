@@ -9,7 +9,6 @@ import (
 
 func GetStrategyByCode(strategyCode string) *model.Strategy {
 	return conf.GetBasicStrategyConfig(global_const.BasicStrategyCode(strategyCode))
-
 }
 
 func GetSuitableStrategy(entryPointVersion global_const.EntrypointVersion, chain global_const.Network, payType global_const.PayType) (*model.Strategy, error) {

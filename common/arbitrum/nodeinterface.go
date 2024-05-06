@@ -12,10 +12,6 @@ import (
 	"math/big"
 )
 
-//https://docs.arbitrum.io/build-decentralized-apps/nodeinterface/reference
-
-//https://medium.com/offchainlabs/understanding-arbitrum-2-dimensional-fees-fd1d582596c9
-
 var (
 	// GasEstimateL1ComponentMethod https://github.com/OffchainLabs/nitro/blob/v2.2.5/nodeInterface/NodeInterface.go#L473C1-L473C47
 	GasEstimateL1ComponentMethod = abi.NewMethod(
@@ -45,6 +41,9 @@ type GasEstimateL1ComponentOutput struct {
 	BaseFee           *big.Int
 	L1BaseFeeEstimate *big.Int
 }
+
+//GetArbEstimateOutPut  https://docs.arbitrum.io/build-decentralized-apps/nodeinterface/reference
+//https://medium.com/offchainlabs/understanding-arbitrum-2-dimensional-fees-fd1d582596c9
 
 func GetArbEstimateOutPut(client *ethclient.Client, preVerificationEstimateInput *model.PreVerificationGasEstimateInput) (*GasEstimateL1ComponentOutput, error) {
 	strategy := preVerificationEstimateInput.Strategy

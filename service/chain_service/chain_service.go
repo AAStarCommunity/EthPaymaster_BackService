@@ -14,19 +14,19 @@ import (
 )
 
 func CheckContractAddressAccess(contract *common.Address, chain global_const.Network) (bool, error) {
-	//todo needcache
+	//todo needCache
 	executor := network.GetEthereumExecutor(chain)
 	return executor.CheckContractAddressAccess(contract)
 }
 
 func GetAddressTokenBalance(networkParam global_const.Network, address common.Address, tokenTypeParam global_const.TokenType) (float64, error) {
 	executor := network.GetEthereumExecutor(networkParam)
-	bananceResult, err := executor.GetUserTokenBalance(address, tokenTypeParam)
+	balanceResult, err := executor.GetUserTokenBalance(address, tokenTypeParam)
 	if err != nil {
 		return 0, err
 	}
 
-	balanceResultFloat := float64(bananceResult.Int64()) * math.Pow(10, -6)
+	balanceResultFloat := float64(balanceResult.Int64()) * math.Pow(10, -6)
 	return balanceResultFloat, nil
 
 }

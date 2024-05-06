@@ -134,8 +134,8 @@ func GetGasToken(networkParam global_const.Network) global_const.TokenType {
 	return networkConfig.GasToken
 }
 
-func GetChainId(newworkParam global_const.Network) string {
-	networkConfig := basicConfig.NetworkConfigMap[newworkParam]
+func GetChainId(networkParam global_const.Network) string {
+	networkConfig := basicConfig.NetworkConfigMap[networkParam]
 	return networkConfig.ChainId
 }
 func GetEthereumRpcUrl(network global_const.Network) string {
@@ -189,7 +189,4 @@ func IsEthereumAdaptableNetWork(network global_const.Network) bool {
 }
 func IsArbNetWork(network global_const.Network) bool {
 	return ArbStackNetWork.Contains(network)
-}
-func GetSimulateEntryPointAddress(network global_const.Network) *common.Address {
-	panic("implement me")
 }

@@ -36,11 +36,11 @@ func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {
 	if tokenType == global_const.ETH {
 		return 3100, nil
 	}
-	url, ok := URLMap[tokenType]
+	tokenUrl, ok := URLMap[tokenType]
 	if !ok {
 		return 0, xerrors.Errorf("tokens type [%w] not found", tokenType)
 	}
-	req, _ := http.NewRequest("GET", url, nil)
+	req, _ := http.NewRequest("GET", tokenUrl, nil)
 
 	req.Header.Add("x-cg-demo-api-key", "CG-ioE6p8cmmSFBFwJnKECCbZ7U\t")
 

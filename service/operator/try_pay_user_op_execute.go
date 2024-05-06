@@ -42,8 +42,6 @@ func TryPayUserOpExecute(request *model.UserOpRequest) (*model.TryPayUserOpRespo
 	return result, nil
 }
 
-//sub Function ---------
-
 func prepareExecute(request *model.UserOpRequest) (*user_op.UserOpInput, *model.Strategy, *paymaster_data.PaymasterDataInput, error) {
 	var strategy *model.Strategy
 	strategy, generateErr := StrategyGenerate(request)
@@ -73,7 +71,6 @@ func estimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymaste
 		return nil, nil, gasComputeError
 	}
 	//The maxFeePerGas and maxPriorityFeePerGas are above a configurable minimum value that the client is willing to accept. At the minimum, they are sufficiently high to be included with the current block.basefee.
-	//validate gas
 	if err := ValidateGas(userOp, gasResponse, strategy); err != nil {
 		return nil, nil, err
 	}
