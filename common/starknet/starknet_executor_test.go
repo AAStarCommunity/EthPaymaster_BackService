@@ -21,4 +21,5 @@ func TestDemo(t *testing.T) {
 	}
 	//starkProvider.SimulateTransactions()
 	fmt.Println(chainId)
+
 }

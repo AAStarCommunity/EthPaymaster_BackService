@@ -154,6 +154,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/paymaster": {
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Paymaster JSON-RPC API",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Paymaster"
+                ],
+                "parameters": [
+                    {
+                        "description": "JsonRpcRequest Model",
+                        "name": "rpcRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.JsonRpcRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/v1/try-pay-user-operation": {
             "post": {
                 "security": [
@@ -188,6 +220,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "global_const.EntrypointVersion": {
+            "type": "string",
+            "enum": [
+                "v0.6",
+                "v0.7"
+            ],
+            "x-enum-varnames": [
+                "EntrypointV06",
+                "EntrypointV07"
+            ]
+        },
         "global_const.Network": {
             "type": "string",
             "enum": [
@@ -221,6 +264,21 @@ const docTemplate = `{
                 "BaseSepolia"
             ]
         },
+        "global_const.TokenType": {
+            "type": "string",
+            "enum": [
+                "USDT",
+                "USDC",
+                "ETH",
+                "OP"
+            ],
+            "x-enum-varnames": [
+                "TokenTypeUSDT",
+                "TokenTypeUSDC",
+                "ETH",
+                "OP"
+            ]
+        },
         "model.ClientCredential": {
             "type": "object",
             "properties": {
@@ -229,9 +287,30 @@ const docTemplate = `{
                 }
             }
         },
+        "model.JsonRpcRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "jsonrpc": {
+                    "type": "string"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "params": {
+                    "type": "array",
+                    "items": {}
+                }
+            }
+        },
         "model.UserOpRequest": {
             "type": "object",
             "properties": {
+                "entrypoint_version": {
+                    "$ref": "#/definitions/global_const.EntrypointVersion"
+                },
                 "estimate_op_gas": {
                     "type": "boolean"
                 },
@@ -246,7 +325,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "force_token": {
-                    "type": "string"
+                    "$ref": "#/definitions/global_const.TokenType"
                 },
                 "user_operation": {
                     "type": "object",

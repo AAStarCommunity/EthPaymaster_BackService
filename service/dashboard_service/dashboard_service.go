@@ -12,8 +12,11 @@ func GetStrategyByCode(strategyCode string) *model.Strategy {
 
 }
 
-func GetSuitableStrategy(entrypoint string, chain global_const.Network, payType global_const.PayType) (*model.Strategy, error) {
-	strategy, err := conf.GetSuitableStrategy(entrypoint, chain, payType)
+func GetSuitableStrategy(entryPointVersion global_const.EntrypointVersion, chain global_const.Network, payType global_const.PayType) (*model.Strategy, error) {
+	if entryPointVersion == "" {
+		entryPointVersion = global_const.EntrypointV06
+	}
+	strategy, err := conf.GetSuitableStrategy(entryPointVersion, chain, payType)
 	if err != nil {
 		return nil, err
 	}

@@ -279,8 +279,8 @@ func testGetPaymasterData(t *testing.T, chain global_const.Network, input *user_
 	}
 	t.Logf("entryPoint Address %s", strategy.GetEntryPointAddress())
 	dataInput := paymaster_data.NewPaymasterDataInput(strategy)
-	dataInput.PaymasterPostOpGasLimit = global_const.DummyPaymasterPostopGaslimitBigint
-	dataInput.PaymasterVerificationGasLimit = global_const.DummyPaymasterVerificationgaslimitBigint
+	dataInput.PaymasterPostOpGasLimit = global_const.DummyPaymasterPostoperativelyBigint
+	dataInput.PaymasterVerificationGasLimit = global_const.DummyPaymasterOversimplificationBigint
 	paymasterData, err := executor.GetPaymasterData(input, strategy, dataInput)
 	if err != nil {
 		t.Error(err)

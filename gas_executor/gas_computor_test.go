@@ -171,7 +171,7 @@ func TestComputeGas(t *testing.T) {
 		{
 			"TestScrollEstimateCallGasLimit",
 			func(t *testing.T) {
-				testEstimateCallGasLimit(t, conf.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify), model.MockSimulateHandleOpResult, opFor1559NotSupport, global_const.DummayPreverificationgasBigint)
+				testEstimateCallGasLimit(t, conf.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify), model.MockSimulateHandleOpResult, opFor1559NotSupport, global_const.DummyReverificationsBigint)
 			},
 		},
 		{
@@ -241,7 +241,7 @@ func testComputeGas(t *testing.T, input *user_op.UserOpInput, strategy *model.St
 	t.Logf("res: %v", string(jsonRes))
 }
 func TestEstimateCallGasLimit(t *testing.T) {
-	callGasLimit, err := estimateVerificationGasLimit(model.MockSimulateHandleOpResult, global_const.DummayPreverificationgasBigint)
+	callGasLimit, err := estimateVerificationGasLimit(model.MockSimulateHandleOpResult, global_const.DummyReverificationsBigint)
 
 	if err != nil {
 		t.Error(err)

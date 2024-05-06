@@ -133,7 +133,7 @@ func StrategyGenerate(request *model.UserOpRequest) (*model.Strategy, error) {
 			strategyResult = strategy
 		}
 	} else {
-		suitableStrategy, err := dashboard_service.GetSuitableStrategy(request.ForceEntryPointAddress, request.ForceNetwork, global_const.PayTypeSuperVerifying) //TODO
+		suitableStrategy, err := dashboard_service.GetSuitableStrategy(request.EntryPointVersion, request.ForceNetwork, global_const.PayTypeSuperVerifying) //TODO
 		if err != nil {
 			return nil, err
 		}

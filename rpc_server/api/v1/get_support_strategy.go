@@ -5,6 +5,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/service/operator"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/xerrors"
 	"net/http"
 )
 
@@ -33,5 +34,13 @@ func GetSupportStrategy(c *gin.Context) {
 	} else {
 		response.WithData(result).Success(c)
 		return
+	}
+}
+func GetSupportStrategyFunc() MethodFunctionFunc {
+	return func(ctx *gin.Context, jsonRpcRequest model.JsonRpcRequest) (result interface{}, err error) {
+		if jsonRpcRequest.Params[0] == nil || jsonRpcRequest.Params[0].(string) == "" {
+			return nil, xerrors.Errorf("Request Error [network is empty]")
+		}
+		return operator.GetSupportStrategyExecute(jsonRpcRequest.Params[0].(string))
 	}
 }

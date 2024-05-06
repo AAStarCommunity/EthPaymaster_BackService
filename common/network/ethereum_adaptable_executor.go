@@ -1,13 +1,13 @@
 package network
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/contract_entrypoint_v06"
-	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/contract_entrypoint_v07"
-	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/erc20"
-	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/l1_gas_oracle"
-	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/paymaster_verifying_erc20_v06"
-	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/paymaster_verifying_erc20_v07"
-	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/simulate_entrypoint"
+	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_contract/contract/contract_entrypoint_v06"
+	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_contract/contract/contract_entrypoint_v07"
+	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_contract/contract/erc20"
+	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_contract/contract/l1_gas_oracle"
+	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_contract/contract/paymaster_verifying_erc20_v06"
+	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_contract/contract/paymaster_verifying_erc20_v07"
+	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_contract/contract/simulate_entrypoint"
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
@@ -291,7 +291,7 @@ func (executor EthereumExecutor) SimulateV06HandleOp(v06 user_op.UserOpInput, en
 	logrus.Debugf("simulateHandleOp req :[%v]", req)
 	callErr := client.Client().CallContext(context.Background(), nil, "eth_call", &req, "latest")
 	logrus.Debugf("simulateHandleOp callErr :[%v]", callErr)
-	simResult, simErr := contract_entrypoint_v06.NewExecutionResult(callErr)
+	simResult, simErr := contract_entrypoint_v06.NewExecutionResult(callErr, abi)
 	if simErr != nil {
 		return nil, simErr
 	}

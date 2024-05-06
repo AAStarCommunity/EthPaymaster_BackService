@@ -1,7 +1,7 @@
-package ethereum_common
+package ethereum_contract
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/contract/paymaster_verifying_erc20_v07"
+	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_contract/contract/paymaster_verifying_erc20_v07"
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/conf"
 	"context"

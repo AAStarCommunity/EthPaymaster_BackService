@@ -1,7 +1,7 @@
 package arbitrum
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/paymaster_abi"
+	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_contract/paymaster_abi"
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"github.com/ethereum/go-ethereum/accounts/abi"

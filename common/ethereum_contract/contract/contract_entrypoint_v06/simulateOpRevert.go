@@ -1,7 +1,8 @@
 package contract_entrypoint_v06
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/paymaster_abi"
+	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_contract/paymaster_abi"
+	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -31,9 +32,9 @@ func ExecutionResult() abi.Error {
 	})
 }
 
-func NewExecutionResult(err error) (*ExecutionResultRevert, error) {
+func NewExecutionResult(inputError error, abi *abi.ABI) (*ExecutionResultRevert, error) {
 
-	rpcErr, ok := err.(rpc.DataError)
+	rpcErr, ok := inputError.(rpc.DataError)
 	if !ok {
 		return nil, xerrors.Errorf("ExecutionResult: cannot assert type: error is not of type rpc.DataError")
 	}
@@ -46,9 +47,11 @@ func NewExecutionResult(err error) (*ExecutionResultRevert, error) {
 	}
 
 	sim := ExecutionResult()
-	revert, err := sim.Unpack(common.Hex2Bytes(data[2:]))
-	if err != nil {
-		return nil, fmt.Errorf("executionResult err: [%s]", err)
+	revert, upPackerr := sim.Unpack(common.Hex2Bytes(data[2:]))
+	if upPackerr != nil {
+		// is another ERROR
+		errstr, parseErr := utils.ParseCallError(inputError, abi)
+		return nil, fmt.Errorf("executionResult err: [%s] parErr [%s]", errstr, parseErr)
 	}
 
 	args, ok := revert.([]any)

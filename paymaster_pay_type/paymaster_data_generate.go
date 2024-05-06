@@ -1,7 +1,7 @@
 package paymaster_pay_type
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/paymaster_abi"
+	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_contract/paymaster_abi"
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"

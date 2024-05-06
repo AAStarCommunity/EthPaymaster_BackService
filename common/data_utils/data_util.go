@@ -12,10 +12,22 @@ func GetUserOpWithPaymasterAndDataForSimulate(op user_op.UserOpInput, strategy *
 	executor := network.GetEthereumExecutor(strategy.GetNewWork())
 	op.MaxFeePerGas = gasPriceResult.MaxFeePerGas
 	op.MaxPriorityFeePerGas = gasPriceResult.MaxPriorityFeePerGas
-	paymasterDataInput.PaymasterPostOpGasLimit = global_const.DummyPaymasterPostopGaslimitBigint
-	paymasterDataInput.PaymasterVerificationGasLimit = global_const.DummyPaymasterVerificationgaslimitBigint
+	paymasterDataInput.PaymasterPostOpGasLimit = global_const.DummyPaymasterPostoperativelyBigint
+	paymasterDataInput.PaymasterVerificationGasLimit = global_const.DummyPaymasterOversimplificationBigint
 	op.AccountGasLimits = user_op.DummyAccountGasLimits
 	op.GasFees = user_op.DummyGasFees
+	if op.PreVerificationGas == nil {
+		op.PreVerificationGas = global_const.DummyReverificationsBigint
+	}
+	if op.VerificationGasLimit == nil {
+		op.VerificationGasLimit = global_const.DummyVerificationGasLimit
+	}
+	if op.Signature == nil {
+		op.Signature = global_const.DummySignatureByte
+	}
+	if op.CallGasLimit == nil {
+		op.CallGasLimit = global_const.DummyCallGasLimit
+	}
 	paymasterData, err := executor.GetPaymasterData(&op, strategy, paymasterDataInput)
 	if err != nil {
 		return nil, err

@@ -1,7 +1,7 @@
 package user_op
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_common/paymaster_abi"
+	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_contract/paymaster_abi"
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"encoding/hex"
@@ -250,18 +250,18 @@ type UserOpInput struct {
 	Nonce              *big.Int        `json:"nonce"  mapstructure:"nonce"  binding:"required"`
 	InitCode           []byte          `json:"initCode"  mapstructure:"initCode" `
 	CallData           []byte          `json:"callData"  mapstructure:"callData"  binding:"required"`
-	PreVerificationGas *big.Int        `json:"preVerificationGas"  mapstructure:"preVerificationGas"  binding:"required"`
+	PreVerificationGas *big.Int        `json:"preVerificationGas"  mapstructure:"preVerificationGas"`
 	PaymasterAndData   []byte          `json:"paymasterAndData"  mapstructure:"paymasterAndData"`
 	Signature          []byte          `json:"signature"  mapstructure:"signature"  binding:"required"`
 	//Maximum fee per gas (similar to EIP-1559  max_fee_per_gas)
-	MaxFeePerGas *big.Int `json:"maxFeePerGas"  mapstructure:"maxFeePerGas"  binding:"required"`
+	MaxFeePerGas *big.Int `json:"maxFeePerGas"  mapstructure:"maxFeePerGas"`
 	//Maximum priority fee per gas (similar to EIP-1559 max_priority_fee_per_gas)
-	MaxPriorityFeePerGas *big.Int `json:"maxPriorityFeePerGas"  mapstructure:"maxPriorityFeePerGas"  binding:"required"`
+	MaxPriorityFeePerGas *big.Int `json:"maxPriorityFeePerGas"  mapstructure:"maxPriorityFeePerGas" `
 	//Gas limit for execution phase
-	CallGasLimit *big.Int `json:"callGasLimit"  mapstructure:"callGasLimit"  binding:"required"`
+	CallGasLimit *big.Int `json:"callGasLimit"  mapstructure:"callGasLimit"`
 	//Gas limit for verification phase
-	VerificationGasLimit *big.Int `json:"verificationGasLimit"  mapstructure:"verificationGasLimit"  binding:"required"`
-	AccountGasLimits     [32]byte `json:"accountGasLimits"  mapstructure:"accountGasLimits"  binding:"required"`
+	VerificationGasLimit *big.Int `json:"verificationGasLimit"  mapstructure:"verificationGasLimit"`
+	AccountGasLimits     [32]byte `json:"accountGasLimits"  mapstructure:"accountGasLimits"`
 	GasFees              [32]byte `json:"gasFees"  mapstructure:"gas_fees"  binding:"required"`
 
 	ComputeGasOnly bool
@@ -293,7 +293,15 @@ func (userOp *UserOpInput) PackUserOpForMock(version global_const.EntrypointVers
 		}
 		return hex.EncodeToString(encoded), encoded, nil
 	} else if version == global_const.EntrypointV06 {
-		encoded, err := userOpV06PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, global_const.DummyCallGasLimit, global_const.DummyVerificationGasLimit, global_const.DummayPreverificationgasBigint, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, global_const.DummyPaymasterDataByte, userOp.Signature)
+		maxFeePerGas := userOp.MaxFeePerGas
+		if maxFeePerGas == nil {
+			maxFeePerGas = global_const.DummyMaxFeePerGas
+		}
+		maxPriorityFeePerGas := userOp.MaxPriorityFeePerGas
+		if maxPriorityFeePerGas == nil {
+			maxPriorityFeePerGas = global_const.DummyMaxPriorityFeePerGas
+		}
+		encoded, err := userOpV06PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, global_const.DummyCallGasLimit, global_const.DummyVerificationGasLimit, global_const.DummyReverificationsBigint, maxFeePerGas, maxPriorityFeePerGas, global_const.DummyPaymasterDataByte, userOp.Signature)
 
 		if err != nil {
 			return "", nil, err

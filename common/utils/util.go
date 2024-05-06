@@ -201,7 +201,8 @@ func ParseCallError(err error, abi *abi.ABI) (string, error) {
 			logrus.Debugf("executionResult err: [%s]", uppackErr.Error())
 		} else {
 			logrus.Debugf("has revert :[%v]", revert)
-			return revert.(string), nil
+
+			return fmt.Sprintf("%v", revert), nil
 		}
 	}
 	return "", nil

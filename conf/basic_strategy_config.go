@@ -15,13 +15,14 @@ import (
 var basicStrategyConfig = make(map[string]*model.Strategy)
 
 // suitableStrategyMap[chain][entrypoint][payType]
-var suitableStrategyMap = make(map[global_const.Network]map[string]map[global_const.PayType]*model.Strategy)
+var suitableStrategyMap = make(map[global_const.Network]map[global_const.EntrypointVersion]map[global_const.PayType]*model.Strategy)
 
 func GetBasicStrategyConfig(strategyCode global_const.BasicStrategyCode) *model.Strategy {
 	return basicStrategyConfig[string(strategyCode)]
 }
-func GetSuitableStrategy(entrypoint string, chain global_const.Network, payType global_const.PayType) (*model.Strategy, error) {
-	strategy := suitableStrategyMap[chain][entrypoint][payType]
+func GetSuitableStrategy(entrypointVersion global_const.EntrypointVersion, chain global_const.Network, payType global_const.PayType) (*model.Strategy, error) {
+	//TODO
+	strategy := suitableStrategyMap[chain][entrypointVersion][payType]
 	if strategy == nil {
 		return nil, xerrors.Errorf("strategy not found")
 	}
@@ -94,12 +95,12 @@ func convertMapToStrategyConfig(data map[string]map[string]any) (map[string]*mod
 
 		config[key] = strategy
 		if suitableStrategyMap[strategy.NetWorkInfo.NetWork] == nil {
-			suitableStrategyMap[strategy.NetWorkInfo.NetWork] = make(map[string]map[global_const.PayType]*model.Strategy)
+			suitableStrategyMap[strategy.NetWorkInfo.NetWork] = make(map[global_const.EntrypointVersion]map[global_const.PayType]*model.Strategy)
 		}
-		if suitableStrategyMap[strategy.NetWorkInfo.NetWork][strategy.GetEntryPointAddress().String()] == nil {
-			suitableStrategyMap[strategy.NetWorkInfo.NetWork][strategy.GetEntryPointAddress().String()] = make(map[global_const.PayType]*model.Strategy)
+		if suitableStrategyMap[strategy.NetWorkInfo.NetWork][strategy.GetStrategyEntrypointVersion()] == nil {
+			suitableStrategyMap[strategy.NetWorkInfo.NetWork][strategy.GetStrategyEntrypointVersion()] = make(map[global_const.PayType]*model.Strategy)
 		}
-		suitableStrategyMap[strategy.NetWorkInfo.NetWork][strategy.GetEntryPointAddress().String()][strategy.GetPayType()] = strategy
+		suitableStrategyMap[strategy.NetWorkInfo.NetWork][strategy.GetStrategyEntrypointVersion()][strategy.GetPayType()] = strategy
 	}
 	return config, nil
 }

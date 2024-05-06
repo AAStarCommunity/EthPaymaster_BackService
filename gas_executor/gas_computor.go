@@ -139,8 +139,8 @@ func getUserOpEstimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy,
 	if entryPointVersion == global_const.EntrypointV07 {
 		opEstimateGas.AccountGasLimit = utils.PackIntTo32Bytes(verificationGasLimit, callGasLimit)
 		opEstimateGas.GasFees = utils.PackIntTo32Bytes(gasPriceResult.MaxPriorityFeePerGas, gasPriceResult.MaxFeePerGas)
-		opEstimateGas.PaymasterPostOpGasLimit = global_const.DummyPaymasterPostopGaslimitBigint
-		opEstimateGas.PaymasterVerificationGasLimit = global_const.DummyPaymasterVerificationgaslimitBigint
+		opEstimateGas.PaymasterPostOpGasLimit = global_const.DummyPaymasterPostoperativelyBigint
+		opEstimateGas.PaymasterVerificationGasLimit = global_const.DummyPaymasterOversimplificationBigint
 	}
 	return &opEstimateGas, nil
 }
@@ -157,14 +157,14 @@ func getNewUserOpAfterCompute(op *user_op.UserOpInput, gas *model.UserOpEstimate
 		Nonce:                op.Nonce,
 		InitCode:             op.InitCode,
 		CallData:             op.CallData,
-		MaxFeePerGas:         op.MaxFeePerGas,
+		MaxFeePerGas:         gas.MaxFeePerGas,
 		Signature:            op.Signature,
-		MaxPriorityFeePerGas: op.MaxPriorityFeePerGas,
-		CallGasLimit:         op.CallGasLimit,
-		VerificationGasLimit: op.VerificationGasLimit,
+		MaxPriorityFeePerGas: gas.MaxPriorityFeePerGas,
+		CallGasLimit:         gas.CallGasLimit,
+		VerificationGasLimit: gas.VerificationGasLimit,
 		AccountGasLimits:     accountGasLimits,
 		GasFees:              gasFee,
-		PreVerificationGas:   op.PreVerificationGas,
+		PreVerificationGas:   gas.PreVerificationGas,
 	}
 	return result
 }
@@ -222,8 +222,8 @@ func estimateVerificationGasLimit(simulateOpResult *model.SimulateHandleOpResult
 	result := new(big.Int).Sub(preOpGas, preVerificationGas)
 	result = result.Mul(result, global_const.ThreeBigint)
 	result = result.Div(result, global_const.TwoBigint)
-	if utils.LeftIsLessTanRight(result, global_const.DummyVerificationgaslimitBigint) {
-		return global_const.DummyVerificationgaslimitBigint, nil
+	if utils.LeftIsLessTanRight(result, global_const.DummyVerificationGasLimit) {
+		return global_const.DummyVerificationGasLimit, nil
 	}
 	return result, nil
 }

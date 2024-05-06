@@ -1,4 +1,12 @@
 definitions:
+  global_const.EntrypointVersion:
+    enum:
+    - v0.6
+    - v0.7
+    type: string
+    x-enum-varnames:
+    - EntrypointV06
+    - EntrypointV07
   global_const.Network:
     enum:
     - ethereum-mainnet
@@ -29,13 +37,39 @@ definitions:
     - StarketSepolia
     - BaseMainnet
     - BaseSepolia
+  global_const.TokenType:
+    enum:
+    - USDT
+    - USDC
+    - ETH
+    - OP
+    type: string
+    x-enum-varnames:
+    - TokenTypeUSDT
+    - TokenTypeUSDC
+    - ETH
+    - OP
   model.ClientCredential:
     properties:
       apiKey:
         type: string
     type: object
+  model.JsonRpcRequest:
+    properties:
+      id:
+        type: integer
+      jsonrpc:
+        type: string
+      method:
+        type: string
+      params:
+        items: {}
+        type: array
+    type: object
   model.UserOpRequest:
     properties:
+      entrypoint_version:
+        $ref: '#/definitions/global_const.EntrypointVersion'
       estimate_op_gas:
         type: boolean
       extra: {}
@@ -46,7 +80,7 @@ definitions:
       force_strategy_id:
         type: string
       force_token:
-        type: string
+        $ref: '#/definitions/global_const.TokenType'
       user_operation:
         additionalProperties: {}
         type: object
@@ -138,6 +172,25 @@ paths:
       - JWT: []
       tags:
       - Sponsor
+  /api/v1/paymaster:
+    post:
+      consumes:
+      - application/json
+      description: Paymaster JSON-RPC API
+      parameters:
+      - description: JsonRpcRequest Model
+        in: body
+        name: rpcRequest
+        required: true
+        schema:
+          $ref: '#/definitions/model.JsonRpcRequest'
+      responses:
+        "200":
+          description: OK
+      security:
+      - JWT: []
+      tags:
+      - Paymaster
   /api/v1/try-pay-user-operation:
     post:
       consumes:

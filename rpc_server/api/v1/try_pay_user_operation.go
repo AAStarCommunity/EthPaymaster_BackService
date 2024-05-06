@@ -1,12 +1,12 @@
 package v1
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/conf"
-	"AAStarCommunity/EthPaymaster_BackService/envirment"
 	"AAStarCommunity/EthPaymaster_BackService/service/operator"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 	"net/http"
 )
@@ -31,7 +31,7 @@ func TryPayUserOperation(c *gin.Context) {
 		return
 	}
 
-	if err := ValidateUserOpRequest(request); err != nil {
+	if err := ValidateUserOpRequest(&request); err != nil {
 		errStr := fmt.Sprintf("Request Error [%v]", err)
 		response.SetHttpCode(http.StatusBadRequest).FailCode(c, http.StatusBadRequest, errStr)
 		return
@@ -47,23 +47,66 @@ func TryPayUserOperation(c *gin.Context) {
 		return
 	}
 }
-func ValidateUserOpRequest(request model.UserOpRequest) error {
-	if len(request.ForceStrategyId) == 0 {
-		if len(request.ForceNetwork) == 0 || len(request.Erc20Token) == 0 || len(request.ForceEntryPointAddress) == 0 {
-			return xerrors.Errorf("strategy configuration illegal")
+
+func TryPayUserOperationMethod() MethodFunctionFunc {
+	return func(ctx *gin.Context, jsonRpcRequest model.JsonRpcRequest) (result interface{}, err error) {
+		request, err := ParseTryPayUserOperationParams(jsonRpcRequest.Params)
+		logrus.Debug("ParseTryPayUserOperationParams result: ", request)
+
+		if err != nil {
+			return nil, xerrors.Errorf("ParseTryPayUserOperationParams ERROR [%v]", err)
+		}
+		if err := ValidateUserOpRequest(request); err != nil {
+			return nil, xerrors.Errorf("Request Error [%v]", err)
+		}
+		logrus.Debugf("After Validate ")
+
+		if result, err := operator.TryPayUserOpExecute(request); err != nil {
+			return nil, xerrors.Errorf("TryPayUserOpExecute ERROR [%v]", err)
+		} else {
+			return result, nil
 		}
 	}
-	if request.ForceStrategyId == "" && (request.Erc20Token == "" || request.ForceNetwork == "") {
-		return xerrors.Errorf("Token And Network Must Set When ForceStrategyId Is Empty")
+}
+func ParseTryPayUserOperationParams(params []interface{}) (*model.UserOpRequest, error) {
+	if len(params) < 2 {
+		return nil, xerrors.Errorf("params length is less than 2")
 	}
-	if envirment.Environment.IsDevelopment() && request.ForceNetwork != "" {
-		if !conf.IsTestNet(request.ForceNetwork) {
-			return xerrors.Errorf("ForceNetwork: [%s] is not test network", request.ForceNetwork)
-		}
+	result := model.UserOpRequest{}
+	userInputParam := params[0]
+	if userInputParam == nil {
+		return nil, xerrors.Errorf("user input is nil")
 	}
-	exist := conf.CheckEntryPointExist(request.ForceNetwork, request.ForceEntryPointAddress)
-	if !exist {
-		return xerrors.Errorf("ForceEntryPointAddress: [%s] not exist in [%s] network", request.ForceEntryPointAddress, request.ForceNetwork)
+	userOpInput := userInputParam.(map[string]any)
+	result.UserOp = userOpInput
+
+	extraParam := params[1]
+	if extraParam == nil {
+		return nil, xerrors.Errorf("extra is nil")
 	}
+	extra := extraParam.(map[string]any)
+	if extra["strategy_code"] != nil {
+		result.ForceStrategyId = extra["strategy_code"].(string)
+	}
+	if extra["network"] != nil {
+		result.ForceNetwork = extra["network"].(global_const.Network)
+	}
+	if extra["token"] != nil {
+		result.Erc20Token = extra["token"].(global_const.TokenType)
+	}
+	if extra["version"] != nil {
+		result.EntryPointVersion = extra["version"].(global_const.EntrypointVersion)
+	}
+	return &result, nil
+}
+
+func ValidateUserOpRequest(request *model.UserOpRequest) error {
+	if request.ForceStrategyId != "" {
+		return nil
+	}
+	if request.ForceNetwork == "" {
+		return xerrors.Errorf("ForceNetwork is empty")
+	}
+
 	return nil
 }
