@@ -3,6 +3,7 @@ package global_const
 import (
 	"crypto/ecdsa"
 	"encoding/hex"
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"math/big"
@@ -37,6 +38,9 @@ var (
 	DummyCallGasLimit                      = big.NewInt(21754)
 	DummyVerificationGasLimit              = big.NewInt(391733)
 	EmptyAddress                           = common.HexToAddress("0x0000000000000000000000000000000000000000")
+	GitHubActionWhiteListSet               = mapset.NewSet(
+		"testGetAddressTokenBalance", "Test_OptimismSepoliaV06Verify_TryPayUserOpExecute", "Test_EthereumSepoliaV06Verify_TryPayUserOpExecute", "Test_OptimismSepoliaV06Verify_TryPayUserOpExecute", "Test_BaseSepoliaV06Verify_TryPayUserOpExecute",
+		"Test_ArbitrumSpeoliaV06Verify_TryPayUserOpExecute")
 )
 
 func init() {

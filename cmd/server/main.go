@@ -62,6 +62,6 @@ func Init(strategyPath string, businessConfigPath string) {
 	}
 	logrus.Infof("Environment: %s", envirment.Environment.Name)
 	logrus.Infof("Debugger: %v", envirment.Environment.Debugger)
-
+	logrus.Infof("Action ENV : [%v]", os.Getenv("GITHUB_ACTIONS"))
 	Engine = routers.SetRouters()
 }
