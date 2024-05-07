@@ -14,7 +14,7 @@ import (
 )
 
 func CheckContractAddressAccess(contract *common.Address, chain global_const.Network) (bool, error) {
-	//todo needCache
+	//todo DB Cache needCache
 	executor := network.GetEthereumExecutor(chain)
 	return executor.CheckContractAddressAccess(contract)
 }

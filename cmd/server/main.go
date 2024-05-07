@@ -47,12 +47,12 @@ func main() {
 	strategyPath := fmt.Sprintf("./config/basic_strategy_%s_config.json", strings.ToLower(envirment.Environment.Name))
 	businessConfigPath := fmt.Sprintf("./config/business_%s_config.json", strings.ToLower(envirment.Environment.Name))
 
-	Init(strategyPath, businessConfigPath)
+	initEngine(strategyPath, businessConfigPath)
 	port := runMode()
 	_ = Engine.Run(port)
 }
 
-func Init(strategyPath string, businessConfigPath string) {
+func initEngine(strategyPath string, businessConfigPath string) {
 	config.BasicStrategyInit(strategyPath)
 	config.BusinessConfigInit(businessConfigPath)
 	if envirment.Environment.IsDevelopment() {

@@ -32,6 +32,7 @@ func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymaster
 	updateUserOp := getNewUserOpAfterCompute(userOp, opEstimateGas, strategy.GetStrategyEntrypointVersion())
 	var erc20TokenCost *big.Float
 	if !userOp.ComputeGasOnly {
+		// NetworkCall 1
 		erc20TokenCost, err = getErc20TokenCost(strategy, totalGasDetail.MaxTxGasCostInEther)
 		if err != nil {
 			return nil, nil, xerrors.Errorf("getErc20TokenCost error: %v", err)
@@ -107,21 +108,27 @@ func getUserOpEstimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy,
 	}
 	logrus.Debugf("userOpInputForSimulate: %v", userOpInputForSimulate)
 	logrus.Debugf("getUserOpEstimateGas gasPriceResult: %v", gasPriceResult)
-	simulateGasPrice := utils.GetGasEntryPointGasGrace(gasPriceResult.MaxFeePerGas, gasPriceResult.MaxPriorityFeePerGas, gasPriceResult.BaseFee)
-
+	// get EntryPoint GasPrice
+	// NetworkCall 1
+	simulateGasPrice := utils.GetGasEntryPointGasPrice(gasPriceResult.MaxFeePerGas, gasPriceResult.MaxPriorityFeePerGas, gasPriceResult.BaseFee)
+	// NetworkCall 1
 	simulateResult, err := chain_service.SimulateHandleOp(userOpInputForSimulate, strategy)
 	if err != nil {
 		return nil, xerrors.Errorf("SimulateHandleOp error: %v", err)
 	}
+	// NetworkCall 1
 	preVerificationGas, err := GetPreVerificationGas(userOp, strategy, gasPriceResult, simulateResult)
 	if err != nil {
 		return nil, xerrors.Errorf("GetPreVerificationGas error: %v", err)
 	}
+
+	// TODO verificationGasLimit and callGasLimit parell
 	verificationGasLimit, err := estimateVerificationGasLimit(simulateResult, preVerificationGas)
 	if err != nil {
 		return nil, xerrors.Errorf("estimateVerificationGasLimit error: %v", err)
 	}
 
+	//  NetworkCall 1
 	callGasLimit, err := EstimateCallGasLimit(strategy, simulateResult, userOp, simulateGasPrice)
 	if err != nil {
 		return nil, xerrors.Errorf("EstimateCallGasLimit error: %v", err)
@@ -194,6 +201,7 @@ func EstimateCallGasLimit(strategy *model.Strategy, simulateOpResult *model.Simu
 	}
 }
 
+// ratio  need cache
 func getErc20TokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Float, error) {
 	if strategy.GetPayType() == global_const.PayTypeERC20 {
 		if strategy.Erc20TokenType == "" {

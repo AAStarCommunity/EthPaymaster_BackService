@@ -93,8 +93,9 @@ func PackIntTo32Bytes(left *big.Int, right *big.Int) [32]byte {
 	return result
 }
 
-func GetGasEntryPointGasGrace(maxFeePerGas *big.Int, maxPriorityFeePerGas *big.Int, baseFee *big.Int) *big.Int {
+func GetGasEntryPointGasPrice(maxFeePerGas *big.Int, maxPriorityFeePerGas *big.Int, baseFee *big.Int) *big.Int {
 	if maxFeePerGas == maxPriorityFeePerGas {
+		// is 1559 not support
 		return maxFeePerGas
 	}
 	combineFee := new(big.Int).Add(baseFee, maxPriorityFeePerGas)

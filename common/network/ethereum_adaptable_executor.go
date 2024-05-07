@@ -67,6 +67,7 @@ type EthereumExecutor struct {
 func GetEthereumExecutor(network global_const.Network) *EthereumExecutor {
 
 	if executorMap[network] == nil {
+		// TODO need to check Out Client Connection Always Open
 		client, err := ethclient.Dial(config.GetEthereumRpcUrl(network))
 		if err != nil {
 			panic(err)
