@@ -343,7 +343,7 @@ func testEthereumExecutorClientConnect(t *testing.T, chain global_const.Network)
 		t.Error("chainId is nil")
 	}
 	if chainId.String() != executor.ChainId.String() {
-		t.Errorf(" %s chainId not equal %s", chainId.String(), executor.ChainId.String())
+		t.Fatalf(" %s chainId not equal %s", chainId.String(), executor.ChainId.String())
 	}
 	t.Logf("network %s chainId: %s", chain, chainId.String())
 }

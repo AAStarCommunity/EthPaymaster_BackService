@@ -46,14 +46,14 @@ func TestConvertStringToSet(t *testing.T) {
 //
 //	sign, err := GetSign(messageByte, privateKey)
 //	if err != nil {
-//		t.Errorf("has Error %s", err)
+//		t.Fatalf("has Error %s", err)
 //		return
 //	}
 //	t.Logf("sign: %x\n", sign)
 //
 //	sigPublicKey, err := crypto.Ecrecover(hash.Bytes(), sign)
 //	if err != nil {
-//		t.Errorf("has Error %s", err)
+//		t.Fatalf("has Error %s", err)
 //		return
 //	}
 //	matches := bytes.Equal(sigPublicKey, publicKeyBytes)

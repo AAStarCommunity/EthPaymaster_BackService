@@ -11,12 +11,12 @@ func TestDemo(t *testing.T) {
 	//only read
 	starkProvider, err := rpc.NewProvider("https://starknet-sepolia.public.blastapi.io/rpc/v0_7")
 	if err != nil {
-		t.Errorf("Error: %v", err)
+		t.Fatalf("Error: %v", err)
 		return
 	}
 	chainId, chainIdError := starkProvider.ChainID(context.Background())
 	if chainIdError != nil {
-		t.Errorf("Error: %v", chainIdError)
+		t.Fatalf("Error: %v", chainIdError)
 		return
 	}
 	//starkProvider.SimulateTransactions()

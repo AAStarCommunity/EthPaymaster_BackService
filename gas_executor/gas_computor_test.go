@@ -171,7 +171,7 @@ func TestComputeGas(t *testing.T) {
 			func(*testing.T) {
 				strategy := config.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Erc20)
 				strategy.Erc20TokenType = global_const.TokenTypeUSDT
-				testComputeGas(t, op, strategy)
+				testComputeGas(t, opFor1559NotSupport, strategy)
 			},
 		},
 		{
@@ -236,7 +236,7 @@ func testComputeGas(t *testing.T, input *user_op.UserOpInput, strategy *model.St
 	paymasterDataInput := paymaster_data.NewPaymasterDataInput(strategy)
 	res, _, err := ComputeGas(input, strategy, paymasterDataInput)
 	if err != nil {
-		t.Error(err)
+		t.Fatalf("err: %v", err)
 		return
 	}
 	if res == nil {
