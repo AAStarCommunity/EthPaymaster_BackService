@@ -24,8 +24,8 @@ type Price struct {
 
 func init() {
 	URLMap = make(map[global_const.TokenType]string)
-	URLMap[global_const.ETH] = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
-	URLMap[global_const.OP] = "https://api.coingecko.com/api/v3/simple/price?ids=optimism&vs_currencies=usd"
+	URLMap[global_const.TokenTypeETH] = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
+	URLMap[global_const.TokenTypeOP] = "https://api.coingecko.com/api/v3/simple/price?ids=optimism&vs_currencies=usd"
 }
 
 func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {
@@ -33,9 +33,9 @@ func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {
 	if global_const.IsStableToken(tokenType) {
 		return 1, nil
 	}
-	if tokenType == global_const.ETH {
-		return 3100, nil
-	}
+	//if tokenType == global_const.ETH {
+	//	return 3100, nil
+	//}
 	tokenUrl, ok := URLMap[tokenType]
 	if !ok {
 		return 0, xerrors.Errorf("tokens type [%w] not found", tokenType)
@@ -53,6 +53,8 @@ func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {
 	usdstr := strings.TrimRight(strarr[2], "}}")
 	return strconv.ParseFloat(usdstr, 64)
 }
+
+// GetToken Get The FromToken/ToToken Rate
 func GetToken(fromToken global_const.TokenType, toToken global_const.TokenType) (float64, error) {
 	if toToken == global_const.TokenTypeUSDT {
 		return GetPriceUsd(fromToken)
