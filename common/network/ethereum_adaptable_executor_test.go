@@ -310,7 +310,7 @@ func testSimulateHandleOp(t *testing.T, chain global_const.Network, strategy *mo
 	t.Logf("version: %s", version)
 	var simulateResult *model.SimulateHandleOpResult
 	if version == global_const.EntrypointV06 {
-		simulateResult, err = sepoliaExector.SimulateV06HandleOp(*op, strategy.GetEntryPointAddress())
+		simulateResult, err = sepoliaExector.SimulateV06HandleOp(op, strategy.GetEntryPointAddress())
 	} else if version == global_const.EntrypointV07 {
 
 		simulateResult, err = sepoliaExector.SimulateV07HandleOp(*op, strategy.GetEntryPointAddress())

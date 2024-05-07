@@ -109,6 +109,12 @@ func EncodeToStringWithPrefix(data []byte) string {
 	return res
 }
 
+func DecodeStringWithPrefix(data string) ([]byte, error) {
+	if data[:2] == "0x" {
+		data = data[2:]
+	}
+	return hex.DecodeString(data)
+}
 func SignMessage(privateKeyHex string, message string) ([]byte, error) {
 	privateKey, err := crypto.HexToECDSA(privateKeyHex)
 	if err != nil {

@@ -265,12 +265,12 @@ func (executor EthereumExecutor) GetL1DataFee(data []byte) (*big.Int, error) {
 	return fee, nil
 }
 
-func (executor EthereumExecutor) SimulateV06HandleOp(v06 user_op.UserOpInput, entryPoint *common.Address) (*model.SimulateHandleOpResult, error) {
+func (executor EthereumExecutor) SimulateV06HandleOp(v06 *user_op.UserOpInput, entryPoint *common.Address) (*model.SimulateHandleOpResult, error) {
 	abi, err := contract_entrypoint_v06.ContractMetaData.GetAbi()
 	if err != nil {
 		return nil, err
 	}
-	callData, err := abi.Pack("simulateHandleOp", &v06, global_const.EmptyAddress, []byte{})
+	callData, err := abi.Pack("simulateHandleOp", v06, global_const.EmptyAddress, []byte{})
 	if err != nil {
 		return nil, xerrors.Errorf("pack Arg ERROR [%v]", err)
 	}

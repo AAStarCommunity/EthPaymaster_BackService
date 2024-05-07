@@ -6,11 +6,13 @@ import (
 )
 
 type TryPayUserOpResponse struct {
-	StrategyId        string          `json:"strategyId"`
-	EntryPointAddress string          `json:"entrypointAddress"`
-	PayMasterAddress  string          `json:"paymasterAddress"`
-	Erc20TokenCost    *big.Float      `json:"Erc20TokenCost"`
-	UserOpResponse    *UserOpResponse `json:"userOpResponse"`
+	StrategyId        string                         `json:"strategyId"`
+	NetWork           global_const.Network           `json:"network"`
+	EntrypointVersion global_const.EntrypointVersion `json:"entrypointVersion"`
+	EntryPointAddress string                         `json:"entrypointAddress"`
+	PayMasterAddress  string                         `json:"paymasterAddress"`
+	Erc20TokenCost    *big.Float                     `json:"Erc20TokenCost"`
+	UserOpResponse    *UserOpResponse                `json:"userOpResponse"`
 }
 type UserOpResponse struct {
 	PayMasterAndData     string   `json:"paymasterAndData"`

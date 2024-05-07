@@ -113,6 +113,8 @@ func postExecute(userOp *user_op.UserOpInput, strategy *model.Strategy, gasRespo
 	var result = &model.TryPayUserOpResponse{
 		StrategyId:        strategy.Id,
 		EntryPointAddress: strategy.GetEntryPointAddress().String(),
+		NetWork:           strategy.GetNewWork(),
+		EntrypointVersion: strategy.GetStrategyEntrypointVersion(),
 		PayMasterAddress:  strategy.GetPaymasterAddress().String(),
 		Erc20TokenCost:    gasResponse.Erc20TokenCost,
 

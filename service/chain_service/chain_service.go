@@ -50,7 +50,7 @@ func SimulateHandleOp(op *user_op.UserOpInput, strategy *model.Strategy) (*model
 	entrypointVersion := strategy.GetStrategyEntrypointVersion()
 	if entrypointVersion == global_const.EntrypointV06 {
 
-		return executor.SimulateV06HandleOp(*op, strategy.GetEntryPointAddress())
+		return executor.SimulateV06HandleOp(op, strategy.GetEntryPointAddress())
 
 	} else if entrypointVersion == global_const.EntrypointV07 {
 		return executor.SimulateV07HandleOp(*op, strategy.GetEntryPointAddress())
