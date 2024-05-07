@@ -3,6 +3,7 @@ package contract_entrypoint_v06
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_contract/paymaster_abi"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
+	"errors"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -34,7 +35,8 @@ func ExecutionResult() abi.Error {
 
 func NewExecutionResult(inputError error, abi *abi.ABI) (*ExecutionResultRevert, error) {
 
-	rpcErr, ok := inputError.(rpc.DataError)
+	var rpcErr rpc.DataError
+	ok := errors.As(inputError, &rpcErr)
 	if !ok {
 		return nil, xerrors.Errorf("ExecutionResult: cannot assert type: error is not of type rpc.DataError")
 	}

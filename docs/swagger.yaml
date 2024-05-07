@@ -1,54 +1,4 @@
 definitions:
-  global_const.EntrypointVersion:
-    enum:
-    - v0.6
-    - v0.7
-    type: string
-    x-enum-varnames:
-    - EntrypointV06
-    - EntrypointV07
-  global_const.Network:
-    enum:
-    - ethereum-mainnet
-    - ethereum-sepolia
-    - optimism-mainnet
-    - optimism-sepolia
-    - arbitrum-one
-    - arbitrum-nova
-    - arbitrum-sepolia
-    - scroll-mainnet
-    - scroll-sepolia
-    - starknet-mainnet
-    - starknet-sepolia
-    - base-mainnet
-    - base-sepolia
-    type: string
-    x-enum-varnames:
-    - EthereumMainnet
-    - EthereumSepolia
-    - OptimismMainnet
-    - OptimismSepolia
-    - ArbitrumOne
-    - ArbitrumNova
-    - ArbitrumSpeolia
-    - ScrollMainnet
-    - ScrollSepolia
-    - StarketMainnet
-    - StarketSepolia
-    - BaseMainnet
-    - BaseSepolia
-  global_const.TokenType:
-    enum:
-    - USDT
-    - USDC
-    - ETH
-    - OP
-    type: string
-    x-enum-varnames:
-    - TokenTypeUSDT
-    - TokenTypeUSDC
-    - ETH
-    - OP
   model.ClientCredential:
     properties:
       apiKey:
@@ -65,25 +15,6 @@ definitions:
       params:
         items: {}
         type: array
-    type: object
-  model.UserOpRequest:
-    properties:
-      entrypoint_version:
-        $ref: '#/definitions/global_const.EntrypointVersion'
-      estimate_op_gas:
-        type: boolean
-      extra: {}
-      force_entrypoint_address:
-        type: string
-      force_network:
-        $ref: '#/definitions/global_const.Network'
-      force_strategy_id:
-        type: string
-      force_token:
-        $ref: '#/definitions/global_const.TokenType'
-      user_operation:
-        additionalProperties: {}
-        type: object
     type: object
 info:
   contact:
@@ -117,61 +48,6 @@ paths:
           description: OK
       tags:
       - Healthz
-  /api/v1/estimate-user-operation-gas:
-    post:
-      consumes:
-      - application/json
-      description: get the estimate gas of the userOp
-      parameters:
-      - description: UserOp Request
-        in: body
-        name: tryPay
-        required: true
-        schema:
-          $ref: '#/definitions/model.UserOpRequest'
-      responses:
-        "200":
-          description: OK
-      security:
-      - JWT: []
-      tags:
-      - Sponsor
-  /api/v1/get-support-entrypoint:
-    get:
-      consumes:
-      - application/json
-      description: get the support entrypoint
-      parameters:
-      - description: network
-        in: query
-        name: network
-        type: string
-      responses:
-        "200":
-          description: OK
-      security:
-      - JWT: []
-      tags:
-      - Sponsor
-  /api/v1/get-support-strategy:
-    get:
-      consumes:
-      - application/json
-      description: get the support strategy
-      parameters:
-      - description: network
-        in: query
-        name: network
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      security:
-      - JWT: []
-      tags:
-      - Sponsor
   /api/v1/paymaster:
     post:
       consumes:
@@ -191,25 +67,6 @@ paths:
       - JWT: []
       tags:
       - Paymaster
-  /api/v1/try-pay-user-operation:
-    post:
-      consumes:
-      - application/json
-      description: sponsor the userOp
-      parameters:
-      - description: UserOp Request
-        in: body
-        name: tryPay
-        required: true
-        schema:
-          $ref: '#/definitions/model.UserOpRequest'
-      responses:
-        "200":
-          description: OK
-      security:
-      - JWT: []
-      tags:
-      - Sponsor
 securityDefinitions:
   JWT:
     description: Type 'Bearer \<TOKEN\>' to correctly set the AccessToken

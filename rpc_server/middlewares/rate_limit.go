@@ -30,6 +30,9 @@ func RateLimiterByApiKeyHandler() gin.HandlerFunc {
 		}
 	}
 }
+func clearLimiter(apiKey *string) {
+	delete(limiter, *apiKey)
+}
 
 func limiting(apiKey *string) bool {
 

@@ -20,6 +20,11 @@ var (
 		MaxPriorityFeePerGas: big.NewInt(1000000000),
 		BaseFee:              big.NewInt(1053608903),
 	}
+	MockGasPriceNotSupport1559 = &GasPrice{
+		MaxFeePerGas:         big.NewInt(2053608903),
+		MaxPriorityFeePerGas: big.NewInt(2053608903),
+		BaseFee:              big.NewInt(0),
+	}
 )
 
 func init() {

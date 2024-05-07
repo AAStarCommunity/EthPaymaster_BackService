@@ -1,4 +1,4 @@
-package conf
+package config
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"

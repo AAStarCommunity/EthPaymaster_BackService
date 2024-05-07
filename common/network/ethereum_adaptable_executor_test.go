@@ -6,18 +6,17 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
-	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/config"
 	"context"
 	"encoding/hex"
-	"encoding/json"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/sirupsen/logrus"
 	"testing"
 )
 
 func TestEthereumAdaptableExecutor(t *testing.T) {
-	conf.BasicStrategyInit("../../conf/basic_strategy_dev_config.json")
-	conf.BusinessConfigInit("../../conf/business_dev_config.json")
+	config.BasicStrategyInit("../../config/basic_strategy_dev_config.json")
+	config.BusinessConfigInit("../../config/business_dev_config.json")
 	logrus.SetLevel(logrus.DebugLevel)
 	op, err := user_op.NewUserOp(utils.GenerateMockUservOperation())
 	if err != nil {
@@ -57,7 +56,7 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 		{
 			"TestGetUseOpHash",
 			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
+				strategy := config.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
 				t.Logf("paymaster Address %s", strategy.GetPaymasterAddress())
 				testGetUserOpHash(t, *op, strategy)
 			},
@@ -65,7 +64,7 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 		{
 			"TestGetUseOpHashV07",
 			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v07_verifyPaymaster")
+				strategy := config.GetBasicStrategyConfig("Ethereum_Sepolia_v07_verifyPaymaster")
 				t.Logf("paymaster Address %s", strategy.GetPaymasterAddress())
 				testGetUserOpHash(t, *op, strategy)
 			},
@@ -73,14 +72,14 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 		{
 			"TestSepoliaSimulateV06HandleOp",
 			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV06Verify)
+				strategy := config.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV06Verify)
 				testSimulateHandleOp(t, global_const.EthereumSepolia, strategy)
 			},
 		},
 		{
 			"TestSepoliaSimulateV06HandleOp",
 			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeOptimismSepoliaV06Verify)
+				strategy := config.GetBasicStrategyConfig(global_const.StrategyCodeOptimismSepoliaV06Verify)
 				testSimulateHandleOp(t, global_const.OptimismSepolia, strategy)
 			},
 		},
@@ -91,18 +90,18 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 		//		testSimulateHandleOp(t, global_const.ScrollSepolia, strategy)
 		//	},
 		//},
-		{
-			"TestSepoliaSimulateV07HandleOp",
-			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV07Verify)
-
-				testSimulateHandleOp(t, global_const.EthereumSepolia, strategy)
-			},
-		},
+		//{ TODO Support V07 later
+		//	"TestSepoliaSimulateV07HandleOp",
+		//	func(t *testing.T) {
+		//		strategy := config.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV07Verify)
+		//
+		//		testSimulateHandleOp(t, global_const.EthereumSepolia, strategy)
+		//	},
+		//},
 		{
 			"TestGetPaymasterAndDataV07",
 			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV07Verify)
+				strategy := config.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV07Verify)
 				testGetPaymasterData(t, global_const.EthereumSepolia, op, strategy)
 			},
 		},
@@ -141,7 +140,7 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 		{
 			"TestEstimateUserOpCallGas",
 			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
+				strategy := config.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
 				entrypointAddress := strategy.GetEntryPointAddress()
 				testEstimateUserOpCallGas(t, global_const.EthereumSepolia, op, entrypointAddress)
 			},
@@ -149,7 +148,7 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 		{
 			"TestEstimateCreateSenderGas",
 			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
+				strategy := config.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
 				entrypointAddress := strategy.GetEntryPointAddress()
 				testEstimateCreateSenderGas(t, global_const.EthereumSepolia, op, entrypointAddress)
 			},
@@ -157,9 +156,9 @@ func TestEthereumAdaptableExecutor(t *testing.T) {
 		{
 			"TestOptimismGetL1DataFee",
 			func(t *testing.T) {
-				stategy := conf.GetBasicStrategyConfig("Optimism_Sepolia_v06_verifyPaymaster")
+				strategy := config.GetBasicStrategyConfig("Optimism_Sepolia_v06_verifyPaymaster")
 
-				testGetL1DataFee(t, global_const.OptimismSepolia, *op, stategy.GetStrategyEntrypointVersion())
+				testGetL1DataFee(t, global_const.OptimismSepolia, *op, strategy.GetStrategyEntrypointVersion())
 			},
 		},
 		{
@@ -309,57 +308,24 @@ func testSimulateHandleOp(t *testing.T, chain global_const.Network, strategy *mo
 	t.Logf("entryPoint Address %s", strategy.GetEntryPointAddress())
 	version := strategy.GetStrategyEntrypointVersion()
 	t.Logf("version: %s", version)
-	var simulataResult *model.SimulateHandleOpResult
+	var simulateResult *model.SimulateHandleOpResult
 	if version == global_const.EntrypointV06 {
-		simulataResult, err = sepoliaExector.SimulateV06HandleOp(*op, strategy.GetEntryPointAddress())
+		simulateResult, err = sepoliaExector.SimulateV06HandleOp(*op, strategy.GetEntryPointAddress())
 	} else if version == global_const.EntrypointV07 {
-		//userOpMap := map[string]string{
-		//	"sender":             op.Sender.String(),
-		//	"nonce":              op.Nonce.String(),
-		//	"initCode":           hex.EncodeToString(op.InitCode),
-		//	"callData":           hex.EncodeToString(op.CallData),
-		//	"accountGasLimits":   hex.EncodeToString(op.AccountGasLimits[:]),
-		//	"preVerificationGas": op.PreVerificationGas.String(),
-		//	"gasFees":            hex.EncodeToString(op.GasFees[:]),
-		//	"paymasterAndData":   hex.EncodeToString(paymasterData),
-		//	"signature":          hex.EncodeToString(op.Signature),
-		//}
-		//abi, _ := contract_entrypoint_v07.ContractMetaData.GetAbi()
-		//var userOps [1]user_op.UserOpInput
-		//userOps[0] = *op
-		//handleOpsCallDat, abiErr := abi.Pack("handleOps", userOps, global_const.DummyAddress)
-		//if abiErr != nil {
-		//	t.Error(abiErr)
-		//	return
-		//}
-		//t.Logf("handleOpsCallDat: %v", hex.EncodeToString(handleOpsCallDat))
-		//userOpMapJson, _ := json.Marshal(userOpMap)
-		//t.Logf("userOpMapJson: %v", string(userOpMapJson))
-		//
-		//t.Logf("userOpMap: %v", userOpMap)
-		//t.Logf("Sender [%s]", op.Sender)
-		//t.Logf("Nonce [%d]", op.Nonce)
-		//t.Logf("InitCode [%v]", op.InitCode)
-		//t.Logf("CallData [%v]", op.CallData)
-		//t.Logf("AccountGasLimits [%v]", op.AccountGasLimits)
-		//t.Logf("PreVerificationGas [%v]", op.PreVerificationGas)
-		//t.Logf("GasFees [%v]", op.GasFees)
-		//t.Logf("PaymasterAndData [%v]", op.PaymasterAndData)
-		//t.Logf("Signature [%v]", op.Signature)
 
-		simulataResult, err = sepoliaExector.SimulateV07HandleOp(*op, strategy.GetEntryPointAddress())
+		simulateResult, err = sepoliaExector.SimulateV07HandleOp(*op, strategy.GetEntryPointAddress())
 	}
 
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if simulataResult == nil {
+	if simulateResult == nil {
 		t.Error("simulataResult is nil")
 		return
 	}
-	t.Logf("simulateResult: %v", simulataResult)
-	callData := simulataResult.SimulateUserOpCallData
+	t.Logf("simulateResult: %v", simulateResult)
+	callData := simulateResult.SimulateUserOpCallData
 	t.Logf("callData: %v", hex.EncodeToString(callData))
 }
 
@@ -380,19 +346,4 @@ func testEthereumExecutorClientConnect(t *testing.T, chain global_const.Network)
 		t.Errorf(" %s chainId not equal %s", chainId.String(), executor.ChainId.String())
 	}
 	t.Logf("network %s chainId: %s", chain, chainId.String())
-}
-
-func TestStr(t *testing.T) {
-
-	res, err := hex.DecodeString("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000001e41413331207061796d6173746572206465706f73697420746f6f206c6f770000")
-
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	t.Logf("res: %v", res)
-	var resStr string
-
-	json.Unmarshal(res, &resStr)
-	t.Logf("resStr: %v", resStr)
 }

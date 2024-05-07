@@ -1,4 +1,4 @@
-package conf
+package config
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
@@ -6,25 +6,29 @@ import (
 )
 
 func TestConfigInit(t *testing.T) {
-	BasicStrategyInit("../conf/basic_strategy_dev_config.json")
-	BusinessConfigInit("../conf/business_dev_config.json")
+	BasicStrategyInit("../config/basic_strategy_dev_config.json")
+	BusinessConfigInit("../config/business_dev_config.json")
 	strategy := GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
 	if strategy == nil {
 		t.Error("strategy is nil")
+		return
 	}
-	strategySuit, err := GetSuitableStrategy("0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789", global_const.EthereumSepolia, global_const.PayTypeVerifying)
+	strategySuit, err := GetSuitableStrategy(global_const.EntrypointV06, global_const.EthereumSepolia, global_const.PayTypeVerifying)
 	if err != nil {
+
 		t.Error("strategySuit is nil")
+		return
 	}
 	if strategySuit == nil {
 		t.Error("strategySuit is nil")
+		return
 	}
 
-	chainid := GetChainId(global_const.EthereumSepolia)
-	if chainid == "" {
+	chainId := GetChainId(global_const.EthereumSepolia)
+	if chainId == "" {
 		t.Error("chainid is 0")
 	}
-	t.Log(chainid)
+	t.Log(chainId)
 	rpcUrl := GetEthereumRpcUrl(global_const.EthereumSepolia)
 	if rpcUrl == "" {
 		t.Error("rpcUrl is 0")

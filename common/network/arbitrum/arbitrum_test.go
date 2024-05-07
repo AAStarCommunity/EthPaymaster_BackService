@@ -5,15 +5,15 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
-	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/config"
 	"encoding/json"
 	"testing"
 )
 
 func TestGetArbitrumGas(t *testing.T) {
-	conf.BasicStrategyInit("../../conf/basic_strategy_dev_config.json")
-	conf.BusinessConfigInit("../../conf/business_dev_config.json")
-	strategy := conf.GetBasicStrategyConfig("Arbitrum_Sepolia_v06_verifyPaymaster")
+	config.BasicStrategyInit("../../../config/basic_strategy_dev_config.json")
+	config.BusinessConfigInit("../../../config/business_dev_config.json")
+	strategy := config.GetBasicStrategyConfig("Arbitrum_Sepolia_v06_verifyPaymaster")
 	if strategy == nil {
 		t.Error("strategy is nil")
 	}

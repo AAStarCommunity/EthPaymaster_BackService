@@ -3,7 +3,7 @@ package ethereum_contract
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/ethereum_contract/contract/paymaster_verifying_erc20_v07"
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
-	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/config"
 	"context"
 	"encoding/hex"
 	"encoding/json"
@@ -14,8 +14,10 @@ import (
 )
 
 func TestPaymasterV07(t *testing.T) {
-	conf.BusinessConfigInit("../../conf/business_dev_config.json")
-	network := conf.GetEthereumRpcUrl(global_const.EthereumSepolia)
+
+	config.BasicStrategyInit("../../config/basic_strategy_dev_config.json")
+	config.BusinessConfigInit("../../config/business_dev_config.json")
+	network := config.GetEthereumRpcUrl(global_const.EthereumSepolia)
 	contractAddress := common.HexToAddress("0x3Da96267B98a33267249734FD8FFeC75093D3085")
 	client, err := ethclient.Dial(network)
 	if err != nil {
@@ -33,11 +35,11 @@ func TestPaymasterV07(t *testing.T) {
 		t.Errorf("Error: %v", err)
 		return
 	}
-	writeConstractInstance, err := paymaster_verifying_erc20_v07.NewContractTransactor(contractAddress, client)
-	if err != nil {
-		t.Errorf("Error: %v", err)
-		return
-	}
+	//writeInstance, err := paymaster_verifying_erc20_v07.NewContractTransactor(contractAddress, client)
+	//if err != nil {
+	//	t.Errorf("Error: %v", err)
+	//	return
+	//}
 	tests := []struct {
 		name string
 		test func(t *testing.T)
@@ -48,12 +50,7 @@ func TestPaymasterV07(t *testing.T) {
 				testV07Deposit(t, contractInstance)
 			},
 		},
-		{
-			"testV07SetDeposit",
-			func(t *testing.T) {
-				testV07SetDeposit(t, writeConstractInstance)
-			},
-		},
+
 		{
 			"parsePaymaster",
 			func(t *testing.T) {
@@ -83,9 +80,6 @@ func parsePaymasterData(t *testing.T, contractInstance *paymaster_verifying_erc2
 
 }
 
-func testV07SetDeposit(t *testing.T, contractInstance *paymaster_verifying_erc20_v07.ContractTransactor) {
-
-}
 func testV07Deposit(t *testing.T, contractInstance *paymaster_verifying_erc20_v07.Contract) {
 	deopsit, err := contractInstance.GetDeposit(&bind.CallOpts{})
 	if err != nil {

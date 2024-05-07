@@ -3,7 +3,7 @@ package paymaster_data
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/config"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/sirupsen/logrus"
 	"math/big"
@@ -26,7 +26,7 @@ func NewPaymasterDataInput(strategy *model.Strategy) *PaymasterDataInput {
 	end := strategy.ExecuteRestriction.EffectiveEndTime
 	var tokenAddress string
 	if strategy.GetPayType() == global_const.PayTypeERC20 {
-		tokenAddress = conf.GetTokenAddress(strategy.GetNewWork(), strategy.Erc20TokenType)
+		tokenAddress = config.GetTokenAddress(strategy.GetNewWork(), strategy.Erc20TokenType)
 
 	} else {
 		tokenAddress = global_const.DummyAddress.String()

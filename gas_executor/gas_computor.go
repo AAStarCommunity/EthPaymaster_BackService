@@ -8,7 +8,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
-	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/config"
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
@@ -20,7 +20,7 @@ var (
 	EthWeiFactor = new(big.Float).SetInt(big.NewInt(1e18))
 )
 
-// https://blog.particle.network/bundler-predicting-gas/
+// ComputeGas https://blog.particle.network/bundler-predicting-gas/
 func ComputeGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterDataInput) (*model.ComputeGasResponse, *user_op.UserOpInput, error) {
 
 	opEstimateGas, err := getUserOpEstimateGas(userOp, strategy, paymasterDataInput)
@@ -88,7 +88,7 @@ func getUserOpEstimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy,
 		return nil, xerrors.Errorf("get gas price error: %v", gasPriceErr)
 	}
 	if userOp.MaxFeePerGas != nil && userOp.MaxPriorityFeePerGas != nil {
-		if conf.IsDisable1559Chain(strategy.GetNewWork()) && userOp.MaxFeePerGas.Cmp(userOp.MaxPriorityFeePerGas) != 0 {
+		if config.IsDisable1559Chain(strategy.GetNewWork()) && userOp.MaxFeePerGas.Cmp(userOp.MaxPriorityFeePerGas) != 0 {
 			return nil, xerrors.Errorf("[%v] is not support 1559 MaxFeePerGas and MaxPriorityFeePerGas can not be same  at the same time", strategy.GetNewWork())
 		}
 	}
@@ -199,7 +199,7 @@ func getErc20TokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Fl
 		if strategy.Erc20TokenType == "" {
 			return nil, xerrors.Errorf("strategy.Erc20TokenType is nil")
 		}
-		formTokenType := conf.GetGasToken(strategy.GetNewWork())
+		formTokenType := config.GetGasToken(strategy.GetNewWork())
 		toTokenType := strategy.Erc20TokenType
 		toTokenPrice, err := utils.GetToken(formTokenType, toTokenType)
 		if err != nil {
@@ -232,7 +232,7 @@ func estimateVerificationGasLimit(simulateOpResult *model.SimulateHandleOpResult
 
 // GetGasPrice return gas price in wei, gwei, ether
 func GetGasPrice(chain global_const.Network) (*model.GasPrice, error) {
-	if conf.IsEthereumAdaptableNetWork(chain) {
+	if config.IsEthereumAdaptableNetWork(chain) {
 		ethereumExecutor := network.GetEthereumExecutor(chain)
 		return ethereumExecutor.GetGasPrice()
 	} else if chain == global_const.StarketMainnet || chain == global_const.StarketSepolia {
@@ -251,7 +251,7 @@ func GetGasPrice(chain global_const.Network) (*model.GasPrice, error) {
 // GetPreVerificationGas https://github.com/eth-infinitism/bundler/blob/main/packages/sdk/src/calcPreVerificationGas.ts
 func GetPreVerificationGas(userOp *user_op.UserOpInput, strategy *model.Strategy, gasFeeResult *model.GasPrice, simulateOpResult *model.SimulateHandleOpResult) (*big.Int, error) {
 	chain := strategy.GetNewWork()
-	stack := conf.GetNetWorkStack(chain)
+	stack := config.GetNetWorkStack(chain)
 	preGasFunc, err := GetPreVerificationGasFunc(stack)
 	if err != nil {
 		return nil, err

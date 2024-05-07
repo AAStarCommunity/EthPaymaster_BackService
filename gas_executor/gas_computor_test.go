@@ -6,10 +6,8 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
-	"AAStarCommunity/EthPaymaster_BackService/conf"
-	"context"
+	"AAStarCommunity/EthPaymaster_BackService/config"
 	"encoding/json"
-	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/sirupsen/logrus"
 	"math/big"
 	"testing"
@@ -44,8 +42,8 @@ func TestComputeGas(t *testing.T) {
 	//assert.NotNil(t, gas)
 	//jsonBypte, _ := json.Marshal(gas)
 	//fmt.Println(string(jsonBypte))
-	conf.BasicStrategyInit("../conf/basic_strategy_dev_config.json")
-	conf.BusinessConfigInit("../conf/business_dev_config.json")
+	config.BasicStrategyInit("../config/basic_strategy_dev_config.json")
+	config.BusinessConfigInit("../config/business_dev_config.json")
 	logrus.SetLevel(logrus.DebugLevel)
 	op, err := user_op.NewUserOp(utils.GenerateMockUservOperation())
 	if err != nil {
@@ -72,14 +70,14 @@ func TestComputeGas(t *testing.T) {
 		{
 			"testEstimateVerificationGasLimit",
 			func(*testing.T) {
-				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
+				strategy := config.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
 				testGetUserOpEstimateGas(t, op, strategy)
 			},
 		},
 		{
 			"testScrollGetUserOpEstimateGas",
 			func(*testing.T) {
-				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify)
+				strategy := config.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify)
 
 				testGetUserOpEstimateGas(t, opFor1559NotSupport, strategy)
 			},
@@ -96,50 +94,50 @@ func TestComputeGas(t *testing.T) {
 		{
 			"TestGetPreVerificationGas",
 			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig("Optimism_Sepolia_v06_verifyPaymaster")
+				strategy := config.GetBasicStrategyConfig("Optimism_Sepolia_v06_verifyPaymaster")
 				testGetPreVerificationGas(t, op, strategy, model.MockGasPrice)
 			},
 		},
 		{
 			"testComputeGas_StrategyCodeEthereumSepoliaVo6Verify",
 			func(*testing.T) {
-				testComputeGas(t, op, conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV06Verify))
+				testComputeGas(t, op, config.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV06Verify))
 			},
 		},
 		{
 			"testComputeGas_StrategyCodeOpSepoliaVo6Verify",
 			func(*testing.T) {
-				testComputeGas(t, op, conf.GetBasicStrategyConfig(global_const.StrategyCodeOptimismSepoliaV06Verify))
+				testComputeGas(t, op, config.GetBasicStrategyConfig(global_const.StrategyCodeOptimismSepoliaV06Verify))
 			},
 		},
 		{
 			"testComputeGas_StrategyCodeOpSepoliaVo6Verify",
 			func(*testing.T) {
-				testComputeGas(t, op, conf.GetBasicStrategyConfig(global_const.StrategyCodeOptimismSepoliaV06Verify))
+				testComputeGas(t, op, config.GetBasicStrategyConfig(global_const.StrategyCodeOptimismSepoliaV06Verify))
 			},
 		},
 		{
 			"testComputeGas_StrategyCodeArbSepoliaVo6Verify",
 			func(*testing.T) {
-				testComputeGas(t, op, conf.GetBasicStrategyConfig(global_const.StrategyCodeArbitrumSpeoliaV06Verify))
+				testComputeGas(t, op, config.GetBasicStrategyConfig(global_const.StrategyCodeArbitrumSepoliaV06Verify))
 			},
 		},
 		{
 			"testComputeGas_StrategyCodeScrollSepoliaVo6Verify",
 			func(*testing.T) {
-				testComputeGas(t, opFor1559NotSupport, conf.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify))
+				testComputeGas(t, opFor1559NotSupport, config.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify))
 			},
 		},
 		{
 			"testComputeGas_StrategyCodeBaseSepoliaVo6Verify",
 			func(*testing.T) {
-				testComputeGas(t, op, conf.GetBasicStrategyConfig(global_const.StrategyCodeBaseSepoliaV06Verify))
+				testComputeGas(t, op, config.GetBasicStrategyConfig(global_const.StrategyCodeBaseSepoliaV06Verify))
 			},
 		},
 		{
 			"testComputeGas_StrategyCodeEthereumSepoliaV06Erc20",
 			func(*testing.T) {
-				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV06Erc20)
+				strategy := config.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV06Erc20)
 				strategy.Erc20TokenType = global_const.TokenTypeUSDT
 				testComputeGas(t, op, strategy)
 			},
@@ -147,7 +145,7 @@ func TestComputeGas(t *testing.T) {
 		{
 			"testComputeGas_StrategyCodeOptimismSepoliaV06Erc20",
 			func(*testing.T) {
-				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeOptimismSepoliaV06Erc20)
+				strategy := config.GetBasicStrategyConfig(global_const.StrategyCodeOptimismSepoliaV06Erc20)
 				strategy.Erc20TokenType = global_const.TokenTypeUSDT
 				testComputeGas(t, op, strategy)
 			},
@@ -155,7 +153,7 @@ func TestComputeGas(t *testing.T) {
 		{
 			"testComputeGas_StrategyCodeArbitrumSpeoliaV06Erc20",
 			func(*testing.T) {
-				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeArbitrumSpeoliaV06Erc20)
+				strategy := config.GetBasicStrategyConfig(global_const.StrategyCodeArbitrumSepoliaV06Erc20)
 				strategy.Erc20TokenType = global_const.TokenTypeUSDT
 				testComputeGas(t, op, strategy)
 			},
@@ -163,7 +161,15 @@ func TestComputeGas(t *testing.T) {
 		{
 			"testComputeGas_StrategyCodeBaseSepoliaV06Erc20",
 			func(*testing.T) {
-				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeBaseSepoliaV06Erc20)
+				strategy := config.GetBasicStrategyConfig(global_const.StrategyCodeBaseSepoliaV06Erc20)
+				strategy.Erc20TokenType = global_const.TokenTypeUSDT
+				testComputeGas(t, op, strategy)
+			},
+		},
+		{
+			"testComputeGas_StrategyCodeScrollSepoliaV06Erc20",
+			func(*testing.T) {
+				strategy := config.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Erc20)
 				strategy.Erc20TokenType = global_const.TokenTypeUSDT
 				testComputeGas(t, op, strategy)
 			},
@@ -171,13 +177,13 @@ func TestComputeGas(t *testing.T) {
 		{
 			"TestScrollEstimateCallGasLimit",
 			func(t *testing.T) {
-				testEstimateCallGasLimit(t, conf.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify), model.MockSimulateHandleOpResult, opFor1559NotSupport, global_const.DummyReverificationsBigint)
+				testEstimateCallGasLimit(t, config.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify), model.MockSimulateHandleOpResult, opFor1559NotSupport, global_const.DummyReverificationsBigint)
 			},
 		},
 		{
 			"TestErc20",
 			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV06Erc20)
+				strategy := config.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV06Erc20)
 				strategy.Erc20TokenType = global_const.TokenTypeUSDT
 				testErc20TokenCost(t, strategy, big.NewFloat(0.0001))
 			},
@@ -185,7 +191,7 @@ func TestComputeGas(t *testing.T) {
 		{
 			"TestUSDTTokenCost",
 			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV06Erc20)
+				strategy := config.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV06Erc20)
 				strategy.Erc20TokenType = global_const.TokenTypeUSDT
 				testErc20TokenCost(t, strategy, big.NewFloat(0.0001))
 			},
@@ -266,17 +272,4 @@ func testGetUserOpEstimateGas(t *testing.T, input *user_op.UserOpInput, strategy
 	}
 	jsonRes, _ := json.Marshal(res)
 	t.Logf("res: %v", string(jsonRes))
-}
-func testBase(t *testing.T) {
-	client, err := ethclient.Dial(conf.GetEthereumRpcUrl("https://base-sepolia.g.alchemy.com/v2/zUhtd18b2ZOTIJME6rv2Uwz9q7PBnnsa"))
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	gasPrice, err := client.SuggestGasPrice(context.Background())
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	t.Logf("gasPrice:%v", gasPrice)
 }

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/config"
 	"AAStarCommunity/EthPaymaster_BackService/envirment"
 	"AAStarCommunity/EthPaymaster_BackService/rpc_server/routers"
 	"flag"
@@ -44,8 +44,8 @@ var Engine *gin.Engine
 // @description Type 'Bearer \<TOKEN\>' to correctly set the AccessToken
 // @BasePath /api
 func main() {
-	strategyPath := fmt.Sprintf("./conf/basic_strategy_%s_config.json", strings.ToLower(envirment.Environment.Name))
-	businessConfigPath := fmt.Sprintf("./conf/business_%s_config.json", strings.ToLower(envirment.Environment.Name))
+	strategyPath := fmt.Sprintf("./config/basic_strategy_%s_config.json", strings.ToLower(envirment.Environment.Name))
+	businessConfigPath := fmt.Sprintf("./config/business_%s_config.json", strings.ToLower(envirment.Environment.Name))
 
 	Init(strategyPath, businessConfigPath)
 	port := runMode()
@@ -53,13 +53,15 @@ func main() {
 }
 
 func Init(strategyPath string, businessConfigPath string) {
-	conf.BasicStrategyInit(strategyPath)
-	conf.BusinessConfigInit(businessConfigPath)
+	config.BasicStrategyInit(strategyPath)
+	config.BusinessConfigInit(businessConfigPath)
 	if envirment.Environment.IsDevelopment() {
 		logrus.SetLevel(logrus.DebugLevel)
 	} else {
 		logrus.SetLevel(logrus.InfoLevel)
 	}
+	logrus.Infof("Environment: %s", envirment.Environment.Name)
+	logrus.Infof("Debugger: %v", envirment.Environment.Debugger)
 
 	Engine = routers.SetRouters()
 }

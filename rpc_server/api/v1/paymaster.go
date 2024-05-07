@@ -3,14 +3,14 @@ package v1
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/common/utils"
+	"AAStarCommunity/EthPaymaster_BackService/config"
 	"AAStarCommunity/EthPaymaster_BackService/service/operator"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 	"net/http"
-	"runtime"
 )
 
 var PaymasterAPIMethods = map[string]MethodFunctionFunc{}
@@ -22,16 +22,6 @@ func init() {
 	PaymasterAPIMethods["pm_supportEntrypoint"] = GetSupportEntryPointFunc()
 	PaymasterAPIMethods["pm_estimateUserOperationGas"] = EstimateUserOpGasFunc()
 	PaymasterAPIMethods["pm_paymasterAccount"] = GetSupportPaymaster()
-}
-
-const (
-	defaultStackSize = 4096
-)
-
-func getCurrentGoroutineStack() string {
-	var buf [defaultStackSize]byte
-	n := runtime.Stack(buf[:], false)
-	return string(buf[:n])
 }
 
 // Paymaster
@@ -50,7 +40,7 @@ func Paymaster(ctx *gin.Context) {
 
 	defer func() {
 		if r := recover(); r != nil {
-			errInfo := fmt.Sprintf("[panic]: err : [%v] , stack :[%v]", r, getCurrentGoroutineStack())
+			errInfo := fmt.Sprintf("[panic]: err : [%v] , stack :[%v]", r, utils.GetCurrentGoroutineStack())
 			logrus.Error(errInfo)
 			response.SetHttpCode(http.StatusInternalServerError).FailCode(ctx, http.StatusInternalServerError, fmt.Sprintf("%v", r))
 		}
@@ -96,7 +86,7 @@ func GetSupportPaymaster() MethodFunctionFunc {
 		if !ok {
 			return nil, xerrors.Errorf("Request Error [network is not string]")
 		}
-		paymasterSet, err := conf.GetSupportPaymaster(global_const.Network(networkStr))
+		paymasterSet, err := config.GetSupportPaymaster(global_const.Network(networkStr))
 		if err != nil {
 			return nil, err
 		}
@@ -113,7 +103,7 @@ func GetSupportEntryPointFunc() MethodFunctionFunc {
 		if !ok {
 			return nil, xerrors.Errorf("Request Error [network is not string]")
 		}
-		entryPoints, err := conf.GetSupportEntryPoints(global_const.Network(networkStr))
+		entryPoints, err := config.GetSupportEntryPoints(global_const.Network(networkStr))
 		if err != nil {
 			return nil, err
 		}

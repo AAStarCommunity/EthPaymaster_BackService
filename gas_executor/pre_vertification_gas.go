@@ -1,10 +1,10 @@
 package gas_executor
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/arbitrum"
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
+	"AAStarCommunity/EthPaymaster_BackService/common/network/arbitrum"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"golang.org/x/xerrors"
@@ -29,6 +29,7 @@ func GetPreVerificationGasFunc(stack global_const.NewWorkStack) (PreVerification
 	return function, nil
 }
 
+// ArbitrumPreVerificationGasFunc
 // https://medium.com/offchainlabs/understanding-arbitrum-2-dimensional-fees-fd1d582596c9.
 // https://docs.arbitrum.io/build-decentralized-apps/nodeinterface/reference
 func ArbitrumPreVerificationGasFunc() PreVerificationGasFunc {

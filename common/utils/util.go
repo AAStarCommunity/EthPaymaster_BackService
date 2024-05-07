@@ -16,11 +16,14 @@ import (
 	"golang.org/x/xerrors"
 	"math/big"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 )
 
 var HexPattern = regexp.MustCompile(`^0x[a-fA-F\d]*$`)
+
+const defaultStackSize = 4096
 
 type EthCallReq struct {
 	From common.Address `json:"from"`
@@ -206,4 +209,10 @@ func ParseCallError(err error, abi *abi.ABI) (string, error) {
 		}
 	}
 	return "", nil
+}
+
+func GetCurrentGoroutineStack() string {
+	var buf [defaultStackSize]byte
+	n := runtime.Stack(buf[:], false)
+	return string(buf[:n])
 }

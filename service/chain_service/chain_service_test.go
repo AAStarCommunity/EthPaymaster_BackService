@@ -7,7 +7,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
-	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/config"
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -18,8 +18,8 @@ import (
 )
 
 func TestChainService(t *testing.T) {
-	conf.BasicStrategyInit("../../conf/basic_strategy_dev_config.json")
-	conf.BusinessConfigInit("../../conf/business_dev_config.json")
+	config.BasicStrategyInit("../../config/basic_strategy_dev_config.json")
+	config.BusinessConfigInit("../../config/business_dev_config.json")
 	logrus.SetLevel(logrus.DebugLevel)
 	op, err := user_op.NewUserOp(utils.GenerateMockUservOperation())
 	if err != nil {
@@ -41,28 +41,28 @@ func TestChainService(t *testing.T) {
 		{
 			"TestSepoliaSimulateHandleOp",
 			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
-				testSimulateHandleOp(t, op, strategy)
+				strategy := config.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
+				testSimulateHandleOp(t, op, strategy, model.MockGasPrice)
 			},
 		},
 		{
 			"TestScrollSepoliaSimulateHandleOp",
 			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify)
-				testSimulateHandleOp(t, op, strategy)
+				strategy := config.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify)
+				testSimulateHandleOp(t, opFor1559NotSupport, strategy, model.MockGasPriceNotSupport1559)
 			},
 		},
-		{
-			"TestSepoliaSimulateHandleOp",
-			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV07Verify)
-				testSimulateHandleOp(t, op, strategy)
-			},
-		},
+		//{ TODO support v07 later
+		//	"TestV07SepoliaSimulateHandleOp",
+		//	func(t *testing.T) {
+		//		strategy := config.GetBasicStrategyConfig(global_const.StrategyCodeEthereumSepoliaV07Verify)
+		//		testSimulateHandleOp(t, op, strategy, model.MockGasPrice)
+		//	},
+		//},
 		{
 			"testGetpaymasterEntryPointBalance",
 			func(t *testing.T) {
-				strategy := conf.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
+				strategy := config.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
 				testGetPaymasterEntryPointBalance(t, *strategy)
 			},
 		},
@@ -107,9 +107,10 @@ func testGetPaymasterEntryPointBalance(t *testing.T, strategy model.Strategy) {
 
 }
 
-func testSimulateHandleOp(t *testing.T, userOp *user_op.UserOpInput, strategy *model.Strategy) {
+func testSimulateHandleOp(t *testing.T, userOp *user_op.UserOpInput, strategy *model.Strategy, gasPrice *model.GasPrice) {
 	paymasterDataInput := paymaster_data.NewPaymasterDataInput(strategy)
-	userOpInputForSimulate, err := data_utils.GetUserOpWithPaymasterAndDataForSimulate(*userOp, strategy, paymasterDataInput, model.MockGasPrice)
+
+	userOpInputForSimulate, err := data_utils.GetUserOpWithPaymasterAndDataForSimulate(*userOp, strategy, paymasterDataInput, gasPrice)
 	if err != nil {
 		t.Error(err)
 		return

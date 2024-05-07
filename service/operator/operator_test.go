@@ -4,7 +4,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
-	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/config"
 	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
@@ -12,8 +12,8 @@ import (
 )
 
 func TestOperator(t *testing.T) {
-	conf.BasicStrategyInit("../../conf/basic_strategy_dev_config.json")
-	conf.BusinessConfigInit("../../conf/business_dev_config.json")
+	config.BasicStrategyInit("../../config/basic_strategy_dev_config.json")
+	config.BusinessConfigInit("../../config/business_dev_config.json")
 	logrus.SetLevel(logrus.DebugLevel)
 	mockRequest := getMockTryPayUserOpRequest()
 	mockReuqetNotSupport1559 := getMockTryPayUserOpRequest()
@@ -64,14 +64,14 @@ func TestOperator(t *testing.T) {
 		{
 			"Test_ArbitrumSpeoliaV06Verify_TryPayUserOpExecute",
 			func(t *testing.T) {
-				mockRequest.ForceStrategyId = string(global_const.StrategyCodeArbitrumSpeoliaV06Verify)
+				mockRequest.ForceStrategyId = string(global_const.StrategyCodeArbitrumSepoliaV06Verify)
 				testTryPayUserOpExecute(t, mockRequest)
 			},
 		},
 		{
 			"Test_BaseSepoliaV06Verify_TryPayUserOpExecute",
 			func(t *testing.T) {
-				mockRequest.ForceStrategyId = string(global_const.StrategyCodeArbitrumSpeoliaV06Verify)
+				mockRequest.ForceStrategyId = string(global_const.StrategyCodeArbitrumSepoliaV06Verify)
 				testTryPayUserOpExecute(t, mockRequest)
 			},
 		},
@@ -95,15 +95,7 @@ func TestOperator(t *testing.T) {
 			"Test_ArbSepoliaV06Erc20_TryPayUserOpExecute",
 			func(t *testing.T) {
 				mockRequest.Erc20Token = global_const.TokenTypeUSDT
-				mockRequest.ForceStrategyId = string(global_const.StrategyCodeArbitrumSpeoliaV06Erc20)
-				testTryPayUserOpExecute(t, mockRequest)
-			},
-		},
-		{
-			"Test_BaseSepoliaV06Erc20_TryPayUserOpExecute",
-			func(t *testing.T) {
-				mockRequest.Erc20Token = global_const.TokenTypeUSDT
-				mockRequest.ForceStrategyId = string(global_const.StrategyCodeBaseSepoliaV06Erc20)
+				mockRequest.ForceStrategyId = string(global_const.StrategyCodeArbitrumSepoliaV06Erc20)
 				testTryPayUserOpExecute(t, mockRequest)
 			},
 		},

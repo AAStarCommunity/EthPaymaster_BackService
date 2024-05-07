@@ -1,20 +1,16 @@
 package network
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/config"
 	"github.com/sirupsen/logrus"
 	"testing"
 )
 
 func TestPreVerGas(t *testing.T) {
-	conf.BasicStrategyInit("../../conf/basic_strategy_dev_config.json")
-	conf.BusinessConfigInit("../../conf/business_dev_config.json")
+	config.BasicStrategyInit("../../config/basic_strategy_dev_config.json")
+	config.BusinessConfigInit("../../config/business_dev_config.json")
 	logrus.SetLevel(logrus.DebugLevel)
-	//op, err := user_op.NewUserOp(utils.GenerateMockUservOperation())
-	//if err != nil {
-	//	t.Error(err)
-	//	return
-	//}
+
 	tests := []struct {
 		name string
 		test func(t *testing.T)
@@ -30,7 +26,3 @@ func TestPreVerGas(t *testing.T) {
 		t.Run(tt.name, tt.test)
 	}
 }
-
-//func testL2PreVerGas(t *testing.T,) {
-//
-//}

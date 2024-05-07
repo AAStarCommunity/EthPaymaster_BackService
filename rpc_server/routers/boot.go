@@ -38,8 +38,10 @@ func SetRouters() (routers *gin.Engine) {
 		model.GetResponse().SetHttpCode(http.StatusNotFound).FailCode(ctx, http.StatusNotFound)
 	})
 
-	return
+	return routers
 }
+
+// buildRouters build routers Init API AND Middleware
 func buildRoute(routers *gin.Engine) {
 	// build http routers and middleware
 	routers.Use(middlewares.GenericRecoveryHandler())
@@ -55,6 +57,7 @@ func buildRoute(routers *gin.Engine) {
 	buildRouters(routers, PrivateRouterMaps)
 }
 
+// buildMod set Mode by envirment
 func buildMod(routers *gin.Engine) {
 
 	// prod mode

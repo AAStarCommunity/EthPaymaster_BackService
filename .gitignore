@@ -23,9 +23,7 @@ go.work
 .idea
 .vscode/
 build/
-config/*.json
 
 vendor
 
 conf/appsettings.*.yaml
-conf/secret_*_config.json

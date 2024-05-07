@@ -20,3 +20,6 @@ type JsonRpcRequest struct {
 	Params  []interface{} `json:"params"`
 	Id      int           `json:"id"`
 }
+type ClientCredential struct {
+	ApiKey string `json:"apiKey"`
+}
