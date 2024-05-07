@@ -39,8 +39,8 @@ var (
 	DummyVerificationGasLimit              = big.NewInt(391733)
 	EmptyAddress                           = common.HexToAddress("0x0000000000000000000000000000000000000000")
 	GitHubActionWhiteListSet               = mapset.NewSet(
-		"testGetAddressTokenBalance", "Test_OptimismSepoliaV06Verify_TryPayUserOpExecute", "Test_EthereumSepoliaV06Verify_TryPayUserOpExecute", "Test_OptimismSepoliaV06Verify_TryPayUserOpExecute", "Test_BaseSepoliaV06Verify_TryPayUserOpExecute",
-		"Test_ArbitrumSpeoliaV06Verify_TryPayUserOpExecute")
+		"Test_EthereumSepoliaV06Erc20_TryPayUserOpExecute", "Test_ArbSepoliaV06Erc20_TryPayUserOpExecute", "Test_OpSepoliaV06Erc20_TryPayUserOpExecute", "testGetAddressTokenBalance", "Test_EthereumSepoliaV06Verify_TryPayUserOpExecute", "Test_OptimismSepoliaV06Verify_TryPayUserOpExecute", "Test_BaseSepoliaV06Verify_TryPayUserOpExecute",
+		"Test_ArbitrumSpeoliaV06Verify_TryPayUserOpExecute", "Test_ScrollSepoliaV06Verify_TryPayUserOpExecute")
 )
 
 func init() {

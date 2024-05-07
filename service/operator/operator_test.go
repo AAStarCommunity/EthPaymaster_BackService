@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"os"
 	"testing"
 )
 
@@ -101,6 +102,10 @@ func TestOperator(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		if os.Getenv("GITHUB_ACTIONS") != "" && global_const.GitHubActionWhiteListSet.Contains(tt.name) {
+			t.Logf("Skip test [%s] in GitHub Actions", tt.name)
+			continue
+		}
 		t.Run(tt.name, tt.test)
 	}
 
