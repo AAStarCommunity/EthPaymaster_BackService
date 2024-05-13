@@ -20,6 +20,6 @@ jobs:
       - name: Audit
         run: go install golang.org/x/vuln/cmd/govulncheck@latest && govulncheck ./...
       - name: Test
-        run: go test -test.short 
+        run: go test -v ./... -test.short
 
 name: Building And Testing
