@@ -267,23 +267,6 @@ type UserOpInput struct {
 	ComputeGasOnly bool
 }
 
-func packUserOpV6ForUserOpHash(userOp *UserOperationV06) (string, []byte, error) {
-	//TODO disgusting logic
-	encoded, err := userOpV06PackArg.Pack(userOp.Sender, userOp.Nonce, userOp.InitCode, userOp.CallData, userOp.CallGasLimit, userOp.VerificationGasLimit, userOp.PreVerificationGas, userOp.MaxFeePerGas, userOp.MaxPriorityFeePerGas, global_const.DummyPaymasterDataByte, userOp.Sender)
-	if err != nil {
-		return "", nil, err
-	}
-	//https://github.com/jayden-sudo/SoulWalletCore/blob/dc76bdb9a156d4f99ef41109c59ab99106c193ac/contracts/utils/CalldataPack.sol#L51-L65
-	hexString := hex.EncodeToString(encoded)
-	//1. get From  63*10+ 1 ～64*10
-	hexString = hexString[64:]
-	//hexLen := len(hexString)
-	subIndex := GetIndex(hexString)
-	hexString = hexString[:subIndex]
-	//fmt.Printf("subIndex: %d\n", subIndex)
-	return hexString, encoded, nil
-}
-
 func (userOp *UserOpInput) PackUserOpForMock(version global_const.EntrypointVersion) (string, []byte, error) {
 	if version == global_const.EntrypointV07 {
 		gasFee := utils.PackIntTo32Bytes(userOp.MaxPriorityFeePerGas, userOp.MaxFeePerGas)

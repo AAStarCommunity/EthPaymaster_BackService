@@ -44,8 +44,8 @@ func ArbitrumPreVerificationGasFunc() PreVerificationGasFunc {
 		if err != nil {
 			return nil, err
 		}
-		big.NewInt(0).Add(base, big.NewInt(int64(estimateOutPut.GasEstimateForL1)))
-		return big.NewInt(0), nil
+
+		return big.NewInt(0).Add(base, big.NewInt(int64(estimateOutPut.GasEstimateForL1))), nil
 	}
 }
 func DefaultPreVerificationGasFunc() PreVerificationGasFunc {
@@ -116,7 +116,8 @@ func getBasicPreVerificationGas(op *user_op.UserOpInput, strategy *model.Strateg
 			callDataConst += global_const.GasOverHand.NonZeroByte
 		}
 	}
-	floatRes := math.Round(callDataConst + global_const.GasOverHand.Fixed/global_const.GasOverHand.BundleSize + global_const.GasOverHand.PerUserOp + global_const.GasOverHand.PerUserOpWord*lengthInWord)
+	floatRes := math.Round(callDataConst + global_const.GasOverHand.Fixed/global_const.GasOverHand.BundleSize +
+		global_const.GasOverHand.PerUserOp + global_const.GasOverHand.PerUserOpWord*lengthInWord)
 	floatVal := new(big.Float).SetFloat64(floatRes)
 	result := new(big.Int)
 	floatVal.Int(result)

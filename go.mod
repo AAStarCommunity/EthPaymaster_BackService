@@ -6,7 +6,7 @@ require (
 	github.com/NethermindEth/starknet.go v0.7.0
 	github.com/appleboy/gin-jwt/v2 v2.9.2
 	github.com/deckarep/golang-set/v2 v2.6.0
-	github.com/ethereum/go-ethereum v1.13.14
+	github.com/ethereum/go-ethereum v1.14.3
 	github.com/gin-contrib/cors v1.7.1
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.19.0
@@ -57,10 +57,10 @@ require (
 	github.com/chenzhuoyu/iasm v0.9.1 // indirect
 	github.com/consensys/bavard v0.1.13 // indirect
 	github.com/consensys/gnark-crypto v0.12.1 // indirect
-	github.com/crate-crypto/go-kzg-4844 v0.7.0 // indirect; indirect(force degrade)
+	github.com/crate-crypto/go-kzg-4844 v1.0.0 // indirect; indirect(force degrade)
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.3.0 // indirect
-	github.com/ethereum/c-kzg-4844 v0.4.0 // indirect; indirect (force degrade)
+	github.com/ethereum/c-kzg-4844 v1.0.0 // indirect; indirect (force degrade)
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
