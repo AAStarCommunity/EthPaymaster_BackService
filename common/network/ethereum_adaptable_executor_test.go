@@ -333,16 +333,14 @@ func testSimulateHandleOp(t *testing.T, chain global_const.Network, strategy *mo
 }
 func parseOpToMapV7(input user_op.UserOpInput) map[string]string {
 	opMap := make(map[string]string)
-
-	opMap["accountGasLimits"] = utils.EncodeToStringWithPrefix(input.AccountGasLimits[:])
-	opMap["callGasLimit"] = input.CallGasLimit.String()
-	opMap["gasFees"] = utils.EncodeToStringWithPrefix(input.GasFees[:])
-	opMap["maxFeePerGas"] = input.MaxFeePerGas.String()
-	opMap["maxPriorityFeePerGas"] = input.MaxPriorityFeePerGas.String()
-	opMap["preVerificationGas"] = input.PreVerificationGas.String()
-	opMap["verificationGasLimit"] = input.VerificationGasLimit.String()
-	opMap["paymasterAndData"] = utils.EncodeToStringWithPrefix(input.PaymasterAndData[:])
+	opMap["sender"] = input.Sender.String()
 	opMap["Nonce"] = input.Nonce.String()
+	opMap["initCode"] = utils.EncodeToStringWithPrefix(input.InitCode[:])
+	opMap["accountGasLimits"] = utils.EncodeToStringWithPrefix(input.AccountGasLimits[:])
+	opMap["preVerificationGas"] = input.PreVerificationGas.String()
+	opMap["gasFees"] = utils.EncodeToStringWithPrefix(input.GasFees[:])
+	opMap["paymasterAndData"] = utils.EncodeToStringWithPrefix(input.PaymasterAndData[:])
+	opMap["signature"] = utils.EncodeToStringWithPrefix(input.Signature[:])
 	return opMap
 }
 

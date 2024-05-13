@@ -6,6 +6,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
+	"AAStarCommunity/EthPaymaster_BackService/common/price_compoent"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/config"
@@ -209,7 +210,7 @@ func getErc20TokenCost(strategy *model.Strategy, tokenCount *big.Float) (*big.Fl
 		}
 		formTokenType := config.GetGasToken(strategy.GetNewWork())
 		toTokenType := strategy.Erc20TokenType
-		toTokenPrice, err := utils.GetToken(formTokenType, toTokenType)
+		toTokenPrice, err := price_compoent.GetToken(formTokenType, toTokenType)
 		if err != nil {
 			return nil, err
 		}

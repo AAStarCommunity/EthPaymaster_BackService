@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/ethereum/go-ethereum/crypto"
+	"math/big"
 	"testing"
 )
 
@@ -35,6 +36,13 @@ func TestConvertStringToSet(t *testing.T) {
 	str := "a,b,c,d"
 	set := ConvertStringToSet(str, ",")
 	fmt.Printf("set: %v\n", set)
+}
+func TestPackIntTo32Bytes(t *testing.T) {
+
+	bytes := PackIntTo32Bytes(big.NewInt(2312), big.NewInt(2312))
+
+	resStr := EncodeToStringWithPrefix(bytes[:])
+	t.Logf("resStr: %s\n", resStr)
 }
 
 //func TestEthereumSign(t *testing.T) {

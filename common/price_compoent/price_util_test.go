@@ -1,13 +1,15 @@
-package utils
+package price_compoent
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
+	"AAStarCommunity/EthPaymaster_BackService/config"
 	"fmt"
 	"strconv"
 	"testing"
 )
 
 func TestPriceUtilTest(t *testing.T) {
+	config.InitConfig("../../config/basic_strategy_config.json", "../../config/basic_config.json", "../../config/secret_config.json")
 	tests := []struct {
 		name string
 		test func(t *testing.T)
@@ -38,10 +40,6 @@ func testGetPriceUsd(t *testing.T, tokenType global_const.TokenType) {
 	t.Logf("price:%v", price)
 }
 
-func TestGetToken(t *testing.T) {
-	price, _ := GetToken(global_const.TokenTypeETH, global_const.TokenTypeUSDT)
-	fmt.Println(price)
-}
 func TestDemo(t *testing.T) {
 	str := "0000000000000000000000000000000000000000000000000000000000000002"
 	fmt.Printf(strconv.Itoa(len(str)))

@@ -1,7 +1,8 @@
-package utils
+package price_compoent
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
+	"AAStarCommunity/EthPaymaster_BackService/config"
 	"fmt"
 	"golang.org/x/xerrors"
 	"io"
@@ -42,7 +43,7 @@ func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {
 	}
 	req, _ := http.NewRequest("GET", tokenUrl, nil)
 	//TODO remove APIKey
-	req.Header.Add("x-cg-demo-api-key", "CG-ioE6p8cmmSFBFwJnKECCbZ7U\t")
+	req.Header.Add("x-cg-demo-api-key", config.GetPriceOracleApiKey())
 
 	res, _ := http.DefaultClient.Do(req)
 

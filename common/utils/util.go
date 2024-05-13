@@ -79,14 +79,9 @@ func IsStringInUint64Range(s string) bool {
 func PackIntTo32Bytes(left *big.Int, right *big.Int) [32]byte {
 	leftBytes := left.Bytes()
 	rightBytes := right.Bytes()
-
-	leftHex := fmt.Sprintf("%016x", leftBytes)
-	rightHex := fmt.Sprintf("%016x", rightBytes)
-
-	leftBytes, _ = hex.DecodeString(leftHex)
-	rightBytes, _ = hex.DecodeString(rightHex)
-
-	var result [32]byte
+	leftBytes = append(make([]byte, 16-len(leftBytes)), leftBytes...)
+	rightBytes = append(make([]byte, 16-len(rightBytes)), rightBytes...)
+	var result = [32]byte{}
 	copy(result[:16], leftBytes)
 	copy(result[16:], rightBytes)
 
