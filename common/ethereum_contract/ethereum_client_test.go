@@ -14,7 +14,9 @@ import (
 )
 
 func TestPaymasterV07(t *testing.T) {
-
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	config.InitConfig("../../config/basic_strategy_config.json", "../../config/basic_config.json", "../../config/secret_config.json")
 	network := config.GetNewWorkClientURl(global_const.EthereumSepolia)
 	contractAddress := common.HexToAddress("0x3Da96267B98a33267249734FD8FFeC75093D3085")

@@ -40,6 +40,9 @@ func APITestCall(engine *gin.Engine, method, url string, body any, response any,
 }
 
 func TestAPI(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 
 	initEngine("../../config/basic_strategy_config.json", "../../config/basic_config.json", "../../config/secret_config.json")
 	tests := []struct {

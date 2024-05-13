@@ -6,6 +6,9 @@ import (
 )
 
 func TestSecretConfigInit(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	secretConfigInit("../config/secret_config.json")
 	config := GetNetworkSecretConfig(global_const.EthereumSepolia)
 	t.Log(config.RpcUrl)
@@ -13,6 +16,9 @@ func TestSecretConfigInit(t *testing.T) {
 	t.Log(GetSigner(global_const.EthereumSepolia).Address.Hex())
 }
 func TestConfigInit(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	InitConfig("../config/basic_strategy_config.json", "../config/basic_config.json", "../config/secret_config.json")
 	strategy := GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
 	if strategy == nil {

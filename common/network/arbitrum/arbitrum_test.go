@@ -11,6 +11,9 @@ import (
 )
 
 func TestGetArbitrumGas(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	config.InitConfig("../../../config/basic_strategy_config.json", "../../../config/basic_config.json", "../../../config/secret_config.json")
 	strategy := config.GetBasicStrategyConfig("Arbitrum_Sepolia_v06_verifyPaymaster")
 	if strategy == nil {
