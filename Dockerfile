@@ -1,5 +1,5 @@
 ## build
-FROM golang:1.22.1-alpine3.19 AS build-env
+FROM golang:1.22.3-alpine3.19 AS build-env
 
 RUN apk add build-base
 
@@ -20,6 +20,7 @@ RUN mkdir -p /ep && mkdir -p /ep/log
 WORKDIR /ep
 
 COPY --from=build-env /go/src/app /ep/
+COPY --from=build-env /go/src/app/config/*.json /ep/config/
 
 ENV PATH $PATH:/aa
 

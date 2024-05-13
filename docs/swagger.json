@@ -50,73 +50,28 @@
                 }
             }
         },
-        "/api/v1/get-support-entrypoint": {
-            "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "description": "get the support entrypoint",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Sponsor"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/api/v1/get-support-strategy": {
-            "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "description": "get the support strategy",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Sponsor"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/api/v1/try-pay-user-operation": {
+        "/api/v1/paymaster": {
             "post": {
                 "security": [
                     {
                         "JWT": []
                     }
                 ],
-                "description": "sponsor the userOp",
+                "description": "Paymaster JSON-RPC API",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
-                    "Sponsor"
+                    "Paymaster"
                 ],
                 "parameters": [
                     {
-                        "description": "UserOp Request",
-                        "name": "tryPay",
+                        "description": "JsonRpcRequest Model",
+                        "name": "rpcRequest",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.TryPayUserOpRequest"
+                            "$ref": "#/definitions/model.JsonRpcRequest"
                         }
                     }
                 ],
@@ -137,84 +92,23 @@
                 }
             }
         },
-        "model.TryPayUserOpRequest": {
+        "model.JsonRpcRequest": {
             "type": "object",
             "properties": {
-                "extra": {},
-                "force_entrypoint_address": {
+                "id": {
+                    "type": "integer"
+                },
+                "jsonrpc": {
                     "type": "string"
                 },
-                "force_network": {
-                    "$ref": "#/definitions/types.NetWork"
-                },
-                "force_strategy_id": {
+                "method": {
                     "type": "string"
                 },
-                "force_token": {
-                    "type": "string"
-                },
-                "user_operation": {
-                    "$ref": "#/definitions/model.UserOperationItem"
+                "params": {
+                    "type": "array",
+                    "items": {}
                 }
             }
-        },
-        "model.UserOperationItem": {
-            "type": "object",
-            "required": [
-                "call_data",
-                "call_gas_limit",
-                "max_fee_per_gas",
-                "max_priority_fee_per_gas",
-                "nonce",
-                "per_verification_gas",
-                "sender",
-                "verification_gas_list"
-            ],
-            "properties": {
-                "call_data": {
-                    "type": "string"
-                },
-                "call_gas_limit": {
-                    "type": "string"
-                },
-                "init_code": {
-                    "type": "string"
-                },
-                "max_fee_per_gas": {
-                    "type": "string"
-                },
-                "max_priority_fee_per_gas": {
-                    "type": "string"
-                },
-                "nonce": {
-                    "type": "string"
-                },
-                "per_verification_gas": {
-                    "type": "string"
-                },
-                "sender": {
-                    "type": "string"
-                },
-                "signature": {
-                    "type": "string"
-                },
-                "verification_gas_list": {
-                    "type": "string"
-                }
-            }
-        },
-        "types.NetWork": {
-            "type": "string",
-            "enum": [
-                "ethereum",
-                "sepolia",
-                "arbitrum"
-            ],
-            "x-enum-varnames": [
-                "Ethereum",
-                "Sepolia",
-                "Arbitrum"
-            ]
         }
     },
     "securityDefinitions": {

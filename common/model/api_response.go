@@ -1,30 +1,69 @@
 package model
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"math/big"
 )
 
 type TryPayUserOpResponse struct {
-	StrategyId         string              `json:"strategy_id"`
-	EntryPointAddress  string              `json:"entrypoint_address"`
-	PayMasterAddress   string              `json:"paymaster_address"`
-	PayMasterSignature string              `json:"paymaster_signature"`
-	PayReceipt         *PayReceipt         `json:"pay_receipt"`
-	GasInfo            *ComputeGasResponse `json:"gas_info"`
+	StrategyId        string                         `json:"strategyId"`
+	NetWork           global_const.Network           `json:"network"`
+	EntrypointVersion global_const.EntrypointVersion `json:"entrypointVersion"`
+	EntryPointAddress string                         `json:"entrypointAddress"`
+	PayMasterAddress  string                         `json:"paymasterAddress"`
+	Erc20TokenCost    *big.Float                     `json:"Erc20TokenCost"`
+	UserOpResponse    *UserOpResponse                `json:"userOpResponse"`
+}
+type UserOpResponse struct {
+	PayMasterAndData     string   `json:"paymasterAndData"`
+	PreVerificationGas   *big.Int `json:"preVerificationGas"`
+	VerificationGasLimit *big.Int `json:"verificationGasLimit"`
+	CallGasLimit         *big.Int `json:"callGasLimit"`
+	MaxFeePerGas         *big.Int `json:"maxFeePerGas"`
+	MaxPriorityFeePerGas *big.Int `json:"maxPriorityFeePerGas"`
+	//v0.7
+	AccountGasLimit               string   `json:"accountGasLimit" binding:"required"`
+	PaymasterVerificationGasLimit *big.Int `json:"paymasterVerificationGasLimit" binding:"required"`
+	PaymasterPostOpGasLimit       *big.Int `json:"paymasterPostOpGasLimit" binding:"required"`
+	GasFees                       string   `json:"gasFees" binding:"required"`
 }
 
 type ComputeGasResponse struct {
-	GasPriceInWei   uint64          `json:"gas_price_wei"` // wei
-	GasPriceInGwei  *big.Float      `json:"gas_price_gwei"`
-	GasPriceInEther string          `json:"gas_price_ether"`
-	TokenCost       string          `json:"token_cost"`
-	Network         types.NetWork   `json:"network"`
-	Token           types.TokenType `json:"token"`
-	UsdCost         string          `json:"usd_cost"`
-	BlobEnable      bool            `json:"blob_enable"`
+	Erc20TokenCost *big.Float         `json:"Erc20TokenCost"`
+	OpEstimateGas  *UserOpEstimateGas `json:"opEstimateGas"`
+	TotalGasDetail *TotalGasDetail    `json:"totalGasDetail"`
+}
+type UserOpEstimateGas struct {
+	//common
+	PreVerificationGas *big.Int `json:"preVerificationGas"`
+
+	BaseFee *big.Int `json:"baseFee"`
+	//v0.6
+	VerificationGasLimit *big.Int `json:"verificationGasLimit"`
+	CallGasLimit         *big.Int `json:"callGasLimit"`
+	MaxFeePerGas         *big.Int `json:"maxFeePerGas"`
+	MaxPriorityFeePerGas *big.Int `json:"maxPriorityFeePerGas"`
+	//v0.7
+	AccountGasLimit               *[32]byte `json:"accountGasLimit" binding:"required"`
+	PaymasterVerificationGasLimit *big.Int  `json:"paymasterVerificationGasLimit" binding:"required"`
+	PaymasterPostOpGasLimit       *big.Int  `json:"paymasterPostOpGasLimit" binding:"required"`
+	GasFees                       *[32]byte `json:"gasFees" binding:"required"`
 }
 type PayReceipt struct {
 	TransactionHash string `json:"transaction_hash"`
 	Sponsor         string `json:"sponsor"`
+}
+
+type GetSupportEntryPointResponse struct {
+	EntrypointDomains *[]EntrypointDomain `json:"entrypoints"`
+}
+type EntrypointDomain struct {
+	Address    string               `json:"address"`
+	Desc       string               `json:"desc"`
+	NetWork    global_const.Network `json:"network"`
+	StrategyId string               `json:"strategy_id"`
+}
+
+type GetSupportStrategyResponse struct {
+	Strategies *[]Strategy `json:"strategies"`
 }

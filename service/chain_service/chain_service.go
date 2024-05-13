@@ -1,52 +1,60 @@
 package chain_service
 
 import (
-	"AAStarCommunity/EthPaymaster_BackService/common/types"
-	"context"
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
+	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/common/network"
+	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
+	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
+	"math"
 	"math/big"
 )
 
-var GweiFactor = new(big.Float).SetInt(big.NewInt(1e9))
-var EthWeiFactor = new(big.Float).SetInt(new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil))
-
-func CheckContractAddressAccess(contract string, chain types.NetWork) (bool, error) {
-	if chain == "" {
-		return false, xerrors.Errorf("chain can not be empty")
-	}
-	contractAddress := common.HexToAddress(contract)
-
-	client, exist := NetWorkClientMap[chain]
-	if !exist {
-		return false, xerrors.Errorf("chain Client [%s] not exist", chain)
-	}
-	code, err := client.CodeAt(context.Background(), contractAddress, nil)
-	if err != nil {
-		return false, err
-	}
-	if len(code) == 0 {
-		return false, xerrors.Errorf("contract  [%s] address not exist in [%s] network", contract, chain)
-	}
-	return true, nil
+func CheckContractAddressAccess(contract *common.Address, chain global_const.Network) (bool, error) {
+	//todo DB Cache needCache
+	executor := network.GetEthereumExecutor(chain)
+	return executor.CheckContractAddressAccess(contract)
 }
 
-// GetGasPrice return gas price in wei, gwei, ether
-func GetGasPrice(chain types.NetWork) (*big.Int, *big.Float, *string, error) {
-	client, exist := NetWorkClientMap[chain]
-	if !exist {
-		return nil, nil, nil, xerrors.Errorf("chain Client [%s] not exist", chain)
-	}
-	priceWei, err := client.SuggestGasPrice(context.Background())
+func GetAddressTokenBalance(networkParam global_const.Network, address common.Address, tokenTypeParam global_const.TokenType) (float64, error) {
+	executor := network.GetEthereumExecutor(networkParam)
+	balanceResult, err := executor.GetUserTokenBalance(address, tokenTypeParam)
 	if err != nil {
-		return nil, nil, nil, err
+		return 0, err
 	}
 
-	gasPriceInGwei := new(big.Float).SetInt(priceWei)
-	gasPriceInGwei.Quo(gasPriceInGwei, GweiFactor)
+	balanceResultFloat := float64(balanceResult.Int64()) * math.Pow(10, -6)
+	return balanceResultFloat, nil
 
-	gasPriceInEther := new(big.Float).SetInt(priceWei)
-	gasPriceInEther.Quo(gasPriceInEther, EthWeiFactor)
-	gasPriceInEtherStr := gasPriceInEther.Text('f', 18)
-	return priceWei, gasPriceInGwei, &gasPriceInEtherStr, nil
+}
+func GetPaymasterEntryPointBalance(strategy *model.Strategy) (*big.Float, error) {
+	networkParam := strategy.GetNewWork()
+	paymasterAddress := strategy.GetPaymasterAddress()
+	logrus.Debug("paymasterAddress", paymasterAddress)
+	executor := network.GetEthereumExecutor(networkParam)
+	balance, err := executor.GetPaymasterDeposit(paymasterAddress)
+	if err != nil {
+		return nil, err
+	}
+	logrus.Debug("balance", balance)
+	balanceResultFloat := utils.ConvertBalanceToEther(balance)
+
+	return balanceResultFloat, nil
+}
+func SimulateHandleOp(op *user_op.UserOpInput, strategy *model.Strategy) (*model.SimulateHandleOpResult, error) {
+	networkParam := strategy.GetNewWork()
+	executor := network.GetEthereumExecutor(networkParam)
+	entrypointVersion := strategy.GetStrategyEntrypointVersion()
+	if entrypointVersion == global_const.EntrypointV06 {
+
+		return executor.SimulateV06HandleOp(op, strategy.GetEntryPointAddress())
+
+	} else if entrypointVersion == global_const.EntrypointV07 {
+		return executor.SimulateV07HandleOp(*op, strategy.GetEntryPointAddress())
+	}
+	return nil, xerrors.Errorf("[never be here]entrypoint version %s not support", entrypointVersion)
+	//TODO Starknet
 }

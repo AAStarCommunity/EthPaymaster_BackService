@@ -1,88 +1,92 @@
 package operator
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/common/network"
+	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
+	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
-	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
+	"AAStarCommunity/EthPaymaster_BackService/gas_executor"
 	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
-	"AAStarCommunity/EthPaymaster_BackService/service/gas_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/pay_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/validator_service"
-	"encoding/hex"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 )
 
-func TryPayUserOpExecute(request *model.TryPayUserOpRequest) (*model.Result, error) {
-	// validator
-	if err := businessParamValidate(request); err != nil {
-		return nil, err
-	}
-	userOp := request.UserOperation
-
-	// getStrategy
-	var strategy *model.Strategy
-	if stg, err := strategyGenerate(request); err != nil {
-		return nil, err
-	} else if err = validator_service.ValidateStrategy(stg, &userOp); err != nil {
-		return nil, err
-	} else {
-		strategy = stg
-	}
-
-	//base Strategy and UserOp computeGas
-	gasResponse, gasComputeError := gas_service.ComputeGas(&userOp, strategy)
-	if gasComputeError != nil {
-		return nil, gasComputeError
-	}
-
-	//validate gas
-	if err := gas_service.ValidateGas(&userOp, gasResponse); err != nil {
+func TryPayUserOpExecute(request *model.UserOpRequest) (*model.TryPayUserOpResponse, error) {
+	userOp, strategy, paymasterDataInput, err := prepareExecute(request)
+	if err != nil {
 		return nil, err
 	}
 
-	//pay
-	payReceipt, payError := executePay(strategy, &userOp, gasResponse)
-	if payError != nil {
-		return nil, payError
-	}
-	paymasterSignature := getPayMasterSignature(strategy, &userOp)
-	var result = model.TryPayUserOpResponse{
-		StrategyId:         strategy.Id,
-		EntryPointAddress:  strategy.EntryPointAddress,
-		PayMasterAddress:   strategy.PayMasterAddress,
-		PayReceipt:         payReceipt,
-		PayMasterSignature: paymasterSignature,
-		GasInfo:            gasResponse,
+	gasResponse, paymasterUserOp, err := estimateGas(userOp, strategy, paymasterDataInput)
+	if err != nil {
+		return nil, err
 	}
 
-	return &model.Result{
-		Code:    200,
-		Data:    result,
-		Message: "message",
-		Cost:    "cost",
-	}, nil
+	paymasterDataInput.PaymasterVerificationGasLimit = gasResponse.OpEstimateGas.PaymasterVerificationGasLimit
+	paymasterDataInput.PaymasterPostOpGasLimit = gasResponse.OpEstimateGas.PaymasterPostOpGasLimit
+
+	payReceipt, err := executePay(strategy, paymasterUserOp, gasResponse)
+	if err != nil {
+		return nil, err
+	}
+	logrus.Debug("payReceipt:", payReceipt)
+	result, err := postExecute(paymasterUserOp, strategy, gasResponse, paymasterDataInput)
+	if err != nil {
+		return nil, err
+	}
+	logrus.Debug("postExecute result:", result)
+	return result, nil
 }
 
-func businessParamValidate(request *model.TryPayUserOpRequest) error {
-	if request.ForceStrategyId == "" && (request.ForceToken == "" || request.ForceNetwork == "") {
-		return xerrors.Errorf("Token And Network Must Set When ForceStrategyId Is Empty")
+func prepareExecute(request *model.UserOpRequest) (*user_op.UserOpInput, *model.Strategy, *paymaster_data.PaymasterDataInput, error) {
+	var strategy *model.Strategy
+	strategy, generateErr := StrategyGenerate(request)
+	if generateErr != nil {
+		return nil, nil, nil, generateErr
 	}
-	//UserOp Validate
-	if err := validator_service.ValidateUserOp(&request.UserOperation); err != nil {
+
+	userOp, err := user_op.NewUserOp(&request.UserOp)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if err := validator_service.ValidateStrategy(strategy); err != nil {
+		return nil, nil, nil, err
+	}
+	if err := validator_service.ValidateUserOp(userOp, strategy); err != nil {
+		return nil, nil, nil, err
+	}
+	paymasterDataIput := paymaster_data.NewPaymasterDataInput(strategy)
+	paymaster_data.NewPaymasterDataInput(strategy)
+	return userOp, strategy, paymasterDataIput, nil
+}
+
+func estimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterDataInput) (*model.ComputeGasResponse, *user_op.UserOpInput, error) {
+	//base Strategy and UserOp computeGas
+	gasResponse, paymasterUserOp, gasComputeError := gas_executor.ComputeGas(userOp, strategy, paymasterDataInput)
+	if gasComputeError != nil {
+		return nil, nil, gasComputeError
+	}
+	//The maxFeePerGas and maxPriorityFeePerGas are above a configurable minimum value that the client is willing to accept. At the minimum, they are sufficiently high to be included with the current block.basefee.
+	if err := ValidateGas(userOp, gasResponse, strategy); err != nil {
+		return nil, nil, err
+	}
+	return gasResponse, paymasterUserOp, nil
+}
+
+func ValidateGas(userOp *user_op.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
+	validateFunc := gas_executor.GetGasValidateFunc(strategy.GetPayType())
+	err := validateFunc(userOp, gasComputeResponse, strategy)
+	if err != nil {
 		return err
-	}
-	if request.ForceEntryPointAddress != "" && request.ForceNetwork != "" {
-		// check Address is available in NetWork
-		if ok, err := chain_service.CheckContractAddressAccess(request.ForceEntryPointAddress, request.ForceNetwork); err != nil {
-			return err
-		} else if !ok {
-			return xerrors.Errorf("ForceEntryPointAddress: [%s] not exist in [%s] network", request.ForceEntryPointAddress, request.ForceNetwork)
-		}
 	}
 	return nil
 }
 
-func executePay(strategy *model.Strategy, userOp *model.UserOperationItem, gasResponse *model.ComputeGasResponse) (*model.PayReceipt, error) {
+func executePay(strategy *model.Strategy, userOp *user_op.UserOpInput, gasResponse *model.ComputeGasResponse) (*model.PayReceipt, error) {
 	//1.Recharge
 	ethereumPayservice := pay_service.EthereumPayService{}
 	if err := ethereumPayservice.Pay(); err != nil {
@@ -97,27 +101,69 @@ func executePay(strategy *model.Strategy, userOp *model.UserOperationItem, gasRe
 		Sponsor:         "aastar",
 	}, nil
 }
-func getPayMasterSignature(strategy *model.Strategy, userOp *model.UserOperationItem) string {
-	signatureBytes, _ := utils.SignUserOp("1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421", userOp)
-	return hex.EncodeToString(signatureBytes)
+
+func postExecute(userOp *user_op.UserOpInput, strategy *model.Strategy, gasResponse *model.ComputeGasResponse, paymasterDataInput *paymaster_data.PaymasterDataInput) (*model.TryPayUserOpResponse, error) {
+	executor := network.GetEthereumExecutor(strategy.GetNewWork())
+	paymasterData, err := executor.GetPaymasterData(userOp, strategy, paymasterDataInput)
+	if err != nil {
+		return nil, xerrors.Errorf("postExecute GetPaymasterData Error: [%w]", err)
+	}
+	logrus.Debug("postExecute paymasterData:", paymasterData)
+
+	var result = &model.TryPayUserOpResponse{
+		StrategyId:        strategy.Id,
+		EntryPointAddress: strategy.GetEntryPointAddress().String(),
+		NetWork:           strategy.GetNewWork(),
+		EntrypointVersion: strategy.GetStrategyEntrypointVersion(),
+		PayMasterAddress:  strategy.GetPaymasterAddress().String(),
+		Erc20TokenCost:    gasResponse.Erc20TokenCost,
+
+		UserOpResponse: &model.UserOpResponse{
+			PayMasterAndData:     utils.EncodeToStringWithPrefix(paymasterData),
+			PreVerificationGas:   gasResponse.OpEstimateGas.PreVerificationGas,
+			MaxFeePerGas:         gasResponse.OpEstimateGas.MaxFeePerGas,
+			MaxPriorityFeePerGas: gasResponse.OpEstimateGas.MaxPriorityFeePerGas,
+			VerificationGasLimit: gasResponse.OpEstimateGas.VerificationGasLimit,
+			CallGasLimit:         gasResponse.OpEstimateGas.CallGasLimit,
+		},
+	}
+
+	if strategy.GetStrategyEntrypointVersion() == global_const.EntrypointV07 {
+		result.UserOpResponse.AccountGasLimit = utils.EncodeToStringWithPrefix(gasResponse.OpEstimateGas.AccountGasLimit[:])
+		result.UserOpResponse.GasFees = utils.EncodeToStringWithPrefix(gasResponse.OpEstimateGas.GasFees[:])
+		result.UserOpResponse.PaymasterVerificationGasLimit = gasResponse.OpEstimateGas.PaymasterVerificationGasLimit
+		result.UserOpResponse.PaymasterPostOpGasLimit = gasResponse.OpEstimateGas.PaymasterPostOpGasLimit
+	}
+
+	return result, nil
 }
 
-func strategyGenerate(request *model.TryPayUserOpRequest) (*model.Strategy, error) {
+func StrategyGenerate(request *model.UserOpRequest) (*model.Strategy, error) {
+	var strategyResult *model.Strategy
 	if forceStrategyId := request.ForceStrategyId; forceStrategyId != "" {
 		//force strategy
-		if strategy := dashboard_service.GetStrategyById(forceStrategyId); strategy == nil {
+		if strategy := dashboard_service.GetStrategyByCode(forceStrategyId); strategy == nil {
 			return nil, xerrors.Errorf("Not Support Strategy ID: [%w]", forceStrategyId)
 		} else {
-			return strategy, nil
+			strategyResult = strategy
 		}
-	}
+	} else {
+		suitableStrategy, err := dashboard_service.GetSuitableStrategy(request.EntryPointVersion, request.ForceNetwork, global_const.PayTypeSuperVerifying) //TODO
+		if err != nil {
+			return nil, err
+		}
+		if suitableStrategy == nil {
+			return nil, xerrors.Errorf("Empty Strategies")
+		}
 
-	suitableStrategy, err := dashboard_service.GetSuitableStrategy(request.ForceEntryPointAddress, request.ForceNetwork, request.ForceToken) //TODO
-	if err != nil {
-		return nil, err
+		strategyResult = suitableStrategy
 	}
-	if suitableStrategy == nil {
-		return nil, xerrors.Errorf("Empty Strategies")
+	if strategyResult.GetPayType() == global_const.PayTypeERC20 {
+		if request.Erc20Token == "" {
+			return nil, xerrors.Errorf("Empty Erc20Token")
+		}
+		strategyResult.Erc20TokenType = request.Erc20Token
+
 	}
-	return suitableStrategy, nil
+	return strategyResult, nil
 }

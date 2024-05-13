@@ -2,7 +2,7 @@ package middlewares
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/conf"
+	"AAStarCommunity/EthPaymaster_BackService/envirment"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -15,7 +15,7 @@ func GenericRecoveryHandler() gin.HandlerFunc {
 	DefaultErrorWriter := &PanicExceptionRecord{}
 	return gin.RecoveryWithWriter(DefaultErrorWriter, func(c *gin.Context, err interface{}) {
 		errStr := ""
-		if conf.Environment.Debugger {
+		if envirment.Environment.Debugger {
 			errStr = fmt.Sprintf("%v", err)
 		}
 		model.GetResponse().SetHttpCode(http.StatusInternalServerError).FailCode(c, http.StatusInternalServerError, errStr)

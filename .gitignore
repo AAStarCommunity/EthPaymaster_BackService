@@ -20,11 +20,13 @@
 # Go workspace file
 go.work
 
+.env
+
 .idea
 .vscode/
 build/
-config/*.json
 
 vendor
 
 conf/appsettings.*.yaml
+config/secret_*.json
