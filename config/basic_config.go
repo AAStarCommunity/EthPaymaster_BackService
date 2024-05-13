@@ -10,20 +10,13 @@ import (
 )
 
 var basicConfig *BusinessConfig
-var signerConfig = make(SignerConfigMap)
 
-type SignerConfigMap map[global_const.Network]*global_const.EOA
-
-func BusinessConfigInit(path string) {
+func basicConfigInit(path string) {
 	if path == "" {
 		panic("pathParam is empty")
 	}
 	originConfig := initBusinessConfig(path)
 	basicConfig = convertConfig(originConfig)
-
-}
-func GetSigner(network global_const.Network) *global_const.EOA {
-	return signerConfig[network]
 }
 
 func convertConfig(originConfig *OriginBusinessConfig) *BusinessConfig {
@@ -34,11 +27,14 @@ func convertConfig(originConfig *OriginBusinessConfig) *BusinessConfig {
 	for network, originNetWorkConfig := range originConfig.NetworkConfigMap {
 		//TODO valid
 		basic.NetworkConfigMap[network] = NetWorkConfig{
-			ChainId:     originNetWorkConfig.ChainId,
-			IsTest:      originNetWorkConfig.IsTest,
-			RpcUrl:      fmt.Sprintf("%s/%s", originNetWorkConfig.RpcUrl, originNetWorkConfig.ApiKey),
-			TokenConfig: originNetWorkConfig.TokenConfig,
-			GasToken:    originNetWorkConfig.GasToken,
+			ChainId:              originNetWorkConfig.ChainId,
+			IsTest:               originNetWorkConfig.IsTest,
+			TokenConfig:          originNetWorkConfig.TokenConfig,
+			GasToken:             originNetWorkConfig.GasToken,
+			V06EntryPointAddress: common.HexToAddress(originNetWorkConfig.V06EntryPointAddress),
+			V07EntryPointAddress: common.HexToAddress(originNetWorkConfig.V07EntryPointAddress),
+			V06PaymasterAddress:  common.HexToAddress(originNetWorkConfig.V06PaymasterAddress),
+			V07PaymasterAddress:  common.HexToAddress(originNetWorkConfig.V07PaymasterAddress),
 		}
 		paymasterArr := originConfig.SupportPaymaster[network]
 		paymasterSet := mapset.NewSet[string]()
@@ -49,12 +45,6 @@ func convertConfig(originConfig *OriginBusinessConfig) *BusinessConfig {
 		entryPointSet := mapset.NewSet[string]()
 		entryPointSet.Append(entryPointArr...)
 		basic.SupportEntryPoint[network] = entryPointSet
-		//TODO starknet
-		eoa, err := global_const.NewEoa(originNetWorkConfig.SignerKey)
-		if err != nil {
-			panic(fmt.Sprintf("signer key error: %s", err))
-		}
-		signerConfig[network] = eoa
 	}
 	return basic
 }
@@ -80,14 +70,15 @@ type OriginBusinessConfig struct {
 	SupportPaymaster  map[global_const.Network][]string             `json:"support_paymaster"`
 }
 type OriginNetWorkConfig struct {
-	ChainId          string                            `json:"chain_id"`
-	IsTest           bool                              `json:"is_test"`
-	RpcUrl           string                            `json:"rpc_url"`
-	ApiKey           string                            `json:"api_key"`
-	SignerKey        string                            `json:"signer_key"`
-	TokenConfig      map[global_const.TokenType]string `json:"token_config"`
-	GasToken         global_const.TokenType            `json:"gas_token"`
-	GasOracleAddress string
+	ChainId              string                            `json:"chain_id"`
+	IsTest               bool                              `json:"is_test"`
+	TokenConfig          map[global_const.TokenType]string `json:"token_config"`
+	GasToken             global_const.TokenType            `json:"gas_token"`
+	V06PaymasterAddress  string                            `json:"v06_paymaster_address"`
+	V07PaymasterAddress  string                            `json:"v07_paymaster_address"`
+	V06EntryPointAddress string                            `json:"v06_entrypoint_address"`
+	V07EntryPointAddress string                            `json:"v07_entrypoint_address"`
+	GasOracleAddress     string
 }
 
 type BusinessConfig struct {
@@ -96,12 +87,15 @@ type BusinessConfig struct {
 	SupportPaymaster  map[global_const.Network]mapset.Set[string] `json:"support_paymaster"`
 }
 type NetWorkConfig struct {
-	ChainId          string                            `json:"chain_id"`
-	IsTest           bool                              `json:"is_test"`
-	RpcUrl           string                            `json:"rpc_url"`
-	TokenConfig      map[global_const.TokenType]string `json:"token_config"`
-	GasToken         global_const.TokenType
-	GasOracleAddress common.Address
+	ChainId              string                            `json:"chain_id"`
+	IsTest               bool                              `json:"is_test"`
+	TokenConfig          map[global_const.TokenType]string `json:"token_config"`
+	GasToken             global_const.TokenType
+	GasOracleAddress     common.Address
+	V06PaymasterAddress  common.Address
+	V07PaymasterAddress  common.Address
+	V06EntryPointAddress common.Address
+	V07EntryPointAddress common.Address
 }
 
 func GetSupportEntryPoints(network global_const.Network) (mapset.Set[string], error) {
@@ -138,9 +132,22 @@ func GetChainId(networkParam global_const.Network) string {
 	networkConfig := basicConfig.NetworkConfigMap[networkParam]
 	return networkConfig.ChainId
 }
-func GetEthereumRpcUrl(network global_const.Network) string {
+
+func GetPaymasterAddress(network global_const.Network, version global_const.EntrypointVersion) common.Address {
 	networkConfig := basicConfig.NetworkConfigMap[network]
-	return networkConfig.RpcUrl
+	if version == global_const.EntrypointV07 {
+		return networkConfig.V07PaymasterAddress
+	}
+	return networkConfig.V06PaymasterAddress
+}
+
+func GetEntrypointAddress(network global_const.Network, version global_const.EntrypointVersion) common.Address {
+	networkConfig := basicConfig.NetworkConfigMap[network]
+	if version == global_const.EntrypointV07 {
+		return networkConfig.V07EntryPointAddress
+	}
+	return networkConfig.V06EntryPointAddress
+
 }
 
 var (

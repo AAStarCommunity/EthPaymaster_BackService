@@ -9,14 +9,14 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/config"
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/sirupsen/logrus"
 	"testing"
 )
 
 func TestEthereumAdaptableExecutor(t *testing.T) {
-	config.BasicStrategyInit("../../config/basic_strategy_dev_config.json")
-	config.BusinessConfigInit("../../config/business_dev_config.json")
+	config.InitConfig("../../config/basic_strategy_config.json", "../../config/basic_config.json", "../../config/secret_config.json")
 	logrus.SetLevel(logrus.DebugLevel)
 	op, err := user_op.NewUserOp(utils.GenerateMockUservOperation())
 	if err != nil {
@@ -304,6 +304,9 @@ func testSimulateHandleOp(t *testing.T, chain global_const.Network, strategy *mo
 		return
 	}
 	op.PaymasterAndData = paymasterData
+	opMap := parseOpToMapV7(*op)
+	opJson, _ := json.Marshal(opMap)
+	t.Logf("SimulateHandleOp op: %v", string(opJson))
 
 	t.Logf("entryPoint Address %s", strategy.GetEntryPointAddress())
 	version := strategy.GetStrategyEntrypointVersion()
@@ -327,6 +330,20 @@ func testSimulateHandleOp(t *testing.T, chain global_const.Network, strategy *mo
 	t.Logf("simulateResult: %v", simulateResult)
 	callData := simulateResult.SimulateUserOpCallData
 	t.Logf("callData: %v", hex.EncodeToString(callData))
+}
+func parseOpToMapV7(input user_op.UserOpInput) map[string]string {
+	opMap := make(map[string]string)
+
+	opMap["accountGasLimits"] = utils.EncodeToStringWithPrefix(input.AccountGasLimits[:])
+	opMap["callGasLimit"] = input.CallGasLimit.String()
+	opMap["gasFees"] = utils.EncodeToStringWithPrefix(input.GasFees[:])
+	opMap["maxFeePerGas"] = input.MaxFeePerGas.String()
+	opMap["maxPriorityFeePerGas"] = input.MaxPriorityFeePerGas.String()
+	opMap["preVerificationGas"] = input.PreVerificationGas.String()
+	opMap["verificationGasLimit"] = input.VerificationGasLimit.String()
+	opMap["paymasterAndData"] = utils.EncodeToStringWithPrefix(input.PaymasterAndData[:])
+	opMap["Nonce"] = input.Nonce.String()
+	return opMap
 }
 
 func testEthereumExecutorClientConnect(t *testing.T, chain global_const.Network) {

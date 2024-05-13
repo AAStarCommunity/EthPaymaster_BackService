@@ -19,8 +19,8 @@ import (
 )
 
 func TestChainService(t *testing.T) {
-	config.BasicStrategyInit("../../config/basic_strategy_dev_config.json")
-	config.BusinessConfigInit("../../config/business_dev_config.json")
+
+	config.InitConfig("../../config/basic_strategy_config.json", "../../config/basic_config.json", "../../config/secret_config.json")
 	logrus.SetLevel(logrus.DebugLevel)
 	op, err := user_op.NewUserOp(utils.GenerateMockUservOperation())
 	if err != nil {

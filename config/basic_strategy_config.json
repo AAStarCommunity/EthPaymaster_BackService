@@ -1,210 +1,170 @@
 {
   "Ethereum_Sepolia_v06_verifyPaymaster": {
     "network": "ethereum-sepolia",
-    "entrypoint_address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
     "entrypoint_version": "v0.6",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
     "paymaster_pay_type": "PayTypeVerifying",
     "access_project": "official"
   },
   "Ethereum_Sepolia_v07_verifyPaymaster": {
     "network": "ethereum-sepolia",
-    "entrypoint_address": "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
     "entrypoint_version": "v0.7",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0x3Da96267B98a33267249734FD8FFeC75093D3085",
     "paymaster_pay_type": "PayTypeVerifying",
     "access_project": "official"
   },
   "Ethereum_Sepolia_v06_erc20Paymaster": {
     "network": "ethereum-sepolia",
-    "entrypoint_address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
     "entrypoint_version": "v0.6",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
     "paymaster_pay_type": "PayTypeERC20",
     "access_erc20": "USDT,USDC",
     "access_project": "official"
   },
   "Ethereum_Sepolia_v07_erc20Paymaster": {
     "network": "ethereum-sepolia",
-    "entrypoint_address": "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
     "entrypoint_version": "v0.7",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0x3Da96267B98a33267249734FD8FFeC75093D3085",
     "paymaster_pay_type": "PayTypeERC20",
     "access_erc20": "USDT,USDC",
     "access_project": "official"
   },
   "Optimism_Sepolia_v06_verifyPaymaster": {
     "network": "optimism-sepolia",
-    "entrypoint_address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
     "entrypoint_version": "v0.6",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
     "paymaster_pay_type": "PayTypeVerifying",
     "access_project": "official"
   },
   "Optimism_Sepolia_v07_verifyPaymaster": {
     "network": "optimism-sepolia",
-    "entrypoint_address": "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
     "entrypoint_version": "v0.7",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
     "paymaster_pay_type": "PayTypeVerifying",
     "access_project": "official"
   },
   "Optimism_Sepolia_v06_erc20Paymaster": {
     "network": "optimism-sepolia",
-    "entrypoint_address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
     "entrypoint_version": "v0.6",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
     "paymaster_pay_type": "PayTypeERC20",
     "access_erc20": "USDT,USDC",
     "access_project": "official"
   },
   "Optimism_Sepolia_v07_erc20Paymaster": {
     "network": "optimism-sepolia",
-    "entrypoint_address": "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
     "entrypoint_version": "v0.7",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
     "paymaster_pay_type": "PayTypeERC20",
     "access_erc20": "USDT,USDC",
     "access_project": "official"
   },
   "Arbitrum_Sepolia_v06_verifyPaymaster": {
     "network": "arbitrum-sepolia",
-    "entrypoint_address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
     "entrypoint_version": "v0.6",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
     "paymaster_pay_type": "PayTypeVerifying",
     "access_project": "official"
   },
   "Arbitrum_Sepolia_v06_erc20Paymaster": {
     "network": "arbitrum-sepolia",
-    "entrypoint_address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
     "entrypoint_version": "v0.6",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
     "paymaster_pay_type": "PayTypeERC20",
     "access_erc20": "USDT,USDC",
     "access_project": "official"
   },
   "Arbitrum_Sepolia_v07_verifyPaymaster": {
     "network": "arbitrum-sepolia",
-    "entrypoint_address": "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
     "entrypoint_version": "v0.7",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
     "paymaster_pay_type": "PayTypeVerifying",
     "access_project": "official"
   },
   "Arbitrum_Sepolia_v07_erc20Paymaster": {
     "network": "arbitrum-sepolia",
-    "entrypoint_address": "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
     "entrypoint_version": "v0.7",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
     "paymaster_pay_type": "PayTypeERC20",
     "access_erc20": "USDT,USDC",
     "access_project": "official"
   },
   "Scroll_Sepolia_v06_verifyPaymaster": {
     "network": "scroll-sepolia",
-    "entrypoint_address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
     "entrypoint_version": "v0.6",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0x0Fa9ee28202F8602E9a4C99Af799C75C29AFbC89",
     "paymaster_pay_type": "PayTypeVerifying",
     "access_project": "official"
   },
   "Scroll_Sepolia_v06_erc20Paymaster": {
     "network": "scroll-sepolia",
-    "entrypoint_address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
     "entrypoint_version": "v0.6",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0x0Fa9ee28202F8602E9a4C99Af799C75C29AFbC89",
     "paymaster_pay_type": "PayTypeERC20",
     "access_erc20": "USDT,USDC",
     "access_project": "official"
   },
   "Scroll_Sepolia_v07_verifyPaymaster": {
     "network": "scroll-sepolia",
-    "entrypoint_address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
     "entrypoint_version": "v0.7",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
     "paymaster_pay_type": "PayTypeVerifying",
     "access_project": "official"
   },
   "Scroll_Sepolia_v07_erc20Paymaster": {
     "network": "scroll-sepolia",
-    "entrypoint_address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
     "entrypoint_version": "v0.7",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
     "paymaster_pay_type": "PayTypeERC20",
     "access_erc20": "USDT,USDC",
     "access_project": "official"
   },
   "Base_Sepolia_v06_verifyPaymaster": {
     "network": "base-sepolia",
-    "entrypoint_address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
     "entrypoint_version": "v0.6",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xa86cFf572E299B2704FBBCF77dcbbc7FEfFbcA06",
     "paymaster_pay_type": "PayTypeVerifying",
     "access_project": "official"
   },
   "Base_Sepolia_v07_verifyPaymaster": {
     "network": "base-sepolia",
-    "entrypoint_address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
     "entrypoint_version": "v0.7",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xa86cFf572E299B2704FBBCF77dcbbc7FEfFbcA06",
     "paymaster_pay_type": "PayTypeVerifying",
     "access_project": "official"
   },
   "Base_Sepolia_v06_erc20Paymaster": {
     "network": "base-sepolia",
-    "entrypoint_address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
     "entrypoint_version": "v0.6",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xa86cFf572E299B2704FBBCF77dcbbc7FEfFbcA06",
     "paymaster_pay_type": "PayTypeERC20",
     "access_erc20": "USDT,USDC",
     "access_project": "official"
   },
   "Base_Sepolia_v07_erc20Paymaster": {
     "network": "base-sepolia",
-    "entrypoint_address": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
     "entrypoint_version": "v0.7",
     "effective_start_time": "1710044496",
     "effective_end_time": "1820044496",
-    "paymaster_address": "0xa86cFf572E299B2704FBBCF77dcbbc7FEfFbcA06",
     "paymaster_pay_type": "PayTypeERC20",
     "access_erc20": "USDT,USDC",
     "access_project": "official"

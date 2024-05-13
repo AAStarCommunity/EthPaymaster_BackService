@@ -6,7 +6,6 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/xerrors"
 	"math/big"
 	"os"
@@ -18,7 +17,13 @@ var basicStrategyConfig = make(map[string]*model.Strategy)
 var suitableStrategyMap = make(map[global_const.Network]map[global_const.EntrypointVersion]map[global_const.PayType]*model.Strategy)
 
 func GetBasicStrategyConfig(strategyCode global_const.BasicStrategyCode) *model.Strategy {
-	return basicStrategyConfig[string(strategyCode)]
+	strategy := basicStrategyConfig[string(strategyCode)]
+	paymasterAddress := GetPaymasterAddress(strategy.GetNewWork(), strategy.GetStrategyEntrypointVersion())
+	strategy.PaymasterInfo.PayMasterAddress = &paymasterAddress
+	entryPointAddress := GetEntrypointAddress(strategy.GetNewWork(), strategy.GetStrategyEntrypointVersion())
+	strategy.EntryPointInfo.EntryPointAddress = &entryPointAddress
+	return strategy
+
 }
 func GetSuitableStrategy(entrypointVersion global_const.EntrypointVersion, chain global_const.Network, payType global_const.PayType) (*model.Strategy, error) {
 	//TODO
@@ -29,7 +34,7 @@ func GetSuitableStrategy(entrypointVersion global_const.EntrypointVersion, chain
 	return strategy, nil
 }
 
-func BasicStrategyInit(path string) {
+func basicStrategyInit(path string) {
 	if path == "" {
 		panic("pathParam is empty")
 	}
@@ -55,8 +60,6 @@ func convertMapToStrategyConfig(data map[string]map[string]any) (map[string]*mod
 	config := make(map[string]*model.Strategy)
 
 	for key, value := range data {
-		paymasterAddress := common.HexToAddress(value["paymaster_address"].(string))
-		entryPointAddress := common.HexToAddress(value["entrypoint_address"].(string))
 		effectiveStartTime, ok := new(big.Int).SetString(value["effective_start_time"].(string), 10)
 		if !ok {
 			return nil, xerrors.Errorf("effective_start_time illegal")
@@ -73,7 +76,6 @@ func convertMapToStrategyConfig(data map[string]map[string]any) (map[string]*mod
 				NetWork: global_const.Network(value["network"].(string)),
 			},
 			EntryPointInfo: &model.EntryPointInfo{
-				EntryPointAddress: &entryPointAddress,
 				EntryPointVersion: global_const.EntrypointVersion(value["entrypoint_version"].(string)),
 			},
 
@@ -83,8 +85,7 @@ func convertMapToStrategyConfig(data map[string]map[string]any) (map[string]*mod
 				AccessProject:      utils.ConvertStringToSet(accessProjectStr, ","),
 			},
 			PaymasterInfo: &model.PaymasterInfo{
-				PayMasterAddress: &paymasterAddress,
-				PayType:          global_const.PayType(value["paymaster_pay_type"].(string)),
+				PayType: global_const.PayType(value["paymaster_pay_type"].(string)),
 			},
 		}
 		if strategy.GetPayType() == global_const.PayTypeERC20 {

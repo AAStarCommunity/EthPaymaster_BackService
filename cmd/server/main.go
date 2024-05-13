@@ -5,11 +5,15 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/envirment"
 	"AAStarCommunity/EthPaymaster_BackService/rpc_server/routers"
 	"flag"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"os"
 	"strings"
+)
+
+const (
+	strategyPath    = "./config/basic_strategy_config.json"
+	basicConfigPath = "./config/basic_config.json"
 )
 
 var aPort = flag.String("port", "", "Port")
@@ -44,17 +48,20 @@ var Engine *gin.Engine
 // @description Type 'Bearer \<TOKEN\>' to correctly set the AccessToken
 // @BasePath /api
 func main() {
-	strategyPath := fmt.Sprintf("./config/basic_strategy_%s_config.json", strings.ToLower(envirment.Environment.Name))
-	businessConfigPath := fmt.Sprintf("./config/business_%s_config.json", strings.ToLower(envirment.Environment.Name))
-
-	initEngine(strategyPath, businessConfigPath)
+	secretPath := os.Getenv("secret_config_path")
+	if secretPath == "" {
+		secretPath = "./config/secret_config.json"
+	}
+	initEngine(strategyPath, basicConfigPath, secretPath)
 	port := runMode()
+	os.Getenv("secret_config_path")
 	_ = Engine.Run(port)
 }
 
-func initEngine(strategyPath string, businessConfigPath string) {
-	config.BasicStrategyInit(strategyPath)
-	config.BusinessConfigInit(businessConfigPath)
+func initEngine(strategyPath string, basicConfigPath string, secretPath string) {
+
+	logrus.Infof("secretPath: %s", secretPath)
+	config.InitConfig(strategyPath, basicConfigPath, secretPath)
 	if envirment.Environment.IsDevelopment() {
 		logrus.SetLevel(logrus.DebugLevel)
 	} else {
@@ -62,6 +69,5 @@ func initEngine(strategyPath string, businessConfigPath string) {
 	}
 	logrus.Infof("Environment: %s", envirment.Environment.Name)
 	logrus.Infof("Debugger: %v", envirment.Environment.Debugger)
-	logrus.Infof("Action ENV : [%v]", os.Getenv("GITHUB_ACTIONS"))
 	Engine = routers.SetRouters()
 }

@@ -59,6 +59,11 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	signatureByte, err := hex.DecodeString(DummySignature[2:])
+	if err != nil {
+		panic(err)
+	}
+	DummySignatureByte = signatureByte
 }
 
 var GasOverHand = struct {
@@ -84,12 +89,4 @@ var GasOverHand = struct {
 	NonZeroByte:   16,
 	BundleSize:    1,
 	sigSize:       65,
-}
-
-func init() {
-	signatureByte, err := hex.DecodeString(DummySignature[2:])
-	if err != nil {
-		panic(err)
-	}
-	DummySignatureByte = signatureByte
 }

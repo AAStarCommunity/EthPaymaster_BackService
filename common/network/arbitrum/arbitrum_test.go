@@ -11,8 +11,7 @@ import (
 )
 
 func TestGetArbitrumGas(t *testing.T) {
-	config.BasicStrategyInit("../../../config/basic_strategy_dev_config.json")
-	config.BusinessConfigInit("../../../config/business_dev_config.json")
+	config.InitConfig("../../../config/basic_strategy_config.json", "../../../config/basic_config.json", "../../../config/secret_config.json")
 	strategy := config.GetBasicStrategyConfig("Arbitrum_Sepolia_v06_verifyPaymaster")
 	if strategy == nil {
 		t.Error("strategy is nil")

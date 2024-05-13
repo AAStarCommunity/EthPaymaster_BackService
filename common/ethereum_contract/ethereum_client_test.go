@@ -15,10 +15,10 @@ import (
 
 func TestPaymasterV07(t *testing.T) {
 
-	config.BasicStrategyInit("../../config/basic_strategy_dev_config.json")
-	config.BusinessConfigInit("../../config/business_dev_config.json")
-	network := config.GetEthereumRpcUrl(global_const.EthereumSepolia)
+	config.InitConfig("../../config/basic_strategy_config.json", "../../config/basic_config.json", "../../config/secret_config.json")
+	network := config.GetNewWorkClientURl(global_const.EthereumSepolia)
 	contractAddress := common.HexToAddress("0x3Da96267B98a33267249734FD8FFeC75093D3085")
+	t.Logf("network URL %s", network)
 	client, err := ethclient.Dial(network)
 	if err != nil {
 		t.Fatalf("Error: %v", err)

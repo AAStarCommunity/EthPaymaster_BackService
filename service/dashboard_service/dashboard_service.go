@@ -8,7 +8,12 @@ import (
 )
 
 func GetStrategyByCode(strategyCode string) *model.Strategy {
-	return config.GetBasicStrategyConfig(global_const.BasicStrategyCode(strategyCode))
+	strategy := config.GetBasicStrategyConfig(global_const.BasicStrategyCode(strategyCode))
+	paymasterAddress := config.GetPaymasterAddress(strategy.GetNewWork(), strategy.GetStrategyEntrypointVersion())
+	strategy.PaymasterInfo.PayMasterAddress = &paymasterAddress
+	entryPointAddress := config.GetEntrypointAddress(strategy.GetNewWork(), strategy.GetStrategyEntrypointVersion())
+	strategy.EntryPointInfo.EntryPointAddress = &entryPointAddress
+	return strategy
 }
 
 func GetSuitableStrategy(entryPointVersion global_const.EntrypointVersion, chain global_const.Network, payType global_const.PayType) (*model.Strategy, error) {
@@ -23,6 +28,10 @@ func GetSuitableStrategy(entryPointVersion global_const.EntrypointVersion, chain
 	if strategy == nil {
 		return nil, errors.New("strategy not found")
 	}
+	paymasterAddress := config.GetPaymasterAddress(strategy.GetNewWork(), strategy.GetStrategyEntrypointVersion())
+	strategy.PaymasterInfo.PayMasterAddress = &paymasterAddress
+	entryPointAddress := config.GetEntrypointAddress(strategy.GetNewWork(), strategy.GetStrategyEntrypointVersion())
+	strategy.EntryPointInfo.EntryPointAddress = &entryPointAddress
 	return strategy, nil
 }
 

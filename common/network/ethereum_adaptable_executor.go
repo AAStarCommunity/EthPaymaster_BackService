@@ -29,6 +29,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 	"math/big"
+	"sync"
 )
 
 var executorMap = make(map[global_const.Network]*EthereumExecutor)
@@ -64,43 +65,56 @@ type EthereumExecutor struct {
 	ChainId    *big.Int
 }
 
-func GetEthereumExecutor(network global_const.Network) *EthereumExecutor {
+var mu sync.Mutex
 
-	if executorMap[network] == nil {
-		// TODO need to check Out Client Connection Always Open
-		client, err := ethclient.Dial(config.GetEthereumRpcUrl(network))
-		if err != nil {
-			panic(err)
-		}
-		chainId := big.NewInt(0)
-		_, success := chainId.SetString(config.GetChainId(network), 10)
-		if !success {
-			panic(xerrors.Errorf("chainId %s is invalid", config.GetChainId(network)))
-		}
-		geth := gethclient.New(client.Client())
-		executorMap[network] = &EthereumExecutor{
-			network:    network,
-			Client:     client,
-			ChainId:    chainId,
-			GethClient: geth,
-		}
+func GetEthereumExecutor(network global_const.Network) *EthereumExecutor {
+	executor, ok := executorMap[network]
+	if ok {
+		return executor
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+	executor, ok = executorMap[network]
+	if ok {
+		return executor
+	}
+	rpcUrl := config.GetNewWorkClientURl(network)
+	if rpcUrl == "" {
+		panic(xerrors.Errorf("network [%s] is not supported", network))
+	}
+	client, err := ethclient.Dial(rpcUrl)
+	if err != nil {
+		panic(err)
+	}
+	chainId := big.NewInt(0)
+	_, success := chainId.SetString(config.GetChainId(network), 10)
+	if !success {
+		panic(xerrors.Errorf("chainId %s is invalid", config.GetChainId(network)))
+	}
+	geth := gethclient.New(client.Client())
+	executorMap[network] = &EthereumExecutor{
+		network:    network,
+		Client:     client,
+		ChainId:    chainId,
+		GethClient: geth,
 	}
 
 	return executorMap[network]
 }
 
-func (executor EthereumExecutor) GetEntryPointV6Deposit(entryPoint *common.Address, depoist common.Address) (*big.Int, error) {
+func (executor *EthereumExecutor) GetEntryPointV6Deposit(entryPoint *common.Address, deposit common.Address) (*big.Int, error) {
 	contract, err := executor.GetEntryPoint06(entryPoint)
 	if err != nil {
 		return nil, err
 	}
-	depoistInfo, err := contract.GetDepositInfo(&bind.CallOpts{}, depoist)
+	depoistInfo, err := contract.GetDepositInfo(&bind.CallOpts{}, deposit)
 	if err != nil {
 		return nil, err
 	}
 	return depoistInfo.Deposit, nil
 }
-func (executor EthereumExecutor) GetEntryPointV7Deposit(entryPoint *common.Address, depoist common.Address) (*big.Int, error) {
+func (executor *EthereumExecutor) GetEntryPointV7Deposit(entryPoint *common.Address, depoist common.Address) (*big.Int, error) {
 	contract, err := executor.GetEntryPoint07(entryPoint)
 	if err != nil {
 		return nil, err
@@ -112,7 +126,7 @@ func (executor EthereumExecutor) GetEntryPointV7Deposit(entryPoint *common.Addre
 	return depositInfo.Deposit, nil
 }
 
-func (executor EthereumExecutor) GetUserTokenBalance(userAddress common.Address, token global_const.TokenType) (*big.Int, error) {
+func (executor *EthereumExecutor) GetUserTokenBalance(userAddress common.Address, token global_const.TokenType) (*big.Int, error) {
 	tokenAddress := config.GetTokenAddress(executor.network, token) //TODO
 	if tokenAddress == "" {
 		return nil, xerrors.Errorf("tokenType [%s] is not supported in [%s] network", token, executor.network)
@@ -124,7 +138,7 @@ func (executor EthereumExecutor) GetUserTokenBalance(userAddress common.Address,
 	}
 	return tokenInstance.BalanceOf(&bind.CallOpts{}, userAddress)
 }
-func (executor EthereumExecutor) CheckContractAddressAccess(contract *common.Address) (bool, error) {
+func (executor *EthereumExecutor) CheckContractAddressAccess(contract *common.Address) (bool, error) {
 	client := executor.Client
 
 	code, err := client.CodeAt(context.Background(), *contract, nil)
@@ -137,7 +151,7 @@ func (executor EthereumExecutor) CheckContractAddressAccess(contract *common.Add
 	return true, nil
 }
 
-func (executor EthereumExecutor) GetTokenContract(tokenAddress *common.Address) (*contract_erc20.Contract, error) {
+func (executor *EthereumExecutor) GetTokenContract(tokenAddress *common.Address) (*contract_erc20.Contract, error) {
 	client := executor.Client
 	contract, ok := TokenContractCache[tokenAddress]
 	if !ok {
@@ -151,7 +165,7 @@ func (executor EthereumExecutor) GetTokenContract(tokenAddress *common.Address) 
 	return contract, nil
 }
 
-func (executor EthereumExecutor) EstimateUserOpCallGas(entrypointAddress *common.Address, userOpParam *user_op.UserOpInput) (*big.Int, error) {
+func (executor *EthereumExecutor) EstimateUserOpCallGas(entrypointAddress *common.Address, userOpParam *user_op.UserOpInput) (*big.Int, error) {
 	client := executor.Client
 	userOpValue := *userOpParam
 	res, err := client.EstimateGas(context.Background(), ethereum.CallMsg{
@@ -164,7 +178,7 @@ func (executor EthereumExecutor) EstimateUserOpCallGas(entrypointAddress *common
 	}
 	return new(big.Int).SetUint64(res), nil
 }
-func (executor EthereumExecutor) EstimateCreateSenderGas(entrypointAddress *common.Address, userOpParam *user_op.UserOpInput) (*big.Int, error) {
+func (executor *EthereumExecutor) EstimateCreateSenderGas(entrypointAddress *common.Address, userOpParam *user_op.UserOpInput) (*big.Int, error) {
 	client := executor.Client
 	userOpValue := *userOpParam
 	factoryAddress, err := userOpValue.GetFactoryAddress()
@@ -184,7 +198,7 @@ func (executor EthereumExecutor) EstimateCreateSenderGas(entrypointAddress *comm
 
 // GetGasPrice uint256 gasFee = min(maxFeePerGas, maxPriorityFeePerGas + block.baseFee);
 // maxPriorityFeePerGasBuffer = L1_fee / verificationGasLimit
-func (executor EthereumExecutor) GetGasPrice() (*model.GasPrice, error) {
+func (executor *EthereumExecutor) GetGasPrice() (*model.GasPrice, error) {
 
 	//The Arbitrum sequencer ignores priority fees and eth_maxPriorityFeePerGas always returns 0
 	//On Optimism we set maxPriorityFeePerGas = l1_gas / l2_base_fee
@@ -239,7 +253,7 @@ func (executor EthereumExecutor) GetGasPrice() (*model.GasPrice, error) {
 // OpResource https://github.com/ethereum-optimism/optimism/blob/233ede59d16cb01bdd8e7ff662a153a4c3178bdd/packages/contracts/contracts/L2/predeploys/OVM_GasPriceOracle.sol#L109-L124
 // l1Gas = zeros * TX_DATA_ZERO_GAS + (nonZeros + 4) * TX_DATA_NON_ZERO_GAS
 // l1GasFee = ((l1Gas + overhead) * l1BaseFee * scalar) / PRECISION
-func (executor EthereumExecutor) GetL1DataFee(data []byte) (*big.Int, error) {
+func (executor *EthereumExecutor) GetL1DataFee(data []byte) (*big.Int, error) {
 	address, ok := config.L1GasOracleInL2[executor.network]
 	if !ok {
 		return nil, xerrors.Errorf("L1GasOracleInL2 not found in network %s", executor.network)
@@ -266,7 +280,7 @@ func (executor EthereumExecutor) GetL1DataFee(data []byte) (*big.Int, error) {
 	return fee, nil
 }
 
-func (executor EthereumExecutor) SimulateV06HandleOp(v06 *user_op.UserOpInput, entryPoint *common.Address) (*model.SimulateHandleOpResult, error) {
+func (executor *EthereumExecutor) SimulateV06HandleOp(v06 *user_op.UserOpInput, entryPoint *common.Address) (*model.SimulateHandleOpResult, error) {
 	abi, err := contract_entrypoint_v06.ContractMetaData.GetAbi()
 	if err != nil {
 		return nil, err
@@ -303,7 +317,7 @@ func (executor EthereumExecutor) SimulateV06HandleOp(v06 *user_op.UserOpInput, e
 	}, nil
 }
 
-func (executor EthereumExecutor) SimulateV07HandleOp(userOpV07 user_op.UserOpInput, entryPoint *common.Address) (*model.SimulateHandleOpResult, error) {
+func (executor *EthereumExecutor) SimulateV07HandleOp(userOpV07 user_op.UserOpInput, entryPoint *common.Address) (*model.SimulateHandleOpResult, error) {
 	var result *simulate_entrypoint.IEntryPointSimulationsExecutionResult
 	simulateAbi, err := simulate_entrypoint.ContractMetaData.GetAbi()
 	if err != nil {
@@ -353,7 +367,7 @@ func (executor EthereumExecutor) SimulateV07HandleOp(userOpV07 user_op.UserOpInp
 		TargetResult:  result.TargetResult,
 	}, nil
 }
-func (executor EthereumExecutor) GetSimulateEntryPoint() (*simulate_entrypoint.Contract, error) {
+func (executor *EthereumExecutor) GetSimulateEntryPoint() (*simulate_entrypoint.Contract, error) {
 	contract, ok := SimulateEntryPointContractCache[executor.network]
 	if !ok {
 		contractInstance, err := simulate_entrypoint.NewContract(common.HexToAddress("0x"), executor.Client)
@@ -365,7 +379,7 @@ func (executor EthereumExecutor) GetSimulateEntryPoint() (*simulate_entrypoint.C
 	}
 	return contract, nil
 }
-func (executor EthereumExecutor) GetPaymasterDeposit(paymasterAddress *common.Address) (*big.Int, error) {
+func (executor *EthereumExecutor) GetPaymasterDeposit(paymasterAddress *common.Address) (*big.Int, error) {
 	contract, err := executor.GetPaymasterErc20AndVerifyV06(paymasterAddress)
 	if err != nil {
 		return nil, err
@@ -377,7 +391,7 @@ func (executor EthereumExecutor) GetPaymasterDeposit(paymasterAddress *common.Ad
 	return deposit, nil
 }
 
-func (executor EthereumExecutor) GetEntryPoint07(entryPoint *common.Address) (*contract_entrypoint_v07.Contract, error) {
+func (executor *EthereumExecutor) GetEntryPoint07(entryPoint *common.Address) (*contract_entrypoint_v07.Contract, error) {
 	contract, ok := V07EntryPointContractCache[executor.network][*entryPoint]
 	if !ok {
 		contractInstance, err := contract_entrypoint_v07.NewContract(*entryPoint, executor.Client)
@@ -389,7 +403,7 @@ func (executor EthereumExecutor) GetEntryPoint07(entryPoint *common.Address) (*c
 	}
 	return contract, nil
 }
-func (executor EthereumExecutor) GetEntryPoint06(entryPoint *common.Address) (*contract_entrypoint_v06.Contract, error) {
+func (executor *EthereumExecutor) GetEntryPoint06(entryPoint *common.Address) (*contract_entrypoint_v06.Contract, error) {
 	contract, ok := V06EntryPointContractCache[executor.network][*entryPoint]
 	if !ok {
 		contractInstance, err := contract_entrypoint_v06.NewContract(*entryPoint, executor.Client)
@@ -405,7 +419,7 @@ func (executor EthereumExecutor) GetEntryPoint06(entryPoint *common.Address) (*c
 	return contract, nil
 
 }
-func (executor EthereumExecutor) GetPaymasterErc20AndVerifyV06(paymasterAddress *common.Address) (*paymaster_verifying_erc20_v06.Contract, error) {
+func (executor *EthereumExecutor) GetPaymasterErc20AndVerifyV06(paymasterAddress *common.Address) (*paymaster_verifying_erc20_v06.Contract, error) {
 	contract, ok := V06PaymasterErc20AndPaymasterCache[executor.network][*paymasterAddress]
 	if !ok {
 		contractInstance, err := paymaster_verifying_erc20_v06.NewContract(*paymasterAddress, executor.Client)
@@ -420,7 +434,7 @@ func (executor EthereumExecutor) GetPaymasterErc20AndVerifyV06(paymasterAddress 
 	}
 	return contract, nil
 }
-func (executor EthereumExecutor) GetPaymasterErc20AndVerifyV07(paymasterAddress *common.Address) (*paymaster_verifying_erc20_v07.Contract, error) {
+func (executor *EthereumExecutor) GetPaymasterErc20AndVerifyV07(paymasterAddress *common.Address) (*paymaster_verifying_erc20_v07.Contract, error) {
 	contract, ok := V07PaymasterErc20AndPaymasterCache[executor.network][*paymasterAddress]
 	if !ok {
 		contractInstance, err := paymaster_verifying_erc20_v07.NewContract(*paymasterAddress, executor.Client)
@@ -436,7 +450,7 @@ func (executor EthereumExecutor) GetPaymasterErc20AndVerifyV07(paymasterAddress 
 	return contract, nil
 }
 
-func (executor EthereumExecutor) GetAuth() (*bind.TransactOpts, error) {
+func (executor *EthereumExecutor) GetAuth() (*bind.TransactOpts, error) {
 	if executor.ChainId == nil {
 		return nil, xerrors.Errorf("chainId is nil")
 	}
@@ -460,7 +474,7 @@ func GetAuth(chainId *big.Int, privateKey *ecdsa.PrivateKey) (*bind.TransactOpts
 		Context: context.Background(),
 	}, nil
 }
-func (executor EthereumExecutor) GetUserOpHash(userOp *user_op.UserOpInput, strategy *model.Strategy) ([]byte, string, error) {
+func (executor *EthereumExecutor) GetUserOpHash(userOp *user_op.UserOpInput, strategy *model.Strategy) ([]byte, string, error) {
 	version := strategy.GetStrategyEntrypointVersion()
 	erc20Token := common.HexToAddress("0x")
 	payType := strategy.GetPayType()
@@ -525,7 +539,7 @@ func (executor EthereumExecutor) GetUserOpHash(userOp *user_op.UserOpInput, stra
 	}
 
 }
-func (executor EthereumExecutor) GetPaymasterData(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterDataInput) ([]byte, error) {
+func (executor *EthereumExecutor) GetPaymasterData(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterDataInput) ([]byte, error) {
 	userOpHash, _, err := executor.GetUserOpHash(userOp, strategy)
 	if err != nil {
 		logrus.Errorf("GetUserOpHash error [%v]", err)

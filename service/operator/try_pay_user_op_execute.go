@@ -78,7 +78,7 @@ func estimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymaste
 }
 
 func ValidateGas(userOp *user_op.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
-	validateFunc := gas_executor.GasValidateFuncMap[strategy.GetPayType()]
+	validateFunc := gas_executor.GetGasValidateFunc(strategy.GetPayType())
 	err := validateFunc(userOp, gasComputeResponse, strategy)
 	if err != nil {
 		return err

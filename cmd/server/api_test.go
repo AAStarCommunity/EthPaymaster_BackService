@@ -40,7 +40,8 @@ func APITestCall(engine *gin.Engine, method, url string, body any, response any,
 }
 
 func TestAPI(t *testing.T) {
-	initEngine("../../config/basic_strategy_dev_config.json", "../../config/business_dev_config.json")
+
+	initEngine("../../config/basic_strategy_config.json", "../../config/basic_config.json", "../../config/secret_config.json")
 	tests := []struct {
 		name string
 		test func(t *testing.T)

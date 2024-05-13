@@ -5,9 +5,15 @@ import (
 	"testing"
 )
 
+func TestSecretConfigInit(t *testing.T) {
+	secretConfigInit("../config/secret_config.json")
+	config := GetNetworkSecretConfig(global_const.EthereumSepolia)
+	t.Log(config.RpcUrl)
+	t.Log(config.SignerKey)
+	t.Log(GetSigner(global_const.EthereumSepolia).Address.Hex())
+}
 func TestConfigInit(t *testing.T) {
-	BasicStrategyInit("../config/basic_strategy_dev_config.json")
-	BusinessConfigInit("../config/business_dev_config.json")
+	InitConfig("../config/basic_strategy_config.json", "../config/basic_config.json", "../config/secret_config.json")
 	strategy := GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
 	if strategy == nil {
 		t.Error("strategy is nil")
@@ -29,7 +35,7 @@ func TestConfigInit(t *testing.T) {
 		t.Error("chainid is 0")
 	}
 	t.Log(chainId)
-	rpcUrl := GetEthereumRpcUrl(global_const.EthereumSepolia)
+	rpcUrl := GetNewWorkClientURl(global_const.EthereumSepolia)
 	if rpcUrl == "" {
 		t.Error("rpcUrl is 0")
 	}

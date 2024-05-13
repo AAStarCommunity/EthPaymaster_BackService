@@ -12,6 +12,6 @@ func init() {
 func GetStarknetExecutor() *StarknetExecutor {
 	return &StarknetExecutor{}
 }
-func (executor StarknetExecutor) GetGasPrice() (*model.GasPrice, error) {
+func (executor *StarknetExecutor) GetGasPrice() (*model.GasPrice, error) {
 	return nil, nil
 }

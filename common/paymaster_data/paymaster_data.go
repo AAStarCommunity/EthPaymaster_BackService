@@ -41,7 +41,7 @@ func NewPaymasterDataInput(strategy *model.Strategy) *PaymasterDataInput {
 		ExchangeRate:                  big.NewInt(0),
 		PayType:                       strategy.GetPayType(),
 		EntryPointVersion:             strategy.GetStrategyEntrypointVersion(),
-		PaymasterVerificationGasLimit: global_const.DummyVerificationGasLimit,
+		PaymasterVerificationGasLimit: global_const.DummyPaymasterOversimplificationBigint,
 		PaymasterPostOpGasLimit:       global_const.DummyPaymasterPostoperativelyBigint,
 	}
 }

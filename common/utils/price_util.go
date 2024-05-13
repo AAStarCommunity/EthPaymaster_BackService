@@ -41,7 +41,7 @@ func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {
 		return 0, xerrors.Errorf("tokens type [%w] not found", tokenType)
 	}
 	req, _ := http.NewRequest("GET", tokenUrl, nil)
-
+	//TODO remove APIKey
 	req.Header.Add("x-cg-demo-api-key", "CG-ioE6p8cmmSFBFwJnKECCbZ7U\t")
 
 	res, _ := http.DefaultClient.Do(req)

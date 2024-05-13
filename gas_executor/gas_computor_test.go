@@ -7,6 +7,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/config"
+	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
 	"encoding/json"
 	"github.com/sirupsen/logrus"
 	"math/big"
@@ -42,8 +43,7 @@ func TestComputeGas(t *testing.T) {
 	//assert.NotNil(t, gas)
 	//jsonBypte, _ := json.Marshal(gas)
 	//fmt.Println(string(jsonBypte))
-	config.BasicStrategyInit("../config/basic_strategy_dev_config.json")
-	config.BusinessConfigInit("../config/business_dev_config.json")
+	config.InitConfig("../config/basic_strategy_config.json", "../config/basic_config.json", "../config/secret_config.json")
 	logrus.SetLevel(logrus.DebugLevel)
 	op, err := user_op.NewUserOp(utils.GenerateMockUservOperation())
 	if err != nil {
@@ -70,14 +70,18 @@ func TestComputeGas(t *testing.T) {
 		{
 			"testEstimateVerificationGasLimit",
 			func(*testing.T) {
-				strategy := config.GetBasicStrategyConfig("Ethereum_Sepolia_v06_verifyPaymaster")
+				strategy := dashboard_service.GetStrategyByCode("Ethereum_Sepolia_v06_verifyPaymaster")
+				if strategy == nil {
+					t.Fatal("strategy is nil")
+				}
 				testGetUserOpEstimateGas(t, op, strategy)
 			},
 		},
 		{
 			"testScrollGetUserOpEstimateGas",
 			func(*testing.T) {
-				strategy := config.GetBasicStrategyConfig(global_const.StrategyCodeScrollSepoliaV06Verify)
+
+				strategy := dashboard_service.GetStrategyByCode(string(global_const.StrategyCodeScrollSepoliaV06Verify))
 
 				testGetUserOpEstimateGas(t, opFor1559NotSupport, strategy)
 			},

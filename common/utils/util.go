@@ -141,24 +141,6 @@ func ToEthSignedMessageHash(msg []byte) []byte {
 	return crypto.Keccak256(buffer.Bytes())
 }
 
-func ReplaceLastTwoChars(str, replacement string) string {
-	if len(str) < 2 {
-		return str
-	}
-	return str[:len(str)-2] + replacement
-}
-func SupplyZero(prefix string, maxTo int) string {
-	padding := maxTo - len(prefix)
-	if padding > 0 {
-		prefix = "0" + prefix
-		prefix = fmt.Sprintf("%0*s", maxTo, prefix)
-	}
-	return prefix
-}
-func IsLessThanZero(value *big.Int) bool {
-	return false
-	//TODO
-}
 func LeftIsLessTanRight(a *big.Int, b *big.Int) bool {
 	return a.Cmp(b) < 0
 }
