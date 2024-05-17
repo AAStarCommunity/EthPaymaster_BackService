@@ -8,6 +8,8 @@ import (
 	"os"
 )
 
+var dsnTemplate = "host=%s port=%v user=%s password=%s dbname=%s TimeZone=%s sslmode=%s"
+
 var secretConfig *model.SecretConfig
 var signerConfig = make(SignerConfigMap)
 
@@ -53,4 +55,30 @@ func GetSignerKey(network global_const.Network) string {
 }
 func GetSigner(network global_const.Network) *global_const.EOA {
 	return signerConfig[network]
+}
+func GetAPIKeyTableName() string {
+	return secretConfig.ApiKeyTableName
+}
+func GetStrategyConfigTableName() string {
+	return secretConfig.StrategyConfigTableName
+}
+func GetConfigDBDSN() string {
+	return fmt.Sprintf(dsnTemplate,
+		secretConfig.ConfigDBConfig.Host,
+		secretConfig.ConfigDBConfig.Port,
+		secretConfig.ConfigDBConfig.User,
+		secretConfig.ConfigDBConfig.Password,
+		secretConfig.ConfigDBConfig.DBName,
+		secretConfig.ConfigDBConfig.TimeZone,
+		secretConfig.ConfigDBConfig.SslMode)
+}
+func GetRelayDBDSN() string {
+	return fmt.Sprintf(dsnTemplate,
+		secretConfig.RelayDBConfig.Host,
+		secretConfig.RelayDBConfig.Port,
+		secretConfig.RelayDBConfig.User,
+		secretConfig.RelayDBConfig.Password,
+		secretConfig.RelayDBConfig.DBName,
+		secretConfig.RelayDBConfig.TimeZone,
+		secretConfig.RelayDBConfig.SslMode)
 }

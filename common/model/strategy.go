@@ -15,15 +15,17 @@ type Strategy struct {
 	EntryPointInfo     *EntryPointInfo            `json:"entrypoint_info"`
 	Description        string                     `json:"description"`
 	ExecuteRestriction StrategyExecuteRestriction `json:"execute_restriction"`
-	Erc20TokenType     global_const.TokenType
+
+	Erc20TokenType global_const.TokenType
 }
 type PaymasterInfo struct {
-	PayMasterAddress *common.Address      `json:"paymaster_address"`
-	PayType          global_const.PayType `json:"pay_type"`
+	PayMasterAddress        *common.Address      `json:"paymaster_address"`
+	PayType                 global_const.PayType `json:"pay_type"`
+	IsProjectErc20PayEnable bool                 `json:"is_project_erc20_pay_enable"`
 }
 type NetWorkInfo struct {
-	NetWork global_const.Network   `json:"network"`
-	Token   global_const.TokenType `json:"tokens"`
+	NetWork  global_const.Network   `json:"network"`
+	GasToken global_const.TokenType `json:"tokens"`
 }
 type EntryPointInfo struct {
 	EntryPointAddress *common.Address                `json:"entrypoint_address"`
@@ -41,7 +43,7 @@ func (strategy *Strategy) GetNewWork() global_const.Network {
 }
 
 func (strategy *Strategy) GetUseToken() global_const.TokenType {
-	return strategy.NetWorkInfo.Token
+	return strategy.NetWorkInfo.GasToken
 }
 func (strategy *Strategy) GetPayType() global_const.PayType {
 	return strategy.PaymasterInfo.PayType
@@ -49,7 +51,7 @@ func (strategy *Strategy) GetPayType() global_const.PayType {
 func (strategy *Strategy) GetStrategyEntrypointVersion() global_const.EntrypointVersion {
 	return strategy.EntryPointInfo.EntryPointVersion
 }
-func (strategy Strategy) IsCurrencyPayEnable() bool {
+func (strategy *Strategy) IsCurrencyPayEnable() bool {
 	return false
 }
 

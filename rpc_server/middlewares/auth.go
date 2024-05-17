@@ -1,9 +1,13 @@
 package middlewares
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/envirment"
+	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
+	"golang.org/x/xerrors"
 	"time"
 )
 
@@ -37,18 +41,47 @@ func AuthHandler() gin.HandlerFunc {
 			if err := c.ShouldBind(&apiKey); err != nil {
 				return "", jwt.ErrMissingLoginValues
 			}
+			// TODO check APIKey is UseFul
 
-			// TODO: verify if the key is correct
 			return apiKey.Key, nil
 
 			// if incorrect
 			//return nil, jwt.ErrFailedAuthentication
 		},
+		//every Request  will be checked
 		Authorizator: func(data interface{}, c *gin.Context) bool {
 			// always return true unless the permission feature started
+			if data == nil {
+				logrus.Errorf("Authorizator id is nil")
+				return false
+			}
+			apiKey := data.(string)
+			if apiKey == "" {
+				logrus.Errorf("Authorizator id is nil")
+				return false
+			}
+
+			apiModel, err := dashboard_service.GetAPiInfoByApiKey(apiKey)
+			if err != nil {
+				c.Set("ERROR_REASON", err.Error())
+				return false
+			}
+			if apiModel == nil {
+				c.Set("ERROR_REASON", "API Key is not found")
+				return false
+			}
+			err = CheckAPIKeyAvailable(apiModel)
+			if err != nil {
+				c.Set("ERROR_REASON", err.Error())
+				return false
+			}
+			c.Set(global_const.ContextKeyApiMoDel, apiModel)
 			return true
 		},
 		Unauthorized: func(c *gin.Context, code int, message string) {
+			if c.GetString("ERROR_REASON") != "" {
+				message = c.GetString("ERROR_REASON")
+			}
 			c.JSON(code, gin.H{
 				"code":    code,
 				"message": message,
@@ -65,4 +98,10 @@ func AuthHandler() gin.HandlerFunc {
 	jwtMiddleware = m
 
 	return m.MiddlewareFunc()
+}
+func CheckAPIKeyAvailable(apiModel *dashboard_service.ApiKeyModel) error {
+	if apiModel.Disable {
+		return xerrors.Errorf("API Key is disabled")
+	}
+	return nil
 }

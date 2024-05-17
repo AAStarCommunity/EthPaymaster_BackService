@@ -9,6 +9,8 @@ import (
 	"math/big"
 )
 
+type StrategyStatus string
+
 const (
 	DummyPrivateKeyText                = "0a82406dc7fcf16090e05215ff394c7465608dd1a698632471b1eb37b8ece2f7"
 	DummySignature                     = "0x3054659b5e29460a8f3ac9afc3d5fcbe4b76f92aed454b944e9b29e55d80fde807716530b739540e95cfa4880d69f710a9d45910f2951a227675dc1fb0fdf2c71c"
@@ -17,6 +19,10 @@ const (
 	DummyVerificationGas               = 50000
 	DummyPaymasterPostOpGasLimit       = 2000000
 	DummyPaymasterVerificationGasLimit = 5000000
+
+	ContextKeyApiMoDel                   = "api_model"
+	StrategyStatusDisable StrategyStatus = "disable"
+	StrategyStatusAchieve StrategyStatus = "achieve"
 )
 
 var (

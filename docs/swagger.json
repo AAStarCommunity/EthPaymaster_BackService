@@ -4,7 +4,9 @@
         "contact": {
             "name": "AAStar Support",
             "url": "https://aastar.xyz"
-        }
+        },
+      "version": "",
+      "title": ""
     },
     "paths": {
         "/api/auth": {

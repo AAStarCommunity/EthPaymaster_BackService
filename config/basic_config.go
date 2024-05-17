@@ -170,8 +170,12 @@ var (
 		global_const.ScrollMainnet:   common.HexToAddress("0x5300000000000000000000000000000000000002"),
 	}
 	Disable1559Chain = mapset.NewSet(global_const.ScrollSepolia, global_const.ScrollMainnet)
+	PErc20TokenSet   = mapset.NewSet(global_const.TokenTypeAAStar)
 )
 
+func IsPErc20Token(token global_const.TokenType) bool {
+	return PErc20TokenSet.Contains(token)
+}
 func IsDisable1559Chain(network global_const.Network) bool {
 	return Disable1559Chain.Contains(network)
 }

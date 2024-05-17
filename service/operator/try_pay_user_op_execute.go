@@ -142,13 +142,17 @@ func StrategyGenerate(request *model.UserOpRequest) (*model.Strategy, error) {
 	var strategyResult *model.Strategy
 	if forceStrategyId := request.ForceStrategyId; forceStrategyId != "" {
 		//force strategy
-		if strategy := dashboard_service.GetStrategyByCode(forceStrategyId); strategy == nil {
-			return nil, xerrors.Errorf("Not Support Strategy ID: [%w]", forceStrategyId)
-		} else {
-			strategyResult = strategy
+		strategy, err := dashboard_service.GetStrategyByCode(forceStrategyId, request.EntryPointVersion, request.Network)
+		if err != nil {
+			return nil, err
 		}
+		if strategy == nil {
+			return nil, xerrors.Errorf("Empty Strategies")
+		}
+		strategyResult = strategy
+
 	} else {
-		suitableStrategy, err := dashboard_service.GetSuitableStrategy(request.EntryPointVersion, request.ForceNetwork, global_const.PayTypeSuperVerifying) //TODO
+		suitableStrategy, err := dashboard_service.GetSuitableStrategy(request.EntryPointVersion, request.Network, request.Erc20Token) //TODO
 		if err != nil {
 			return nil, err
 		}
@@ -157,13 +161,6 @@ func StrategyGenerate(request *model.UserOpRequest) (*model.Strategy, error) {
 		}
 
 		strategyResult = suitableStrategy
-	}
-	if strategyResult.GetPayType() == global_const.PayTypeERC20 {
-		if request.Erc20Token == "" {
-			return nil, xerrors.Errorf("Empty Erc20Token")
-		}
-		strategyResult.Erc20TokenType = request.Erc20Token
-
 	}
 	return strategyResult, nil
 }

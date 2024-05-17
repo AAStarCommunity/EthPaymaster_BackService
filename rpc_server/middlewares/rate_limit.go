@@ -1,7 +1,9 @@
 package middlewares
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/rpc_server/api/utils"
+	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/time/rate"
@@ -19,8 +21,12 @@ var limiter map[string]*rate.Limiter
 func RateLimiterByApiKeyHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		if exists, current := utils.CurrentUser(ctx); exists {
-
-			if limiting(&current) {
+			apiKeyModel, _ := ctx.Get(global_const.ContextKeyApiMoDel)
+			defaultLimit := DefaultLimit
+			if apiKeyModel != nil {
+				defaultLimit = apiKeyModel.(*dashboard_service.ApiKeyModel).GetRateLimit()
+			}
+			if limiting(&current, defaultLimit) {
 				ctx.Next()
 			} else {
 				_ = ctx.AbortWithError(http.StatusTooManyRequests, errors.New("too many requests"))
@@ -34,14 +40,13 @@ func clearLimiter(apiKey *string) {
 	delete(limiter, *apiKey)
 }
 
-func limiting(apiKey *string) bool {
+func limiting(apiKey *string, defaultLimit rate.Limit) bool {
 
 	var l *rate.Limiter
 	if limit, ok := limiter[*apiKey]; ok {
 		l = limit
 	} else {
-		// TODO: different rate config for each current(apiKey) should get from dashboard service
-		l = rate.NewLimiter(DefaultLimit, DefaultBurst)
+		l = rate.NewLimiter(defaultLimit, DefaultBurst)
 		limiter[*apiKey] = l
 	}
 

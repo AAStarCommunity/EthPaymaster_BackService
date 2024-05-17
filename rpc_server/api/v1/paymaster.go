@@ -168,7 +168,7 @@ func parseTryPayUserOperationParams(params []interface{}) (*model.UserOpRequest,
 		result.ForceStrategyId = extra["strategy_code"].(string)
 	}
 	if extra["network"] != nil {
-		result.ForceNetwork = extra["network"].(global_const.Network)
+		result.Network = extra["network"].(global_const.Network)
 	}
 	if extra["token"] != nil {
 		result.Erc20Token = extra["token"].(global_const.TokenType)
@@ -183,7 +183,7 @@ func validateUserOpRequest(request *model.UserOpRequest) error {
 	if request.ForceStrategyId != "" {
 		return nil
 	}
-	if request.ForceNetwork == "" {
+	if request.Network == "" {
 		return xerrors.Errorf("ForceNetwork is empty")
 	}
 

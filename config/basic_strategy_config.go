@@ -90,7 +90,7 @@ func convertMapToStrategyConfig(data map[string]map[string]any) (map[string]*mod
 		}
 		if strategy.GetPayType() == global_const.PayTypeERC20 {
 			erc20TokenStr := value["access_erc20"].(string)
-			strategy.NetWorkInfo.Token = global_const.TokenType(erc20TokenStr)
+			strategy.NetWorkInfo.GasToken = global_const.TokenType(erc20TokenStr)
 			strategy.ExecuteRestriction.AccessErc20 = utils.ConvertStringToSet(erc20TokenStr, ",")
 		}
 
