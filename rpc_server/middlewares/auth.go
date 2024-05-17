@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
+	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/envirment"
 	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
 	jwt "github.com/appleboy/gin-jwt/v2"
@@ -41,12 +42,15 @@ func AuthHandler() gin.HandlerFunc {
 			if err := c.ShouldBind(&apiKey); err != nil {
 				return "", jwt.ErrMissingLoginValues
 			}
-			// TODO check APIKey is UseFul
-
+			apiModel, err := dashboard_service.GetAPiInfoByApiKey(apiKey.Key)
+			if err != nil {
+				return "", err
+			}
+			err = CheckAPIKeyAvailable(apiModel)
+			if err != nil {
+				return "", err
+			}
 			return apiKey.Key, nil
-
-			// if incorrect
-			//return nil, jwt.ErrFailedAuthentication
 		},
 		//every Request  will be checked
 		Authorizator: func(data interface{}, c *gin.Context) bool {
@@ -99,7 +103,7 @@ func AuthHandler() gin.HandlerFunc {
 
 	return m.MiddlewareFunc()
 }
-func CheckAPIKeyAvailable(apiModel *dashboard_service.ApiKeyModel) error {
+func CheckAPIKeyAvailable(apiModel *model.ApiKeyModel) error {
 	if apiModel.Disable {
 		return xerrors.Errorf("API Key is disabled")
 	}

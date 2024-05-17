@@ -2,8 +2,8 @@ package middlewares
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
+	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/rpc_server/api/utils"
-	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/time/rate"
@@ -24,7 +24,7 @@ func RateLimiterByApiKeyHandler() gin.HandlerFunc {
 			apiKeyModel, _ := ctx.Get(global_const.ContextKeyApiMoDel)
 			defaultLimit := DefaultLimit
 			if apiKeyModel != nil {
-				defaultLimit = apiKeyModel.(*dashboard_service.ApiKeyModel).GetRateLimit()
+				defaultLimit = apiKeyModel.(*model.ApiKeyModel).RateLimit
 			}
 			if limiting(&current, defaultLimit) {
 				ctx.Next()

@@ -135,28 +135,36 @@ func IsPayMasterSupport(address string, chain global_const.Network) bool {
 	return supportPayMasterSet.Contains(address)
 }
 
-type ApiKeyModel struct {
+type ApiKeyDbModel struct {
 	Disable bool           `gorm:"column:disable;type:bool" json:"disable"`
 	ApiKey  string         `gorm:"column:api_key;type:varchar(255)" json:"api_key"`
 	KeyName string         `gorm:"column:key_name;type:varchar(255)" json:"key_name"`
 	Extra   datatypes.JSON `gorm:"column:extra" json:"extra"`
 }
 
-func (*ApiKeyModel) TableName() string {
+func (*ApiKeyDbModel) TableName() string {
 	return config.GetAPIKeyTableName()
 }
 
-func (m *ApiKeyModel) GetRateLimit() rate.Limit {
+func (m *ApiKeyDbModel) GetRateLimit() rate.Limit {
 	return 10
 }
-func GetAPiInfoByApiKey(apiKey string) (apikeyModel *ApiKeyModel, err error) {
-	apikeyModel = &ApiKeyModel{}
+func convertApiKeyDbModelToApiKeyModel(apiKeyDbModel *ApiKeyDbModel) *model.ApiKeyModel {
+	return &model.ApiKeyModel{
+		Disable:   apiKeyDbModel.Disable,
+		ApiKey:    apiKeyDbModel.ApiKey,
+		RateLimit: 10,
+	}
+}
+func GetAPiInfoByApiKey(apiKey string) (*model.ApiKeyModel, error) {
+	apikeyModel := &ApiKeyDbModel{}
 	tx := configDB.Where("api_key = ?", apiKey).First(&apikeyModel)
 	if tx.Error != nil {
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 			return nil, tx.Error
 		}
-		return apikeyModel, xerrors.Errorf("error when finding apikey: %w", tx.Error)
+		return nil, xerrors.Errorf("error when finding apikey: %w", tx.Error)
 	}
-	return apikeyModel, nil
+	apikeyRes := convertApiKeyDbModelToApiKeyModel(apikeyModel)
+	return apikeyRes, nil
 }
