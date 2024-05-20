@@ -165,13 +165,13 @@ func parseTryPayUserOperationParams(params []interface{}) (*model.UserOpRequest,
 	}
 	extra := extraParam.(map[string]any)
 	if extra["strategy_code"] != nil {
-		result.ForceStrategyId = extra["strategy_code"].(string)
+		result.StrategyCode = extra["strategy_code"].(string)
 	}
 	if extra["network"] != nil {
 		result.Network = extra["network"].(global_const.Network)
 	}
 	if extra["token"] != nil {
-		result.Erc20Token = extra["token"].(global_const.TokenType)
+		result.UserPayErc20Token = extra["token"].(global_const.TokenType)
 	}
 	if extra["version"] != nil {
 		result.EntryPointVersion = extra["version"].(global_const.EntrypointVersion)
@@ -180,7 +180,7 @@ func parseTryPayUserOperationParams(params []interface{}) (*model.UserOpRequest,
 }
 
 func validateUserOpRequest(request *model.UserOpRequest) error {
-	if request.ForceStrategyId != "" {
+	if request.StrategyCode != "" {
 		return nil
 	}
 	if request.Network == "" {

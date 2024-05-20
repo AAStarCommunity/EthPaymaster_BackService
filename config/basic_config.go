@@ -133,20 +133,20 @@ func GetChainId(networkParam global_const.Network) string {
 	return networkConfig.ChainId
 }
 
-func GetPaymasterAddress(network global_const.Network, version global_const.EntrypointVersion) common.Address {
+func GetPaymasterAddress(network global_const.Network, version global_const.EntrypointVersion) *common.Address {
 	networkConfig := basicConfig.NetworkConfigMap[network]
 	if version == global_const.EntrypointV07 {
-		return networkConfig.V07PaymasterAddress
+		return &networkConfig.V07PaymasterAddress
 	}
-	return networkConfig.V06PaymasterAddress
+	return &networkConfig.V06PaymasterAddress
 }
 
-func GetEntrypointAddress(network global_const.Network, version global_const.EntrypointVersion) common.Address {
+func GetEntrypointAddress(network global_const.Network, version global_const.EntrypointVersion) *common.Address {
 	networkConfig := basicConfig.NetworkConfigMap[network]
 	if version == global_const.EntrypointV07 {
-		return networkConfig.V07EntryPointAddress
+		return &networkConfig.V07EntryPointAddress
 	}
-	return networkConfig.V06EntryPointAddress
+	return &networkConfig.V06EntryPointAddress
 
 }
 

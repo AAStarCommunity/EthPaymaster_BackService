@@ -49,7 +49,7 @@ func TestOperator(t *testing.T) {
 		{
 			"Test_ScrollSepoliaV06Verify_TryPayUserOpExecute",
 			func(t *testing.T) {
-				mockRequestNotSupport1559.ForceStrategyId = string(global_const.StrategyCodeScrollSepoliaV06Verify)
+				mockRequestNotSupport1559.StrategyCode = string(global_const.StrategyCodeScrollSepoliaV06Verify)
 				mockRequest := getMockTryPayUserOpRequest()
 
 				testTryPayUserOpExecute(t, mockRequest)
@@ -60,7 +60,7 @@ func TestOperator(t *testing.T) {
 			func(t *testing.T) {
 				mockRequest := getMockTryPayUserOpRequest()
 
-				mockRequest.ForceStrategyId = string(global_const.StrategyCodeEthereumSepoliaV06Verify)
+				mockRequest.StrategyCode = string(global_const.StrategyCodeEthereumSepoliaV06Verify)
 
 				testTryPayUserOpExecute(t, mockRequest)
 			},
@@ -70,7 +70,7 @@ func TestOperator(t *testing.T) {
 			func(t *testing.T) {
 				mockRequest := getMockTryPayUserOpRequest()
 
-				mockRequest.ForceStrategyId = string(global_const.StrategyCodeOptimismSepoliaV06Verify)
+				mockRequest.StrategyCode = string(global_const.StrategyCodeOptimismSepoliaV06Verify)
 
 				testTryPayUserOpExecute(t, mockRequest)
 			},
@@ -80,7 +80,7 @@ func TestOperator(t *testing.T) {
 			func(t *testing.T) {
 				mockRequest := getMockTryPayUserOpRequest()
 
-				mockRequest.ForceStrategyId = string(global_const.StrategyCodeArbitrumSepoliaV06Verify)
+				mockRequest.StrategyCode = string(global_const.StrategyCodeArbitrumSepoliaV06Verify)
 
 				testTryPayUserOpExecute(t, mockRequest)
 			},
@@ -89,7 +89,7 @@ func TestOperator(t *testing.T) {
 			"Test_BaseSepoliaV06Verify_TryPayUserOpExecute",
 			func(t *testing.T) {
 				mockRequest := getMockTryPayUserOpRequest()
-				mockRequest.ForceStrategyId = string(global_const.StrategyCodeArbitrumSepoliaV06Verify)
+				mockRequest.StrategyCode = string(global_const.StrategyCodeArbitrumSepoliaV06Verify)
 
 				testTryPayUserOpExecute(t, mockRequest)
 			},
@@ -99,8 +99,8 @@ func TestOperator(t *testing.T) {
 			func(t *testing.T) {
 				mockRequest := getMockTryPayUserOpRequest()
 
-				mockRequest.Erc20Token = global_const.TokenTypeUSDT
-				mockRequest.ForceStrategyId = string(global_const.StrategyCodeEthereumSepoliaV06Erc20)
+				mockRequest.UserPayErc20Token = global_const.TokenTypeUSDT
+				mockRequest.StrategyCode = string(global_const.StrategyCodeEthereumSepoliaV06Erc20)
 				testTryPayUserOpExecute(t, mockRequest)
 			},
 		},
@@ -109,8 +109,8 @@ func TestOperator(t *testing.T) {
 			func(t *testing.T) {
 				mockRequest := getMockTryPayUserOpRequest()
 
-				mockRequest.Erc20Token = global_const.TokenTypeUSDT
-				mockRequest.ForceStrategyId = string(global_const.StrategyCodeOptimismSepoliaV06Erc20)
+				mockRequest.UserPayErc20Token = global_const.TokenTypeUSDT
+				mockRequest.StrategyCode = string(global_const.StrategyCodeOptimismSepoliaV06Erc20)
 				testTryPayUserOpExecute(t, mockRequest)
 			},
 		},
@@ -118,8 +118,8 @@ func TestOperator(t *testing.T) {
 			"Test_ArbSepoliaV06Erc20_TryPayUserOpExecute",
 			func(t *testing.T) {
 				mockRequest := getMockTryPayUserOpRequest()
-				mockRequest.Erc20Token = global_const.TokenTypeUSDT
-				mockRequest.ForceStrategyId = string(global_const.StrategyCodeArbitrumSepoliaV06Erc20)
+				mockRequest.UserPayErc20Token = global_const.TokenTypeUSDT
+				mockRequest.StrategyCode = string(global_const.StrategyCodeArbitrumSepoliaV06Erc20)
 				testTryPayUserOpExecute(t, mockRequest)
 			},
 		},
@@ -209,7 +209,7 @@ func testTryPayUserOpExecute(t *testing.T, request *model.UserOpRequest) {
 
 func getMockTryPayUserOpRequest() *model.UserOpRequest {
 	return &model.UserOpRequest{
-		ForceStrategyId: "Ethereum_Sepolia_v06_verifyPaymaster",
-		UserOp:          *utils.GenerateMockUservOperation(),
+		StrategyCode: "Ethereum_Sepolia_v06_verifyPaymaster",
+		UserOp:       *utils.GenerateMockUservOperation(),
 	}
 }

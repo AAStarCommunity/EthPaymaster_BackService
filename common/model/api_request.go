@@ -5,9 +5,9 @@ import (
 )
 
 type UserOpRequest struct {
-	ForceStrategyId   string                         `json:"force_strategy_id"`
-	Network           global_const.Network           `json:"force_network"`
-	Erc20Token        global_const.TokenType         `json:"force_token"`
+	StrategyCode      string                         `json:"strategy_code"`
+	Network           global_const.Network           `json:"network"`
+	UserPayErc20Token global_const.TokenType         `json:"user_pay_erc20_token"`
 	UserOp            map[string]any                 `json:"user_operation"`
 	Extra             interface{}                    `json:"extra"`
 	EstimateOpGas     bool                           `json:"estimate_op_gas"`

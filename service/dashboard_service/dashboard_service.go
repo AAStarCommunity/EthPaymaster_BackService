@@ -4,12 +4,15 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/config"
+	"encoding/json"
 	"errors"
+	mapset "github.com/deckarep/golang-set/v2"
 	"golang.org/x/time/rate"
 	"golang.org/x/xerrors"
 	"gorm.io/datatypes"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"math/big"
 	"sync"
 )
 
@@ -55,27 +58,105 @@ func (StrategyDBModel) TableName() string {
 }
 
 // GetStrategyByCode is Sponsor Type , need GasTank
-func GetStrategyByCode(strategyCode string, entryPointVersion global_const.EntrypointVersion, chain global_const.Network) (*model.Strategy, error) {
-
+func GetStrategyByCode(strategyCode string, entryPointVersion global_const.EntrypointVersion, network global_const.Network) (*model.Strategy, error) {
+	if entryPointVersion == "" {
+		entryPointVersion = global_const.EntrypointV06
+	}
 	strategyDbModel := &StrategyDBModel{}
 	tx := configDB.Where("strategy_code = ?", strategyCode).First(&strategyDbModel)
 	if tx.Error != nil {
-		return nil, tx.Error
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return nil, xerrors.Errorf("strategy not found: %w", tx.Error)
+		} else {
+			return nil, xerrors.Errorf("error when finding strategy: %w", tx.Error)
+		}
 	}
-
-	strategy, err := convertStrategyDBModelToStrategy(strategyDbModel)
+	strategy, err := convertStrategyDBModelToStrategy(strategyDbModel, entryPointVersion, network)
 	if err != nil {
 		return nil, err
 	}
-	paymasterAddress := config.GetPaymasterAddress(strategy.GetNewWork(), strategy.GetStrategyEntrypointVersion())
-	strategy.PaymasterInfo.PayMasterAddress = &paymasterAddress
-	entryPointAddress := config.GetEntrypointAddress(strategy.GetNewWork(), strategy.GetStrategyEntrypointVersion())
-	strategy.EntryPointInfo.EntryPointAddress = &entryPointAddress
+
 	return strategy, nil
 }
 
-func convertStrategyDBModelToStrategy(strategyDBModel *StrategyDBModel) (*model.Strategy, error) {
-	return &model.Strategy{}, nil
+func convertStrategyDBModelToStrategy(strategyDBModel *StrategyDBModel, entryPointVersion global_const.EntrypointVersion, network global_const.Network) (*model.Strategy, error) {
+	entryPointAddress := config.GetEntrypointAddress(network, entryPointVersion)
+
+	if entryPointAddress == nil {
+		return nil, errors.New("entryPointAddress not found")
+	}
+	paymasterAddress := config.GetPaymasterAddress(network, entryPointVersion)
+	if paymasterAddress == nil {
+		return nil, errors.New("paymasterAddress not found")
+	}
+	strategyExecuteRestrictionJson := StrategyExecuteRestrictionJson{}
+	if strategyDBModel.ExecuteRestriction != nil {
+		eJson, _ := strategyDBModel.ExecuteRestriction.MarshalJSON()
+		err := json.Unmarshal(eJson, &strategyExecuteRestrictionJson)
+		if err != nil {
+			return nil, xerrors.Errorf("error when unmarshal strategyExecuteRestriction: %w", err)
+		}
+
+		if err != nil {
+			return nil, xerrors.Errorf("error when unmarshal strategyExecuteRestriction: %w", err)
+		}
+	}
+	strategyExecuteRestriction := &model.StrategyExecuteRestriction{
+		EffectiveStartTime: big.NewInt(strategyExecuteRestrictionJson.EffectiveStartTime),
+		EffectiveEndTime:   big.NewInt(strategyExecuteRestrictionJson.EffectiveEndTime),
+		GlobalMaxUSD:       big.NewInt(strategyExecuteRestrictionJson.GlobalMaxUSD),
+		GlobalMaxOpCount:   big.NewInt(strategyExecuteRestrictionJson.GlobalMaxOpCount),
+		DayMaxUSD:          big.NewInt(strategyExecuteRestrictionJson.DayMaxUSD),
+	}
+	if strategyExecuteRestrictionJson.BanSenderAddress != nil {
+		strategyExecuteRestriction.BanSenderAddress = mapset.NewSetWithSize[string](len(strategyExecuteRestrictionJson.BanSenderAddress))
+		for _, v := range strategyExecuteRestrictionJson.BanSenderAddress {
+			strategyExecuteRestriction.BanSenderAddress.Add(v)
+		}
+	}
+	if strategyExecuteRestrictionJson.AccessProject != nil {
+		strategyExecuteRestriction.AccessProject = mapset.NewSetWithSize[string](len(strategyExecuteRestrictionJson.AccessProject))
+		for _, v := range strategyExecuteRestrictionJson.AccessProject {
+			strategyExecuteRestriction.AccessProject.Add(v)
+		}
+	}
+	if strategyExecuteRestrictionJson.ChainIdWhiteList != nil {
+		strategyExecuteRestriction.ChainIdWhiteList = mapset.NewSetWithSize[string](len(strategyExecuteRestrictionJson.ChainIdWhiteList))
+		for _, v := range strategyExecuteRestrictionJson.ChainIdWhiteList {
+			strategyExecuteRestriction.ChainIdWhiteList.Add(v)
+		}
+	}
+
+	return &model.Strategy{
+		StrategyCode: strategyDBModel.StrategyCode,
+		Description:  strategyDBModel.Description,
+		NetWorkInfo: &model.NetWorkInfo{
+			NetWork:  network,
+			GasToken: config.GetGasToken(network),
+		},
+		EntryPointInfo: &model.EntryPointInfo{
+			EntryPointVersion: entryPointVersion,
+			EntryPointAddress: config.GetEntrypointAddress(network, entryPointVersion),
+		},
+		PaymasterInfo: &model.PaymasterInfo{
+			PayMasterAddress:        config.GetPaymasterAddress(network, entryPointVersion),
+			PayType:                 global_const.PayTypeVerifying,
+			IsProjectErc20PayEnable: false,
+		},
+		ExecuteRestriction: strategyExecuteRestriction,
+	}, nil
+}
+
+type StrategyExecuteRestrictionJson struct {
+	BanSenderAddress   []string `json:"ban_sender_address"`
+	EffectiveStartTime int64    `json:"start_time"`
+	EffectiveEndTime   int64    `json:"end_time"`
+	GlobalMaxUSD       int64    `json:"global_max_usd"`
+	GlobalMaxOpCount   int64    `json:"global_max_op_count"`
+	DayMaxUSD          int64    `json:"day_max_usd"`
+	AccessProject      []string `json:"access_project"`
+	AccessErc20        []string `json:"access_erc20"`
+	ChainIdWhiteList   []string `json:"chain_id_whitelist"`
 }
 
 // GetSuitableStrategy get suitable strategy by entryPointVersion, chain,
@@ -104,10 +185,10 @@ func GetSuitableStrategy(entryPointVersion global_const.EntrypointVersion, chain
 		},
 		EntryPointInfo: &model.EntryPointInfo{
 			EntryPointVersion: entryPointVersion,
-			EntryPointAddress: &entryPointAddress,
+			EntryPointAddress: entryPointAddress,
 		},
 		PaymasterInfo: &model.PaymasterInfo{
-			PayMasterAddress:        &paymasterAddress,
+			PayMasterAddress:        paymasterAddress,
 			PayType:                 payType,
 			IsProjectErc20PayEnable: isPerc20Enable,
 		},

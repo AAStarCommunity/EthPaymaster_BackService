@@ -7,9 +7,10 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/xerrors"
+	"time"
 )
 
-func ValidateStrategy(strategy *model.Strategy) error {
+func ValidateStrategy(strategy *model.Strategy, request *model.UserOpRequest) error {
 	if strategy == nil {
 		return xerrors.Errorf("empty strategy")
 	}
@@ -26,6 +27,24 @@ func ValidateStrategy(strategy *model.Strategy) error {
 	if err != nil {
 		return err
 	}
+	curTime := time.Now().Unix()
+	//check Time
+	if strategy.ExecuteRestriction.EffectiveStartTime != nil {
+		if curTime < strategy.ExecuteRestriction.EffectiveStartTime.Int64() {
+			return xerrors.Errorf("strategy is not effective")
+		}
+	}
+	if strategy.ExecuteRestriction.EffectiveEndTime != nil {
+		if curTime > strategy.ExecuteRestriction.EffectiveEndTime.Int64() {
+			return xerrors.Errorf("strategy is expired")
+		}
+	}
+	if strategy.ExecuteRestriction.AccessErc20 != nil && request.UserPayErc20Token != "" {
+		if !strategy.ExecuteRestriction.AccessErc20.Contains(string(request.UserPayErc20Token)) {
+			return xerrors.Errorf("strategy not support erc20 token")
+		}
+	}
+
 	return nil
 }
 
@@ -36,6 +55,12 @@ func ValidateUserOp(userOpParam *user_op.UserOpInput, strategy *model.Strategy) 
 	userOpValue := *userOpParam
 	if !userOpValue.Nonce.IsInt64() {
 		return xerrors.Errorf("nonce is not in uint64 range")
+	}
+	if strategy.ExecuteRestriction.BanSenderAddress != nil {
+		if strategy.ExecuteRestriction.BanSenderAddress.Contains(userOpValue.Sender.String()) {
+			return xerrors.Errorf("sender is banned")
+
+		}
 	}
 	//If initCode is not empty, parse its first 20 bytes as a factory address. Record whether the factory is staked, in case the later simulation indicates that it needs to be. If the factory accesses global state, it must be staked - see reputation, throttling and banning section for details.
 	//The verificationGasLimit is sufficiently low (<= MAX_VERIFICATION_GAS) and the preVerificationGas is sufficiently high (enough to pay for the calldata gas cost of serializing the UserOperationV06 plus PRE_VERIFICATION_OVERHEAD_GAS)

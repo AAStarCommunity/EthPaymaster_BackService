@@ -49,13 +49,15 @@ func prepareExecute(request *model.UserOpRequest) (*user_op.UserOpInput, *model.
 		return nil, nil, nil, generateErr
 	}
 
+	if err := validator_service.ValidateStrategy(strategy, request); err != nil {
+		return nil, nil, nil, err
+	}
+
 	userOp, err := user_op.NewUserOp(&request.UserOp)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	if err := validator_service.ValidateStrategy(strategy); err != nil {
-		return nil, nil, nil, err
-	}
+
 	if err := validator_service.ValidateUserOp(userOp, strategy); err != nil {
 		return nil, nil, nil, err
 	}
@@ -140,7 +142,7 @@ func postExecute(userOp *user_op.UserOpInput, strategy *model.Strategy, gasRespo
 
 func StrategyGenerate(request *model.UserOpRequest) (*model.Strategy, error) {
 	var strategyResult *model.Strategy
-	if forceStrategyId := request.ForceStrategyId; forceStrategyId != "" {
+	if forceStrategyId := request.StrategyCode; forceStrategyId != "" {
 		//force strategy
 		strategy, err := dashboard_service.GetStrategyByCode(forceStrategyId, request.EntryPointVersion, request.Network)
 		if err != nil {
@@ -152,7 +154,7 @@ func StrategyGenerate(request *model.UserOpRequest) (*model.Strategy, error) {
 		strategyResult = strategy
 
 	} else {
-		suitableStrategy, err := dashboard_service.GetSuitableStrategy(request.EntryPointVersion, request.Network, request.Erc20Token) //TODO
+		suitableStrategy, err := dashboard_service.GetSuitableStrategy(request.EntryPointVersion, request.Network, request.UserPayErc20Token)
 		if err != nil {
 			return nil, err
 		}

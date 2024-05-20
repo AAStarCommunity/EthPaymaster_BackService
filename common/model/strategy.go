@@ -8,13 +8,13 @@ import (
 )
 
 type Strategy struct {
-	Id                 string                     `json:"id"`
-	StrategyCode       string                     `json:"strategy_code"`
-	PaymasterInfo      *PaymasterInfo             `json:"paymaster_info"`
-	NetWorkInfo        *NetWorkInfo               `json:"network_info"`
-	EntryPointInfo     *EntryPointInfo            `json:"entrypoint_info"`
-	Description        string                     `json:"description"`
-	ExecuteRestriction StrategyExecuteRestriction `json:"execute_restriction"`
+	Id                 string                      `json:"id"`
+	StrategyCode       string                      `json:"strategy_code"`
+	PaymasterInfo      *PaymasterInfo              `json:"paymaster_info"`
+	NetWorkInfo        *NetWorkInfo                `json:"network_info"`
+	EntryPointInfo     *EntryPointInfo             `json:"entrypoint_info"`
+	Description        string                      `json:"description"`
+	ExecuteRestriction *StrategyExecuteRestriction `json:"execute_restriction"`
 
 	Erc20TokenType global_const.TokenType
 }
@@ -56,16 +56,15 @@ func (strategy *Strategy) IsCurrencyPayEnable() bool {
 }
 
 type StrategyExecuteRestriction struct {
-	BanSenderAddress   string             `json:"ban_sender_address"`
-	EffectiveStartTime *big.Int           `json:"effective_start_time"`
-	EffectiveEndTime   *big.Int           `json:"effective_end_time"`
-	GlobalMaxUSD       int64              `json:"global_max_usd"`
-	GlobalMaxOpCount   int64              `json:"global_max_op_count"`
-	DayMaxUSD          int64              `json:"day_max_usd"`
-	StartTime          int64              `json:"start_time"`
-	EndTime            int64              `json:"end_time"`
+	BanSenderAddress   mapset.Set[string] `json:"ban_sender_address"`
+	EffectiveStartTime *big.Int           `json:"start_time"`
+	EffectiveEndTime   *big.Int           `json:"end_time"`
+	GlobalMaxUSD       *big.Int           `json:"global_max_usd"`
+	GlobalMaxOpCount   *big.Int           `json:"global_max_op_count"`
+	DayMaxUSD          *big.Int           `json:"day_max_usd"`
 	AccessProject      mapset.Set[string] `json:"access_project"`
 	AccessErc20        mapset.Set[string] `json:"access_erc20"`
+	ChainIdWhiteList   mapset.Set[string] `json:"chain_id_whitelist"`
 }
 
 type StrategyValidateConfig struct {
