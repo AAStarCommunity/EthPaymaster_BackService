@@ -22,8 +22,9 @@ func IsStableToken(token TokenType) bool {
 }
 
 const (
-	TokenTypeUSDT TokenType = "USDT"
-	TokenTypeUSDC TokenType = "USDC"
-	TokenTypeETH  TokenType = "ETH"
-	TokenTypeOP   TokenType = "OP"
+	TokenTypeUSDT   TokenType = "USDT"
+	TokenTypeUSDC   TokenType = "USDC"
+	TokenTypeETH    TokenType = "ETH"
+	TokenTypeOP     TokenType = "OP"
+	TokenTypeAAStar TokenType = "AAStar"
 )

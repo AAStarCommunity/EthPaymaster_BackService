@@ -61,7 +61,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/paymaster": {
+        "/api/v1/paymaster/{network}": {
             "post": {
                 "security": [
                     {
@@ -76,6 +76,13 @@ const docTemplate = `{
                     "Paymaster"
                 ],
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Network",
+                        "name": "network",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "JsonRpcRequest Model",
                         "name": "rpcRequest",
