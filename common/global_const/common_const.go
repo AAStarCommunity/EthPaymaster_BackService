@@ -22,7 +22,7 @@ const (
 
 	ContextKeyApiMoDel                   = "api_model"
 	StrategyStatusDisable StrategyStatus = "disable"
-	StrategyStatusAchieve StrategyStatus = "achieve"
+	StrategyStatusAchieve StrategyStatus = "enable"
 )
 
 var (

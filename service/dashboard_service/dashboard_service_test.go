@@ -44,7 +44,7 @@ func testGetSuitableStrategy(t *testing.T) {
 	t.Logf("Strategy: %s", string(jsonByte))
 }
 func testGetStrategyByCode(t *testing.T) {
-	strategy, err := GetStrategyByCode("demo_with_white_list_6bd-4dec-b8e7-a224cdd5a965_YF4tWsoJir", "", global_const.ArbitrumSpeolia)
+	strategy, err := GetStrategyByCode("basic_arb_strategy__vHUZk", "", global_const.ArbitrumSpeolia)
 	if err != nil {
 		t.Error(err)
 	}
