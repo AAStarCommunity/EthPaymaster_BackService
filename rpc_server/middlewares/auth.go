@@ -98,9 +98,7 @@ func AuthHandler() gin.HandlerFunc {
 			return "401 Unauthorized"
 		},
 	})
-
 	jwtMiddleware = m
-
 	return m.MiddlewareFunc()
 }
 func checkAPIKeyAvailable(apiModel *model.ApiKeyModel) error {
