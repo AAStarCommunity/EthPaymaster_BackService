@@ -46,7 +46,7 @@ func AuthHandler() gin.HandlerFunc {
 			if err != nil {
 				return "", err
 			}
-			err = CheckAPIKeyAvailable(apiModel)
+			err = checkAPIKeyAvailable(apiModel)
 			if err != nil {
 				return "", err
 			}
@@ -74,7 +74,7 @@ func AuthHandler() gin.HandlerFunc {
 				c.Set("ERROR_REASON", "API Key is not found")
 				return false
 			}
-			err = CheckAPIKeyAvailable(apiModel)
+			err = checkAPIKeyAvailable(apiModel)
 			if err != nil {
 				c.Set("ERROR_REASON", err.Error())
 				return false
@@ -103,7 +103,7 @@ func AuthHandler() gin.HandlerFunc {
 
 	return m.MiddlewareFunc()
 }
-func CheckAPIKeyAvailable(apiModel *model.ApiKeyModel) error {
+func checkAPIKeyAvailable(apiModel *model.ApiKeyModel) error {
 	if apiModel.Disable {
 		return xerrors.Errorf("API Key is disabled")
 	}

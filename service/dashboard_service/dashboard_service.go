@@ -43,6 +43,7 @@ func Init() {
 }
 
 type StrategyDBModel struct {
+	model.BaseData
 	DeletedAt          gorm.DeletedAt              `gorm:"softDelete:flag" json:"deleted_at"`
 	Description        string                      `gorm:"type:varchar(500)" json:"description"`
 	StrategyCode       string                      `gorm:"type:varchar(255)" json:"strategy_code"`
@@ -223,6 +224,7 @@ func IsPayMasterSupport(address string, chain global_const.Network) bool {
 }
 
 type ApiKeyDbModel struct {
+	model.BaseData
 	Disable   bool           `gorm:"column:disable;type:bool" json:"disable"`
 	ApiKey    string         `gorm:"column:api_key;type:varchar(255)" json:"api_key"`
 	KeyName   string         `gorm:"column:key_name;type:varchar(255)" json:"key_name"`
