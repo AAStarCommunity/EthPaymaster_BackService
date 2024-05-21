@@ -15,8 +15,7 @@ type Strategy struct {
 	EntryPointInfo     *EntryPointInfo             `json:"entrypoint_info"`
 	Description        string                      `json:"description"`
 	ExecuteRestriction *StrategyExecuteRestriction `json:"execute_restriction"`
-
-	Erc20TokenType global_const.TokenType
+	Erc20TokenType     global_const.TokenType
 }
 type PaymasterInfo struct {
 	PayMasterAddress        *common.Address      `json:"paymaster_address"`
@@ -59,12 +58,13 @@ type StrategyExecuteRestriction struct {
 	BanSenderAddress   mapset.Set[string] `json:"ban_sender_address"`
 	EffectiveStartTime *big.Int           `json:"start_time"`
 	EffectiveEndTime   *big.Int           `json:"end_time"`
-	GlobalMaxUSD       *big.Int           `json:"global_max_usd"`
+	GlobalMaxUSD       *big.Float         `json:"global_max_usd"`
 	GlobalMaxOpCount   *big.Int           `json:"global_max_op_count"`
-	DayMaxUSD          *big.Int           `json:"day_max_usd"`
+	DayMaxUSD          *big.Float         `json:"day_max_usd"`
 	AccessProject      mapset.Set[string] `json:"access_project"`
 	AccessErc20        mapset.Set[string] `json:"access_erc20"`
 	ChainIdWhiteList   mapset.Set[string] `json:"chain_id_whitelist"`
+	Status             global_const.StrategyStatus
 }
 
 type StrategyValidateConfig struct {

@@ -89,6 +89,10 @@ func convertStrategyDBModelToStrategy(strategyDBModel *StrategyDBModel, entryPoi
 	if paymasterAddress == nil {
 		return nil, errors.New("paymasterAddress not found")
 	}
+
+	if strategyDBModel.Status == "" {
+		strategyDBModel.Status = global_const.StrategyStatusDisable
+	}
 	strategyExecuteRestrictionJson := StrategyExecuteRestrictionJson{}
 	if strategyDBModel.ExecuteRestriction != nil {
 		eJson, _ := strategyDBModel.ExecuteRestriction.MarshalJSON()
@@ -104,9 +108,10 @@ func convertStrategyDBModelToStrategy(strategyDBModel *StrategyDBModel, entryPoi
 	strategyExecuteRestriction := &model.StrategyExecuteRestriction{
 		EffectiveStartTime: big.NewInt(strategyExecuteRestrictionJson.EffectiveStartTime),
 		EffectiveEndTime:   big.NewInt(strategyExecuteRestrictionJson.EffectiveEndTime),
-		GlobalMaxUSD:       big.NewInt(strategyExecuteRestrictionJson.GlobalMaxUSD),
+		GlobalMaxUSD:       big.NewFloat(strategyExecuteRestrictionJson.GlobalMaxUSD),
 		GlobalMaxOpCount:   big.NewInt(strategyExecuteRestrictionJson.GlobalMaxOpCount),
-		DayMaxUSD:          big.NewInt(strategyExecuteRestrictionJson.DayMaxUSD),
+		DayMaxUSD:          big.NewFloat(strategyExecuteRestrictionJson.DayMaxUSD),
+		Status:             strategyDBModel.Status,
 	}
 	if strategyExecuteRestrictionJson.BanSenderAddress != nil {
 		strategyExecuteRestriction.BanSenderAddress = mapset.NewSetWithSize[string](len(strategyExecuteRestrictionJson.BanSenderAddress))
@@ -151,9 +156,9 @@ type StrategyExecuteRestrictionJson struct {
 	BanSenderAddress   []string `json:"ban_sender_address"`
 	EffectiveStartTime int64    `json:"start_time"`
 	EffectiveEndTime   int64    `json:"end_time"`
-	GlobalMaxUSD       int64    `json:"global_max_usd"`
+	GlobalMaxUSD       float64  `json:"global_max_usd"`
 	GlobalMaxOpCount   int64    `json:"global_max_op_count"`
-	DayMaxUSD          int64    `json:"day_max_usd"`
+	DayMaxUSD          float64  `json:"day_max_usd"`
 	AccessProject      []string `json:"access_project"`
 	AccessErc20        []string `json:"access_erc20"`
 	ChainIdWhiteList   []string `json:"chain_id_whitelist"`

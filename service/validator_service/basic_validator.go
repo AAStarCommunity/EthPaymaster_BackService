@@ -7,6 +7,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/xerrors"
+	"math/big"
 	"time"
 )
 
@@ -17,6 +18,7 @@ func ValidateStrategy(strategy *model.Strategy, request *model.UserOpRequest) er
 	if strategy.GetNewWork() == "" {
 		return xerrors.Errorf("empty strategy network")
 	}
+
 	// check Paymaster
 	_, err := chain_service.CheckContractAddressAccess(strategy.GetPaymasterAddress(), strategy.GetNewWork())
 	if err != nil {
@@ -27,16 +29,23 @@ func ValidateStrategy(strategy *model.Strategy, request *model.UserOpRequest) er
 	if err != nil {
 		return err
 	}
+
+	if strategy.ExecuteRestriction == nil {
+		return nil
+	}
+	if strategy.ExecuteRestriction.Status != global_const.StrategyStatusAchieve {
+		return xerrors.Errorf("strategy status is not active")
+	}
 	curTime := time.Now().Unix()
 	//check Time
 	if strategy.ExecuteRestriction.EffectiveStartTime != nil {
 		if curTime < strategy.ExecuteRestriction.EffectiveStartTime.Int64() {
-			return xerrors.Errorf("strategy is not effective")
+			return xerrors.Errorf("curTime [%s] is OutOff EffectiveStartTime [%s]", curTime, strategy.ExecuteRestriction.EffectiveStartTime.Int64())
 		}
 	}
 	if strategy.ExecuteRestriction.EffectiveEndTime != nil {
 		if curTime > strategy.ExecuteRestriction.EffectiveEndTime.Int64() {
-			return xerrors.Errorf("strategy is expired")
+			return xerrors.Errorf("curTime [%s] is OutOff EffectiveEndTime [%s]", curTime, strategy.ExecuteRestriction.EffectiveEndTime.Int64())
 		}
 	}
 	if strategy.ExecuteRestriction.AccessErc20 != nil && request.UserPayErc20Token != "" {
@@ -44,8 +53,36 @@ func ValidateStrategy(strategy *model.Strategy, request *model.UserOpRequest) er
 			return xerrors.Errorf("strategy not support erc20 token")
 		}
 	}
+	if strategy.ExecuteRestriction.GlobalMaxUSD != nil || strategy.ExecuteRestriction.GlobalMaxUSD.Sign() != 0 {
+		curGlobalUse, err := GetStrategyGlobalUse(strategy)
+		if err != nil {
+			return err
+		}
+		if strategy.ExecuteRestriction.GlobalMaxUSD.Cmp(curGlobalUse) < 0 {
+			return xerrors.Errorf("strategy global max usd use out of limit")
+		}
+	}
+	if strategy.ExecuteRestriction.DayMaxUSD != nil || strategy.ExecuteRestriction.DayMaxUSD.Sign() != 0 {
+		curDayUse, err := GetStrategyDayUse(strategy)
+		if err != nil {
+			return err
+		}
+		if strategy.ExecuteRestriction.DayMaxUSD.Cmp(curDayUse) < 0 {
+			return xerrors.Errorf("strategy day max usd use out of limit")
+		}
 
+	}
 	return nil
+
+}
+
+func GetStrategyDayUse(strategy *model.Strategy) (*big.Float, error) {
+	//TODO
+	return big.NewFloat(0), nil
+}
+func GetStrategyGlobalUse(strategy *model.Strategy) (*big.Float, error) {
+	//TODO
+	return big.NewFloat(0), nil
 }
 
 func ValidateUserOp(userOpParam *user_op.UserOpInput, strategy *model.Strategy) error {
