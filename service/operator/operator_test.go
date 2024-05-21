@@ -160,7 +160,7 @@ func testGetSupportEntrypointExecute(t *testing.T) {
 	t.Log(res)
 }
 func testTryPayUserOpExecute(t *testing.T, request *model.UserOpRequest) {
-	result, err := TryPayUserOpExecute(request)
+	result, err := TryPayUserOpExecute(&model.ApiKeyModel{}, request)
 	if err != nil {
 		t.Fatal(err)
 		return

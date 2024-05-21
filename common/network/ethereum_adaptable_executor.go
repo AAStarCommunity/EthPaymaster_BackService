@@ -539,18 +539,21 @@ func (executor *EthereumExecutor) GetUserOpHash(userOp *user_op.UserOpInput, str
 	}
 
 }
-func (executor *EthereumExecutor) GetPaymasterData(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterDataInput) ([]byte, error) {
-	userOpHash, _, err := executor.GetUserOpHash(userOp, strategy)
-	if err != nil {
+func (executor *EthereumExecutor) GetPaymasterData(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterDataInput) (paymasterData []byte, userOpHash []byte, err error) {
+	userOpHash, _, hashErr := executor.GetUserOpHash(userOp, strategy)
+	if hashErr != nil {
 		logrus.Errorf("GetUserOpHash error [%v]", err)
-		return nil, err
+		return nil, nil, err
 	}
 	signer := config.GetSigner(strategy.GetNewWork())
 	signature, err := utils.GetSign(userOpHash, signer.PrivateKey)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	dataGenerateFunc := paymaster_pay_type.GetGenerateFunc(strategy.GetPayType())
-	paymasterData, err := dataGenerateFunc(paymasterDataInput, signature)
-	return paymasterData, err
+	paymasterData, generateDataErr := dataGenerateFunc(paymasterDataInput, signature)
+	if generateDataErr != nil {
+		return nil, nil, generateDataErr
+	}
+	return paymasterData, userOpHash, nil
 }

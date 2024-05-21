@@ -76,6 +76,7 @@ func GetStrategyByCode(strategyCode string, entryPointVersion global_const.Entry
 	if err != nil {
 		return nil, err
 	}
+	strategy.ProjectSponsor = true
 
 	return strategy, nil
 }
@@ -223,6 +224,7 @@ func IsPayMasterSupport(address string, chain global_const.Network) bool {
 }
 
 type ApiKeyDbModel struct {
+	UserId    int64          `gorm:"column:user_id;type:integer" json:"user_id"`
 	Disable   bool           `gorm:"column:disable;type:bool" json:"disable"`
 	ApiKey    string         `gorm:"column:api_key;type:varchar(255)" json:"api_key"`
 	KeyName   string         `gorm:"column:key_name;type:varchar(255)" json:"key_name"`
@@ -242,6 +244,7 @@ func convertApiKeyDbModelToApiKeyModel(apiKeyDbModel *ApiKeyDbModel) *model.ApiK
 		Disable:   apiKeyDbModel.Disable,
 		ApiKey:    apiKeyDbModel.ApiKey,
 		RateLimit: 10,
+		UserId:    apiKeyDbModel.UserId,
 	}
 }
 func GetAPiInfoByApiKey(apiKey string) (*model.ApiKeyModel, error) {

@@ -283,7 +283,7 @@ func testGetPaymasterData(t *testing.T, chain global_const.Network, input *user_
 	dataInput := paymaster_data.NewPaymasterDataInput(strategy)
 	dataInput.PaymasterPostOpGasLimit = global_const.DummyPaymasterPostoperativelyBigint
 	dataInput.PaymasterVerificationGasLimit = global_const.DummyPaymasterOversimplificationBigint
-	paymasterData, err := executor.GetPaymasterData(input, strategy, dataInput)
+	paymasterData, _, err := executor.GetPaymasterData(input, strategy, dataInput)
 	if err != nil {
 		t.Error(err)
 		return
@@ -301,7 +301,7 @@ func testSimulateHandleOp(t *testing.T, chain global_const.Network, strategy *mo
 	dataInput := paymaster_data.NewPaymasterDataInput(strategy)
 	op.AccountGasLimits = user_op.DummyAccountGasLimits
 	op.GasFees = user_op.DummyGasFees
-	paymasterData, err := sepoliaExector.GetPaymasterData(op, strategy, dataInput)
+	paymasterData, _, err := sepoliaExector.GetPaymasterData(op, strategy, dataInput)
 	if err != nil {
 		t.Error(err)
 		return
