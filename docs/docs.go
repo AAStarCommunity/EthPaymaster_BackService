@@ -61,7 +61,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/paymaster{network}": {
+        "/api/v1/paymaster/{network}": {
             "post": {
                 "security": [
                     {

@@ -48,7 +48,7 @@ paths:
           description: OK
       tags:
       - Healthz
-  /api/v1/paymaster{network}:
+  /api/v1/paymaster/{network}:
     post:
       consumes:
       - application/json
