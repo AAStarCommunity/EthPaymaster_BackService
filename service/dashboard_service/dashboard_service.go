@@ -43,6 +43,7 @@ func Init() {
 }
 
 type StrategyDBModel struct {
+	model.BaseData
 	DeletedAt          gorm.DeletedAt              `gorm:"softDelete:flag" json:"deleted_at"`
 	Description        string                      `gorm:"type:varchar(500)" json:"description"`
 	StrategyCode       string                      `gorm:"type:varchar(255)" json:"strategy_code"`
@@ -76,6 +77,7 @@ func GetStrategyByCode(strategyCode string, entryPointVersion global_const.Entry
 	if err != nil {
 		return nil, err
 	}
+
 	strategy.ProjectSponsor = true
 
 	return strategy, nil
@@ -201,6 +203,41 @@ func GetSuitableStrategy(entryPointVersion global_const.EntrypointVersion, chain
 		},
 		Erc20TokenType: gasUseToken,
 	}
+// GetSuitableStrategy get suitable strategy by entryPointVersion, chain,
+//
+//	For Offical StrategyConfig,
+func GetSuitableStrategy(entryPointVersion global_const.EntrypointVersion, chain global_const.Network, gasUseToken global_const.TokenType) (*model.Strategy, error) {
+	if entryPointVersion == "" {
+		entryPointVersion = global_const.EntrypointV06
+	}
+	gasToken := config.GetGasToken(chain)
+	entryPointAddress := config.GetEntrypointAddress(chain, entryPointVersion)
+	paymasterAddress := config.GetPaymasterAddress(chain, entryPointVersion)
+	payType := global_const.PayTypeVerifying
+	isPerc20Enable := false
+	if gasUseToken != "" {
+		payType = global_const.PayTypeERC20
+		if config.IsPErc20Token(gasUseToken) {
+			isPerc20Enable = true
+		}
+	}
+
+	strategy := &model.Strategy{
+		NetWorkInfo: &model.NetWorkInfo{
+			NetWork:  chain,
+			GasToken: gasToken,
+		},
+		EntryPointInfo: &model.EntryPointInfo{
+			EntryPointVersion: entryPointVersion,
+			EntryPointAddress: entryPointAddress,
+		},
+		PaymasterInfo: &model.PaymasterInfo{
+			PayMasterAddress:        paymasterAddress,
+			PayType:                 payType,
+			IsProjectErc20PayEnable: isPerc20Enable,
+		},
+		Erc20TokenType: gasUseToken,
+	}
 	if strategy == nil {
 		return nil, errors.New("strategy not found")
 	}
@@ -224,6 +261,8 @@ func IsPayMasterSupport(address string, chain global_const.Network) bool {
 }
 
 type ApiKeyDbModel struct {
+
+	model.BaseData
 	UserId    int64          `gorm:"column:user_id;type:integer" json:"user_id"`
 	Disable   bool           `gorm:"column:disable;type:bool" json:"disable"`
 	ApiKey    string         `gorm:"column:api_key;type:varchar(255)" json:"api_key"`
