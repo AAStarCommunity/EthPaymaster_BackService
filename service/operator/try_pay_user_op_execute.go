@@ -49,13 +49,15 @@ func prepareExecute(request *model.UserOpRequest) (*user_op.UserOpInput, *model.
 		return nil, nil, nil, generateErr
 	}
 
+	if err := validator_service.ValidateStrategy(strategy, request); err != nil {
+		return nil, nil, nil, err
+	}
+
 	userOp, err := user_op.NewUserOp(&request.UserOp)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	if err := validator_service.ValidateStrategy(strategy); err != nil {
-		return nil, nil, nil, err
-	}
+
 	if err := validator_service.ValidateUserOp(userOp, strategy); err != nil {
 		return nil, nil, nil, err
 	}
@@ -140,15 +142,19 @@ func postExecute(userOp *user_op.UserOpInput, strategy *model.Strategy, gasRespo
 
 func StrategyGenerate(request *model.UserOpRequest) (*model.Strategy, error) {
 	var strategyResult *model.Strategy
-	if forceStrategyId := request.ForceStrategyId; forceStrategyId != "" {
+	if forceStrategyId := request.StrategyCode; forceStrategyId != "" {
 		//force strategy
-		if strategy := dashboard_service.GetStrategyByCode(forceStrategyId); strategy == nil {
-			return nil, xerrors.Errorf("Not Support Strategy ID: [%w]", forceStrategyId)
-		} else {
-			strategyResult = strategy
+		strategy, err := dashboard_service.GetStrategyByCode(forceStrategyId, request.EntryPointVersion, request.Network)
+		if err != nil {
+			return nil, err
 		}
+		if strategy == nil {
+			return nil, xerrors.Errorf("Empty Strategies")
+		}
+		strategyResult = strategy
+
 	} else {
-		suitableStrategy, err := dashboard_service.GetSuitableStrategy(request.EntryPointVersion, request.ForceNetwork, global_const.PayTypeSuperVerifying) //TODO
+		suitableStrategy, err := dashboard_service.GetSuitableStrategy(request.EntryPointVersion, request.Network, request.UserPayErc20Token)
 		if err != nil {
 			return nil, err
 		}
@@ -157,13 +163,6 @@ func StrategyGenerate(request *model.UserOpRequest) (*model.Strategy, error) {
 		}
 
 		strategyResult = suitableStrategy
-	}
-	if strategyResult.GetPayType() == global_const.PayTypeERC20 {
-		if request.Erc20Token == "" {
-			return nil, xerrors.Errorf("Empty Erc20Token")
-		}
-		strategyResult.Erc20TokenType = request.Erc20Token
-
 	}
 	return strategyResult, nil
 }

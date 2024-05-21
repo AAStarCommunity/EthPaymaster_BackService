@@ -7,15 +7,18 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/service/chain_service"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/xerrors"
+	"math/big"
+	"time"
 )
 
-func ValidateStrategy(strategy *model.Strategy) error {
+func ValidateStrategy(strategy *model.Strategy, request *model.UserOpRequest) error {
 	if strategy == nil {
 		return xerrors.Errorf("empty strategy")
 	}
 	if strategy.GetNewWork() == "" {
 		return xerrors.Errorf("empty strategy network")
 	}
+
 	// check Paymaster
 	_, err := chain_service.CheckContractAddressAccess(strategy.GetPaymasterAddress(), strategy.GetNewWork())
 	if err != nil {
@@ -26,7 +29,60 @@ func ValidateStrategy(strategy *model.Strategy) error {
 	if err != nil {
 		return err
 	}
+
+	if strategy.ExecuteRestriction == nil {
+		return nil
+	}
+	if strategy.ExecuteRestriction.Status != global_const.StrategyStatusAchieve {
+		return xerrors.Errorf("strategy status is not active")
+	}
+	curTime := time.Now().Unix()
+	//check Time
+	if strategy.ExecuteRestriction.EffectiveStartTime != nil {
+		if curTime < strategy.ExecuteRestriction.EffectiveStartTime.Int64() {
+			return xerrors.Errorf("curTime [%s] is OutOff EffectiveStartTime [%s]", curTime, strategy.ExecuteRestriction.EffectiveStartTime.Int64())
+		}
+	}
+	if strategy.ExecuteRestriction.EffectiveEndTime != nil {
+		if curTime > strategy.ExecuteRestriction.EffectiveEndTime.Int64() {
+			return xerrors.Errorf("curTime [%s] is OutOff EffectiveEndTime [%s]", curTime, strategy.ExecuteRestriction.EffectiveEndTime.Int64())
+		}
+	}
+	if strategy.ExecuteRestriction.AccessErc20 != nil && request.UserPayErc20Token != "" {
+		if !strategy.ExecuteRestriction.AccessErc20.Contains(string(request.UserPayErc20Token)) {
+			return xerrors.Errorf("strategy not support erc20 token")
+		}
+	}
+	if strategy.ExecuteRestriction.GlobalMaxUSD != nil || strategy.ExecuteRestriction.GlobalMaxUSD.Sign() != 0 {
+		curGlobalUse, err := GetStrategyGlobalUse(strategy)
+		if err != nil {
+			return err
+		}
+		if strategy.ExecuteRestriction.GlobalMaxUSD.Cmp(curGlobalUse) < 0 {
+			return xerrors.Errorf("strategy global max usd use out of limit")
+		}
+	}
+	if strategy.ExecuteRestriction.DayMaxUSD != nil || strategy.ExecuteRestriction.DayMaxUSD.Sign() != 0 {
+		curDayUse, err := GetStrategyDayUse(strategy)
+		if err != nil {
+			return err
+		}
+		if strategy.ExecuteRestriction.DayMaxUSD.Cmp(curDayUse) < 0 {
+			return xerrors.Errorf("strategy day max usd use out of limit")
+		}
+
+	}
 	return nil
+
+}
+
+func GetStrategyDayUse(strategy *model.Strategy) (*big.Float, error) {
+	//TODO
+	return big.NewFloat(0), nil
+}
+func GetStrategyGlobalUse(strategy *model.Strategy) (*big.Float, error) {
+	//TODO
+	return big.NewFloat(0), nil
 }
 
 func ValidateUserOp(userOpParam *user_op.UserOpInput, strategy *model.Strategy) error {
@@ -36,6 +92,12 @@ func ValidateUserOp(userOpParam *user_op.UserOpInput, strategy *model.Strategy) 
 	userOpValue := *userOpParam
 	if !userOpValue.Nonce.IsInt64() {
 		return xerrors.Errorf("nonce is not in uint64 range")
+	}
+	if strategy.ExecuteRestriction.BanSenderAddress != nil {
+		if strategy.ExecuteRestriction.BanSenderAddress.Contains(userOpValue.Sender.String()) {
+			return xerrors.Errorf("sender is banned")
+
+		}
 	}
 	//If initCode is not empty, parse its first 20 bytes as a factory address. Record whether the factory is staked, in case the later simulation indicates that it needs to be. If the factory accesses global state, it must be staked - see reputation, throttling and banning section for details.
 	//The verificationGasLimit is sufficiently low (<= MAX_VERIFICATION_GAS) and the preVerificationGas is sufficiently high (enough to pay for the calldata gas cost of serializing the UserOperationV06 plus PRE_VERIFICATION_OVERHEAD_GAS)

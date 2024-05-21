@@ -133,20 +133,20 @@ func GetChainId(networkParam global_const.Network) string {
 	return networkConfig.ChainId
 }
 
-func GetPaymasterAddress(network global_const.Network, version global_const.EntrypointVersion) common.Address {
+func GetPaymasterAddress(network global_const.Network, version global_const.EntrypointVersion) *common.Address {
 	networkConfig := basicConfig.NetworkConfigMap[network]
 	if version == global_const.EntrypointV07 {
-		return networkConfig.V07PaymasterAddress
+		return &networkConfig.V07PaymasterAddress
 	}
-	return networkConfig.V06PaymasterAddress
+	return &networkConfig.V06PaymasterAddress
 }
 
-func GetEntrypointAddress(network global_const.Network, version global_const.EntrypointVersion) common.Address {
+func GetEntrypointAddress(network global_const.Network, version global_const.EntrypointVersion) *common.Address {
 	networkConfig := basicConfig.NetworkConfigMap[network]
 	if version == global_const.EntrypointV07 {
-		return networkConfig.V07EntryPointAddress
+		return &networkConfig.V07EntryPointAddress
 	}
-	return networkConfig.V06EntryPointAddress
+	return &networkConfig.V06EntryPointAddress
 
 }
 
@@ -170,8 +170,12 @@ var (
 		global_const.ScrollMainnet:   common.HexToAddress("0x5300000000000000000000000000000000000002"),
 	}
 	Disable1559Chain = mapset.NewSet(global_const.ScrollSepolia, global_const.ScrollMainnet)
+	PErc20TokenSet   = mapset.NewSet(global_const.TokenTypeAAStar)
 )
 
+func IsPErc20Token(token global_const.TokenType) bool {
+	return PErc20TokenSet.Contains(token)
+}
 func IsDisable1559Chain(network global_const.Network) bool {
 	return Disable1559Chain.Contains(network)
 }

@@ -19,9 +19,9 @@ var suitableStrategyMap = make(map[global_const.Network]map[global_const.Entrypo
 func GetBasicStrategyConfig(strategyCode global_const.BasicStrategyCode) *model.Strategy {
 	strategy := basicStrategyConfig[string(strategyCode)]
 	paymasterAddress := GetPaymasterAddress(strategy.GetNewWork(), strategy.GetStrategyEntrypointVersion())
-	strategy.PaymasterInfo.PayMasterAddress = &paymasterAddress
+	strategy.PaymasterInfo.PayMasterAddress = paymasterAddress
 	entryPointAddress := GetEntrypointAddress(strategy.GetNewWork(), strategy.GetStrategyEntrypointVersion())
-	strategy.EntryPointInfo.EntryPointAddress = &entryPointAddress
+	strategy.EntryPointInfo.EntryPointAddress = entryPointAddress
 	return strategy
 
 }
@@ -79,7 +79,7 @@ func convertMapToStrategyConfig(data map[string]map[string]any) (map[string]*mod
 				EntryPointVersion: global_const.EntrypointVersion(value["entrypoint_version"].(string)),
 			},
 
-			ExecuteRestriction: model.StrategyExecuteRestriction{
+			ExecuteRestriction: &model.StrategyExecuteRestriction{
 				EffectiveStartTime: effectiveStartTime,
 				EffectiveEndTime:   effectiveEndTime,
 				AccessProject:      utils.ConvertStringToSet(accessProjectStr, ","),
@@ -90,7 +90,7 @@ func convertMapToStrategyConfig(data map[string]map[string]any) (map[string]*mod
 		}
 		if strategy.GetPayType() == global_const.PayTypeERC20 {
 			erc20TokenStr := value["access_erc20"].(string)
-			strategy.NetWorkInfo.Token = global_const.TokenType(erc20TokenStr)
+			strategy.NetWorkInfo.GasToken = global_const.TokenType(erc20TokenStr)
 			strategy.ExecuteRestriction.AccessErc20 = utils.ConvertStringToSet(erc20TokenStr, ",")
 		}
 
