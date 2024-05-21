@@ -48,12 +48,17 @@ paths:
           description: OK
       tags:
       - Healthz
-  /api/v1/paymaster:
+  /api/v1/paymaster{network}:
     post:
       consumes:
       - application/json
       description: Paymaster JSON-RPC API
       parameters:
+      - description: Network
+        in: path
+        name: network
+        required: true
+        type: string
       - description: JsonRpcRequest Model
         in: body
         name: rpcRequest

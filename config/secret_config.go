@@ -44,6 +44,10 @@ func GetNetworkSecretConfig(network global_const.Network) model.NetWorkSecretCon
 	return secretConfig.NetWorkSecretConfigMap[string(network)]
 }
 
+func CheckNetworkSupport(network global_const.Network) bool {
+	_, ok := secretConfig.NetWorkSecretConfigMap[string(network)]
+	return ok
+}
 func GetPriceOracleApiKey() string {
 	return secretConfig.PriceOracleApiKey
 }

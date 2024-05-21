@@ -14,10 +14,11 @@ type UserOpRequest struct {
 	EntryPointVersion global_const.EntrypointVersion `json:"entrypoint_version"`
 }
 type JsonRpcRequest struct {
-	JsonRpc string        `json:"jsonrpc"`
-	Method  string        `json:"method"`
-	Params  []interface{} `json:"params"`
-	Id      int           `json:"id"`
+	JsonRpc string               `json:"jsonrpc"`
+	Method  string               `json:"method"`
+	Params  []interface{}        `json:"params"`
+	Id      int                  `json:"id"`
+	Network global_const.Network `json:"-"`
 }
 type ClientCredential struct {
 	ApiKey string `json:"apiKey"`

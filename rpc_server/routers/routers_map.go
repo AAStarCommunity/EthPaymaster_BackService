@@ -20,5 +20,5 @@ type Path string
 const (
 	Auth      Path = "api/auth"
 	Healthz   Path = "api/healthz"
-	Paymaster Path = "api/v1/paymaster"
+	Paymaster Path = "api/v1/paymaster:network"
 )

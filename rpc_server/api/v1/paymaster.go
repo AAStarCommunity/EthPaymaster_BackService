@@ -29,8 +29,9 @@ func init() {
 // @Description Paymaster JSON-RPC API
 // @Accept json
 // @Product json
+// @param network path string true "Network"
 // @Param rpcRequest body model.JsonRpcRequest true "JsonRpcRequest Model"
-// @Router /api/v1/paymaster  [post]
+// @Router /api/v1/paymaster{network}  [post]
 // @Success 200
 // @Security JWT
 func Paymaster(ctx *gin.Context) {
@@ -46,6 +47,18 @@ func Paymaster(ctx *gin.Context) {
 		}
 
 	}()
+	network := ctx.Param("network")
+	if network == "" {
+		errStr := fmt.Sprintf("Request Error [network is empty]")
+		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, errStr)
+		return
+	}
+	if !config.CheckNetworkSupport(global_const.Network(network)) {
+		errStr := fmt.Sprintf("Request Error [network not support]")
+		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, errStr)
+		return
+	}
+	jsonRpcRequest.Network = global_const.Network(network)
 
 	if err := ctx.ShouldBindJSON(&jsonRpcRequest); err != nil {
 		errStr := fmt.Sprintf("Request Error [%v]", err)
@@ -79,14 +92,8 @@ func Paymaster(ctx *gin.Context) {
 
 func GetSupportPaymaster() MethodFunctionFunc {
 	return func(ctx *gin.Context, jsonRpcRequest model.JsonRpcRequest) (result interface{}, err error) {
-		if jsonRpcRequest.Params[0] == nil {
-			return nil, xerrors.Errorf("Request Error [network is empty]")
-		}
-		networkStr, ok := jsonRpcRequest.Params[0].(string)
-		if !ok {
-			return nil, xerrors.Errorf("Request Error [network is not string]")
-		}
-		paymasterSet, err := config.GetSupportPaymaster(global_const.Network(networkStr))
+
+		paymasterSet, err := config.GetSupportPaymaster(jsonRpcRequest.Network)
 		if err != nil {
 			return nil, err
 		}
@@ -96,14 +103,7 @@ func GetSupportPaymaster() MethodFunctionFunc {
 
 func GetSupportEntryPointFunc() MethodFunctionFunc {
 	return func(ctx *gin.Context, jsonRpcRequest model.JsonRpcRequest) (result interface{}, err error) {
-		if jsonRpcRequest.Params[0] == nil {
-			return nil, xerrors.Errorf("Request Error [network is empty]")
-		}
-		networkStr, ok := jsonRpcRequest.Params[0].(string)
-		if !ok {
-			return nil, xerrors.Errorf("Request Error [network is not string]")
-		}
-		entryPoints, err := config.GetSupportEntryPoints(global_const.Network(networkStr))
+		entryPoints, err := config.GetSupportEntryPoints(jsonRpcRequest.Network)
 		if err != nil {
 			return nil, err
 		}
@@ -113,6 +113,7 @@ func GetSupportEntryPointFunc() MethodFunctionFunc {
 func EstimateUserOpGasFunc() MethodFunctionFunc {
 	return func(ctx *gin.Context, jsonRpcRequest model.JsonRpcRequest) (result interface{}, err error) {
 		request, err := parseTryPayUserOperationParams(jsonRpcRequest.Params)
+		request.Network = jsonRpcRequest.Network
 		if err != nil {
 			return nil, xerrors.Errorf("parseTryPayUserOperationParams ERROR [%v]", err)
 		}
@@ -130,6 +131,7 @@ func EstimateUserOpGasFunc() MethodFunctionFunc {
 func TryPayUserOperationMethod() MethodFunctionFunc {
 	return func(ctx *gin.Context, jsonRpcRequest model.JsonRpcRequest) (result interface{}, err error) {
 		request, err := parseTryPayUserOperationParams(jsonRpcRequest.Params)
+		request.Network = jsonRpcRequest.Network
 		logrus.Debug("parseTryPayUserOperationParams result: ", request)
 
 		if err != nil {
@@ -167,9 +169,7 @@ func parseTryPayUserOperationParams(params []interface{}) (*model.UserOpRequest,
 	if extra["strategy_code"] != nil {
 		result.StrategyCode = extra["strategy_code"].(string)
 	}
-	if extra["network"] != nil {
-		result.Network = extra["network"].(global_const.Network)
-	}
+
 	if extra["token"] != nil {
 		result.UserPayErc20Token = extra["token"].(global_const.TokenType)
 	}
