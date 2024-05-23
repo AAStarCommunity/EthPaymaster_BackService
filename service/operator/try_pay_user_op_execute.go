@@ -98,9 +98,13 @@ func executePay(input *ExecutePayInput) (*model.PayReceipt, error) {
 		return nil, nil
 	}
 	if config.IsSponsorWhitelist(input.UserOpSender) {
-		logrus.Debugf("Not Need ExecutePay In SponsorWhitelist")
+		logrus.Debugf("Not Need ExecutePay In SponsorWhitelist [%s]", input.UserOpSender)
 		return nil, nil
 	}
+	//if config.IsTestNet(input.Network) {
+	//	logrus.Debugf("Not Need ExecutePay In TestNet [%s]", input.Network)
+	//	return nil, nil
+	//}
 	// Get Deposit Balance
 	var payUserKey string
 	if input.ProjectSponsor == true {
@@ -112,7 +116,7 @@ func executePay(input *ExecutePayInput) (*model.PayReceipt, error) {
 	if err != nil {
 		return nil, err
 	}
-	gasUsdCost, err := price_compoent.GetTokenCostInUsd(global_const.TokenTypeETH, input.MaxTxGasCostInEther)
+	gasUsdCost, err := price_compoent.GetTokenCostInUsd(input.GasToken, input.MaxTxGasCostInEther)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +124,7 @@ func executePay(input *ExecutePayInput) (*model.PayReceipt, error) {
 		return nil, xerrors.Errorf("Insufficient balance [%s] not Enough to Pay Cost [%s]", depositBalance.String(), gasUsdCost.String())
 	}
 	//Lock Deposit Balance
-	err = sponsor_manager.LockBalance(payUserKey, input.UserOpHash, input.Network,
+	err = sponsor_manager.LockUserBalance(payUserKey, input.UserOpHash, input.Network,
 		gasUsdCost)
 	if err != nil {
 		return nil, err
@@ -140,6 +144,7 @@ type ExecutePayInput struct {
 	MaxTxGasCostInEther *big.Float
 	UserOpHash          []byte
 	Network             global_const.Network
+	GasToken            global_const.TokenType
 }
 
 func postExecute(apiKeyModel *model.ApiKeyModel, userOp *user_op.UserOpInput, strategy *model.Strategy, gasResponse *model.ComputeGasResponse, paymasterDataInput *paymaster_data.PaymasterDataInput) (*model.TryPayUserOpResponse, error) {
@@ -159,6 +164,7 @@ func postExecute(apiKeyModel *model.ApiKeyModel, userOp *user_op.UserOpInput, st
 		MaxTxGasCostInEther: gasResponse.TotalGasDetail.MaxTxGasCostInEther,
 		UserOpHash:          userOpHash,
 		Network:             strategy.GetNewWork(),
+		GasToken:            strategy.GetGasToken(),
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("postExecute executePay Error: [%w]", err)

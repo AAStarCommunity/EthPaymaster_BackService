@@ -42,7 +42,7 @@ func (strategy *Strategy) GetNewWork() global_const.Network {
 	return strategy.NetWorkInfo.NetWork
 }
 
-func (strategy *Strategy) GetUseToken() global_const.TokenType {
+func (strategy *Strategy) GetGasToken() global_const.TokenType {
 	return strategy.NetWorkInfo.GasToken
 }
 func (strategy *Strategy) GetPayType() global_const.PayType {

@@ -18,14 +18,12 @@ import (
 
 var (
 	configDB *gorm.DB
-	relayDB  *gorm.DB
 	onlyOnce = sync.Once{}
 )
 
 func Init() {
 	onlyOnce.Do(func() {
 		configDBDsn := config.GetConfigDBDSN()
-		relayDBDsn := config.GetRelayDBDSN()
 
 		configDBVar, err := gorm.Open(postgres.Open(configDBDsn), &gorm.Config{})
 		if err != nil {
@@ -33,11 +31,6 @@ func Init() {
 		}
 		configDB = configDBVar
 
-		relayDBVar, err := gorm.Open(postgres.Open(relayDBDsn), &gorm.Config{})
-		if err != nil {
-			panic(err)
-		}
-		relayDB = relayDBVar
 	})
 
 }
