@@ -54,6 +54,7 @@ type DepositBalanceInput struct {
 	Signature string
 	Amount    *big.Float
 	TxReceipt string
+	PayUserId string
 }
 
 func (UserSponsorBalanceDBModel) TableName() string {
@@ -64,6 +65,7 @@ type UserSponsorBalanceUpdateLogDBModel struct {
 	model.BaseData
 	Amount     *big.Float `gorm:"type:numeric(30,18)" json:"amount"`
 	UpdateType UpdateType `gorm:"type:varchar(20)" json:"update_type"`
+	UserOpHash []byte     `gorm:"type:bytea" json:"user_op_hash"`
 }
 
 func (UserSponsorBalanceUpdateLogDBModel) TableName() string {
@@ -101,6 +103,7 @@ func LockUserBalance(userId string, userOpHash []byte, network global_const.Netw
 	if tx.Error != nil {
 		return tx.Error
 	}
+	LogBalanceChange(LockBalance, userOpHash, lockAmount)
 
 	return nil
 }
@@ -110,27 +113,48 @@ func ReleaseBalanceWithActualCost(userId string, userOpHash []byte, network glob
 	//TODO
 	return nil
 }
+
+type ReleaseUserOpHashLockInput struct {
+	UserOpHash []byte
+}
+
 func ReleaseUserOpHashLock(userOpHash []byte) (err error) {
+	// Get ChangeLog By UserOpHash
 	//TODO
 	return nil
 }
 
 func DepositSponsorBalance(input *DepositBalanceInput) (err error) {
 	//TODO
+	balanceModel, err := getUserSponsorBalance(input.PayUserId)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		balanceModel.AvailableBalance = input.Amount
+		balanceModel.PayUserId = input.PayUserId
+		balanceModel.LockBalance = big.NewFloat(0)
+		tx := relayDB.Create(&balanceModel)
+		if tx.Error != nil {
+			return tx.Error
+		}
+	}
+	if err != nil {
+		return err
+	}
+	newAvaileBalnce := new(big.Float).Add(balanceModel.AvailableBalance, input.Amount)
+	balanceModel.AvailableBalance = newAvaileBalnce
+	tx := relayDB.Model(&UserSponsorBalanceDBModel{}).Where("pay_user_id = ?", input.PayUserId).Updates(balanceModel)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	LogBalanceChange(AvailableBalance, input, input.Amount)
 	return nil
-
 }
 
-func LogBalanceChange(balanceType BalanceType, data interface{}, amount *big.Float) (err error) {
+func LogBalanceChange(balanceType BalanceType, data interface{}, amount *big.Float) {
 	//TODO
-	return nil
+	return
 }
 
 func getUserSponsorBalance(userId string) (balanceModel *UserSponsorBalanceDBModel, err error) {
-	relayDB.Model(&UserSponsorBalanceDBModel{}).Where("pay_user_id = ?", userId).First(&balanceModel)
-	return balanceModel, nil
-}
-func CreateSponsorBalance(userId string) (err error) {
-	//TODO
-	return nil
+	tx := relayDB.Model(&UserSponsorBalanceDBModel{}).Where("pay_user_id = ?", userId).First(&balanceModel)
+	return balanceModel, tx.Error
 }
