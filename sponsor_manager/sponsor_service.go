@@ -29,49 +29,6 @@ func Init() {
 	})
 }
 
-type UpdateType string
-type BalanceType string
-
-const (
-	Deposit  UpdateType = "deposit"
-	Lock     UpdateType = "lock"
-	Withdraw UpdateType = "withdraw"
-	Release  UpdateType = "release"
-
-	AvailableBalance BalanceType = "available_balance"
-	LockBalance      BalanceType = "lock_balance"
-)
-
-type UserSponsorBalanceDBModel struct {
-	model.BaseData
-	PayUserId        string     `gorm:"type:varchar(255);index" json:"pay_user_id"`
-	AvailableBalance *big.Float `gorm:"type:numeric(30,18)" json:"available_balance"`
-	LockBalance      *big.Float `gorm:"type:numeric(30,18)" json:"lock_balance"`
-}
-
-type DepositBalanceInput struct {
-	Source    string
-	Signature string
-	Amount    *big.Float
-	TxReceipt string
-	PayUserId string
-}
-
-func (UserSponsorBalanceDBModel) TableName() string {
-	return config.GetStrategyConfigTableName()
-}
-
-type UserSponsorBalanceUpdateLogDBModel struct {
-	model.BaseData
-	Amount     *big.Float `gorm:"type:numeric(30,18)" json:"amount"`
-	UpdateType UpdateType `gorm:"type:varchar(20)" json:"update_type"`
-	UserOpHash []byte     `gorm:"type:bytea" json:"user_op_hash"`
-}
-
-func (UserSponsorBalanceUpdateLogDBModel) TableName() string {
-	return config.GetStrategyConfigTableName()
-}
-
 //----------Functions----------
 
 func GetAvailableBalance(userId string) (balance *big.Float, err error) {
@@ -103,8 +60,7 @@ func LockUserBalance(userId string, userOpHash []byte, network global_const.Netw
 	if tx.Error != nil {
 		return tx.Error
 	}
-	LogBalanceChange(LockBalance, userOpHash, lockAmount)
-
+	LogBalanceChange(global_const.UpdateTypeLock, global_const.BalanceTypeLockBalance, userOpHash, lockAmount)
 	return nil
 }
 
@@ -124,37 +80,61 @@ func ReleaseUserOpHashLock(userOpHash []byte) (err error) {
 	return nil
 }
 
-func DepositSponsorBalance(input *DepositBalanceInput) (err error) {
+func getUserSponsorBalance(userId string) (balanceModel *UserSponsorBalanceDBModel, err error) {
+	tx := relayDB.Model(&UserSponsorBalanceDBModel{}).Where("pay_user_id = ?", userId).First(&balanceModel)
+	return balanceModel, tx.Error
+}
+
+//----------Functions----------
+
+func DepositSponsor(input *model.DepositSponsorRequest) (balanceModel *UserSponsorBalanceDBModel, err error) {
 	//TODO
-	balanceModel, err := getUserSponsorBalance(input.PayUserId)
+	balanceModel, err = FindUserSponsorBalance(input.PayUserId)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		balanceModel.AvailableBalance = input.Amount
 		balanceModel.PayUserId = input.PayUserId
 		balanceModel.LockBalance = big.NewFloat(0)
 		tx := relayDB.Create(&balanceModel)
 		if tx.Error != nil {
-			return tx.Error
+			return nil, tx.Error
 		}
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
-	newAvaileBalnce := new(big.Float).Add(balanceModel.AvailableBalance, input.Amount)
-	balanceModel.AvailableBalance = newAvaileBalnce
+	newAvailableBalance := new(big.Float).Add(balanceModel.AvailableBalance, input.Amount)
+	balanceModel.AvailableBalance = newAvailableBalance
 	tx := relayDB.Model(&UserSponsorBalanceDBModel{}).Where("pay_user_id = ?", input.PayUserId).Updates(balanceModel)
 	if tx.Error != nil {
-		return tx.Error
+		return nil, tx.Error
 	}
-	LogBalanceChange(AvailableBalance, input, input.Amount)
+	LogBalanceChange(global_const.UpdateTypeDeposit, global_const.BalanceTypeAvailableBalance, input, input.Amount)
+	return balanceModel, nil
+}
+
+func WithDrawSponsor(input *model.WithdrawSponsorRequest) (balanceModel *UserSponsorBalanceDBModel, err error) {
+	balanceModel, err = FindUserSponsorBalance(input.PayUserId)
+	if err != nil {
+		return nil, err
+	}
+	if balanceModel.AvailableBalance.Cmp(input.Amount) < 0 {
+		return nil, xerrors.Errorf("Insufficient balance [%s] not Enough to Withdraw [%s]", balanceModel.AvailableBalance.String(), input.Amount.String())
+	}
+	newAvailableBalance := new(big.Float).Sub(balanceModel.AvailableBalance, input.Amount)
+	balanceModel.AvailableBalance = newAvailableBalance
+	err = UpdateSponsorBalance(balanceModel)
+	if err != nil {
+		return nil, err
+	}
+	LogBalanceChange(global_const.UpdateTypeWithdraw, global_const.BalanceTypeAvailableBalance, input, input.Amount)
+	return balanceModel, nil
+}
+func GetSponsorTransactionList() (err error) {
+	//TODO
 	return nil
 }
 
-func LogBalanceChange(balanceType BalanceType, data interface{}, amount *big.Float) {
+func GetSponsorMetaData() (err error) {
 	//TODO
-	return
-}
-
-func getUserSponsorBalance(userId string) (balanceModel *UserSponsorBalanceDBModel, err error) {
-	tx := relayDB.Model(&UserSponsorBalanceDBModel{}).Where("pay_user_id = ?", userId).First(&balanceModel)
-	return balanceModel, tx.Error
+	return nil
 }
