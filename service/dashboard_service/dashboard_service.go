@@ -142,7 +142,7 @@ func convertStrategyDBModelToStrategy(strategyDBModel *StrategyDBModel, entryPoi
 		},
 		PaymasterInfo: &model.PaymasterInfo{
 			PayMasterAddress:        config.GetPaymasterAddress(network, entryPointVersion),
-			PayType:                 global_const.PayTypeVerifying,
+			PayType:                 global_const.PayTypeProjectSponsor,
 			IsProjectErc20PayEnable: false,
 		},
 		ExecuteRestriction: strategyExecuteRestriction,
@@ -171,7 +171,7 @@ func GetSuitableStrategy(entryPointVersion global_const.EntrypointVersion, chain
 	gasToken := config.GetGasToken(chain)
 	entryPointAddress := config.GetEntrypointAddress(chain, entryPointVersion)
 	paymasterAddress := config.GetPaymasterAddress(chain, entryPointVersion)
-	payType := global_const.PayTypeVerifying
+	payType := global_const.PayTypeUserSponsor
 	isPerc20Enable := false
 	if gasUseToken != "" {
 		payType = global_const.PayTypeERC20

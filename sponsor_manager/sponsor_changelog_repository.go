@@ -17,6 +17,7 @@ type UserSponsorBalanceUpdateLogDBModel struct {
 	TxHash     string                  `gorm:"type:varchar(255)" json:"tx_hash"`
 	TxInfo     datatypes.JSON          `gorm:"type:json" json:"tx_info"`
 	Source     string                  `gorm:"type:varchar(255)" json:"source"`
+	IsTestNet  bool                    `gorm:"type:boolean" json:"is_test_net"`
 }
 
 func (UserSponsorBalanceUpdateLogDBModel) TableName() string {
@@ -27,8 +28,8 @@ func LogBalanceChange(updateType global_const.UpdateType, balanceType global_con
 	//TODO
 	return
 }
-func GetDepositAndWithDrawLog(userId string) (models []*UserSponsorBalanceUpdateLogDBModel, err error) {
-	tx := relayDB.Model(&UserSponsorBalanceUpdateLogDBModel{}).Where("pay_user_id = ?", userId).Where("update_type = ?", global_const.UpdateTypeDeposit).Or("update_type = ?", global_const.UpdateTypeWithdraw).Find(&models)
+func GetDepositAndWithDrawLog(userId string, IsTestNet bool) (models []*UserSponsorBalanceUpdateLogDBModel, err error) {
+	tx := relayDB.Model(&UserSponsorBalanceUpdateLogDBModel{}).Where("pay_user_id = ?", userId).Where("is_test_net = ?", IsTestNet).Where("update_type = ?", global_const.UpdateTypeDeposit).Or("update_type = ?", global_const.UpdateTypeWithdraw).Find(&models)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}

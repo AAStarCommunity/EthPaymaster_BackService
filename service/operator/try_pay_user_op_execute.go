@@ -92,7 +92,7 @@ func ValidateGas(userOp *user_op.UserOpInput, gasComputeResponse *model.ComputeG
 	return nil
 }
 
-func executePay(input *ExecutePayInput) (*model.PayReceipt, error) {
+func executePay(input *ExecutePayInput) (*model.PayResponse, error) {
 	if input.PayType == global_const.PayTypeERC20 {
 		logrus.Debugf("Not Need ExecutePay In ERC20 PayType")
 		return nil, nil
@@ -101,6 +101,7 @@ func executePay(input *ExecutePayInput) (*model.PayReceipt, error) {
 		logrus.Debugf("Not Need ExecutePay In SponsorWhitelist [%s]", input.UserOpSender)
 		return nil, nil
 	}
+	// TODO
 	//if config.IsTestNet(input.Network) {
 	//	logrus.Debugf("Not Need ExecutePay In TestNet [%s]", input.Network)
 	//	return nil, nil
@@ -112,7 +113,8 @@ func executePay(input *ExecutePayInput) (*model.PayReceipt, error) {
 	} else {
 		payUserKey = input.UserOpSender
 	}
-	depositBalance, err := sponsor_manager.GetAvailableBalance(payUserKey)
+	isTestNet := config.IsTestNet(input.Network)
+	depositBalance, err := sponsor_manager.GetAvailableBalance(payUserKey, isTestNet)
 	if err != nil {
 		return nil, err
 	}
@@ -124,15 +126,14 @@ func executePay(input *ExecutePayInput) (*model.PayReceipt, error) {
 		return nil, xerrors.Errorf("Insufficient balance [%s] not Enough to Pay Cost [%s]", depositBalance.String(), gasUsdCost.String())
 	}
 	//Lock Deposit Balance
-	err = sponsor_manager.LockUserBalance(payUserKey, input.UserOpHash, input.Network,
+	err = sponsor_manager.LockUserBalance(payUserKey, input.UserOpHash, isTestNet,
 		gasUsdCost)
 	if err != nil {
 		return nil, err
 	}
 
-	return &model.PayReceipt{
-		TransactionHash: "0x110406d44ec1681fcdab1df2310181dee26ff43c37167b2c9c496b35cce69437",
-		Sponsor:         "aastar",
+	return &model.PayResponse{
+		PayType: input.PayType,
 	}, nil
 }
 

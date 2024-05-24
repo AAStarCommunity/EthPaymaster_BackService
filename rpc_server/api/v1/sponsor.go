@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
+	"strconv"
 )
 
 // DepositSponsor
@@ -17,6 +18,7 @@ import (
 // @Accept json
 // @Product json
 // @Param request body DepositSponsorRequest true "DepositSponsorRequest Model
+// @Param is_test_net path boolean true "Is Test Net"
 // @Router /api/v1/paymaster_sponsor/deposit [post]
 // @Success 200
 func DepositSponsor(ctx *gin.Context) {
@@ -43,6 +45,7 @@ func DepositSponsor(ctx *gin.Context) {
 // @Accept json
 // @Product json
 // @Param request body WithdrawSponsorRequest true "WithdrawSponsorRequest Model"
+// @Param is_test_net path boolean true "Is Test Net"
 // @Router /api/v1/paymaster_sponsor/withdraw [post]
 // @Success 200
 func WithdrawSponsor(ctx *gin.Context) {
@@ -75,12 +78,16 @@ type SponsorDepositTransaction struct {
 // @Accept json
 // @Product json
 // @Param userId path string true "User Id"
+// @Param is_test_net path boolean true "Is Test Net"
 // @Router /api/v1/paymaster_sponsor/deposit_log
 // @Success 200
 func GetSponsorDepositAndWithdrawTransactions(ctx *gin.Context) {
-	userId := ctx.Param("userId")
+	userId := ctx.Param("user_id")
+	textNet := ctx.Param("is_test_net")
+	// convertTOBool
+	isTestNet, _ := strconv.ParseBool(textNet)
 	response := model.GetResponse()
-	models, err := sponsor_manager.GetDepositAndWithDrawLog(userId)
+	models, err := sponsor_manager.GetDepositAndWithDrawLog(userId, isTestNet)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			response.FailCode(ctx, 301, "No Deposit Transactions")
@@ -95,5 +102,37 @@ func GetSponsorDepositAndWithdrawTransactions(ctx *gin.Context) {
 		trans = append(trans, tran)
 	}
 	response.WithDataSuccess(ctx, trans)
+	return
+}
+
+type SponsorMetaResponse struct {
+	AvailableBalance string `json:"available_balance"`
+	SponsorAddress   string `json:"sponsor_address"`
+}
+
+// GetSponsorMetaData
+// @Tags Sponsor
+// @Description Get Sponsor Balance
+// @Accept json
+// @Product json
+// @Param userId path string true "User Id"
+// @Router /api/v1/paymaster_sponsor/balance/{userId}
+// @Success 200
+func GetSponsorMetaData(ctx *gin.Context) {
+	userId := ctx.Param("userId")
+	textNet := ctx.Param("is_test_net")
+	isTestNet, _ := strconv.ParseBool(textNet)
+	response := model.GetResponse()
+	balance, err := sponsor_manager.FindUserSponsorBalance(userId, isTestNet)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			response.FailCode(ctx, 301, "No Balance")
+		}
+	}
+	result := SponsorMetaResponse{
+		AvailableBalance: balance.AvailableBalance.String(),
+		SponsorAddress:   balance.SponsorAddress,
+	}
+	response.WithDataSuccess(ctx, result)
 	return
 }

@@ -7,12 +7,14 @@ type DepositSponsorRequest struct {
 	Amount    *big.Float
 	TxReceipt string
 	PayUserId string
+	IsTestNet bool
 }
 type WithdrawSponsorRequest struct {
 	Source    string
 	Amount    *big.Float
 	TxReceipt string
 	PayUserId string
+	IsTestNet bool
 }
 type GetSponsorTransactionsRequest struct {
 }

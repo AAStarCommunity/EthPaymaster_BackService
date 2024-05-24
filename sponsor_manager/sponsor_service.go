@@ -31,8 +31,8 @@ func Init() {
 
 //----------Functions----------
 
-func GetAvailableBalance(userId string) (balance *big.Float, err error) {
-	balanceModel, err := getUserSponsorBalance(userId)
+func GetAvailableBalance(userId string, isTestNet bool) (balance *big.Float, err error) {
+	balanceModel, err := getUserSponsorBalance(userId, isTestNet)
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -43,9 +43,11 @@ func GetAvailableBalance(userId string) (balance *big.Float, err error) {
 	return balanceModel.AvailableBalance, nil
 }
 
-func LockUserBalance(userId string, userOpHash []byte, network global_const.Network,
+// LockUserBalance
+// Reduce AvailableBalance and Increase LockBalance
+func LockUserBalance(userId string, userOpHash []byte, isTestNet bool,
 	lockAmount *big.Float) (err error) {
-	balanceModel, err := getUserSponsorBalance(userId)
+	balanceModel, err := getUserSponsorBalance(userId, isTestNet)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return xerrors.Errorf("No Balance Deposit Here ")
 	}
@@ -56,9 +58,9 @@ func LockUserBalance(userId string, userOpHash []byte, network global_const.Netw
 	availableBalance := new(big.Float).Sub(balanceModel.AvailableBalance, lockAmount)
 	balanceModel.LockBalance = lockBalance
 	balanceModel.AvailableBalance = availableBalance
-	tx := relayDB.Model(&UserSponsorBalanceDBModel{}).Where("pay_user_id = ?", userId).Updates(balanceModel)
-	if tx.Error != nil {
-		return tx.Error
+	err = UpdateSponsor(balanceModel, isTestNet)
+	if err != nil {
+		return err
 	}
 	LogBalanceChange(global_const.UpdateTypeLock, global_const.BalanceTypeLockBalance, userOpHash, lockAmount)
 	return nil
@@ -76,27 +78,21 @@ type ReleaseUserOpHashLockInput struct {
 
 func ReleaseUserOpHashLock(userOpHash []byte) (err error) {
 	// Get ChangeLog By UserOpHash
-	//TODO
 	return nil
-}
-
-func getUserSponsorBalance(userId string) (balanceModel *UserSponsorBalanceDBModel, err error) {
-	tx := relayDB.Model(&UserSponsorBalanceDBModel{}).Where("pay_user_id = ?", userId).First(&balanceModel)
-	return balanceModel, tx.Error
 }
 
 //----------Functions----------
 
 func DepositSponsor(input *model.DepositSponsorRequest) (balanceModel *UserSponsorBalanceDBModel, err error) {
-	//TODO
-	balanceModel, err = FindUserSponsorBalance(input.PayUserId)
+	balanceModel, err = FindUserSponsorBalance(input.PayUserId, input.IsTestNet)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		balanceModel.AvailableBalance = input.Amount
 		balanceModel.PayUserId = input.PayUserId
 		balanceModel.LockBalance = big.NewFloat(0)
-		tx := relayDB.Create(&balanceModel)
-		if tx.Error != nil {
-			return nil, tx.Error
+		balanceModel.IsTestNet = input.IsTestNet
+		err = CreateSponsorBalance(balanceModel)
+		if err != nil {
+			return nil, err
 		}
 	}
 	if err != nil {
@@ -104,16 +100,16 @@ func DepositSponsor(input *model.DepositSponsorRequest) (balanceModel *UserSpons
 	}
 	newAvailableBalance := new(big.Float).Add(balanceModel.AvailableBalance, input.Amount)
 	balanceModel.AvailableBalance = newAvailableBalance
-	tx := relayDB.Model(&UserSponsorBalanceDBModel{}).Where("pay_user_id = ?", input.PayUserId).Updates(balanceModel)
-	if tx.Error != nil {
-		return nil, tx.Error
+	err = UpdateSponsor(balanceModel, input.IsTestNet)
+	if err != nil {
+		return nil, err
 	}
 	LogBalanceChange(global_const.UpdateTypeDeposit, global_const.BalanceTypeAvailableBalance, input, input.Amount)
 	return balanceModel, nil
 }
 
 func WithDrawSponsor(input *model.WithdrawSponsorRequest) (balanceModel *UserSponsorBalanceDBModel, err error) {
-	balanceModel, err = FindUserSponsorBalance(input.PayUserId)
+	balanceModel, err = FindUserSponsorBalance(input.PayUserId, input.IsTestNet)
 	if err != nil {
 		return nil, err
 	}
@@ -122,19 +118,10 @@ func WithDrawSponsor(input *model.WithdrawSponsorRequest) (balanceModel *UserSpo
 	}
 	newAvailableBalance := new(big.Float).Sub(balanceModel.AvailableBalance, input.Amount)
 	balanceModel.AvailableBalance = newAvailableBalance
-	err = UpdateSponsorBalance(balanceModel)
+	err = UpdateSponsor(balanceModel, input.IsTestNet)
 	if err != nil {
 		return nil, err
 	}
 	LogBalanceChange(global_const.UpdateTypeWithdraw, global_const.BalanceTypeAvailableBalance, input, input.Amount)
 	return balanceModel, nil
-}
-func GetSponsorTransactionList() (err error) {
-	//TODO
-	return nil
-}
-
-func GetSponsorMetaData() (err error) {
-	//TODO
-	return nil
 }

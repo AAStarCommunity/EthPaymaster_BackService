@@ -3,7 +3,8 @@ package global_const
 type PayType string
 
 const (
-	PayTypeVerifying      PayType = "PayTypeVerifying"
+	PayTypeProjectSponsor PayType = "PayTypeProjectSponsor"
 	PayTypeERC20          PayType = "PayTypeERC20"
 	PayTypeSuperVerifying PayType = "PayTypeSuperVerifying"
+	PayTypeUserSponsor    PayType = "PayTypeUserSponsor"
 )

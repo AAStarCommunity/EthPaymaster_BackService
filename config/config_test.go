@@ -25,7 +25,7 @@ func TestConfigInit(t *testing.T) {
 		t.Error("strategy is nil")
 		return
 	}
-	strategySuit, err := GetSuitableStrategy(global_const.EntrypointV06, global_const.EthereumSepolia, global_const.PayTypeVerifying)
+	strategySuit, err := GetSuitableStrategy(global_const.EntrypointV06, global_const.EthereumSepolia, global_const.PayTypeProjectSponsor)
 	if err != nil {
 
 		t.Error("strategySuit is nil")

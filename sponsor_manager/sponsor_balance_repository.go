@@ -13,6 +13,7 @@ type UserSponsorBalanceDBModel struct {
 	LockBalance      *big.Float `gorm:"type:numeric(30,18)" json:"lock_balance"`
 	Source           string     `gorm:"type:varchar(255)" json:"source"`
 	SponsorAddress   string     `gorm:"type:varchar(255)" json:"sponsor_address"`
+	IsTestNet        bool       `gorm:"type:boolean" json:"is_test_net"`
 }
 
 func (UserSponsorBalanceDBModel) TableName() string {
@@ -22,15 +23,19 @@ func (UserSponsorBalanceDBModel) TableName() string {
 func CreateSponsorBalance(balanceModel *UserSponsorBalanceDBModel) error {
 	return relayDB.Create(balanceModel).Error
 }
-func FindUserSponsorBalance(userId string) (balanceModel *UserSponsorBalanceDBModel, err error) {
+func FindUserSponsorBalance(userId string, isTestNet bool) (balanceModel *UserSponsorBalanceDBModel, err error) {
 	balanceModel = &UserSponsorBalanceDBModel{}
-	tx := relayDB.Where("pay_user_id = ?", userId).First(balanceModel)
+	tx := relayDB.Where("pay_user_id = ?", userId).Where("is_test_net = ?", isTestNet).First(balanceModel)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 	return balanceModel, nil
 }
-func UpdateSponsorBalance(balanceModel *UserSponsorBalanceDBModel) error {
-	tx := relayDB.Model(&UserSponsorBalanceDBModel{}).Where("pay_user_id = ?", balanceModel.PayUserId).Updates(balanceModel)
+func UpdateSponsor(balanceModel *UserSponsorBalanceDBModel, isTestNet bool) error {
+	tx := relayDB.Model(&UserSponsorBalanceDBModel{}).Where("pay_user_id = ?", balanceModel.PayUserId).Where("is_test_net = ?", isTestNet).Updates(balanceModel)
 	return tx.Error
+}
+func getUserSponsorBalance(userId string, isTestNet bool) (balanceModel *UserSponsorBalanceDBModel, err error) {
+	tx := relayDB.Model(&UserSponsorBalanceDBModel{}).Where("pay_user_id = ?", userId).Where("is_test_net = ?", isTestNet).First(&balanceModel)
+	return balanceModel, tx.Error
 }

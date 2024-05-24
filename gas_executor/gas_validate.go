@@ -50,7 +50,7 @@ var (
 )
 
 func init() {
-	gasValidateFuncMap[global_const.PayTypeVerifying] = verifyingGasValidateFunc
+	gasValidateFuncMap[global_const.PayTypeProjectSponsor] = verifyingGasValidateFunc
 	gasValidateFuncMap[global_const.PayTypeERC20] = erc20GasValidateFunc
 	gasValidateFuncMap[global_const.PayTypeSuperVerifying] = superGasValidateFunc
 }

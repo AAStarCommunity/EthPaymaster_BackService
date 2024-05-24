@@ -5,6 +5,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/envirment"
 	"AAStarCommunity/EthPaymaster_BackService/rpc_server/routers"
 	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
+	"AAStarCommunity/EthPaymaster_BackService/sponsor_manager"
 	"flag"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -69,6 +70,7 @@ func initEngine(strategyPath string, basicConfigPath string, secretPath string) 
 		logrus.SetLevel(logrus.InfoLevel)
 	}
 	dashboard_service.Init()
+	sponsor_manager.Init()
 	logrus.Infof("Environment: %s", envirment.Environment.Name)
 	logrus.Infof("Debugger: %v", envirment.Environment.Debugger)
 	Engine = routers.SetRouters()

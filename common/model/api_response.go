@@ -49,9 +49,8 @@ type UserOpEstimateGas struct {
 	PaymasterPostOpGasLimit       *big.Int  `json:"paymasterPostOpGasLimit" binding:"required"`
 	GasFees                       *[32]byte `json:"gasFees" binding:"required"`
 }
-type PayReceipt struct {
-	TransactionHash string `json:"transaction_hash"`
-	Sponsor         string `json:"sponsor"`
+type PayResponse struct {
+	PayType global_const.PayType `json:"pay_type"`
 }
 
 type GetSupportEntryPointResponse struct {
