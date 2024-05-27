@@ -3,18 +3,21 @@ package model
 import "math/big"
 
 type DepositSponsorRequest struct {
-	Source    string
-	Amount    *big.Float
-	TxReceipt string
+	Source string
+	Amount *big.Float
+	TxHash string
+
+	TxInfo    map[string]string
 	PayUserId string
 	IsTestNet bool
 }
 type WithdrawSponsorRequest struct {
-	Source    string
-	Amount    *big.Float
-	TxReceipt string
+	Amount *big.Float
+
 	PayUserId string
 	IsTestNet bool
+	TxInfo    map[string]string
+	TxHash    string
 }
 type GetSponsorTransactionsRequest struct {
 }

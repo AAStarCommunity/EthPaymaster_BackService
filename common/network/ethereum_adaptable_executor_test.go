@@ -338,12 +338,12 @@ func parseOpToMapV7(input user_op.UserOpInput) map[string]string {
 	opMap := make(map[string]string)
 	opMap["sender"] = input.Sender.String()
 	opMap["Nonce"] = input.Nonce.String()
-	opMap["initCode"] = utils.EncodeToStringWithPrefix(input.InitCode[:])
-	opMap["accountGasLimits"] = utils.EncodeToStringWithPrefix(input.AccountGasLimits[:])
+	opMap["initCode"] = utils.EncodeToHexStringWithPrefix(input.InitCode[:])
+	opMap["accountGasLimits"] = utils.EncodeToHexStringWithPrefix(input.AccountGasLimits[:])
 	opMap["preVerificationGas"] = input.PreVerificationGas.String()
-	opMap["gasFees"] = utils.EncodeToStringWithPrefix(input.GasFees[:])
-	opMap["paymasterAndData"] = utils.EncodeToStringWithPrefix(input.PaymasterAndData[:])
-	opMap["signature"] = utils.EncodeToStringWithPrefix(input.Signature[:])
+	opMap["gasFees"] = utils.EncodeToHexStringWithPrefix(input.GasFees[:])
+	opMap["paymasterAndData"] = utils.EncodeToHexStringWithPrefix(input.PaymasterAndData[:])
+	opMap["signature"] = utils.EncodeToHexStringWithPrefix(input.Signature[:])
 	return opMap
 }
 

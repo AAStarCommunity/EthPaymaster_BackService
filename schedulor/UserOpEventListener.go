@@ -73,7 +73,7 @@ func UserOpEventComunicate(network global_const.Network, event ContractUserOpera
 		return
 	}
 	if !event.Success {
-		err := sponsor_manager.ReleaseUserOpHashLock(event.UserOpHash[:])
+		err := sponsor_manager.ReleaseUserOpHashLock(event.UserOpHash[:], true)
 		if err != nil {
 			logrus.Errorf("ReleaseUserOpHashLock failed: %v", err)
 		}

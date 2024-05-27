@@ -3,7 +3,6 @@ package sponsor_manager
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/config"
 	"gorm.io/datatypes"
 	"math/big"
 )
@@ -21,10 +20,14 @@ type UserSponsorBalanceUpdateLogDBModel struct {
 }
 
 func (UserSponsorBalanceUpdateLogDBModel) TableName() string {
-	return config.GetStrategyConfigTableName()
+	return "relay_user_sponsor_balance_update_log"
 }
 
+func AddBalanceChangeLog(changeDbModel *UserSponsorBalanceUpdateLogDBModel) error {
+	return relayDB.Create(changeDbModel).Error
+}
 func LogBalanceChange(updateType global_const.UpdateType, balanceType global_const.BalanceType, data interface{}, amount *big.Float) {
+
 	//TODO
 	return
 }
@@ -34,4 +37,34 @@ func GetDepositAndWithDrawLog(userId string, IsTestNet bool) (models []*UserSpon
 		return nil, tx.Error
 	}
 	return models, nil
+}
+func LockBalanceChangeLog(payUserid string, userOpHash string, amount *big.Float, isTestNet bool, updateReason string) error {
+	logModel := &UserSponsorBalanceUpdateLogDBModel{
+		PayUserId:  payUserid,
+		Amount:     amount,
+		UserOpHash: userOpHash,
+		Source:     "GasTank",
+		IsTestNet:  isTestNet,
+	}
+	return relayDB.Create(logModel).Error
+}
+func GetChangeModel(updateType global_const.UpdateType, payUserId string, txHash string, isTestNet bool) (ChangeModel *UserSponsorBalanceUpdateLogDBModel, err error) {
+	if updateType == global_const.UpdateTypeDeposit || updateType == global_const.UpdateTypeWithdraw {
+
+		tx := relayDB.Model(ChangeModel).Where("tx_hash = ?", txHash).Where("pay_user_id", payUserId).Where("update_type = ?", global_const.UpdateTypeDeposit).Where("is_test_net", isTestNet).First(&ChangeModel)
+		if tx.Error != nil {
+			return nil, tx.Error
+		} else {
+			return ChangeModel, nil
+		}
+	} else if updateType == global_const.UpdateTypeLock || updateType == global_const.UpdateTypeRelease {
+		tx := relayDB.Model(ChangeModel).Where("user_op_hash = ?", txHash).Where("update_type = ?", global_const.UpdateTypeLock).Where("is_test_net", isTestNet).First(&ChangeModel)
+		if tx.Error != nil {
+			return nil, tx.Error
+		} else {
+			return ChangeModel, nil
+		}
+	} else {
+		return nil, nil
+	}
 }

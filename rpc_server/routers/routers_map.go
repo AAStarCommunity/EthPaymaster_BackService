@@ -16,6 +16,7 @@ func init() {
 	PublicRouterMaps = append(PublicRouterMaps, RouterMap{string(GetSponsorLog), []RestfulMethod{GET}, v1.GetSponsorDepositAndWithdrawTransactions})
 	PublicRouterMaps = append(PublicRouterMaps, RouterMap{string(DepositSponsor), []RestfulMethod{POST}, v1.DepositSponsor})
 	PublicRouterMaps = append(PublicRouterMaps, RouterMap{string(WithdrawSponsor), []RestfulMethod{POST}, v1.WithdrawSponsor})
+	PublicRouterMaps = append(PublicRouterMaps, RouterMap{string(GetSponsorData), []RestfulMethod{GET}, v1.GetSponsorMetaData})
 }
 
 type Path string
@@ -27,4 +28,5 @@ const (
 	GetSponsorLog   Path = "api/v1/paymaster_sponsor/deposit_log"
 	DepositSponsor  Path = "api/v1/paymaster_sponsor/deposit"
 	WithdrawSponsor Path = "api/v1/paymaster_sponsor/withdraw"
+	GetSponsorData  Path = "api/v1/paymaster_sponsor/data"
 )

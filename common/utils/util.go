@@ -97,7 +97,7 @@ func GetGasEntryPointGasPrice(maxFeePerGas *big.Int, maxPriorityFeePerGas *big.I
 	return GetMinValue(maxFeePerGas, combineFee)
 }
 
-func EncodeToStringWithPrefix(data []byte) string {
+func EncodeToHexStringWithPrefix(data []byte) string {
 	res := hex.EncodeToString(data)
 	if res[:2] != "0x" {
 		return "0x" + res

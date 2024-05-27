@@ -179,7 +179,7 @@ func postExecute(apiKeyModel *model.ApiKeyModel, userOp *user_op.UserOpInput, st
 		Erc20TokenCost:    gasResponse.Erc20TokenCost,
 
 		UserOpResponse: &model.UserOpResponse{
-			PayMasterAndData:     utils.EncodeToStringWithPrefix(paymasterData),
+			PayMasterAndData:     utils.EncodeToHexStringWithPrefix(paymasterData),
 			PreVerificationGas:   gasResponse.OpEstimateGas.PreVerificationGas,
 			MaxFeePerGas:         gasResponse.OpEstimateGas.MaxFeePerGas,
 			MaxPriorityFeePerGas: gasResponse.OpEstimateGas.MaxPriorityFeePerGas,
@@ -189,8 +189,8 @@ func postExecute(apiKeyModel *model.ApiKeyModel, userOp *user_op.UserOpInput, st
 	}
 
 	if strategy.GetStrategyEntrypointVersion() == global_const.EntrypointV07 {
-		result.UserOpResponse.AccountGasLimit = utils.EncodeToStringWithPrefix(gasResponse.OpEstimateGas.AccountGasLimit[:])
-		result.UserOpResponse.GasFees = utils.EncodeToStringWithPrefix(gasResponse.OpEstimateGas.GasFees[:])
+		result.UserOpResponse.AccountGasLimit = utils.EncodeToHexStringWithPrefix(gasResponse.OpEstimateGas.AccountGasLimit[:])
+		result.UserOpResponse.GasFees = utils.EncodeToHexStringWithPrefix(gasResponse.OpEstimateGas.GasFees[:])
 		result.UserOpResponse.PaymasterVerificationGasLimit = gasResponse.OpEstimateGas.PaymasterVerificationGasLimit
 		result.UserOpResponse.PaymasterPostOpGasLimit = gasResponse.OpEstimateGas.PaymasterPostOpGasLimit
 	}

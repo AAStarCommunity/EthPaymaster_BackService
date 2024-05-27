@@ -3,7 +3,9 @@ package sponsor_manager
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/config"
+	"encoding/json"
 	"errors"
 	"golang.org/x/xerrors"
 	"gorm.io/driver/postgres"
@@ -62,13 +64,51 @@ func LockUserBalance(userId string, userOpHash []byte, isTestNet bool,
 	if err != nil {
 		return err
 	}
-	LogBalanceChange(global_const.UpdateTypeLock, global_const.BalanceTypeLockBalance, userOpHash, lockAmount)
+	changeModel := &UserSponsorBalanceUpdateLogDBModel{
+		UserOpHash: utils.EncodeToHexStringWithPrefix(userOpHash),
+		PayUserId:  userId,
+		Amount:     lockAmount,
+		Source:     "GasTank",
+		IsTestNet:  isTestNet,
+		UpdateType: global_const.UpdateTypeLock,
+	}
+	err = AddBalanceChangeLog(changeModel)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func ReleaseBalanceWithActualCost(userId string, userOpHash []byte, network global_const.Network,
-	actualGasCost *big.Float) (err error) {
-	//TODO
+	actualGasCost *big.Float, isTestNet bool) error {
+	userOpHashHex := utils.EncodeToHexStringWithPrefix(userOpHash)
+
+	changeModel, err := GetChangeModel(global_const.UpdateTypeLock, "", userOpHashHex, isTestNet)
+	if err != nil {
+		return err
+	}
+	balanceModel, err := getUserSponsorBalance(changeModel.PayUserId, changeModel.IsTestNet)
+
+	lockBalance := changeModel.Amount
+	balanceModel.LockBalance = new(big.Float).Sub(balanceModel.LockBalance, lockBalance)
+	refundBalance := new(big.Float).Sub(lockBalance, actualGasCost)
+	balanceModel.AvailableBalance = new(big.Float).Add(balanceModel.AvailableBalance, refundBalance)
+
+	err = UpdateSponsor(balanceModel, isTestNet)
+
+	if err != nil {
+		return err
+	}
+	changeDBModel := &UserSponsorBalanceUpdateLogDBModel{
+		UserOpHash: userOpHashHex,
+		PayUserId:  changeModel.PayUserId,
+		Amount:     refundBalance,
+		Source:     "GasTank",
+		IsTestNet:  isTestNet,
+		UpdateType: global_const.UpdateTypeRelease,
+	}
+	err = AddBalanceChangeLog(changeDBModel)
 	return nil
 }
 
@@ -76,35 +116,89 @@ type ReleaseUserOpHashLockInput struct {
 	UserOpHash []byte
 }
 
-func ReleaseUserOpHashLock(userOpHash []byte) (err error) {
+func ReleaseUserOpHashLock(userOpHash []byte, isTestNet bool) (err error) {
 	// Get ChangeLog By UserOpHash
+	userOpHashHex := utils.EncodeToHexStringWithPrefix(userOpHash)
+	changeModel, err := GetChangeModel(global_const.UpdateTypeLock, "", userOpHashHex, isTestNet)
+	if err != nil {
+		return err
+	}
+	// Release Lock
+	balanceModel, err := getUserSponsorBalance(changeModel.PayUserId, changeModel.IsTestNet)
+
+	lockBalance := changeModel.Amount
+
+	balanceModel.LockBalance = new(big.Float).Sub(balanceModel.LockBalance, lockBalance)
+	balanceModel.AvailableBalance = new(big.Float).Add(balanceModel.AvailableBalance, lockBalance)
+
+	err = UpdateSponsor(balanceModel, isTestNet)
+	if err != nil {
+		return err
+	}
+	changeDBModel := &UserSponsorBalanceUpdateLogDBModel{
+		UserOpHash: userOpHashHex,
+		PayUserId:  changeModel.PayUserId,
+		Amount:     lockBalance,
+		Source:     "GasTank",
+		IsTestNet:  isTestNet,
+		UpdateType: global_const.UpdateTypeRelease,
+	}
+	err = AddBalanceChangeLog(changeDBModel)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 //----------Functions----------
 
-func DepositSponsor(input *model.DepositSponsorRequest) (balanceModel *UserSponsorBalanceDBModel, err error) {
-	balanceModel, err = FindUserSponsorBalance(input.PayUserId, input.IsTestNet)
+func DepositSponsor(input *model.DepositSponsorRequest) (*UserSponsorBalanceDBModel, error) {
+
+	balanceModel, err := FindUserSponsorBalance(input.PayUserId, input.IsTestNet)
+
+	tx := relayDB.Begin()
 	if errors.Is(err, gorm.ErrRecordNotFound) {
+		balanceModel = &UserSponsorBalanceDBModel{}
 		balanceModel.AvailableBalance = input.Amount
 		balanceModel.PayUserId = input.PayUserId
 		balanceModel.LockBalance = big.NewFloat(0)
 		balanceModel.IsTestNet = input.IsTestNet
-		err = CreateSponsorBalance(balanceModel)
+		err = tx.Create(balanceModel).Error
 		if err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 	}
 	if err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 	newAvailableBalance := new(big.Float).Add(balanceModel.AvailableBalance, input.Amount)
 	balanceModel.AvailableBalance = newAvailableBalance
-	err = UpdateSponsor(balanceModel, input.IsTestNet)
-	if err != nil {
-		return nil, err
+
+	if updateErr := tx.Model(balanceModel).
+		Where("pay_user_id = ?", balanceModel.PayUserId).
+		Where("is_test_net = ?", input.IsTestNet).Updates(balanceModel).Error; updateErr != nil {
+		tx.Rollback()
+		return nil, updateErr
 	}
-	LogBalanceChange(global_const.UpdateTypeDeposit, global_const.BalanceTypeAvailableBalance, input, input.Amount)
+
+	txInfoJSon, _ := json.Marshal(input.TxInfo)
+	chagneModel := &UserSponsorBalanceUpdateLogDBModel{
+		PayUserId:  input.PayUserId,
+		Amount:     input.Amount,
+		Source:     "Deposit",
+		IsTestNet:  input.IsTestNet,
+		UpdateType: global_const.UpdateTypeDeposit,
+		TxHash:     input.TxHash,
+		TxInfo:     txInfoJSon,
+	}
+	if createErr := tx.Create(chagneModel).Error; createErr != nil {
+		tx.Rollback()
+		return nil, createErr
+	}
+
+	tx.Commit()
 	return balanceModel, nil
 }
 
@@ -122,6 +216,17 @@ func WithDrawSponsor(input *model.WithdrawSponsorRequest) (balanceModel *UserSpo
 	if err != nil {
 		return nil, err
 	}
-	LogBalanceChange(global_const.UpdateTypeWithdraw, global_const.BalanceTypeAvailableBalance, input, input.Amount)
+	changeModel := &UserSponsorBalanceUpdateLogDBModel{
+		PayUserId:  input.PayUserId,
+		Amount:     input.Amount,
+		Source:     "Withdraw",
+		IsTestNet:  input.IsTestNet,
+		UpdateType: global_const.UpdateTypeWithdraw,
+		TxHash:     input.TxHash,
+	}
+	err = AddBalanceChangeLog(changeModel)
+	if err != nil {
+		return nil, err
+	}
 	return balanceModel, nil
 }
