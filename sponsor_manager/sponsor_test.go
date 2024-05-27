@@ -34,18 +34,6 @@ func TestSponsor(t *testing.T) {
 				}
 			},
 		},
-		{
-			"TestLockUserBalanceSt",
-			func(t *testing.T) {
-				res, err := SelectUserSponsorBalanceDBModelWithScanList()
-				if err != nil {
-					t.Error(err)
-				}
-				if res == nil {
-					t.Error("SelectUserSponsorBalanceDBModelWithScanList failed")
-				}
-			},
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, tt.test)

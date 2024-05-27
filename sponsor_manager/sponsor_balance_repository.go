@@ -2,18 +2,19 @@ package sponsor_manager
 
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"database/sql/driver"
 	"fmt"
 	"math/big"
 )
 
 type UserSponsorBalanceDBModel struct {
 	model.BaseData
-	PayUserId        string     `gorm:"type:varchar(255);index" json:"pay_user_id"`
-	AvailableBalance *big.Float `gorm:"type:numeric(30,18)" json:"available_balance"`
-	LockBalance      *big.Float `gorm:"type:numeric(30,18)" json:"lock_balance"`
-	Source           string     `gorm:"type:varchar(255)" json:"source"`
-	SponsorAddress   string     `gorm:"type:varchar(255)" json:"sponsor_address"`
-	IsTestNet        bool       `gorm:"type:boolean" json:"is_test_net"`
+	PayUserId        string   `gorm:"type:varchar(255);index" json:"pay_user_id"`
+	AvailableBalance BigFloat `gorm:"type:numeric(30,18)" json:"available_balance"`
+	LockBalance      BigFloat `gorm:"type:numeric(30,18)" json:"lock_balance"`
+	Source           string   `gorm:"type:varchar(255)" json:"source"`
+	SponsorAddress   string   `gorm:"type:varchar(255)" json:"sponsor_address"`
+	IsTestNet        bool     `gorm:"type:boolean" json:"is_test_net"`
 }
 
 func (UserSponsorBalanceDBModel) TableName() string {
@@ -46,51 +47,32 @@ type BigFloat struct {
 }
 
 // Scan implements the sql.Scanner interface for BigFloat
-func (b *BigFloat) Scan(value interface{}) error {
-	if b == nil {
-		fmt.Println("BigFloat Scan value is nil")
-		return nil
-	}
-	fmt.Println("BigFloat Scan value", value)
+func (bf *BigFloat) Scan(value interface{}) error {
 	switch v := value.(type) {
-	case string:
-
-		if _, ok := b.SetString(v); !ok {
-			return fmt.Errorf("failed to parse string as *big.Float: %s", v)
-		}
 	case []byte:
-		fmt.Println("BigFloat Scan value Case Byte", value)
-
-		if _, ok := b.SetString(string(v)); !ok {
-			return fmt.Errorf("failed to parse byte slice as *big.Float: %s", string(v))
+		f, _, err := big.ParseFloat(string(v), 10, 256, big.ToNearestEven)
+		if err != nil {
+			return err
 		}
+		bf.Float = f
+	case string:
+		f, _, err := big.ParseFloat(v, 10, 256, big.ToNearestEven)
+		if err != nil {
+			return err
+		}
+		bf.Float = f
+	case float64:
+		bf.Float = big.NewFloat(v)
+	case nil:
+		bf.Float = nil
 	default:
-		return fmt.Errorf("unsupported type: %T", v)
+		return fmt.Errorf("cannot scan type %T into BigFloat", value)
 	}
 	return nil
 }
-
-func SelectUserSponsorBalanceDBModelWithScanList() (userSponsorBalanceDBModelWithScanList []UserSponsorBalanceDBModelWithScan, err error) {
-	userSponsorBalanceDBModelWithScanList = make([]UserSponsorBalanceDBModelWithScan, 0)
-	tx := relayDB.Model(&UserSponsorBalanceDBModelWithScan{}).Find(&userSponsorBalanceDBModelWithScanList)
-	if tx.Error != nil {
-		err = tx.Error
-		return
+func (bf *BigFloat) Value() (driver.Value, error) {
+	if bf.Float == nil {
+		return nil, nil
 	}
-	fmt.Println(userSponsorBalanceDBModelWithScanList)
-	return userSponsorBalanceDBModelWithScanList, nil
-}
-
-type UserSponsorBalanceDBModelWithScan struct {
-	model.BaseData
-	PayUserId        string  `gorm:"type:varchar(255);index" json:"pay_user_id"`
-	AvailableBalance float64 `gorm:"type:numeric(30,18)" json:"available_balance"`
-	LockBalance      float64 `gorm:"type:numeric(30,18)" json:"lock_balance"`
-	Source           string  `gorm:"type:varchar(255)" json:"source"`
-	SponsorAddress   string  `gorm:"type:varchar(255)" json:"sponsor_address"`
-	IsTestNet        bool    `gorm:"type:boolean" json:"is_test_net"`
-}
-
-func (UserSponsorBalanceDBModelWithScan) TableName() string {
-	return "relay_user_sponsor_balance"
+	return bf.Text('f', -1), nil
 }

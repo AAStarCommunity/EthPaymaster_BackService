@@ -42,7 +42,7 @@ func GetAvailableBalance(userId string, isTestNet bool) (balance *big.Float, err
 		}
 		return nil, err
 	}
-	return balanceModel.AvailableBalance, nil
+	return balanceModel.AvailableBalance.Float, nil
 }
 
 // LockUserBalance
@@ -56,10 +56,10 @@ func LockUserBalance(userId string, userOpHash []byte, isTestNet bool,
 	if err != nil {
 		return err
 	}
-	lockBalance := new(big.Float).Add(balanceModel.LockBalance, lockAmount)
-	availableBalance := new(big.Float).Sub(balanceModel.AvailableBalance, lockAmount)
-	balanceModel.LockBalance = lockBalance
-	balanceModel.AvailableBalance = availableBalance
+	lockBalance := new(big.Float).Add(balanceModel.LockBalance.Float, lockAmount)
+	availableBalance := new(big.Float).Sub(balanceModel.AvailableBalance.Float, lockAmount)
+	balanceModel.LockBalance = BigFloat{lockBalance}
+	balanceModel.AvailableBalance = BigFloat{availableBalance}
 	err = UpdateSponsor(balanceModel, isTestNet)
 	if err != nil {
 		return err
@@ -91,9 +91,9 @@ func ReleaseBalanceWithActualCost(userId string, userOpHash []byte, network glob
 	balanceModel, err := getUserSponsorBalance(changeModel.PayUserId, changeModel.IsTestNet)
 
 	lockBalance := changeModel.Amount
-	balanceModel.LockBalance = new(big.Float).Sub(balanceModel.LockBalance, lockBalance)
+	balanceModel.LockBalance = BigFloat{new(big.Float).Sub(balanceModel.LockBalance.Float, lockBalance)}
 	refundBalance := new(big.Float).Sub(lockBalance, actualGasCost)
-	balanceModel.AvailableBalance = new(big.Float).Add(balanceModel.AvailableBalance, refundBalance)
+	balanceModel.AvailableBalance = BigFloat{new(big.Float).Add(balanceModel.AvailableBalance.Float, refundBalance)}
 
 	err = UpdateSponsor(balanceModel, isTestNet)
 
@@ -128,8 +128,9 @@ func ReleaseUserOpHashLock(userOpHash []byte, isTestNet bool) (err error) {
 
 	lockBalance := changeModel.Amount
 
-	balanceModel.LockBalance = new(big.Float).Sub(balanceModel.LockBalance, lockBalance)
-	balanceModel.AvailableBalance = new(big.Float).Add(balanceModel.AvailableBalance, lockBalance)
+	balanceModel.LockBalance = BigFloat{new(big.Float).Sub(balanceModel.LockBalance.Float, lockBalance)}
+
+	balanceModel.AvailableBalance = BigFloat{new(big.Float).Add(balanceModel.AvailableBalance.Float, lockBalance)}
 
 	err = UpdateSponsor(balanceModel, isTestNet)
 	if err != nil {
@@ -159,9 +160,9 @@ func DepositSponsor(input *model.DepositSponsorRequest) (*UserSponsorBalanceDBMo
 	tx := relayDB.Begin()
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		balanceModel = &UserSponsorBalanceDBModel{}
-		balanceModel.AvailableBalance = input.Amount
+		balanceModel.AvailableBalance = BigFloat{input.Amount}
 		balanceModel.PayUserId = input.PayUserId
-		balanceModel.LockBalance = big.NewFloat(0)
+		balanceModel.LockBalance = BigFloat{big.NewFloat(0)}
 		balanceModel.IsTestNet = input.IsTestNet
 		err = tx.Create(balanceModel).Error
 		if err != nil {
@@ -173,7 +174,7 @@ func DepositSponsor(input *model.DepositSponsorRequest) (*UserSponsorBalanceDBMo
 		tx.Rollback()
 		return nil, err
 	}
-	newAvailableBalance := new(big.Float).Add(balanceModel.AvailableBalance, input.Amount)
+	newAvailableBalance := BigFloat{new(big.Float).Add(balanceModel.AvailableBalance.Float, input.Amount)}
 	balanceModel.AvailableBalance = newAvailableBalance
 
 	if updateErr := tx.Model(balanceModel).
@@ -210,8 +211,8 @@ func WithDrawSponsor(input *model.WithdrawSponsorRequest) (balanceModel *UserSpo
 	if balanceModel.AvailableBalance.Cmp(input.Amount) < 0 {
 		return nil, xerrors.Errorf("Insufficient balance [%s] not Enough to Withdraw [%s]", balanceModel.AvailableBalance.String(), input.Amount.String())
 	}
-	newAvailableBalance := new(big.Float).Sub(balanceModel.AvailableBalance, input.Amount)
-	balanceModel.AvailableBalance = newAvailableBalance
+	newAvailableBalance := new(big.Float).Sub(balanceModel.AvailableBalance.Float, input.Amount)
+	balanceModel.AvailableBalance = BigFloat{newAvailableBalance}
 	err = UpdateSponsor(balanceModel, input.IsTestNet)
 	if err != nil {
 		return nil, err
