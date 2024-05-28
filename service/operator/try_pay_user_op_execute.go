@@ -126,7 +126,7 @@ func executePay(input *ExecutePayInput) (*model.PayResponse, error) {
 		return nil, xerrors.Errorf("Insufficient balance [%s] not Enough to Pay Cost [%s]", depositBalance.String(), gasUsdCost.String())
 	}
 	//Lock Deposit Balance
-	err = sponsor_manager.LockUserBalance(payUserKey, input.UserOpHash, isTestNet,
+	_, err = sponsor_manager.LockUserBalance(payUserKey, input.UserOpHash, isTestNet,
 		gasUsdCost)
 	if err != nil {
 		return nil, err

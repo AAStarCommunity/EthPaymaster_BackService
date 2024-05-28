@@ -89,7 +89,7 @@ func UserOpEventComunicate(network global_const.Network, event ContractUserOpera
 		return
 	}
 
-	err = sponsor_manager.ReleaseBalanceWithActualCost(event.Sender, event.UserOpHash[:], network, gasCostUsd, true)
+	_, err = sponsor_manager.ReleaseBalanceWithActualCost(event.Sender, event.UserOpHash[:], gasCostUsd, true)
 	if err != nil {
 		//TODO if is NetWorkError, need retry
 		logrus.Errorf("ReleaseBalanceWithActualCost failed: %v", err)
