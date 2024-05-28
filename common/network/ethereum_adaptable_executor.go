@@ -30,6 +30,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 	"math/big"
+	"strings"
 	"sync"
 )
 
@@ -60,11 +61,12 @@ func init() {
 
 type EthereumExecutor struct {
 	BaseExecutor
-	Client        *ethclient.Client
-	GethClient    *gethclient.Client
-	network       global_const.Network
-	ChainId       *big.Int
-	eventListener schedulor.EventListener
+	Client          *ethclient.Client
+	GethClient      *gethclient.Client
+	network         global_const.Network
+	ChainId         *big.Int
+	eventListener   schedulor.EventListener
+	webSocketClient *ethclient.Client
 }
 
 var mu sync.Mutex
@@ -94,7 +96,14 @@ func GetEthereumExecutor(network global_const.Network) *EthereumExecutor {
 	if !success {
 		panic(xerrors.Errorf("chainId %s is invalid", config.GetChainId(network)))
 	}
-	eventListener, err := schedulor.NewEventListener(client, network)
+	wsUrl := config.GetNewWorkClientURl(network)
+	wsUrl = strings.Replace(wsUrl, "https", "wss", 1)
+	webSocketClient, err := ethclient.Dial(wsUrl)
+	if err != nil {
+		panic(err)
+	}
+
+	eventListener, err := schedulor.NewEventListener(webSocketClient, network)
 	if err != nil {
 		panic(err)
 	}
@@ -102,11 +111,12 @@ func GetEthereumExecutor(network global_const.Network) *EthereumExecutor {
 	logrus.Debugf("after Lesten network :[%s]", network)
 	geth := gethclient.New(client.Client())
 	executorMap[network] = &EthereumExecutor{
-		network:       network,
-		Client:        client,
-		ChainId:       chainId,
-		GethClient:    geth,
-		eventListener: eventListener,
+		network:         network,
+		Client:          client,
+		ChainId:         chainId,
+		GethClient:      geth,
+		eventListener:   eventListener,
+		webSocketClient: webSocketClient,
 	}
 
 	return executorMap[network]
