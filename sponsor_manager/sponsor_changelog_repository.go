@@ -10,7 +10,7 @@ import (
 type UserSponsorBalanceUpdateLogDBModel struct {
 	model.BaseData
 	PayUserId  string                  `gorm:"type:varchar(255);index" json:"pay_user_id"`
-	Amount     *big.Float              `gorm:"type:numeric(30,18)" json:"amount"`
+	Amount     BigFloat                `gorm:"type:numeric(30,18)" json:"amount"`
 	UpdateType global_const.UpdateType `gorm:"type:varchar(20)" json:"update_type"`
 	UserOpHash string                  `gorm:"type:varchar(255)" json:"user_op_hash"`
 	TxHash     string                  `gorm:"type:varchar(255)" json:"tx_hash"`
@@ -41,13 +41,14 @@ func GetDepositAndWithDrawLog(userId string, IsTestNet bool) (models []*UserSpon
 func LockBalanceChangeLog(payUserid string, userOpHash string, amount *big.Float, isTestNet bool, updateReason string) error {
 	logModel := &UserSponsorBalanceUpdateLogDBModel{
 		PayUserId:  payUserid,
-		Amount:     amount,
+		Amount:     BigFloat{amount},
 		UserOpHash: userOpHash,
 		Source:     "GasTank",
 		IsTestNet:  isTestNet,
 	}
 	return relayDB.Create(logModel).Error
 }
+
 func GetChangeModel(updateType global_const.UpdateType, payUserId string, txHash string, isTestNet bool) (ChangeModel *UserSponsorBalanceUpdateLogDBModel, err error) {
 	if updateType == global_const.UpdateTypeDeposit || updateType == global_const.UpdateTypeWithdraw {
 

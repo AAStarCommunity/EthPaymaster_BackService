@@ -36,7 +36,7 @@ func UpdateSponsor(balanceModel *UserSponsorBalanceDBModel, isTestNet bool) erro
 	tx := relayDB.Model(&UserSponsorBalanceDBModel{}).Where("pay_user_id = ?", balanceModel.PayUserId).Where("is_test_net = ?", isTestNet).Updates(balanceModel)
 	return tx.Error
 }
-func getUserSponsorBalance(userId string, isTestNet bool) (balanceModel *UserSponsorBalanceDBModel, err error) {
+func findUserSponsor(userId string, isTestNet bool) (balanceModel *UserSponsorBalanceDBModel, err error) {
 	tx := relayDB.Model(&UserSponsorBalanceDBModel{}).Where("pay_user_id = ?", userId).Where("is_test_net = ?", isTestNet).First(&balanceModel)
 	return balanceModel, tx.Error
 }

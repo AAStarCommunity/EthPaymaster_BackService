@@ -73,9 +73,9 @@ func UserOpEventComunicate(network global_const.Network, event ContractUserOpera
 		return
 	}
 	if !event.Success {
-		err := sponsor_manager.ReleaseUserOpHashLock(event.UserOpHash[:], true)
+		_, err := sponsor_manager.ReleaseUserOpHashLockWhenFail(event.UserOpHash[:], true)
 		if err != nil {
-			logrus.Errorf("ReleaseUserOpHashLock failed: %v", err)
+			logrus.Errorf("ReleaseUserOpHashLockWhenFail failed: %v", err)
 		}
 		return
 	}
@@ -89,7 +89,7 @@ func UserOpEventComunicate(network global_const.Network, event ContractUserOpera
 		return
 	}
 
-	err = sponsor_manager.ReleaseBalanceWithActualCost(event.Sender, event.UserOpHash[:], network, gasCostUsd)
+	err = sponsor_manager.ReleaseBalanceWithActualCost(event.Sender, event.UserOpHash[:], network, gasCostUsd, true)
 	if err != nil {
 		//TODO if is NetWorkError, need retry
 		logrus.Errorf("ReleaseBalanceWithActualCost failed: %v", err)

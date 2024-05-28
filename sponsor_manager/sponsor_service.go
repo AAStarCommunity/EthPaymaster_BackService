@@ -14,6 +14,13 @@ import (
 	"sync"
 )
 
+type Source string
+
+const (
+	SourceDashboard Source = "Dashboard"
+	SourceRacks     Source = "Racks"
+)
+
 var (
 	relayDB  *gorm.DB
 	onlyOnce = sync.Once{}
@@ -34,7 +41,7 @@ func Init() {
 //----------Functions----------
 
 func GetAvailableBalance(userId string, isTestNet bool) (balance *big.Float, err error) {
-	balanceModel, err := getUserSponsorBalance(userId, isTestNet)
+	balanceModel, err := findUserSponsor(userId, isTestNet)
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -48,107 +55,138 @@ func GetAvailableBalance(userId string, isTestNet bool) (balance *big.Float, err
 // LockUserBalance
 // Reduce AvailableBalance and Increase LockBalance
 func LockUserBalance(userId string, userOpHash []byte, isTestNet bool,
-	lockAmount *big.Float) (err error) {
-	balanceModel, err := getUserSponsorBalance(userId, isTestNet)
+	lockAmount *big.Float) (*UserSponsorBalanceUpdateLogDBModel, error) {
+	balanceModel, err := findUserSponsor(userId, isTestNet)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return xerrors.Errorf("No Balance Deposit Here ")
+		return nil, xerrors.Errorf("No Balance Deposit Here ")
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
+	UserOphashStr := utils.EncodeToHexStringWithPrefix(userOpHash)
+	_, err = GetChangeModel(global_const.UpdateTypeLock, userId, UserOphashStr, isTestNet)
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, xerrors.Errorf("UserOpHash [%s] Already Lock", UserOphashStr)
+	}
+
+	if balanceModel.AvailableBalance.Cmp(lockAmount) < 0 {
+		return nil, xerrors.Errorf("Insufficient balance [%s] not Enough to Lock [%s]", balanceModel.AvailableBalance.String(), lockAmount.String())
+	}
+
 	lockBalance := new(big.Float).Add(balanceModel.LockBalance.Float, lockAmount)
 	availableBalance := new(big.Float).Sub(balanceModel.AvailableBalance.Float, lockAmount)
 	balanceModel.LockBalance = BigFloat{lockBalance}
 	balanceModel.AvailableBalance = BigFloat{availableBalance}
-	err = UpdateSponsor(balanceModel, isTestNet)
-	if err != nil {
-		return err
+	tx := relayDB.Begin()
+	if updateErr := tx.Model(&UserSponsorBalanceDBModel{}).
+		Where("pay_user_id = ?", balanceModel.PayUserId).
+		Where("is_test_net = ?", isTestNet).Updates(balanceModel).Error; updateErr != nil {
+		tx.Rollback()
+		return nil, updateErr
 	}
+
 	changeModel := &UserSponsorBalanceUpdateLogDBModel{
-		UserOpHash: utils.EncodeToHexStringWithPrefix(userOpHash),
+		UserOpHash: UserOphashStr,
 		PayUserId:  userId,
-		Amount:     lockAmount,
-		Source:     "GasTank",
+		Amount:     BigFloat{lockAmount},
 		IsTestNet:  isTestNet,
 		UpdateType: global_const.UpdateTypeLock,
 	}
-	err = AddBalanceChangeLog(changeModel)
-	if err != nil {
-		return err
+	if createErr := tx.Create(changeModel).Error; createErr != nil {
+		tx.Rollback()
+		return nil, createErr
+	}
+	if commitErr := tx.Commit().Error; commitErr != nil {
+		tx.Rollback()
+		return nil, commitErr
 	}
 
-	return nil
+	return nil, nil
 }
 
-func ReleaseBalanceWithActualCost(userId string, userOpHash []byte, network global_const.Network,
-	actualGasCost *big.Float, isTestNet bool) error {
+func ReleaseBalanceWithActualCost(userId string, userOpHash []byte,
+	actualGasCost *big.Float, isTestNet bool) (*UserSponsorBalanceDBModel, error) {
 	userOpHashHex := utils.EncodeToHexStringWithPrefix(userOpHash)
 
-	changeModel, err := GetChangeModel(global_const.UpdateTypeLock, "", userOpHashHex, isTestNet)
+	changeModel, err := GetChangeModel(global_const.UpdateTypeLock, userId, userOpHashHex, isTestNet)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	balanceModel, err := getUserSponsorBalance(changeModel.PayUserId, changeModel.IsTestNet)
+	balanceModel, err := findUserSponsor(changeModel.PayUserId, changeModel.IsTestNet)
 
 	lockBalance := changeModel.Amount
-	balanceModel.LockBalance = BigFloat{new(big.Float).Sub(balanceModel.LockBalance.Float, lockBalance)}
-	refundBalance := new(big.Float).Sub(lockBalance, actualGasCost)
+	balanceModel.LockBalance = BigFloat{new(big.Float).Sub(balanceModel.LockBalance.Float, lockBalance.Float)}
+	refundBalance := new(big.Float).Sub(lockBalance.Float, actualGasCost)
 	balanceModel.AvailableBalance = BigFloat{new(big.Float).Add(balanceModel.AvailableBalance.Float, refundBalance)}
 
-	err = UpdateSponsor(balanceModel, isTestNet)
-
-	if err != nil {
-		return err
+	tx := relayDB.Begin()
+	if updateErr := tx.Model(&UserSponsorBalanceDBModel{}).
+		Model(&UserSponsorBalanceDBModel{}).
+		Where("pay_user_id = ?", balanceModel.PayUserId).
+		Where("is_test_net = ?", isTestNet).Updates(balanceModel).Error; updateErr != nil {
+		tx.Rollback()
+		return nil, err
 	}
+
 	changeDBModel := &UserSponsorBalanceUpdateLogDBModel{
 		UserOpHash: userOpHashHex,
 		PayUserId:  changeModel.PayUserId,
-		Amount:     refundBalance,
+		Amount:     BigFloat{refundBalance},
 		Source:     "GasTank",
 		IsTestNet:  isTestNet,
 		UpdateType: global_const.UpdateTypeRelease,
 	}
-	err = AddBalanceChangeLog(changeDBModel)
-	return nil
+	if createErr := tx.Create(changeDBModel).Error; createErr != nil {
+		tx.Rollback()
+		return nil, createErr
+	}
+	if commitErr := tx.Commit().Error; commitErr != nil {
+		tx.Rollback()
+		return nil, commitErr
+	}
+	return balanceModel, nil
 }
 
 type ReleaseUserOpHashLockInput struct {
 	UserOpHash []byte
 }
 
-func ReleaseUserOpHashLock(userOpHash []byte, isTestNet bool) (err error) {
+func ReleaseUserOpHashLockWhenFail(userOpHash []byte, isTestNet bool) (*UserSponsorBalanceDBModel, error) {
 	// Get ChangeLog By UserOpHash
 	userOpHashHex := utils.EncodeToHexStringWithPrefix(userOpHash)
 	changeModel, err := GetChangeModel(global_const.UpdateTypeLock, "", userOpHashHex, isTestNet)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	// Release Lock
-	balanceModel, err := getUserSponsorBalance(changeModel.PayUserId, changeModel.IsTestNet)
-
+	balanceModel, err := findUserSponsor(changeModel.PayUserId, changeModel.IsTestNet)
 	lockBalance := changeModel.Amount
-
-	balanceModel.LockBalance = BigFloat{new(big.Float).Sub(balanceModel.LockBalance.Float, lockBalance)}
-
-	balanceModel.AvailableBalance = BigFloat{new(big.Float).Add(balanceModel.AvailableBalance.Float, lockBalance)}
-
-	err = UpdateSponsor(balanceModel, isTestNet)
-	if err != nil {
-		return err
+	balanceModel.LockBalance = BigFloat{new(big.Float).Sub(balanceModel.LockBalance.Float, lockBalance.Float)}
+	balanceModel.AvailableBalance = BigFloat{new(big.Float).Add(balanceModel.AvailableBalance.Float, lockBalance.Float)}
+	tx := relayDB.Begin()
+	if updateErr := tx.Model(&UserSponsorBalanceDBModel{}).
+		Where("pay_user_id = ?", balanceModel.PayUserId).
+		Where("is_test_net = ?", isTestNet).Updates(balanceModel).Error; updateErr != nil {
+		tx.Rollback()
+		return nil, err
 	}
+
 	changeDBModel := &UserSponsorBalanceUpdateLogDBModel{
 		UserOpHash: userOpHashHex,
 		PayUserId:  changeModel.PayUserId,
 		Amount:     lockBalance,
-		Source:     "GasTank",
 		IsTestNet:  isTestNet,
 		UpdateType: global_const.UpdateTypeRelease,
 	}
-	err = AddBalanceChangeLog(changeDBModel)
-	if err != nil {
-		return err
+	if createErr := tx.Create(changeDBModel).Error; createErr != nil {
+		tx.Rollback()
+		return nil, createErr
 	}
-	return nil
+	if commitErr := tx.Commit().Error; commitErr != nil {
+		tx.Rollback()
+		return nil, commitErr
+	}
+	return nil, err
 }
 
 //----------Functions----------
@@ -159,8 +197,9 @@ func DepositSponsor(input *model.DepositSponsorRequest) (*UserSponsorBalanceDBMo
 
 	tx := relayDB.Begin()
 	if errors.Is(err, gorm.ErrRecordNotFound) {
+		//init Data
 		balanceModel = &UserSponsorBalanceDBModel{}
-		balanceModel.AvailableBalance = BigFloat{input.Amount}
+		balanceModel.AvailableBalance = BigFloat{big.NewFloat(0)}
 		balanceModel.PayUserId = input.PayUserId
 		balanceModel.LockBalance = BigFloat{big.NewFloat(0)}
 		balanceModel.IsTestNet = input.IsTestNet
@@ -187,7 +226,7 @@ func DepositSponsor(input *model.DepositSponsorRequest) (*UserSponsorBalanceDBMo
 	txInfoJSon, _ := json.Marshal(input.TxInfo)
 	chagneModel := &UserSponsorBalanceUpdateLogDBModel{
 		PayUserId:  input.PayUserId,
-		Amount:     input.Amount,
+		Amount:     BigFloat{input.Amount},
 		Source:     "Deposit",
 		IsTestNet:  input.IsTestNet,
 		UpdateType: global_const.UpdateTypeDeposit,
@@ -199,12 +238,15 @@ func DepositSponsor(input *model.DepositSponsorRequest) (*UserSponsorBalanceDBMo
 		return nil, createErr
 	}
 
-	tx.Commit()
+	if commitErr := tx.Commit().Error; commitErr != nil {
+		tx.Rollback()
+		return nil, commitErr
+	}
 	return balanceModel, nil
 }
 
-func WithDrawSponsor(input *model.WithdrawSponsorRequest) (balanceModel *UserSponsorBalanceDBModel, err error) {
-	balanceModel, err = FindUserSponsorBalance(input.PayUserId, input.IsTestNet)
+func WithDrawSponsor(input *model.WithdrawSponsorRequest) (*UserSponsorBalanceDBModel, error) {
+	balanceModel, err := FindUserSponsorBalance(input.PayUserId, input.IsTestNet)
 	if err != nil {
 		return nil, err
 	}
@@ -213,21 +255,28 @@ func WithDrawSponsor(input *model.WithdrawSponsorRequest) (balanceModel *UserSpo
 	}
 	newAvailableBalance := new(big.Float).Sub(balanceModel.AvailableBalance.Float, input.Amount)
 	balanceModel.AvailableBalance = BigFloat{newAvailableBalance}
-	err = UpdateSponsor(balanceModel, input.IsTestNet)
-	if err != nil {
-		return nil, err
+	tx := relayDB.Begin()
+	if updateErr := tx.Model(&UserSponsorBalanceDBModel{}).
+		Where("pay_user_id = ?", balanceModel.PayUserId).
+		Where("is_test_net = ?", input.IsTestNet).Updates(balanceModel).Error; updateErr != nil {
+		tx.Rollback()
+		return nil, updateErr
 	}
 	changeModel := &UserSponsorBalanceUpdateLogDBModel{
 		PayUserId:  input.PayUserId,
-		Amount:     input.Amount,
+		Amount:     BigFloat{input.Amount},
 		Source:     "Withdraw",
 		IsTestNet:  input.IsTestNet,
 		UpdateType: global_const.UpdateTypeWithdraw,
 		TxHash:     input.TxHash,
 	}
-	err = AddBalanceChangeLog(changeModel)
-	if err != nil {
-		return nil, err
+	if createErr := tx.Create(changeModel).Error; createErr != nil {
+		tx.Rollback()
+		return nil, createErr
+	}
+	if commitErr := tx.Commit().Error; commitErr != nil {
+		tx.Rollback()
+		return nil, commitErr
 	}
 	return balanceModel, nil
 }
