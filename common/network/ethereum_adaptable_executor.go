@@ -15,6 +15,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/config"
+	"AAStarCommunity/EthPaymaster_BackService/schedulor"
 	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
@@ -59,10 +60,11 @@ func init() {
 
 type EthereumExecutor struct {
 	BaseExecutor
-	Client     *ethclient.Client
-	GethClient *gethclient.Client
-	network    global_const.Network
-	ChainId    *big.Int
+	Client        *ethclient.Client
+	GethClient    *gethclient.Client
+	network       global_const.Network
+	ChainId       *big.Int
+	eventListener schedulor.EventListener
 }
 
 var mu sync.Mutex
@@ -92,12 +94,19 @@ func GetEthereumExecutor(network global_const.Network) *EthereumExecutor {
 	if !success {
 		panic(xerrors.Errorf("chainId %s is invalid", config.GetChainId(network)))
 	}
+	eventListener, err := schedulor.NewEventListener(client, network)
+	if err != nil {
+		panic(err)
+	}
+	go eventListener.Listen()
+	logrus.Debugf("after Lesten network :[%s]", network)
 	geth := gethclient.New(client.Client())
 	executorMap[network] = &EthereumExecutor{
-		network:    network,
-		Client:     client,
-		ChainId:    chainId,
-		GethClient: geth,
+		network:       network,
+		Client:        client,
+		ChainId:       chainId,
+		GethClient:    geth,
+		eventListener: eventListener,
 	}
 
 	return executorMap[network]
