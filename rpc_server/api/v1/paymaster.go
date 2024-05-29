@@ -3,7 +3,6 @@ package v1
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/config"
 	"AAStarCommunity/EthPaymaster_BackService/service/operator"
 	"fmt"
@@ -38,16 +37,17 @@ func Paymaster(ctx *gin.Context) {
 
 	jsonRpcRequest := model.JsonRpcRequest{}
 	response := model.GetResponse()
-
-	defer func() {
-		if r := recover(); r != nil {
-			errInfo := fmt.Sprintf("[panic]: err : [%v] , stack :[%v]", r, utils.GetCurrentGoroutineStack())
-			logrus.Error(errInfo)
-			response.SetHttpCode(http.StatusInternalServerError).FailCode(ctx, http.StatusInternalServerError, fmt.Sprintf("%v", r))
-		}
-
-	}()
+	//
+	//defer func() {
+	//	if r := recover(); r != nil {
+	//		errInfo := fmt.Sprintf("[panic]: err : [%v] , stack :[%v]", r, utils.GetCurrentGoroutineStack())
+	//		logrus.Error(errInfo)
+	//		response.SetHttpCode(http.StatusInternalServerError).FailCode(ctx, http.StatusInternalServerError, fmt.Sprintf("%v", r))
+	//	}
+	//
+	//}()
 	network := ctx.Param("network")
+	logrus.Debugf("Paymaster network: %s", network)
 	if network == "" {
 		errStr := fmt.Sprintf("Request Error [network is empty]")
 		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, errStr)
@@ -58,13 +58,13 @@ func Paymaster(ctx *gin.Context) {
 		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, errStr)
 		return
 	}
-	jsonRpcRequest.Network = global_const.Network(network)
 
 	if err := ctx.ShouldBindJSON(&jsonRpcRequest); err != nil {
-		errStr := fmt.Sprintf("Request Error [%v]", err)
+		errStr := fmt.Sprintf("Parse Request Error [%v]", err)
 		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, errStr)
 		return
 	}
+	jsonRpcRequest.Network = global_const.Network(network)
 	method := jsonRpcRequest.Method
 	if method == "" {
 		errStr := fmt.Sprintf("Request Error [method is empty]")

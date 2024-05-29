@@ -61,6 +61,7 @@ func GenerateMockUservOperation() *map[string]any {
 
 	return &MockUserOpData
 }
+
 func ValidateHex(value string) bool {
 	if HexPattern.MatchString(value) {
 		return true

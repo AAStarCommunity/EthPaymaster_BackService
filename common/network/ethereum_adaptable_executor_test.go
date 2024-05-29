@@ -13,6 +13,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/sirupsen/logrus"
 	"testing"
+	"time"
 )
 
 func TestEthereumAdaptableExecutor(t *testing.T) {
@@ -364,4 +365,9 @@ func testEthereumExecutorClientConnect(t *testing.T, chain global_const.Network)
 		t.Fatalf(" %s chainId not equal %s", chainId.String(), executor.ChainId.String())
 	}
 	t.Logf("network %s chainId: %s", chain, chainId.String())
+}
+func TestTime(t *testing.T) {
+	start := time.Now()
+	t.Logf("start time: %v", start.String())
+	t.Logf("start time: %v", start.Format("2006-01-02 15:04:05.MST"))
 }

@@ -4,7 +4,6 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/envirment"
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -17,7 +16,6 @@ import (
 // @Success 200
 func Healthz(c *gin.Context) {
 	response := model.GetResponse()
-	logrus.Debug("In the Healthz")
 	response.WithDataSuccess(c, gin.H{
 		"hello":       "Eth Paymaster",
 		"environment": envirment.Environment.Name,

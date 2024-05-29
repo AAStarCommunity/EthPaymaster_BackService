@@ -45,9 +45,10 @@ func SetRouters() (routers *gin.Engine) {
 func buildRoute(routers *gin.Engine) {
 	// build http routers and middleware
 	routers.Use(middlewares.GenericRecoveryHandler())
-	if envirment.Environment.IsDevelopment() {
-		routers.Use(middlewares.LogHandler())
-	}
+
+	routers.Use(middlewares.LogHandler())
+
+	routers.Use(middlewares.PvMetrics())
 	routers.Use(middlewares.CorsHandler())
 	//build the routers not need api access like auth or Traffic limit
 	buildRouters(routers, PublicRouterMaps)

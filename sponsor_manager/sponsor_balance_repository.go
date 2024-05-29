@@ -25,6 +25,7 @@ func CreateSponsorBalance(balanceModel *UserSponsorBalanceDBModel) error {
 	return relayDB.Create(balanceModel).Error
 }
 func FindUserSponsorBalance(userId string, isTestNet bool) (balanceModel *UserSponsorBalanceDBModel, err error) {
+
 	balanceModel = &UserSponsorBalanceDBModel{}
 	tx := relayDB.Where("pay_user_id = ?", userId).Where("is_test_net = ?", isTestNet).First(balanceModel)
 	if tx.Error != nil {
