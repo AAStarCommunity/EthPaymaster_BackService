@@ -7,10 +7,19 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"net/http"
 	"strconv"
 )
+
+var sourcePublicKeyMap = map[string]string{
+	"Dashboard": "0x17EE97b5F4Ab8a4b2CfEcfb42b66718F15557687",
+}
+
+func init() {
+
+}
 
 // DepositSponsor
 // @Tags Sponsor
@@ -29,6 +38,13 @@ func DepositSponsor(ctx *gin.Context) {
 		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, errStr)
 		return
 	}
+	signerAddress, ok := sourcePublicKeyMap["Dashboard"]
+	if !ok {
+		response.SetHttpCode(http.StatusInternalServerError).FailCode(ctx, http.StatusInternalServerError, "Invalid Source")
+		return
+	}
+	logrus.Debugf("Signer Address [%v]", signerAddress)
+
 	//TODO Add Signature Verification
 	result, err := sponsor_manager.DepositSponsor(&request)
 	if err != nil {
