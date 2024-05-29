@@ -20,7 +20,6 @@ RUN mkdir -p /ep && mkdir -p /ep/log
 WORKDIR /ep
 
 COPY --from=build-env /go/src/app /ep/
-COPY --from=build-env /go/src/app/config/*.json /ep/config/
 
 ENV PATH $PATH:/aa
 
