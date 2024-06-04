@@ -19,6 +19,7 @@ type SecretConfig struct {
 	RelayDBConfig           DBConfig `json:"relay_db_config"`
 	ApiKeyTableName         string   `json:"api_key_table_name"`
 	StrategyConfigTableName string   `json:"strategy_config_table_name"`
+	FreeSponsorWhitelist    []string `json:"free_sponsor_whitelist"`
 }
 
 type NetWorkSecretConfig struct {

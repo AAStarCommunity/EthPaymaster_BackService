@@ -32,7 +32,7 @@ func GetUserOpWithPaymasterAndDataForSimulate(op user_op.UserOpInput, strategy *
 		op.CallGasLimit = global_const.DummyCallGasLimit
 	}
 
-	paymasterData, err := executor.GetPaymasterData(&op, strategy, paymasterDataInput)
+	paymasterData, _, err := executor.GetPaymasterData(&op, strategy, paymasterDataInput)
 	if err != nil {
 		return nil, err
 	}

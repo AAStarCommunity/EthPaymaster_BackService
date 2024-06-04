@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math/big"
 	"net/http"
 	"net/url"
 	"os"
@@ -27,6 +28,15 @@ func init() {
 	URLMap = make(map[global_const.TokenType]string)
 	URLMap[global_const.TokenTypeETH] = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
 	URLMap[global_const.TokenTypeOP] = "https://api.coingecko.com/api/v3/simple/price?ids=optimism&vs_currencies=usd"
+}
+
+func GetTokenCostInUsd(tokenType global_const.TokenType, amount *big.Float) (*big.Float, error) {
+	price, err := GetPriceUsd(tokenType)
+	if err != nil {
+		return nil, xerrors.Errorf("get price error: %w", err)
+	}
+	amountInUsd := new(big.Float).Mul(new(big.Float).SetFloat64(price), amount)
+	return amountInUsd, nil
 }
 
 func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {

@@ -14,6 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
+	"gorm.io/gorm"
 	"math/big"
 	"regexp"
 	"runtime"
@@ -97,7 +98,7 @@ func GetGasEntryPointGasPrice(maxFeePerGas *big.Int, maxPriorityFeePerGas *big.I
 	return GetMinValue(maxFeePerGas, combineFee)
 }
 
-func EncodeToStringWithPrefix(data []byte) string {
+func EncodeToHexStringWithPrefix(data []byte) string {
 	res := hex.EncodeToString(data)
 	if res[:2] != "0x" {
 		return "0x" + res
@@ -199,4 +200,19 @@ func GetCurrentGoroutineStack() string {
 	var buf [defaultStackSize]byte
 	n := runtime.Stack(buf[:], false)
 	return string(buf[:n])
+}
+func DBTransactional(db *gorm.DB, handle func() error) (err error) {
+	tx := db.Begin()
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			panic(p)
+		} else if err != nil {
+			tx.Rollback()
+		} else {
+			err = tx.Commit().Error
+		}
+	}()
+	err = handle()
+	return
 }

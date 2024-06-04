@@ -41,7 +41,7 @@ func TestPackIntTo32Bytes(t *testing.T) {
 
 	bytes := PackIntTo32Bytes(big.NewInt(2312), big.NewInt(2312))
 
-	resStr := EncodeToStringWithPrefix(bytes[:])
+	resStr := EncodeToHexStringWithPrefix(bytes[:])
 	t.Logf("resStr: %s\n", resStr)
 }
 

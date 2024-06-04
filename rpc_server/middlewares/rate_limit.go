@@ -21,11 +21,9 @@ var limiter map[string]*rate.Limiter
 func RateLimiterByApiKeyHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		if exists, current := utils.CurrentUser(ctx); exists {
-			apiKeyModel, _ := ctx.Get(global_const.ContextKeyApiMoDel)
+			apiKeyModel := ctx.MustGet(global_const.ContextKeyApiMoDel)
 			defaultLimit := DefaultLimit
-			if apiKeyModel != nil {
-				defaultLimit = apiKeyModel.(*model.ApiKeyModel).RateLimit
-			}
+			defaultLimit = apiKeyModel.(*model.ApiKeyModel).RateLimit
 			if limiting(&current, defaultLimit) {
 				ctx.Next()
 			} else {

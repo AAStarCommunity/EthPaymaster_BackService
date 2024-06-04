@@ -5,17 +5,21 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"AAStarCommunity/EthPaymaster_BackService/common/network"
 	"AAStarCommunity/EthPaymaster_BackService/common/paymaster_data"
+	"AAStarCommunity/EthPaymaster_BackService/common/price_compoent"
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
+	"AAStarCommunity/EthPaymaster_BackService/config"
 	"AAStarCommunity/EthPaymaster_BackService/gas_executor"
 	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
-	"AAStarCommunity/EthPaymaster_BackService/service/pay_service"
 	"AAStarCommunity/EthPaymaster_BackService/service/validator_service"
+	"AAStarCommunity/EthPaymaster_BackService/sponsor_manager"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
+	"math/big"
+	"strconv"
 )
 
-func TryPayUserOpExecute(request *model.UserOpRequest) (*model.TryPayUserOpResponse, error) {
+func TryPayUserOpExecute(apiKeyModel *model.ApiKeyModel, request *model.UserOpRequest) (*model.TryPayUserOpResponse, error) {
 	userOp, strategy, paymasterDataInput, err := prepareExecute(request)
 	if err != nil {
 		return nil, err
@@ -29,12 +33,12 @@ func TryPayUserOpExecute(request *model.UserOpRequest) (*model.TryPayUserOpRespo
 	paymasterDataInput.PaymasterVerificationGasLimit = gasResponse.OpEstimateGas.PaymasterVerificationGasLimit
 	paymasterDataInput.PaymasterPostOpGasLimit = gasResponse.OpEstimateGas.PaymasterPostOpGasLimit
 
-	payReceipt, err := executePay(strategy, paymasterUserOp, gasResponse)
-	if err != nil {
-		return nil, err
-	}
-	logrus.Debug("payReceipt:", payReceipt)
-	result, err := postExecute(paymasterUserOp, strategy, gasResponse, paymasterDataInput)
+	//payReceipt, err := executePay(strategy, paymasterUserOp, gasResponse)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//logrus.Debug("payReceipt:", payReceipt)
+	result, err := postExecute(apiKeyModel, paymasterUserOp, strategy, gasResponse, paymasterDataInput)
 	if err != nil {
 		return nil, err
 	}
@@ -88,30 +92,84 @@ func ValidateGas(userOp *user_op.UserOpInput, gasComputeResponse *model.ComputeG
 	return nil
 }
 
-func executePay(strategy *model.Strategy, userOp *user_op.UserOpInput, gasResponse *model.ComputeGasResponse) (*model.PayReceipt, error) {
-	//1.Recharge
-	ethereumPayservice := pay_service.EthereumPayService{}
-	if err := ethereumPayservice.Pay(); err != nil {
+func executePay(input *ExecutePayInput) (*model.PayResponse, error) {
+	if input.PayType == global_const.PayTypeERC20 {
+		logrus.Debugf("Not Need ExecutePay In ERC20 PayType")
+		return nil, nil
+	}
+	if config.IsSponsorWhitelist(input.UserOpSender) {
+		logrus.Debugf("Not Need ExecutePay In SponsorWhitelist [%s]", input.UserOpSender)
+		return nil, nil
+	}
+	// TODO
+	//if config.IsTestNet(input.Network) {
+	//	logrus.Debugf("Not Need ExecutePay In TestNet [%s]", input.Network)
+	//	return nil, nil
+	//}
+	// Get Deposit Balance
+	var payUserKey string
+	if input.ProjectSponsor == true {
+		payUserKey = input.ProjectUserId
+	} else {
+		payUserKey = input.UserOpSender
+	}
+	isTestNet := config.IsTestNet(input.Network)
+	depositBalance, err := sponsor_manager.GetAvailableBalance(payUserKey, isTestNet)
+	if err != nil {
 		return nil, err
 	}
-	//2.record account
-	ethereumPayservice.RecordAccount()
-	//3.return Receipt
-	ethereumPayservice.GetReceipt()
-	return &model.PayReceipt{
-		TransactionHash: "0x110406d44ec1681fcdab1df2310181dee26ff43c37167b2c9c496b35cce69437",
-		Sponsor:         "aastar",
+	gasUsdCost, err := price_compoent.GetTokenCostInUsd(input.GasToken, input.MaxTxGasCostInEther)
+	if err != nil {
+		return nil, err
+	}
+	if depositBalance.Cmp(gasUsdCost) < 0 {
+		return nil, xerrors.Errorf("Insufficient balance [%s] not Enough to Pay Cost [%s]", depositBalance.String(), gasUsdCost.String())
+	}
+	//Lock Deposit Balance
+	_, err = sponsor_manager.LockUserBalance(payUserKey, input.UserOpHash, isTestNet,
+		gasUsdCost)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.PayResponse{
+		PayType: input.PayType,
 	}, nil
 }
 
-func postExecute(userOp *user_op.UserOpInput, strategy *model.Strategy, gasResponse *model.ComputeGasResponse, paymasterDataInput *paymaster_data.PaymasterDataInput) (*model.TryPayUserOpResponse, error) {
+type ExecutePayInput struct {
+	ProjectUserId       string
+	PayType             global_const.PayType
+	ProjectSponsor      bool
+	UserOpSender        string
+	MaxTxGasCostInEther *big.Float
+	UserOpHash          []byte
+	Network             global_const.Network
+	GasToken            global_const.TokenType
+}
+
+func postExecute(apiKeyModel *model.ApiKeyModel, userOp *user_op.UserOpInput, strategy *model.Strategy, gasResponse *model.ComputeGasResponse, paymasterDataInput *paymaster_data.PaymasterDataInput) (*model.TryPayUserOpResponse, error) {
+
 	executor := network.GetEthereumExecutor(strategy.GetNewWork())
-	paymasterData, err := executor.GetPaymasterData(userOp, strategy, paymasterDataInput)
+	paymasterData, userOpHash, err := executor.GetPaymasterData(userOp, strategy, paymasterDataInput)
 	if err != nil {
 		return nil, xerrors.Errorf("postExecute GetPaymasterData Error: [%w]", err)
 	}
 	logrus.Debug("postExecute paymasterData:", paymasterData)
 
+	_, err = executePay(&ExecutePayInput{
+		ProjectUserId:       strconv.FormatInt(apiKeyModel.UserId, 10),
+		PayType:             strategy.GetPayType(),
+		ProjectSponsor:      strategy.ProjectSponsor,
+		UserOpSender:        userOp.Sender.String(),
+		MaxTxGasCostInEther: gasResponse.TotalGasDetail.MaxTxGasCostInEther,
+		UserOpHash:          userOpHash,
+		Network:             strategy.GetNewWork(),
+		GasToken:            strategy.GetGasToken(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("postExecute executePay Error: [%w]", err)
+	}
 	var result = &model.TryPayUserOpResponse{
 		StrategyId:        strategy.Id,
 		EntryPointAddress: strategy.GetEntryPointAddress().String(),
@@ -121,7 +179,7 @@ func postExecute(userOp *user_op.UserOpInput, strategy *model.Strategy, gasRespo
 		Erc20TokenCost:    gasResponse.Erc20TokenCost,
 
 		UserOpResponse: &model.UserOpResponse{
-			PayMasterAndData:     utils.EncodeToStringWithPrefix(paymasterData),
+			PayMasterAndData:     utils.EncodeToHexStringWithPrefix(paymasterData),
 			PreVerificationGas:   gasResponse.OpEstimateGas.PreVerificationGas,
 			MaxFeePerGas:         gasResponse.OpEstimateGas.MaxFeePerGas,
 			MaxPriorityFeePerGas: gasResponse.OpEstimateGas.MaxPriorityFeePerGas,
@@ -131,8 +189,8 @@ func postExecute(userOp *user_op.UserOpInput, strategy *model.Strategy, gasRespo
 	}
 
 	if strategy.GetStrategyEntrypointVersion() == global_const.EntrypointV07 {
-		result.UserOpResponse.AccountGasLimit = utils.EncodeToStringWithPrefix(gasResponse.OpEstimateGas.AccountGasLimit[:])
-		result.UserOpResponse.GasFees = utils.EncodeToStringWithPrefix(gasResponse.OpEstimateGas.GasFees[:])
+		result.UserOpResponse.AccountGasLimit = utils.EncodeToHexStringWithPrefix(gasResponse.OpEstimateGas.AccountGasLimit[:])
+		result.UserOpResponse.GasFees = utils.EncodeToHexStringWithPrefix(gasResponse.OpEstimateGas.GasFees[:])
 		result.UserOpResponse.PaymasterVerificationGasLimit = gasResponse.OpEstimateGas.PaymasterVerificationGasLimit
 		result.UserOpResponse.PaymasterPostOpGasLimit = gasResponse.OpEstimateGas.PaymasterPostOpGasLimit
 	}

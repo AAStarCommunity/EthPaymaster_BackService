@@ -38,7 +38,7 @@ var basicPaymasterDataFunc = func(data *paymaster_data.PaymasterDataInput, signa
 }
 
 func init() {
-	paymasterDataFuncMap[global_const.PayTypeVerifying] = basicPaymasterDataFunc
+	paymasterDataFuncMap[global_const.PayTypeProjectSponsor] = basicPaymasterDataFunc
 	paymasterDataFuncMap[global_const.PayTypeERC20] = basicPaymasterDataFunc
 	paymasterDataFuncMap[global_const.PayTypeSuperVerifying] = func(data *paymaster_data.PaymasterDataInput, signature []byte) ([]byte, error) {
 		packed, err := BasicPaymasterDataAbiV06.Pack(data.ValidUntil, data.ValidAfter, data.ERC20Token, data.ExchangeRate)

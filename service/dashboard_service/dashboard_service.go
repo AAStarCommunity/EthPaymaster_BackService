@@ -18,14 +18,12 @@ import (
 
 var (
 	configDB *gorm.DB
-	relayDB  *gorm.DB
 	onlyOnce = sync.Once{}
 )
 
 func Init() {
 	onlyOnce.Do(func() {
 		configDBDsn := config.GetConfigDBDSN()
-		relayDBDsn := config.GetRelayDBDSN()
 
 		configDBVar, err := gorm.Open(postgres.Open(configDBDsn), &gorm.Config{})
 		if err != nil {
@@ -33,11 +31,6 @@ func Init() {
 		}
 		configDB = configDBVar
 
-		relayDBVar, err := gorm.Open(postgres.Open(relayDBDsn), &gorm.Config{})
-		if err != nil {
-			panic(err)
-		}
-		relayDB = relayDBVar
 	})
 
 }
@@ -77,6 +70,8 @@ func GetStrategyByCode(strategyCode string, entryPointVersion global_const.Entry
 	if err != nil {
 		return nil, err
 	}
+
+	strategy.ProjectSponsor = true
 
 	return strategy, nil
 }
@@ -147,7 +142,7 @@ func convertStrategyDBModelToStrategy(strategyDBModel *StrategyDBModel, entryPoi
 		},
 		PaymasterInfo: &model.PaymasterInfo{
 			PayMasterAddress:        config.GetPaymasterAddress(network, entryPointVersion),
-			PayType:                 global_const.PayTypeVerifying,
+			PayType:                 global_const.PayTypeProjectSponsor,
 			IsProjectErc20PayEnable: false,
 		},
 		ExecuteRestriction: strategyExecuteRestriction,
@@ -176,7 +171,7 @@ func GetSuitableStrategy(entryPointVersion global_const.EntrypointVersion, chain
 	gasToken := config.GetGasToken(chain)
 	entryPointAddress := config.GetEntrypointAddress(chain, entryPointVersion)
 	paymasterAddress := config.GetPaymasterAddress(chain, entryPointVersion)
-	payType := global_const.PayTypeVerifying
+	payType := global_const.PayTypeUserSponsor
 	isPerc20Enable := false
 	if gasUseToken != "" {
 		payType = global_const.PayTypeERC20
@@ -201,9 +196,6 @@ func GetSuitableStrategy(entryPointVersion global_const.EntrypointVersion, chain
 		},
 		Erc20TokenType: gasUseToken,
 	}
-	if strategy == nil {
-		return nil, errors.New("strategy not found")
-	}
 	return strategy, nil
 }
 
@@ -225,6 +217,7 @@ func IsPayMasterSupport(address string, chain global_const.Network) bool {
 
 type ApiKeyDbModel struct {
 	model.BaseData
+	UserId    int64          `gorm:"column:user_id;type:integer" json:"user_id"`
 	Disable   bool           `gorm:"column:disable;type:bool" json:"disable"`
 	ApiKey    string         `gorm:"column:api_key;type:varchar(255)" json:"api_key"`
 	KeyName   string         `gorm:"column:key_name;type:varchar(255)" json:"key_name"`
@@ -244,6 +237,7 @@ func convertApiKeyDbModelToApiKeyModel(apiKeyDbModel *ApiKeyDbModel) *model.ApiK
 		Disable:   apiKeyDbModel.Disable,
 		ApiKey:    apiKeyDbModel.ApiKey,
 		RateLimit: 10,
+		UserId:    apiKeyDbModel.UserId,
 	}
 }
 func GetAPiInfoByApiKey(apiKey string) (*model.ApiKeyModel, error) {

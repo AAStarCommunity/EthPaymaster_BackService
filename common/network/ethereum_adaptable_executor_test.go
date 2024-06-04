@@ -283,7 +283,7 @@ func testGetPaymasterData(t *testing.T, chain global_const.Network, input *user_
 	dataInput := paymaster_data.NewPaymasterDataInput(strategy)
 	dataInput.PaymasterPostOpGasLimit = global_const.DummyPaymasterPostoperativelyBigint
 	dataInput.PaymasterVerificationGasLimit = global_const.DummyPaymasterOversimplificationBigint
-	paymasterData, err := executor.GetPaymasterData(input, strategy, dataInput)
+	paymasterData, _, err := executor.GetPaymasterData(input, strategy, dataInput)
 	if err != nil {
 		t.Error(err)
 		return
@@ -301,7 +301,7 @@ func testSimulateHandleOp(t *testing.T, chain global_const.Network, strategy *mo
 	dataInput := paymaster_data.NewPaymasterDataInput(strategy)
 	op.AccountGasLimits = user_op.DummyAccountGasLimits
 	op.GasFees = user_op.DummyGasFees
-	paymasterData, err := sepoliaExector.GetPaymasterData(op, strategy, dataInput)
+	paymasterData, _, err := sepoliaExector.GetPaymasterData(op, strategy, dataInput)
 	if err != nil {
 		t.Error(err)
 		return
@@ -338,12 +338,12 @@ func parseOpToMapV7(input user_op.UserOpInput) map[string]string {
 	opMap := make(map[string]string)
 	opMap["sender"] = input.Sender.String()
 	opMap["Nonce"] = input.Nonce.String()
-	opMap["initCode"] = utils.EncodeToStringWithPrefix(input.InitCode[:])
-	opMap["accountGasLimits"] = utils.EncodeToStringWithPrefix(input.AccountGasLimits[:])
+	opMap["initCode"] = utils.EncodeToHexStringWithPrefix(input.InitCode[:])
+	opMap["accountGasLimits"] = utils.EncodeToHexStringWithPrefix(input.AccountGasLimits[:])
 	opMap["preVerificationGas"] = input.PreVerificationGas.String()
-	opMap["gasFees"] = utils.EncodeToStringWithPrefix(input.GasFees[:])
-	opMap["paymasterAndData"] = utils.EncodeToStringWithPrefix(input.PaymasterAndData[:])
-	opMap["signature"] = utils.EncodeToStringWithPrefix(input.Signature[:])
+	opMap["gasFees"] = utils.EncodeToHexStringWithPrefix(input.GasFees[:])
+	opMap["paymasterAndData"] = utils.EncodeToHexStringWithPrefix(input.PaymasterAndData[:])
+	opMap["signature"] = utils.EncodeToHexStringWithPrefix(input.Signature[:])
 	return opMap
 }
 

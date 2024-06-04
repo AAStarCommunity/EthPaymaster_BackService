@@ -15,7 +15,8 @@ type Strategy struct {
 	EntryPointInfo     *EntryPointInfo             `json:"entrypoint_info"`
 	Description        string                      `json:"description"`
 	ExecuteRestriction *StrategyExecuteRestriction `json:"execute_restriction"`
-	Erc20TokenType     global_const.TokenType
+	Erc20TokenType     global_const.TokenType      `json:"-"`
+	ProjectSponsor     bool                        `json:"-"`
 }
 type PaymasterInfo struct {
 	PayMasterAddress        *common.Address      `json:"paymaster_address"`
@@ -41,7 +42,7 @@ func (strategy *Strategy) GetNewWork() global_const.Network {
 	return strategy.NetWorkInfo.NetWork
 }
 
-func (strategy *Strategy) GetUseToken() global_const.TokenType {
+func (strategy *Strategy) GetGasToken() global_const.TokenType {
 	return strategy.NetWorkInfo.GasToken
 }
 func (strategy *Strategy) GetPayType() global_const.PayType {

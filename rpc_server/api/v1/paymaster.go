@@ -142,7 +142,9 @@ func TryPayUserOperationMethod() MethodFunctionFunc {
 		}
 		logrus.Debugf("After Validate ")
 
-		if result, err := operator.TryPayUserOpExecute(request); err != nil {
+		apiKeyModel := ctx.MustGet(global_const.ContextKeyApiMoDel)
+
+		if result, err := operator.TryPayUserOpExecute(apiKeyModel.(*model.ApiKeyModel), request); err != nil {
 			return nil, xerrors.Errorf("TryPayUserOpExecute ERROR [%v]", err)
 		} else {
 			return result, nil
