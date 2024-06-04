@@ -66,7 +66,7 @@ func WithdrawSponsor(ctx *gin.Context) {
 	return
 }
 
-type SponsorDepositTransaction struct {
+type sponsorDepositTransaction struct {
 	TxHash     string                  `json:"tx_hash"`
 	Amount     string                  `json:"amount"`
 	UpdateType global_const.UpdateType `json:"update_type"`
@@ -90,12 +90,12 @@ func GetSponsorDepositAndWithdrawTransactions(ctx *gin.Context) {
 	models, err := sponsor_manager.GetDepositAndWithDrawLog(userId, isTestNet)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			response.FailCode(ctx, 301, "No Deposit Transactions")
+			response.FailCode(ctx, 400, "No Deposit Transactions")
 		}
 	}
-	trans := make([]SponsorDepositTransaction, 0)
+	trans := make([]sponsorDepositTransaction, 0)
 	for _, depositModel := range models {
-		tran := SponsorDepositTransaction{
+		tran := sponsorDepositTransaction{
 			TxHash: depositModel.TxHash,
 			Amount: depositModel.Amount.String(),
 		}
@@ -103,11 +103,6 @@ func GetSponsorDepositAndWithdrawTransactions(ctx *gin.Context) {
 	}
 	response.WithDataSuccess(ctx, trans)
 	return
-}
-
-type SponsorMetaResponse struct {
-	AvailableBalance string `json:"available_balance"`
-	SponsorAddress   string `json:"sponsor_address"`
 }
 
 // GetSponsorMetaData
@@ -126,10 +121,13 @@ func GetSponsorMetaData(ctx *gin.Context) {
 	balance, err := sponsor_manager.FindUserSponsorBalance(userId, isTestNet)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			response.FailCode(ctx, 301, "No Balance")
+			response.FailCode(ctx, 400, "No Balance")
 		}
 	}
-	result := SponsorMetaResponse{
+	result := struct {
+		AvailableBalance string `json:"available_balance"`
+		SponsorAddress   string `json:"sponsor_address"`
+	}{
 		AvailableBalance: balance.AvailableBalance.String(),
 		SponsorAddress:   balance.SponsorAddress,
 	}

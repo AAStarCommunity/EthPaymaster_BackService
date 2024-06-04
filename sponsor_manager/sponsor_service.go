@@ -77,29 +77,25 @@ func LockUserBalance(userId string, userOpHash []byte, isTestNet bool,
 	availableBalance := new(big.Float).Sub(balanceModel.AvailableBalance.Float, lockAmount)
 	balanceModel.LockBalance = BigFloat{lockBalance}
 	balanceModel.AvailableBalance = BigFloat{availableBalance}
-	tx := relayDB.Begin()
-	if updateErr := tx.Model(&UserSponsorBalanceDBModel{}).
-		Where("pay_user_id = ?", balanceModel.PayUserId).
-		Where("is_test_net = ?", isTestNet).Updates(balanceModel).Error; updateErr != nil {
-		tx.Rollback()
-		return nil, updateErr
-	}
+	err = utils.DBTransactional(relayDB, func() error {
+		if updateErr := relayDB.Model(&UserSponsorBalanceDBModel{}).
+			Where("pay_user_id = ?", balanceModel.PayUserId).
+			Where("is_test_net = ?", isTestNet).Updates(balanceModel).Error; updateErr != nil {
+			return err
+		}
 
-	changeModel := &UserSponsorBalanceUpdateLogDBModel{
-		UserOpHash: UserOphashStr,
-		PayUserId:  userId,
-		Amount:     BigFloat{lockAmount},
-		IsTestNet:  isTestNet,
-		UpdateType: global_const.UpdateTypeLock,
-	}
-	if createErr := tx.Create(changeModel).Error; createErr != nil {
-		tx.Rollback()
-		return nil, createErr
-	}
-	if commitErr := tx.Commit().Error; commitErr != nil {
-		tx.Rollback()
-		return nil, commitErr
-	}
+		changeModel := &UserSponsorBalanceUpdateLogDBModel{
+			UserOpHash: UserOphashStr,
+			PayUserId:  userId,
+			Amount:     BigFloat{lockAmount},
+			IsTestNet:  isTestNet,
+			UpdateType: global_const.UpdateTypeLock,
+		}
+		if createErr := relayDB.Create(changeModel).Error; createErr != nil {
+			return err
+		}
+		return nil
+	})
 
 	return nil, nil
 }
@@ -119,31 +115,31 @@ func ReleaseBalanceWithActualCost(userId string, userOpHash []byte,
 	refundBalance := new(big.Float).Sub(lockBalance.Float, actualGasCost)
 	balanceModel.AvailableBalance = BigFloat{new(big.Float).Add(balanceModel.AvailableBalance.Float, refundBalance)}
 
-	tx := relayDB.Begin()
-	if updateErr := tx.Model(&UserSponsorBalanceDBModel{}).
-		Model(&UserSponsorBalanceDBModel{}).
-		Where("pay_user_id = ?", balanceModel.PayUserId).
-		Where("is_test_net = ?", isTestNet).Updates(balanceModel).Error; updateErr != nil {
-		tx.Rollback()
+	err = utils.DBTransactional(relayDB, func() error {
+		if updateErr := relayDB.Model(&UserSponsorBalanceDBModel{}).
+			Model(&UserSponsorBalanceDBModel{}).
+			Where("pay_user_id = ?", balanceModel.PayUserId).
+			Where("is_test_net = ?", isTestNet).Updates(balanceModel).Error; updateErr != nil {
+			return err
+		}
+
+		changeDBModel := &UserSponsorBalanceUpdateLogDBModel{
+			UserOpHash: userOpHashHex,
+			PayUserId:  changeModel.PayUserId,
+			Amount:     BigFloat{refundBalance},
+			Source:     "GasTank",
+			IsTestNet:  isTestNet,
+			UpdateType: global_const.UpdateTypeRelease,
+		}
+		if createErr := relayDB.Create(changeDBModel).Error; createErr != nil {
+			return createErr
+		}
+		return nil
+	})
+	if err != nil {
 		return nil, err
 	}
 
-	changeDBModel := &UserSponsorBalanceUpdateLogDBModel{
-		UserOpHash: userOpHashHex,
-		PayUserId:  changeModel.PayUserId,
-		Amount:     BigFloat{refundBalance},
-		Source:     "GasTank",
-		IsTestNet:  isTestNet,
-		UpdateType: global_const.UpdateTypeRelease,
-	}
-	if createErr := tx.Create(changeDBModel).Error; createErr != nil {
-		tx.Rollback()
-		return nil, createErr
-	}
-	if commitErr := tx.Commit().Error; commitErr != nil {
-		tx.Rollback()
-		return nil, commitErr
-	}
 	return balanceModel, nil
 }
 
@@ -163,30 +159,29 @@ func ReleaseUserOpHashLockWhenFail(userOpHash []byte, isTestNet bool) (*UserSpon
 	lockBalance := changeModel.Amount
 	balanceModel.LockBalance = BigFloat{new(big.Float).Sub(balanceModel.LockBalance.Float, lockBalance.Float)}
 	balanceModel.AvailableBalance = BigFloat{new(big.Float).Add(balanceModel.AvailableBalance.Float, lockBalance.Float)}
-	tx := relayDB.Begin()
-	if updateErr := tx.Model(&UserSponsorBalanceDBModel{}).
-		Where("pay_user_id = ?", balanceModel.PayUserId).
-		Where("is_test_net = ?", isTestNet).Updates(balanceModel).Error; updateErr != nil {
-		tx.Rollback()
+	err = utils.DBTransactional(relayDB, func() error {
+		if updateErr := relayDB.Model(&UserSponsorBalanceDBModel{}).
+			Where("pay_user_id = ?", balanceModel.PayUserId).
+			Where("is_test_net = ?", isTestNet).Updates(balanceModel).Error; updateErr != nil {
+			return err
+		}
+
+		changeDBModel := &UserSponsorBalanceUpdateLogDBModel{
+			UserOpHash: userOpHashHex,
+			PayUserId:  changeModel.PayUserId,
+			Amount:     lockBalance,
+			IsTestNet:  isTestNet,
+			UpdateType: global_const.UpdateTypeRelease,
+		}
+		if createErr := relayDB.Create(changeDBModel).Error; createErr != nil {
+			return createErr
+		}
+		return nil
+	})
+	if err != nil {
 		return nil, err
 	}
-
-	changeDBModel := &UserSponsorBalanceUpdateLogDBModel{
-		UserOpHash: userOpHashHex,
-		PayUserId:  changeModel.PayUserId,
-		Amount:     lockBalance,
-		IsTestNet:  isTestNet,
-		UpdateType: global_const.UpdateTypeRelease,
-	}
-	if createErr := tx.Create(changeDBModel).Error; createErr != nil {
-		tx.Rollback()
-		return nil, createErr
-	}
-	if commitErr := tx.Commit().Error; commitErr != nil {
-		tx.Rollback()
-		return nil, commitErr
-	}
-	return nil, err
+	return balanceModel, nil
 }
 
 //----------Functions----------
@@ -194,54 +189,57 @@ func ReleaseUserOpHashLockWhenFail(userOpHash []byte, isTestNet bool) (*UserSpon
 func DepositSponsor(input *model.DepositSponsorRequest) (*UserSponsorBalanceDBModel, error) {
 
 	balanceModel, err := FindUserSponsorBalance(input.PayUserId, input.IsTestNet)
-
-	tx := relayDB.Begin()
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		//init Data
-		balanceModel = &UserSponsorBalanceDBModel{}
-		balanceModel.AvailableBalance = BigFloat{big.NewFloat(0)}
-		balanceModel.PayUserId = input.PayUserId
-		balanceModel.LockBalance = BigFloat{big.NewFloat(0)}
-		balanceModel.IsTestNet = input.IsTestNet
-		err = tx.Create(balanceModel).Error
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-	}
 	if err != nil {
-		tx.Rollback()
 		return nil, err
 	}
-	newAvailableBalance := BigFloat{new(big.Float).Add(balanceModel.AvailableBalance.Float, input.Amount)}
-	balanceModel.AvailableBalance = newAvailableBalance
 
-	if updateErr := tx.Model(balanceModel).
-		Where("pay_user_id = ?", balanceModel.PayUserId).
-		Where("is_test_net = ?", input.IsTestNet).Updates(balanceModel).Error; updateErr != nil {
-		tx.Rollback()
-		return nil, updateErr
+	err = utils.DBTransactional(relayDB, func() error {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			//init Data
+			balanceModel = &UserSponsorBalanceDBModel{}
+			balanceModel.AvailableBalance = BigFloat{big.NewFloat(0)}
+			balanceModel.PayUserId = input.PayUserId
+			balanceModel.LockBalance = BigFloat{big.NewFloat(0)}
+			balanceModel.IsTestNet = input.IsTestNet
+			err = relayDB.Create(balanceModel).Error
+			if err != nil {
+
+				return err
+			}
+		}
+		if err != nil {
+
+			return err
+		}
+		newAvailableBalance := BigFloat{new(big.Float).Add(balanceModel.AvailableBalance.Float, input.Amount)}
+		balanceModel.AvailableBalance = newAvailableBalance
+
+		if updateErr := relayDB.Model(balanceModel).
+			Where("pay_user_id = ?", balanceModel.PayUserId).
+			Where("is_test_net = ?", input.IsTestNet).Updates(balanceModel).Error; updateErr != nil {
+
+			return updateErr
+		}
+
+		txInfoJSon, _ := json.Marshal(input.TxInfo)
+		changeModel := &UserSponsorBalanceUpdateLogDBModel{
+			PayUserId:  input.PayUserId,
+			Amount:     BigFloat{input.Amount},
+			Source:     "Deposit",
+			IsTestNet:  input.IsTestNet,
+			UpdateType: global_const.UpdateTypeDeposit,
+			TxHash:     input.TxHash,
+			TxInfo:     txInfoJSon,
+		}
+		if createErr := relayDB.Create(changeModel).Error; createErr != nil {
+			return createErr
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
 	}
 
-	txInfoJSon, _ := json.Marshal(input.TxInfo)
-	chagneModel := &UserSponsorBalanceUpdateLogDBModel{
-		PayUserId:  input.PayUserId,
-		Amount:     BigFloat{input.Amount},
-		Source:     "Deposit",
-		IsTestNet:  input.IsTestNet,
-		UpdateType: global_const.UpdateTypeDeposit,
-		TxHash:     input.TxHash,
-		TxInfo:     txInfoJSon,
-	}
-	if createErr := tx.Create(chagneModel).Error; createErr != nil {
-		tx.Rollback()
-		return nil, createErr
-	}
-
-	if commitErr := tx.Commit().Error; commitErr != nil {
-		tx.Rollback()
-		return nil, commitErr
-	}
 	return balanceModel, nil
 }
 
@@ -255,28 +253,27 @@ func WithDrawSponsor(input *model.WithdrawSponsorRequest) (*UserSponsorBalanceDB
 	}
 	newAvailableBalance := new(big.Float).Sub(balanceModel.AvailableBalance.Float, input.Amount)
 	balanceModel.AvailableBalance = BigFloat{newAvailableBalance}
-	tx := relayDB.Begin()
-	if updateErr := tx.Model(&UserSponsorBalanceDBModel{}).
-		Where("pay_user_id = ?", balanceModel.PayUserId).
-		Where("is_test_net = ?", input.IsTestNet).Updates(balanceModel).Error; updateErr != nil {
-		tx.Rollback()
-		return nil, updateErr
-	}
-	changeModel := &UserSponsorBalanceUpdateLogDBModel{
-		PayUserId:  input.PayUserId,
-		Amount:     BigFloat{input.Amount},
-		Source:     "Withdraw",
-		IsTestNet:  input.IsTestNet,
-		UpdateType: global_const.UpdateTypeWithdraw,
-		TxHash:     input.TxHash,
-	}
-	if createErr := tx.Create(changeModel).Error; createErr != nil {
-		tx.Rollback()
-		return nil, createErr
-	}
-	if commitErr := tx.Commit().Error; commitErr != nil {
-		tx.Rollback()
-		return nil, commitErr
+	err = utils.DBTransactional(relayDB, func() error {
+		if updateErr := relayDB.Model(&UserSponsorBalanceDBModel{}).
+			Where("pay_user_id = ?", balanceModel.PayUserId).
+			Where("is_test_net = ?", input.IsTestNet).Updates(balanceModel).Error; updateErr != nil {
+			return updateErr
+		}
+		changeModel := &UserSponsorBalanceUpdateLogDBModel{
+			PayUserId:  input.PayUserId,
+			Amount:     BigFloat{input.Amount},
+			Source:     "Withdraw",
+			IsTestNet:  input.IsTestNet,
+			UpdateType: global_const.UpdateTypeWithdraw,
+			TxHash:     input.TxHash,
+		}
+		if createErr := relayDB.Create(changeModel).Error; createErr != nil {
+			return createErr
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
 	}
 	return balanceModel, nil
 }
