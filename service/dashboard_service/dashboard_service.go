@@ -30,7 +30,6 @@ func Init() {
 			panic(err)
 		}
 		dashBoardDb = configDBVar
-
 	})
 
 }
