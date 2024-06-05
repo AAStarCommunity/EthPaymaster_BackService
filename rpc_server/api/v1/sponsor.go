@@ -17,10 +17,6 @@ var sourcePublicKeyMap = map[string]string{
 	"Dashboard": "0x17EE97b5F4Ab8a4b2CfEcfb42b66718F15557687",
 }
 
-func init() {
-
-}
-
 // DepositSponsor
 // @Tags Sponsor
 // @Description Deposit Sponsor

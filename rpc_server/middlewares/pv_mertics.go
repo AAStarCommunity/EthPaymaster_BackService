@@ -69,7 +69,7 @@ func PvMetrics() gin.HandlerFunc {
 				metricsParam.ApiKey = apiKeyModel.ApiKey
 				metricsParam.ApiUserId = apiKeyModel.UserId
 			}
-			MetricsPaymaster(c, metricsParam)
+			metricsPaymaster(c, metricsParam)
 		} else {
 			return
 		}
@@ -86,7 +86,7 @@ func (w *CustomResponseWriter) Write(b []byte) (int, error) {
 	w.body.Write(b)
 	return w.ResponseWriter.Write(b)
 }
-func MetricsPaymaster(c *gin.Context, metricsParam PayMasterParam) {
+func metricsPaymaster(c *gin.Context, metricsParam PayMasterParam) {
 
 	recallModel := dashboard_service.PaymasterRecallLogDbModel{
 		ProjectApikey:   metricsParam.ApiKey,
