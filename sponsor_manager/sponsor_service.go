@@ -109,12 +109,13 @@ func ReleaseBalanceWithActualCost(userId string, userOpHash []byte,
 		return nil, err
 	}
 	balanceModel, err := findUserSponsor(changeModel.PayUserId, changeModel.IsTestNet)
-
+	//TODO 10% Fee
 	lockBalance := changeModel.Amount
 	balanceModel.LockBalance = BigFloat{new(big.Float).Sub(balanceModel.LockBalance.Float, lockBalance.Float)}
 	refundBalance := new(big.Float).Sub(lockBalance.Float, actualGasCost)
 	balanceModel.AvailableBalance = BigFloat{new(big.Float).Add(balanceModel.AvailableBalance.Float, refundBalance)}
 
+	balanceModel.SponsoredBalance = BigFloat{new(big.Float).Add(balanceModel.SponsoredBalance.Float, actualGasCost)}
 	err = utils.DBTransactional(relayDB, func() error {
 		if updateErr := relayDB.Model(&UserSponsorBalanceDBModel{}).
 			Model(&UserSponsorBalanceDBModel{}).

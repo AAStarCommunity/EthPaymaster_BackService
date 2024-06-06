@@ -11,6 +11,7 @@ type UserSponsorBalanceDBModel struct {
 	model.BaseData
 	PayUserId        string   `gorm:"type:varchar(255);index" json:"pay_user_id"`
 	AvailableBalance BigFloat `gorm:"type:numeric(30,18)" json:"available_balance"`
+	SponsoredBalance BigFloat `gorm:"type:numeric(30,18)" json:"sponsored_balance"`
 	LockBalance      BigFloat `gorm:"type:numeric(30,18)" json:"lock_balance"`
 	Source           string   `gorm:"type:varchar(255)" json:"source"`
 	SponsorAddress   string   `gorm:"type:varchar(255)" json:"sponsor_address"`
