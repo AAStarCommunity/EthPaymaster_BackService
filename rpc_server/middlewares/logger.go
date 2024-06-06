@@ -6,5 +6,7 @@ import (
 
 // LogHandler log handler
 func LogHandler() gin.HandlerFunc {
-	return gin.Logger()
+	return gin.LoggerWithConfig(gin.LoggerConfig{
+		SkipPaths: []string{"/api/healthz"},
+	})
 }

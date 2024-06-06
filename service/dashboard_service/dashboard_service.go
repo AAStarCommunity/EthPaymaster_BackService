@@ -17,8 +17,8 @@ import (
 )
 
 var (
-	configDB *gorm.DB
-	onlyOnce = sync.Once{}
+	dashBoardDb *gorm.DB
+	onlyOnce    = sync.Once{}
 )
 
 func Init() {
@@ -29,8 +29,7 @@ func Init() {
 		if err != nil {
 			panic(err)
 		}
-		configDB = configDBVar
-
+		dashBoardDb = configDBVar
 	})
 
 }
@@ -58,7 +57,7 @@ func GetStrategyByCode(strategyCode string, entryPointVersion global_const.Entry
 		entryPointVersion = global_const.EntrypointV06
 	}
 	strategyDbModel := &StrategyDBModel{}
-	tx := configDB.Where("strategy_code = ?", strategyCode).First(&strategyDbModel)
+	tx := dashBoardDb.Where("strategy_code = ?", strategyCode).First(&strategyDbModel)
 	if tx.Error != nil {
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 			return nil, xerrors.Errorf("strategy not found: %w", tx.Error)
@@ -242,7 +241,7 @@ func convertApiKeyDbModelToApiKeyModel(apiKeyDbModel *ApiKeyDbModel) *model.ApiK
 }
 func GetAPiInfoByApiKey(apiKey string) (*model.ApiKeyModel, error) {
 	apikeyModel := &ApiKeyDbModel{}
-	tx := configDB.Where("api_key = ?", apiKey).First(&apikeyModel)
+	tx := dashBoardDb.Where("api_key = ?", apiKey).First(&apikeyModel)
 	if tx.Error != nil {
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 			return nil, tx.Error
@@ -251,4 +250,25 @@ func GetAPiInfoByApiKey(apiKey string) (*model.ApiKeyModel, error) {
 	}
 	apikeyRes := convertApiKeyDbModelToApiKeyModel(apikeyModel)
 	return apikeyRes, nil
+}
+
+type PaymasterRecallLogDbModel struct {
+	model.BaseData
+	ProjectUserId   int64          `gorm:"column:project_user_id;type:integer" json:"project_user_id"`
+	ProjectApikey   string         `gorm:"column:project_apikey;type:varchar(255)" json:"project_apikey"`
+	PaymasterMethod string         `gorm:"column:paymaster_method;type:varchar(25)" json:"paymaster_method"`
+	SendTime        string         `gorm:"column:send_time;type:varchar(50)" json:"send_time"`
+	Latency         int64          `gorm:"column:latency;type:integer" json:"latency"`
+	RequestBody     string         `gorm:"column:request_body;type:varchar(500)" json:"request_body"`
+	ResponseBody    string         `gorm:"column:response_body;type:varchar(1000)" json:"response_body"`
+	NetWork         string         `gorm:"column:network;type:varchar(25)" json:"network"`
+	Status          int            `gorm:"column:status;type:integer" json:"status"`
+	Extra           datatypes.JSON `gorm:"column:extra" json:"extra"`
+}
+
+func (*PaymasterRecallLogDbModel) TableName() string {
+	return "paymaster_recall_log"
+}
+func CreatePaymasterCall(recallModel *PaymasterRecallLogDbModel) error {
+	return dashBoardDb.Create(recallModel).Error
 }
