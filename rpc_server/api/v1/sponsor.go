@@ -3,19 +3,29 @@ package v1
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
+	"AAStarCommunity/EthPaymaster_BackService/common/price_compoent"
+	"AAStarCommunity/EthPaymaster_BackService/common/utils"
+	"AAStarCommunity/EthPaymaster_BackService/config"
 	"AAStarCommunity/EthPaymaster_BackService/sponsor_manager"
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/xerrors"
 	"gorm.io/gorm"
+	"log"
+	"math/big"
 	"net/http"
 	"strconv"
 )
-
-var sourcePublicKeyMap = map[string]string{
-	"Dashboard": "0x17EE97b5F4Ab8a4b2CfEcfb42b66718F15557687",
-}
 
 // DepositSponsor
 // @Tags Sponsor
@@ -34,21 +44,136 @@ func DepositSponsor(ctx *gin.Context) {
 		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, errStr)
 		return
 	}
-	signerAddress, ok := sourcePublicKeyMap["Dashboard"]
-	if !ok {
-		response.SetHttpCode(http.StatusInternalServerError).FailCode(ctx, http.StatusInternalServerError, "Invalid Source")
-		return
-	}
-	logrus.Debugf("Signer Address [%v]", signerAddress)
-
-	//TODO Add Signature Verification
-	result, err := sponsor_manager.DepositSponsor(&request)
+	inputJson, err := json.Marshal(request)
 	if err != nil {
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
+	var signerAddress string
+	if request.DepositSource == "dashboard" {
+		signerAddress = config.GetSponsorConfig().DashBoardSignerAddress
+	} else {
+		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, "Deposit Source Error :Not Support Source")
+		return
+	}
+
+	err = ValidateSignature(ctx.GetHeader("relay_hash"), ctx.GetHeader("relay_signature"), inputJson, signerAddress)
+	if err != nil {
+		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+	sender, amount, err := validateDeposit(&request)
+
+	if err != nil {
+		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	depositInput := sponsor_manager.DepositSponsorInput{
+		From:      sender.Hex(),
+		Amount:    amount,
+		TxHash:    request.TxHash,
+		PayUserId: request.PayUserId,
+	}
+	result, err := sponsor_manager.DepositSponsor(&depositInput)
+	if err != nil {
+		response.SetHttpCode(http.StatusInternalServerError).FailCode(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	response.WithDataSuccess(ctx, result)
 	return
+}
+func ValidateSignature(originHash string, signatureHex string, inputJson []byte, signerAddress string) error {
+	hash := sha256.New()
+	hash.Write(inputJson)
+	hashBytes := hash.Sum(nil)
+	hashHex := hex.EncodeToString(hashBytes)
+	if hashHex != originHash {
+		return xerrors.Errorf("Hash Not Match")
+	}
+	signerAddressHex := common.HexToAddress(signerAddress)
+
+	hashByte, _ := utils.DecodeStringWithPrefix(originHash)
+	signatureByte, _ := utils.DecodeStringWithPrefix(signatureHex)
+	pubKey, err := crypto.SigToPub(hashByte, signatureByte)
+	if err != nil {
+		log.Fatalf("Failed to recover public key: %v", err)
+	}
+	recoveredAddr := crypto.PubkeyToAddress(*pubKey)
+	if signerAddressHex != recoveredAddr {
+		return xerrors.Errorf("Signer Address Not Match")
+	}
+	return nil
+
+}
+func validateDeposit(request *model.DepositSponsorRequest) (sender *common.Address, amount *big.Float, err error) {
+	txHash := request.TxHash
+	client, err := ethclient.Dial("https://opt-sepolia.g.alchemy.com/v2/_z0GaU6Zk8RfIR1guuli8nqMdb8RPdp0")
+	if err != nil {
+		return nil, nil, err
+	}
+	// check tx
+	_, err = sponsor_manager.GetLogByTxHash(txHash)
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil, err
+		}
+	}
+	tx, err := GetInfoByHash(txHash, client)
+	if err != nil {
+		return nil, nil, err
+	}
+	if tx.Type() != types.DynamicFeeTxType {
+		return nil, nil, xerrors.Errorf("Tx Type is not DynamicFeeTxType")
+	}
+	logrus.Info(tx.Type())
+	txSender, err := types.Sender(types.NewLondonSigner(tx.ChainId()), tx)
+	if err != nil {
+		logrus.Errorf("Get Sender Error [%v]", err)
+		return nil, nil, err
+	}
+	sender = &txSender
+	if request.IsTestNet {
+		//Only ETH
+		if tx.Value().Uint64() == 0 {
+
+			return nil, nil, xerrors.Errorf("Tx Value is 0")
+		}
+		if tx.To() == nil {
+			return nil, nil, xerrors.Errorf("Tx To Address is nil")
+		}
+		if tx.To().Hex() != config.GetSponsorConfig().SponsorDepositAddress {
+			return nil, nil, xerrors.Errorf("Tx To Address is not Sponsor Address")
+		}
+		value := tx.Value()
+		valueFloat := new(big.Float).SetInt(value)
+		amount, err = price_compoent.GetTokenCostInUsd(global_const.TokenTypeETH, valueFloat)
+		if err != nil {
+			return nil, nil, err
+		}
+	} else {
+		//contractAddress := tx.To()
+		//chain_service.CheckContractAddressAccess(contractAddress,"")
+		//Only Usdt
+
+	}
+	return sender, amount, nil
+
+}
+
+func GetInfoByHash(txHash string, client *ethclient.Client) (*types.Transaction, error) {
+	txHashHex := common.HexToHash(txHash)
+	//TODO consider about pending
+	tx, _, err := client.TransactionByHash(context.Background(), txHashHex)
+	if err != nil {
+		if err.Error() == "not found" {
+			return nil, xerrors.Errorf("Transaction [%s] not found", txHash)
+		}
+		return nil, err
+	}
+
+	return tx, nil
 }
 
 // WithdrawSponsor

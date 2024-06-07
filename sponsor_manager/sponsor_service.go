@@ -185,9 +185,27 @@ func ReleaseUserOpHashLockWhenFail(userOpHash []byte, isTestNet bool) (*UserSpon
 	return balanceModel, nil
 }
 
-//----------Functions----------
+func GetLogByTxHash(txHash string) (*UserSponsorBalanceUpdateLogDBModel, error) {
+	changeModel := &UserSponsorBalanceUpdateLogDBModel{}
+	err := relayDB.Where("tx_hash = ?", txHash).First(changeModel).Error
+	if err != nil {
+		return nil, err
+	}
+	return changeModel, nil
+}
 
-func DepositSponsor(input *model.DepositSponsorRequest) (*UserSponsorBalanceDBModel, error) {
+// ----------Functions----------
+type DepositSponsorInput struct {
+	TxHash    string `json:"tx_hash"`
+	From      string `json:"from"`
+	To        string `json:"to"`
+	Amount    *big.Float
+	IsTestNet bool   `json:"is_test_net"`
+	PayUserId string `json:"pay_user_id"`
+	TxInfo    map[string]string
+}
+
+func DepositSponsor(input *DepositSponsorInput) (*UserSponsorBalanceDBModel, error) {
 
 	balanceModel, err := FindUserSponsorBalance(input.PayUserId, input.IsTestNet)
 	if err != nil {

@@ -40,6 +40,7 @@ func secretConfigInit(secretConfigPath string) {
 		signerConfig[global_const.Network(network)] = eoa
 	}
 }
+
 func IsSponsorWhitelist(address string) bool {
 
 	//TODO
@@ -67,6 +68,10 @@ func GetSigner(network global_const.Network) *global_const.EOA {
 }
 func GetAPIKeyTableName() string {
 	return secretConfig.ApiKeyTableName
+}
+func GetSponsorConfig() *model.SponsorConfig {
+	//TODO
+	return &secretConfig.SponsorConfig
 }
 func GetStrategyConfigTableName() string {
 	return secretConfig.StrategyConfigTableName

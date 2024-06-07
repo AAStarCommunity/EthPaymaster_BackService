@@ -15,11 +15,18 @@ type SecretConfig struct {
 
 	NetWorkSecretConfigMap map[string]NetWorkSecretConfig `json:"network_secret_configs"`
 
-	ConfigDBConfig          DBConfig `json:"config_db_config"`
-	RelayDBConfig           DBConfig `json:"relay_db_config"`
-	ApiKeyTableName         string   `json:"api_key_table_name"`
-	StrategyConfigTableName string   `json:"strategy_config_table_name"`
-	FreeSponsorWhitelist    []string `json:"free_sponsor_whitelist"`
+	ConfigDBConfig          DBConfig      `json:"config_db_config"`
+	RelayDBConfig           DBConfig      `json:"relay_db_config"`
+	ApiKeyTableName         string        `json:"api_key_table_name"`
+	StrategyConfigTableName string        `json:"strategy_config_table_name"`
+	FreeSponsorWhitelist    []string      `json:"free_sponsor_whitelist"`
+	SponsorConfig           SponsorConfig `json:"sponsor_config"`
+}
+type SponsorConfig struct {
+	SponsorDepositAddress  string `json:"sponsor_deposit_address"`
+	DashBoardSignerAddress string `json:"dashboard_signer_address"`
+	DepositTestNetUrl      string `json:"deposit_test_net_url"`
+	DepositMainNetUrl      string `json:"deposit_main_net_url"`
 }
 
 type NetWorkSecretConfig struct {
