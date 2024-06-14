@@ -1,7 +1,17 @@
 definitions:
-  model.ClientCredential:
+  model.DepositSponsorRequest:
     properties:
-      apiKey:
+      deposit_address:
+        type: string
+      deposit_source:
+        type: string
+      is_test_net:
+        type: boolean
+      pay_user_id:
+        type: string
+      time_stamp:
+        type: integer
+      tx_hash:
         type: string
     type: object
   model.JsonRpcRequest:
@@ -16,28 +26,26 @@ definitions:
         items: {}
         type: array
     type: object
+  model.WithdrawSponsorRequest:
+    properties:
+      amount:
+        type: number
+      isTestNet:
+        type: boolean
+      payUserId:
+        type: string
+      txHash:
+        type: string
+      txInfo:
+        additionalProperties:
+          type: string
+        type: object
+    type: object
 info:
   contact:
     name: AAStar Support
     url: https://aastar.xyz
 paths:
-  /api/auth:
-    post:
-      consumes:
-      - application/json
-      description: Get AccessToken By ApiKey
-      parameters:
-      - description: AccessToken Model
-        in: body
-        name: credential
-        required: true
-        schema:
-          $ref: '#/definitions/model.ClientCredential'
-      responses:
-        "200":
-          description: OK
-      tags:
-      - Auth
   /api/healthz:
     get:
       consumes:
@@ -68,10 +76,55 @@ paths:
       responses:
         "200":
           description: OK
-      security:
-      - JWT: []
       tags:
       - Paymaster
+  /api/v1/paymaster_sponsor/deposit:
+    post:
+      consumes:
+      - application/json
+      description: Deposit Sponsor
+      parameters:
+      - description: DepositSponsorRequest Model
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.DepositSponsorRequest'
+      - description: relay Request  Body Hash
+        in: header
+        name: relay_hash
+        type: string
+      - description: relay Request  Body Hash
+        in: header
+        name: relay_signature
+        type: string
+      responses:
+        "200":
+          description: OK
+      tags:
+      - DepositSponsor
+  /api/v1/paymaster_sponsor/withdraw:
+    post:
+      consumes:
+      - application/json
+      description: Withdraw Sponsor
+      parameters:
+      - description: WithdrawSponsorRequest Model
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.WithdrawSponsorRequest'
+      - description: Is Test Net
+        in: path
+        name: is_test_net
+        required: true
+        type: boolean
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Sponsor
 securityDefinitions:
   JWT:
     description: Type 'Bearer \<TOKEN\>' to correctly set the AccessToken

@@ -24,7 +24,7 @@ import (
 
 var HexPattern = regexp.MustCompile(`^0x[a-fA-F\d]*$`)
 
-const defaultStackSize = 4096
+const defaultStackSize = 10000
 
 type EthCallReq struct {
 	From common.Address `json:"from"`
@@ -202,18 +202,20 @@ func GetCurrentGoroutineStack() string {
 	n := runtime.Stack(buf[:], false)
 	return string(buf[:n])
 }
-func DBTransactional(db *gorm.DB, handle func() error) (err error) {
+func DBTransactional(db *gorm.DB, handle func(tx *gorm.DB) error) (err error) {
 	tx := db.Begin()
 	defer func() {
 		if p := recover(); p != nil {
 			tx.Rollback()
-			panic(p)
+			logrus.Errorf("TX ERROR [%s] ", GetCurrentGoroutineStack())
+			err = xerrors.Errorf("TX ERROR [%v]", p)
+			//panic(p)
 		} else if err != nil {
 			tx.Rollback()
 		} else {
 			err = tx.Commit().Error
 		}
 	}()
-	err = handle()
-	return
+	err = handle(tx)
+	return err
 }

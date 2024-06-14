@@ -32,7 +32,6 @@ func init() {
 // @Param rpcRequest body model.JsonRpcRequest true "JsonRpcRequest Model"
 // @Router /api/v1/paymaster/{network}  [post]
 // @Success 200
-// @Security JWT
 func Paymaster(ctx *gin.Context) {
 
 	jsonRpcRequest := model.JsonRpcRequest{}

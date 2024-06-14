@@ -1,7 +1,5 @@
 package model
 
-import "math/big"
-
 type DepositSponsorRequest struct {
 	TimeStamp      int64  `json:"time_stamp"`
 	DepositAddress string `json:"deposit_address"`
@@ -11,7 +9,7 @@ type DepositSponsorRequest struct {
 	DepositSource  string `json:"deposit_source"`
 }
 type WithdrawSponsorRequest struct {
-	Amount *big.Float
+	Amount float64
 
 	PayUserId string
 	IsTestNet bool

@@ -61,7 +61,6 @@ func main() {
 }
 
 func initEngine(strategyPath string, basicConfigPath string, secretPath string) {
-
 	logrus.Infof("secretPath: %s", secretPath)
 	config.InitConfig(strategyPath, basicConfigPath, secretPath)
 	if envirment.Environment.IsDevelopment() {

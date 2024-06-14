@@ -18,33 +18,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/auth": {
-            "post": {
-                "description": "Get AccessToken By ApiKey",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "parameters": [
-                    {
-                        "description": "AccessToken Model",
-                        "name": "credential",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.ClientCredential"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
         "/api/healthz": {
             "get": {
                 "description": "Get Healthz",
@@ -63,11 +36,6 @@ const docTemplate = `{
         },
         "/api/v1/paymaster/{network}": {
             "post": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
                 "description": "Paymaster JSON-RPC API",
                 "consumes": [
                     "application/json"
@@ -99,13 +67,101 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/paymaster_sponsor/deposit": {
+            "post": {
+                "description": "Deposit Sponsor",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DepositSponsor"
+                ],
+                "parameters": [
+                    {
+                        "description": "DepositSponsorRequest Model",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.DepositSponsorRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "relay Request  Body Hash",
+                        "name": "relay_hash",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "relay Request  Body Hash",
+                        "name": "relay_signature",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/paymaster_sponsor/withdraw": {
+            "post": {
+                "description": "Withdraw Sponsor",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sponsor"
+                ],
+                "parameters": [
+                    {
+                        "description": "WithdrawSponsorRequest Model",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.WithdrawSponsorRequest"
+                        }
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Is Test Net",
+                        "name": "is_test_net",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "model.ClientCredential": {
+        "model.DepositSponsorRequest": {
             "type": "object",
             "properties": {
-                "apiKey": {
+                "deposit_address": {
+                    "type": "string"
+                },
+                "deposit_source": {
+                    "type": "string"
+                },
+                "is_test_net": {
+                    "type": "boolean"
+                },
+                "pay_user_id": {
+                    "type": "string"
+                },
+                "time_stamp": {
+                    "type": "integer"
+                },
+                "tx_hash": {
                     "type": "string"
                 }
             }
@@ -125,6 +181,29 @@ const docTemplate = `{
                 "params": {
                     "type": "array",
                     "items": {}
+                }
+            }
+        },
+        "model.WithdrawSponsorRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "isTestNet": {
+                    "type": "boolean"
+                },
+                "payUserId": {
+                    "type": "string"
+                },
+                "txHash": {
+                    "type": "string"
+                },
+                "txInfo": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }
             }
         }
