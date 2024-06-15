@@ -23,10 +23,11 @@ type SecretConfig struct {
 	SponsorConfig           SponsorConfig `json:"sponsor_config"`
 }
 type SponsorConfig struct {
-	SponsorDepositAddress  string `json:"sponsor_deposit_address"`
-	DashBoardSignerAddress string `json:"dashboard_signer_address"`
-	DepositTestNetUrl      string `json:"deposit_test_net_url"`
-	DepositMainNetUrl      string `json:"deposit_main_net_url"`
+	SponsorDepositAddress    string `json:"sponsor_deposit_address"`
+	SponsorDepositPrivateKey string `json:"sponsor_deposit_private_key"`
+	DashBoardSignerAddress   string `json:"dashboard_signer_address"`
+	DepositTestNetUrl        string `json:"deposit_test_net_url"`
+	DepositMainNetUrl        string `json:"deposit_main_net_url"`
 }
 
 type NetWorkSecretConfig struct {

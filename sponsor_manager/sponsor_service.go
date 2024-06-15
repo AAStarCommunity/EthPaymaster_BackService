@@ -256,7 +256,7 @@ func DepositSponsor(input *DepositSponsorInput) (*UserSponsorBalanceDBModel, err
 	return balanceModel, txErr
 }
 
-func WithDrawSponsor(input *model.WithdrawSponsorRequest) (*UserSponsorBalanceDBModel, error) {
+func WithDrawSponsor(input *model.WithdrawSponsorRequest, txHash string) (*UserSponsorBalanceDBModel, error) {
 	amount := big.NewFloat(input.Amount)
 	balanceModel, err := FindUserSponsorBalance(input.PayUserId, input.IsTestNet)
 	if err != nil {
@@ -279,7 +279,7 @@ func WithDrawSponsor(input *model.WithdrawSponsorRequest) (*UserSponsorBalanceDB
 			Source:     "Withdraw",
 			IsTestNet:  input.IsTestNet,
 			UpdateType: global_const.UpdateTypeWithdraw,
-			TxHash:     input.TxHash,
+			TxHash:     txHash,
 		}
 		if createErr := relayDB.Create(changeModel).Error; createErr != nil {
 			return createErr

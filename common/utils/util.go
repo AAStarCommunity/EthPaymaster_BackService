@@ -3,6 +3,7 @@ package utils
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"bytes"
+	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
@@ -10,11 +11,14 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 	"gorm.io/gorm"
+	"log"
 	"math/big"
 	"regexp"
 	"runtime"
@@ -218,4 +222,47 @@ func DBTransactional(db *gorm.DB, handle func(tx *gorm.DB) error) (err error) {
 	}()
 	err = handle(tx)
 	return err
+}
+
+func TransfertEth(from *ecdsa.PrivateKey, toAddress *common.Address, client *ethclient.Client) (*types.Transaction, error) {
+	fromPrivateKey := from.Public()
+	fromPublicKeyECDSA, ok := fromPrivateKey.(*ecdsa.PublicKey)
+	if !ok {
+		logrus.Error("error casting public key to ECDSA")
+		return nil, xerrors.Errorf("error casting public key to ECDSA")
+	}
+	fromAddress := crypto.PubkeyToAddress(*fromPublicKeyECDSA)
+	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
+	if err != nil {
+		return nil, err
+
+	}
+	value := big.NewInt(100000000000000000) // in wei (0.1 eth)
+	gasLimit := uint64(21000)               // in units
+	gasPrice, err := client.SuggestGasPrice(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	var data []byte
+	tx := types.NewTx(&types.DynamicFeeTx{
+
+		Nonce:     nonce,
+		Data:      data,
+		Gas:       gasLimit,
+		GasFeeCap: gasPrice,
+		GasTipCap: gasPrice,
+		Value:     value,
+		To:        toAddress,
+	})
+	signTx, err := types.SignTx(tx, types.NewEIP155Signer(big.NewInt(1)), from)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = client.SendTransaction(context.Background(), signTx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return signTx, nil
 }

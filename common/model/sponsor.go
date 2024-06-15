@@ -9,12 +9,12 @@ type DepositSponsorRequest struct {
 	DepositSource  string `json:"deposit_source"`
 }
 type WithdrawSponsorRequest struct {
-	Amount float64
-
-	PayUserId string
-	IsTestNet bool
-	TxInfo    map[string]string
-	TxHash    string
+	Amount        float64
+	TimeStamp     int64 `json:"time_stamp"`
+	PayUserId     string
+	IsTestNet     bool
+	RefundAddress string `json:"refund_address"`
+	DepositSource string `json:"deposit_source"`
 }
 type GetSponsorTransactionsRequest struct {
 }

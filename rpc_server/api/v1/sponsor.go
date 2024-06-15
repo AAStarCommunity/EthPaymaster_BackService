@@ -151,7 +151,7 @@ func validateDeposit(request *model.DepositSponsorRequest) (sender *common.Addre
 		if tx.To() == nil {
 			return nil, nil, xerrors.Errorf("Tx To Address is nil")
 		}
-		if tx.To().Hex() != config.GetSponsorConfig().SponsorDepositAddress {
+		if tx.To().Hex() != config.GetDepositer().Address.String() {
 			return nil, nil, xerrors.Errorf("Tx To Address is not Sponsor Address")
 		}
 		value := tx.Value()
@@ -195,6 +195,10 @@ func GetInfoByHash(txHash string, client *ethclient.Client) (*types.Transaction,
 // @Router /api/v1/paymaster_sponsor/withdraw [post]
 // @Success 200
 func WithdrawSponsor(ctx *gin.Context) {
+	client, err := ethclient.Dial("https://opt-sepolia.g.alchemy.com/v2/_z0GaU6Zk8RfIR1guuli8nqMdb8RPdp0")
+	if err != nil {
+		return
+	}
 	request := model.WithdrawSponsorRequest{}
 	response := model.GetResponse()
 	if err := ctx.ShouldBindJSON(&request); err != nil {
@@ -202,8 +206,47 @@ func WithdrawSponsor(ctx *gin.Context) {
 		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, errStr)
 		return
 	}
-	//TODO Add Signature Verification
-	result, err := sponsor_manager.WithDrawSponsor(&request)
+	//validate Sign
+	//validate Signature
+	inputJson, err := json.Marshal(request)
+	if err != nil {
+		response.SetHttpCode(http.StatusInternalServerError).FailCode(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+	var signerAddress string
+	if request.DepositSource == "dashboard" {
+		signerAddress = config.GetSponsorConfig().DashBoardSignerAddress
+	} else {
+		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, "Deposit Source Error :Not Support Source")
+		return
+	}
+	err = ValidateSignature(ctx.GetHeader("relay_hash"), ctx.GetHeader("relay_signature"), inputJson, signerAddress)
+	if err != nil {
+		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+	//checkBalance
+	balanceModel, err := sponsor_manager.FindUserSponsorBalance(request.PayUserId, request.IsTestNet)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, "Balance Not Found")
+			return
+		}
+		response.SetHttpCode(http.StatusInternalServerError).FailCode(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+	amountFloat := big.NewFloat(request.Amount)
+
+	if balanceModel.AvailableBalance.Cmp(amountFloat) < 0 {
+		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, "Insufficient Balance")
+		return
+	}
+	toAddress := common.HexToAddress(request.RefundAddress)
+	// Execute transfer
+	tx, err := utils.TransfertEth(config.GetDepositer().PrivateKey, &toAddress, client)
+	logrus.Debugf("tx: %v", tx)
+	// WithDrawSponsor
+	result, err := sponsor_manager.WithDrawSponsor(&request, "")
 	if err != nil {
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(ctx, http.StatusInternalServerError, err.Error())
 		return

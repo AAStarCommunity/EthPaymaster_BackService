@@ -12,9 +12,13 @@ var dsnTemplate = "host=%s port=%v user=%s password=%s dbname=%s TimeZone=%s ssl
 
 var secretConfig *model.SecretConfig
 var signerConfig = make(SignerConfigMap)
+var depositer *global_const.EOA
 
 type SignerConfigMap map[global_const.Network]*global_const.EOA
 
+func GetDepositer() *global_const.EOA {
+	return depositer
+}
 func secretConfigInit(secretConfigPath string) {
 	if secretConfigPath == "" {
 		panic("secretConfigPath is empty")
@@ -38,6 +42,10 @@ func secretConfigInit(secretConfigPath string) {
 		}
 
 		signerConfig[global_const.Network(network)] = eoa
+	}
+	depositer, err = global_const.NewEoa(secretConfig.SponsorConfig.SponsorDepositPrivateKey)
+	if err != nil {
+		panic(fmt.Sprintf("signer key error: %s", err))
 	}
 }
 
