@@ -243,7 +243,8 @@ func WithdrawSponsor(ctx *gin.Context) {
 	}
 	toAddress := common.HexToAddress(request.RefundAddress)
 	// Execute transfer
-	tx, err := utils.TransfertEth(config.GetDepositer().PrivateKey, &toAddress, client)
+	value := big.NewInt(100000000000000000) // in wei (0.1 eth)
+	tx, err := utils.TransfertEth(config.GetDepositer().PrivateKey, &toAddress, client, value)
 	logrus.Debugf("tx: %v", tx)
 	// WithDrawSponsor
 	result, err := sponsor_manager.WithDrawSponsor(&request, "")

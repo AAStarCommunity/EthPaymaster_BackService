@@ -224,7 +224,7 @@ func DBTransactional(db *gorm.DB, handle func(tx *gorm.DB) error) (err error) {
 	return err
 }
 
-func TransfertEth(from *ecdsa.PrivateKey, toAddress *common.Address, client *ethclient.Client) (*types.Transaction, error) {
+func TransfertEth(from *ecdsa.PrivateKey, toAddress *common.Address, client *ethclient.Client, amount *big.Int) (*types.Transaction, error) {
 	fromPrivateKey := from.Public()
 	fromPublicKeyECDSA, ok := fromPrivateKey.(*ecdsa.PublicKey)
 	if !ok {
@@ -237,8 +237,7 @@ func TransfertEth(from *ecdsa.PrivateKey, toAddress *common.Address, client *eth
 		return nil, err
 
 	}
-	value := big.NewInt(100000000000000000) // in wei (0.1 eth)
-	gasLimit := uint64(21000)               // in units
+	gasLimit := uint64(21000) // in units
 	gasPrice, err := client.SuggestGasPrice(context.Background())
 	if err != nil {
 		return nil, err
@@ -252,7 +251,7 @@ func TransfertEth(from *ecdsa.PrivateKey, toAddress *common.Address, client *eth
 		Gas:       gasLimit,
 		GasFeeCap: gasPrice,
 		GasTipCap: gasPrice,
-		Value:     value,
+		Value:     amount,
 		To:        toAddress,
 	})
 	signTx, err := types.SignTx(tx, types.NewEIP155Signer(big.NewInt(1)), from)
