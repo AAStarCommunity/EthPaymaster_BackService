@@ -16,7 +16,7 @@ func AuthHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		apiKey := c.Query("apiKey")
 		if apiKey == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "ApiKey Is Required"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "ApiKey Is Required Go To Dashboard (dashboard.aastar.io) To Get It"})
 			c.Abort()
 			return
 		}
