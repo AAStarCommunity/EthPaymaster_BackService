@@ -3,7 +3,6 @@ package middlewares
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
-	"AAStarCommunity/EthPaymaster_BackService/rpc_server/api/utils"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/time/rate"
@@ -20,17 +19,15 @@ var limiter map[string]*rate.Limiter
 // RateLimiterByApiKeyHandler represents the rate limit by each ApiKey for each api calling
 func RateLimiterByApiKeyHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		if exists, current := utils.CurrentUser(ctx); exists {
-			apiKeyModel := ctx.MustGet(global_const.ContextKeyApiMoDel)
-			defaultLimit := DefaultLimit
-			defaultLimit = apiKeyModel.(*model.ApiKeyModel).RateLimit
-			if limiting(&current, defaultLimit) {
-				ctx.Next()
-			} else {
-				_ = ctx.AbortWithError(http.StatusTooManyRequests, errors.New("too many requests"))
-			}
+		apiKeyModelInterface := ctx.MustGet(global_const.ContextKeyApiMoDel)
+		defaultLimit := DefaultLimit
+		apiKeyModel := apiKeyModelInterface.(*model.ApiKeyModel)
+		defaultLimit = apiKeyModel.RateLimit
+
+		if limiting(&apiKeyModel.ApiKey, defaultLimit) {
+			ctx.Next()
 		} else {
-			_ = ctx.AbortWithError(http.StatusUnauthorized, errors.New("401 Unauthorized"))
+			_ = ctx.AbortWithError(http.StatusTooManyRequests, errors.New("too many requests"))
 		}
 	}
 }

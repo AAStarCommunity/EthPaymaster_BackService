@@ -59,6 +59,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/model.JsonRpcRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "apiKey",
+                        "name": "apiKey",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -190,30 +197,25 @@ const docTemplate = `{
                 "amount": {
                     "type": "number"
                 },
+                "deposit_source": {
+                    "type": "string"
+                },
                 "isTestNet": {
                     "type": "boolean"
                 },
                 "payUserId": {
                     "type": "string"
                 },
-                "txHash": {
+                "refund_address": {
                     "type": "string"
                 },
-                "txInfo": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                "time_stamp": {
+                    "type": "integer"
+                },
+                "withdraw_source": {
+                    "type": "string"
                 }
             }
-        }
-    },
-    "securityDefinitions": {
-        "JWT": {
-            "description": "Type 'Bearer \\\u003cTOKEN\\\u003e' to correctly set the AccessToken",
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
         }
     }
 }`
@@ -222,7 +224,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "",
 	Host:             "",
-	BasePath:         "",
+	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "",
 	Description:      "",

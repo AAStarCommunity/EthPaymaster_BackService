@@ -1,3 +1,4 @@
+basePath: /api
 definitions:
   model.DepositSponsorRequest:
     properties:
@@ -30,16 +31,18 @@ definitions:
     properties:
       amount:
         type: number
+      deposit_source:
+        type: string
       isTestNet:
         type: boolean
       payUserId:
         type: string
-      txHash:
+      refund_address:
         type: string
-      txInfo:
-        additionalProperties:
-          type: string
-        type: object
+      time_stamp:
+        type: integer
+      withdraw_source:
+        type: string
     type: object
 info:
   contact:
@@ -73,6 +76,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/model.JsonRpcRequest'
+      - description: apiKey
+        in: query
+        name: apiKey
+        required: true
+        type: string
       responses:
         "200":
           description: OK
@@ -125,10 +133,4 @@ paths:
           description: OK
       tags:
       - Sponsor
-securityDefinitions:
-  JWT:
-    description: Type 'Bearer \<TOKEN\>' to correctly set the AccessToken
-    in: header
-    name: Authorization
-    type: apiKey
 swagger: "2.0"

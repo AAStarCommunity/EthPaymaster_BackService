@@ -30,6 +30,7 @@ func init() {
 // @Product json
 // @param network path string true "Network"
 // @Param rpcRequest body model.JsonRpcRequest true "JsonRpcRequest Model"
+// @Param apiKey query string true "apiKey"
 // @Router /api/v1/paymaster/{network}  [post]
 // @Success 200
 func Paymaster(ctx *gin.Context) {

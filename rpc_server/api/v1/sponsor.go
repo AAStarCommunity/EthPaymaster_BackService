@@ -116,10 +116,8 @@ func ValidateSignature(originHash string, signatureHex string, inputJson []byte,
 }
 func validateDeposit(request *model.DepositSponsorRequest) (sender *common.Address, amount *big.Float, err error) {
 	txHash := request.TxHash
-	client, err := ethclient.Dial("https://opt-sepolia.g.alchemy.com/v2/_z0GaU6Zk8RfIR1guuli8nqMdb8RPdp0")
-	if err != nil {
-		return nil, nil, err
-	}
+	client := config.GetPaymasterSponsorClient(request.IsTestNet)
+
 	// check tx
 	_, err = sponsor_manager.GetLogByTxHash(txHash, request.IsTestNet)
 	if err == nil {
@@ -191,14 +189,10 @@ func GetInfoByHash(txHash string, client *ethclient.Client) (*types.Transaction,
 // @Accept json
 // @Product json
 // @Param request body model.WithdrawSponsorRequest true "WithdrawSponsorRequest Model"
-// @Param is_test_net path boolean true "Is Test Net"
 // @Router /api/v1/paymaster_sponsor/withdraw [post]
 // @Success 200
 func WithdrawSponsor(ctx *gin.Context) {
-	client, err := ethclient.Dial("https://opt-sepolia.g.alchemy.com/v2/_z0GaU6Zk8RfIR1guuli8nqMdb8RPdp0")
-	if err != nil {
-		return
-	}
+
 	request := model.WithdrawSponsorRequest{}
 	response := model.GetResponse()
 	if err := ctx.ShouldBindJSON(&request); err != nil {
@@ -206,6 +200,7 @@ func WithdrawSponsor(ctx *gin.Context) {
 		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, errStr)
 		return
 	}
+	client := config.GetPaymasterSponsorClient(request.IsTestNet)
 	//validate Sign
 	//validate Signature
 	inputJson, err := json.Marshal(request)
@@ -254,7 +249,7 @@ func WithdrawSponsor(ctx *gin.Context) {
 	ethWeiValue := utils.CounverEtherToWei(ethCount)
 
 	toAddress := common.HexToAddress(request.RefundAddress)
-	chainId := big.NewInt(11155420)
+	chainId := config.GetPaymasterSponsorChainId(request.IsTestNet)
 	// Execute transfer
 	tx, err := utils.TransEth(config.GetDepositer().PrivateKey, &toAddress, client, ethWeiValue, chainId)
 	// WithDrawSponsor

@@ -44,10 +44,6 @@ var Engine *gin.Engine
 
 // @contact.name   AAStar Support
 // @contact.url    https://aastar.xyz
-// @securityDefinitions.apikey JWT
-// @in header
-// @name Authorization
-// @description Type 'Bearer \<TOKEN\>' to correctly set the AccessToken
 // @BasePath /api
 func main() {
 	secretPath := os.Getenv("secret_config_path")
