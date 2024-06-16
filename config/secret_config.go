@@ -5,6 +5,8 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"encoding/json"
 	"fmt"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"math/big"
 	"os"
 )
 
@@ -13,6 +15,25 @@ var dsnTemplate = "host=%s port=%v user=%s password=%s dbname=%s TimeZone=%s ssl
 var secretConfig *model.SecretConfig
 var signerConfig = make(SignerConfigMap)
 var depositer *global_const.EOA
+
+var sponsorTestNetClient *ethclient.Client
+var sponsorTestNetClientChainId *big.Int
+var sponsorMainNetClient *ethclient.Client
+var sponsorMainNetClinetChainId *big.Int
+
+func GetPaymasterSponsorClient(isTestNet bool) *ethclient.Client {
+	if isTestNet {
+		return sponsorTestNetClient
+
+	}
+	return sponsorMainNetClient
+}
+func GetPaymasterSponsorChainId(isTestNet bool) *big.Int {
+	if isTestNet {
+		return sponsorTestNetClientChainId
+	}
+	return sponsorTestNetClientChainId
+}
 
 type SignerConfigMap map[global_const.Network]*global_const.EOA
 
@@ -47,6 +68,12 @@ func secretConfigInit(secretConfigPath string) {
 	if err != nil {
 		panic(fmt.Sprintf("signer key error: %s", err))
 	}
+
+	//paymasterInnerClient, err = ethclient.Dial(secretConfig.PaymasterInnerClientUrl)
+	//if err != nil {
+	//	panic(fmt.Sprintf("paymaster inner client error: %s", err))
+	//}
+	//paymasterInnerClientChainId, err = paymasterInnerClient.ChainID(context.Background())
 }
 
 func IsSponsorWhitelist(address string) bool {

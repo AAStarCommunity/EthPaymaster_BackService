@@ -28,6 +28,8 @@ type SponsorConfig struct {
 	DashBoardSignerAddress   string `json:"dashboard_signer_address"`
 	DepositTestNetUrl        string `json:"deposit_test_net_url"`
 	DepositMainNetUrl        string `json:"deposit_main_net_url"`
+	SponsorTestClientUrl     string `json:"sponsor_client_rpc_test_net"`
+	SponsorMainClientUrl     string `json:"sponsor_client_rpc_main_net"`
 }
 
 type NetWorkSecretConfig struct {

@@ -168,6 +168,11 @@ func ConvertBalanceToEther(balance *big.Int) *big.Float {
 	balanceFloat = new(big.Float).Quo(balanceFloat, global_const.EthWeiFactor)
 	return balanceFloat
 }
+func CounverEtherToWei(ether *big.Float) *big.Int {
+	afterEther := ether.Mul(ether, global_const.EthWeiFactor)
+	afterEtherInt, _ := afterEther.Int(nil)
+	return afterEtherInt
+}
 func ConvertStringToSet(input string, split string) mapset.Set[string] {
 	set := mapset.NewSet[string]()
 	arr := strings.Split(input, split)
@@ -224,7 +229,7 @@ func DBTransactional(db *gorm.DB, handle func(tx *gorm.DB) error) (err error) {
 	return err
 }
 
-func TransfertEth(from *ecdsa.PrivateKey, toAddress *common.Address, client *ethclient.Client, amount *big.Int) (*types.Transaction, error) {
+func TransEth(from *ecdsa.PrivateKey, toAddress *common.Address, client *ethclient.Client, amount *big.Int, chainID *big.Int) (*types.Transaction, error) {
 	fromPrivateKey := from.Public()
 	fromPublicKeyECDSA, ok := fromPrivateKey.(*ecdsa.PublicKey)
 	if !ok {
@@ -254,7 +259,8 @@ func TransfertEth(from *ecdsa.PrivateKey, toAddress *common.Address, client *eth
 		Value:     amount,
 		To:        toAddress,
 	})
-	signTx, err := types.SignTx(tx, types.NewEIP155Signer(big.NewInt(1)), from)
+
+	signTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), from)
 
 	if err != nil {
 		log.Fatal(err)

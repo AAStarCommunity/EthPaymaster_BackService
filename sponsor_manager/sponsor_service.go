@@ -276,7 +276,7 @@ func WithDrawSponsor(input *model.WithdrawSponsorRequest, txHash string) (*UserS
 		changeModel := &UserSponsorBalanceUpdateLogDBModel{
 			PayUserId:  input.PayUserId,
 			Amount:     BigFloat{amount},
-			Source:     "Withdraw",
+			Source:     input.WithdrawSource,
 			IsTestNet:  input.IsTestNet,
 			UpdateType: global_const.UpdateTypeWithdraw,
 			TxHash:     txHash,

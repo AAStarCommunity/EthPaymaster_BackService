@@ -241,13 +241,24 @@ func WithdrawSponsor(ctx *gin.Context) {
 		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, "Insufficient Balance")
 		return
 	}
+	// U -> ETH
+	ethPrice, err := price_compoent.GetTokenCostInUsd(global_const.TokenTypeETH, amountFloat)
+	if err != nil {
+		response.SetHttpCode(http.StatusInternalServerError).FailCode(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+	// U -> ETH -> Wei
+	ethCount := new(big.Float)
+	ethCount.Quo(ethPrice, amountFloat)
+
+	ethWeiValue := utils.CounverEtherToWei(ethCount)
+
 	toAddress := common.HexToAddress(request.RefundAddress)
+	chainId := big.NewInt(11155420)
 	// Execute transfer
-	value := big.NewInt(100000000000000000) // in wei (0.1 eth)
-	tx, err := utils.TransfertEth(config.GetDepositer().PrivateKey, &toAddress, client, value)
-	logrus.Debugf("tx: %v", tx)
+	tx, err := utils.TransEth(config.GetDepositer().PrivateKey, &toAddress, client, ethWeiValue, chainId)
 	// WithDrawSponsor
-	result, err := sponsor_manager.WithDrawSponsor(&request, "")
+	result, err := sponsor_manager.WithDrawSponsor(&request, tx.Hash().Hex())
 	if err != nil {
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(ctx, http.StatusInternalServerError, err.Error())
 		return
