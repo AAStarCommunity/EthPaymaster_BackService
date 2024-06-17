@@ -15,6 +15,9 @@ import (
 )
 
 func TestValidateDeposit(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	config.InitConfig("../../../config/basic_strategy_config.json", "../../../config/basic_config.json", "../../../config/secret_config.json")
 	sponsor_manager.Init()
 	request := &model.DepositSponsorRequest{
