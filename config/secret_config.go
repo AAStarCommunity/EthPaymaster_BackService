@@ -105,8 +105,6 @@ func secretConfigInit(secretConfigPath string) {
 }
 
 func IsSponsorWhitelist(senderAddress string) bool {
-	logrus.Debugf("IsSponsorWhitelist [%s]", senderAddress)
-	logrus.Debugf("IsSponsorWhitelist [%v]", sponsorWhitelist)
 	return sponsorWhitelist.Contains(senderAddress)
 }
 func GetNetworkSecretConfig(network global_const.Network) model.NetWorkSecretConfig {

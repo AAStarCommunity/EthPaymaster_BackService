@@ -7,12 +7,15 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/config"
+	"AAStarCommunity/EthPaymaster_BackService/envirment"
+	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
 	"AAStarCommunity/EthPaymaster_BackService/sponsor_manager"
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/sirupsen/logrus"
+	"os"
 	"testing"
 )
 
@@ -26,6 +29,8 @@ func TestOperator(t *testing.T) {
 	mockRequestNotSupport1559 := getMockTryPayUserOpRequest()
 	mockRequestNotSupport1559.UserOp["maxPriorityFeePerGas"] = mockRequestNotSupport1559.UserOp["maxFeePerGas"]
 	sponsor_manager.Init()
+	dashboard_service.Init()
+	envirment.Environment.SetUnitEnv()
 	tests := []struct {
 		name string
 		test func(t *testing.T)
@@ -129,8 +134,9 @@ func TestOperator(t *testing.T) {
 			"Test_NoSpectCode_TryPayUserOpExecute",
 			func(t *testing.T) {
 				request := model.UserOpRequest{
-					Network: global_const.EthereumSepolia,
-					UserOp:  *utils.GenerateMockUservOperation(),
+					StrategyCode: "3123124__7dtFu",
+					Network:      global_const.EthereumSepolia,
+					UserOp:       *utils.GenerateMockUservOperation(),
 				}
 				testTryPayUserOpExecute(t, &request)
 			},
@@ -169,7 +175,9 @@ func testGetSupportEntrypointExecute(t *testing.T) {
 	t.Log(res)
 }
 func testTryPayUserOpExecute(t *testing.T, request *model.UserOpRequest) {
-	result, err := TryPayUserOpExecute(&model.ApiKeyModel{}, request)
+	result, err := TryPayUserOpExecute(&model.ApiKeyModel{
+		UserId: 5,
+	}, request)
 	if err != nil {
 		t.Fatal(err)
 		return
@@ -224,6 +232,9 @@ func getMockTryPayUserOpRequest() *model.UserOpRequest {
 }
 
 func TestWSclient(t *testing.T) {
+	os.Setenv("Env", "unit")
+
+	t.Logf("Env: %v", os.Getenv("Env"))
 	//TODO
 	url := "wss://eth-sepolia.g.alchemy.com/v2/wKeLycGxgYRykgf0aGfcpEkUtqyLQg4v"
 	wsClient, err := ethclient.Dial(url)

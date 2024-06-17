@@ -39,11 +39,11 @@ func ValidateStrategy(strategy *model.Strategy, request *model.UserOpRequest) er
 	curTime := time.Now().Unix()
 	//check Time
 	if strategy.ExecuteRestriction.EffectiveStartTime != nil {
-		if curTime < strategy.ExecuteRestriction.EffectiveStartTime.Int64() {
+		if curTime < strategy.ExecuteRestriction.EffectiveStartTime.Int64() && strategy.ExecuteRestriction.EffectiveEndTime.Sign() > 0 {
 			return xerrors.Errorf("curTime [%s] is OutOff EffectiveStartTime [%s]", curTime, strategy.ExecuteRestriction.EffectiveStartTime.Int64())
 		}
 	}
-	if strategy.ExecuteRestriction.EffectiveEndTime != nil {
+	if strategy.ExecuteRestriction.EffectiveEndTime != nil && strategy.ExecuteRestriction.EffectiveEndTime.Sign() > 0 {
 		if curTime > strategy.ExecuteRestriction.EffectiveEndTime.Int64() {
 			return xerrors.Errorf("curTime [%s] is OutOff EffectiveEndTime [%s]", curTime, strategy.ExecuteRestriction.EffectiveEndTime.Int64())
 		}

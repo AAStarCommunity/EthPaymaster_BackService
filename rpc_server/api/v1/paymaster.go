@@ -188,6 +188,5 @@ func validateUserOpRequest(request *model.UserOpRequest) error {
 	if request.Network == "" {
 		return xerrors.Errorf("ForceNetwork is empty")
 	}
-
 	return nil
 }

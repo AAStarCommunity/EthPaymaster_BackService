@@ -15,6 +15,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/config"
+	"AAStarCommunity/EthPaymaster_BackService/envirment"
 	"AAStarCommunity/EthPaymaster_BackService/schedulor"
 	"context"
 	"crypto/ecdsa"
@@ -96,29 +97,35 @@ func GetEthereumExecutor(network global_const.Network) *EthereumExecutor {
 	if !success {
 		panic(xerrors.Errorf("chainId %s is invalid", config.GetChainId(network)))
 	}
-	wsUrl := config.GetNewWorkClientURl(network)
-	wsUrl = strings.Replace(wsUrl, "https", "wss", 1)
-	logrus.Debugf("wsUrl: %s", wsUrl)
-	webSocketClient, err := ethclient.Dial(wsUrl)
-	if err != nil {
-		panic(err)
-	}
 
-	eventListener, err := schedulor.NewEventListener(webSocketClient, network)
-	if err != nil {
-		panic(err)
-	}
-	go eventListener.Listen()
 	logrus.Debugf("after Lesten network :[%s]", network)
 	geth := gethclient.New(client.Client())
-	executorMap[network] = &EthereumExecutor{
-		network:         network,
-		Client:          client,
-		ChainId:         chainId,
-		GethClient:      geth,
-		eventListener:   eventListener,
-		webSocketClient: webSocketClient,
+	ethExecutor := &EthereumExecutor{
+		network:    network,
+		Client:     client,
+		ChainId:    chainId,
+		GethClient: geth,
 	}
+
+	if !envirment.Environment.IsUnit() {
+		logrus.Infof("Init EventListener network :[%s]", network)
+		wsUrl := config.GetNewWorkClientURl(network)
+		wsUrl = strings.Replace(wsUrl, "https", "wss", 1)
+		logrus.Debugf("wsUrl: %s", wsUrl)
+		webSocketClient, err := ethclient.Dial(wsUrl)
+		if err != nil {
+			panic(err)
+		}
+
+		eventListener, err := schedulor.NewEventListener(webSocketClient, network)
+		if err != nil {
+			panic(err)
+		}
+		go eventListener.Listen()
+		ethExecutor.eventListener = eventListener
+		ethExecutor.webSocketClient = webSocketClient
+	}
+	executorMap[network] = ethExecutor
 
 	return executorMap[network]
 }
