@@ -16,7 +16,7 @@ func AuthHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		apiKey := c.Query("apiKey")
 		if apiKey == "" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "ApiKey Is Required Go To Dashboard (dashboard.aastar.io) To Get It"})
+			c.JSON(http.StatusForbidden, gin.H{"error": "ApiKey is mandatory, visit to https://dashboard.aastar.io for more detail."})
 			c.Abort()
 			return
 		}
