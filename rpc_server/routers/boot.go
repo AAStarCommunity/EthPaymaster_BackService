@@ -11,7 +11,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"io"
 	"net/http"
 )
 
@@ -60,18 +59,17 @@ func buildRoute(routers *gin.Engine) {
 
 // buildMod set Mode by envirment
 func buildMod(routers *gin.Engine) {
-
+	buildSwagger(routers)
 	// prod mode
 	if envirment.Environment.IsProduction() {
 		gin.SetMode(gin.ReleaseMode)
-		gin.DefaultWriter = io.Discard // disable gin log
+		//gin.DefaultWriter = io.Discard // disable gin log
 		return
 	}
 
 	// dev mod
 	if envirment.Environment.IsDevelopment() {
 		gin.SetMode(gin.DebugMode)
-		buildSwagger(routers)
 		return
 	}
 }

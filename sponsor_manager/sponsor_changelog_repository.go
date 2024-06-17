@@ -26,11 +26,7 @@ func (UserSponsorBalanceUpdateLogDBModel) TableName() string {
 func AddBalanceChangeLog(changeDbModel *UserSponsorBalanceUpdateLogDBModel) error {
 	return relayDB.Create(changeDbModel).Error
 }
-func LogBalanceChange(updateType global_const.UpdateType, balanceType global_const.BalanceType, data interface{}, amount *big.Float) {
 
-	//TODO
-	return
-}
 func GetDepositAndWithDrawLog(userId string, IsTestNet bool) (models []*UserSponsorBalanceUpdateLogDBModel, err error) {
 	tx := relayDB.Model(&UserSponsorBalanceUpdateLogDBModel{}).Where("pay_user_id = ?", userId).Where("is_test_net = ?", IsTestNet).Where("update_type in (?)", []global_const.UpdateType{global_const.UpdateTypeDeposit, global_const.UpdateTypeWithdraw}).Find(&models)
 	if tx.Error != nil {

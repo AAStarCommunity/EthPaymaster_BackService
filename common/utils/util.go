@@ -3,6 +3,7 @@ package utils
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"bytes"
+	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
@@ -10,11 +11,14 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 	"gorm.io/gorm"
+	"log"
 	"math/big"
 	"regexp"
 	"runtime"
@@ -24,7 +28,7 @@ import (
 
 var HexPattern = regexp.MustCompile(`^0x[a-fA-F\d]*$`)
 
-const defaultStackSize = 4096
+const defaultStackSize = 10000
 
 type EthCallReq struct {
 	From common.Address `json:"from"`
@@ -164,6 +168,11 @@ func ConvertBalanceToEther(balance *big.Int) *big.Float {
 	balanceFloat = new(big.Float).Quo(balanceFloat, global_const.EthWeiFactor)
 	return balanceFloat
 }
+func CounverEtherToWei(ether *big.Float) *big.Int {
+	afterEther := ether.Mul(ether, global_const.EthWeiFactor)
+	afterEtherInt, _ := afterEther.Int(nil)
+	return afterEtherInt
+}
 func ConvertStringToSet(input string, split string) mapset.Set[string] {
 	set := mapset.NewSet[string]()
 	arr := strings.Split(input, split)
@@ -202,18 +211,63 @@ func GetCurrentGoroutineStack() string {
 	n := runtime.Stack(buf[:], false)
 	return string(buf[:n])
 }
-func DBTransactional(db *gorm.DB, handle func() error) (err error) {
+func DBTransactional(db *gorm.DB, handle func(*gorm.DB) error) (err error) {
 	tx := db.Begin()
 	defer func() {
 		if p := recover(); p != nil {
 			tx.Rollback()
-			panic(p)
+			logrus.Errorf("TX ERROR [%s] ", GetCurrentGoroutineStack())
+			err = xerrors.Errorf("TX ERROR [%v]", p)
+			//panic(p)
 		} else if err != nil {
 			tx.Rollback()
 		} else {
 			err = tx.Commit().Error
 		}
 	}()
-	err = handle()
-	return
+	err = handle(tx)
+	return err
+}
+
+func TransEth(from *ecdsa.PrivateKey, toAddress *common.Address, client *ethclient.Client, amount *big.Int, chainID *big.Int) (*types.Transaction, error) {
+	fromPrivateKey := from.Public()
+	fromPublicKeyECDSA, ok := fromPrivateKey.(*ecdsa.PublicKey)
+	if !ok {
+		logrus.Error("error casting public key to ECDSA")
+		return nil, xerrors.Errorf("error casting public key to ECDSA")
+	}
+	fromAddress := crypto.PubkeyToAddress(*fromPublicKeyECDSA)
+	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
+	if err != nil {
+		return nil, err
+
+	}
+	gasLimit := uint64(21000) // in units
+	gasPrice, err := client.SuggestGasPrice(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	var data []byte
+	tx := types.NewTx(&types.DynamicFeeTx{
+
+		Nonce:     nonce,
+		Data:      data,
+		Gas:       gasLimit,
+		GasFeeCap: gasPrice,
+		GasTipCap: gasPrice,
+		Value:     amount,
+		To:        toAddress,
+	})
+
+	signTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), from)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = client.SendTransaction(context.Background(), signTx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return signTx, nil
 }

@@ -28,11 +28,9 @@ func TestSponsor(t *testing.T) {
 		{
 			"TestDepositSponsor",
 			func(t *testing.T) {
-				request := model.DepositSponsorRequest{
+				request := DepositSponsorInput{
 					PayUserId: "test",
-					Amount:    big.NewFloat(3),
 					IsTestNet: true,
-					Source:    string(SourceDashboard),
 				}
 				result, err := DepositSponsor(&request)
 				if err != nil {
@@ -107,11 +105,10 @@ func testWithDrawSponsor(t *testing.T, userId string, isTestNet bool, amount *bi
 
 	request := model.WithdrawSponsorRequest{
 		PayUserId: userId,
-		Amount:    amount,
 		IsTestNet: isTestNet,
-		TxInfo:    map[string]string{},
 	}
-	result, err := WithDrawSponsor(&request)
+	txHash := "0x123456"
+	result, err := WithDrawSponsor(&request, txHash)
 	if err != nil {
 		t.Error(err)
 	}
