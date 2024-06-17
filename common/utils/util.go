@@ -211,7 +211,7 @@ func GetCurrentGoroutineStack() string {
 	n := runtime.Stack(buf[:], false)
 	return string(buf[:n])
 }
-func DBTransactional(db *gorm.DB, handle func(tx *gorm.DB) error) (err error) {
+func DBTransactional(db *gorm.DB, handle func(*gorm.DB) error) (err error) {
 	tx := db.Begin()
 	defer func() {
 		if p := recover(); p != nil {
