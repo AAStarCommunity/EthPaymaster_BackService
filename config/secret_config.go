@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"math/big"
 	"os"
+	"sync"
 )
 
 var dsnTemplate = "host=%s port=%v user=%s password=%s dbname=%s TimeZone=%s sslmode=%s"
@@ -20,7 +21,8 @@ var depositer *global_const.EOA
 var sponsorTestNetClient *ethclient.Client
 var sponsorTestNetClientChainId *big.Int
 var sponsorMainNetClient *ethclient.Client
-var sponsorMainNetClinetChainId *big.Int
+var sponsorMainNetClientChainId *big.Int
+var onlyOnce = sync.Once{}
 
 func GetPaymasterSponsorClient(isTestNet bool) *ethclient.Client {
 	if isTestNet {
@@ -33,7 +35,7 @@ func GetPaymasterSponsorChainId(isTestNet bool) *big.Int {
 	if isTestNet {
 		return sponsorTestNetClientChainId
 	}
-	return sponsorMainNetClinetChainId
+	return sponsorMainNetClientChainId
 }
 
 type SignerConfigMap map[global_const.Network]*global_const.EOA
@@ -69,29 +71,29 @@ func secretConfigInit(secretConfigPath string) {
 	if err != nil {
 		panic(fmt.Sprintf("signer key error: %s", err))
 	}
+	onlyOnce.Do(func() {
+		paymasterSponsorMainNetClient, err := ethclient.Dial(secretConfig.SponsorConfig.SponsorMainClientUrl)
+		if err != nil {
+			panic(fmt.Sprintf("paymaster inner client error: %s", err))
+		}
+		paymasterInnerClientChainId, err := paymasterSponsorMainNetClient.ChainID(context.Background())
+		if err != nil {
+			panic(fmt.Sprintf("paymaster inner client chain id error: %s", err))
+		}
+		sponsorMainNetClient = paymasterSponsorMainNetClient
+		sponsorMainNetClientChainId = paymasterInnerClientChainId
 
-	paymasterSponsorMainNetClient, err := ethclient.Dial(secretConfig.SponsorConfig.SponsorMainClientUrl)
-	if err != nil {
-		panic(fmt.Sprintf("paymaster inner client error: %s", err))
-	}
-	paymasterInnerClientChainId, err := paymasterSponsorMainNetClient.ChainID(context.Background())
-	if err != nil {
-		panic(fmt.Sprintf("paymaster inner client chain id error: %s", err))
-	}
-	sponsorMainNetClient = paymasterSponsorMainNetClient
-	sponsorMainNetClinetChainId = paymasterInnerClientChainId
-
-	paymasterSponsorTestNetClient, err := ethclient.Dial(secretConfig.SponsorConfig.SponsorTestClientUrl)
-	if err != nil {
-		panic(fmt.Sprintf("paymaster inner client error: %s", err))
-	}
-	paymasterInnerClientChainId, err = paymasterSponsorTestNetClient.ChainID(context.Background())
-	if err != nil {
-		panic(fmt.Sprintf("paymaster inner client chain id error: %s", err))
-	}
-	sponsorTestNetClient = paymasterSponsorTestNetClient
-	sponsorTestNetClientChainId = paymasterInnerClientChainId
-
+		paymasterSponsorTestNetClient, err := ethclient.Dial(secretConfig.SponsorConfig.SponsorTestClientUrl)
+		if err != nil {
+			panic(fmt.Sprintf("paymaster inner client error: %s", err))
+		}
+		paymasterInnerClientChainId, err = paymasterSponsorTestNetClient.ChainID(context.Background())
+		if err != nil {
+			panic(fmt.Sprintf("paymaster inner client chain id error: %s", err))
+		}
+		sponsorTestNetClient = paymasterSponsorTestNetClient
+		sponsorTestNetClientChainId = paymasterInnerClientChainId
+	})
 }
 
 func IsSponsorWhitelist(address string) bool {
