@@ -36,7 +36,7 @@ func TestDashBoardService(t *testing.T) {
 	}
 }
 func testGetSuitableStrategy(t *testing.T) {
-	strategy, err := GetSuitableStrategy("", global_const.EthereumSepolia, global_const.TokenTypeOP)
+	strategy, err := GetSuitableStrategyWithOutCode("", global_const.EthereumSepolia, global_const.TokenTypeOP)
 	if err != nil {
 		t.Error(err)
 	}

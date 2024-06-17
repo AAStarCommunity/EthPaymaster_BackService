@@ -5,6 +5,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"encoding/json"
 	"fmt"
+	mapset "github.com/deckarep/golang-set/v2"
 	"os"
 )
 
@@ -12,6 +13,7 @@ var dsnTemplate = "host=%s port=%v user=%s password=%s dbname=%s TimeZone=%s ssl
 
 var secretConfig *model.SecretConfig
 var signerConfig = make(SignerConfigMap)
+var sponsorWhitelist = mapset.NewSet[string]()
 
 type SignerConfigMap map[global_const.Network]*global_const.EOA
 
@@ -39,9 +41,11 @@ func secretConfigInit(secretConfigPath string) {
 
 		signerConfig[global_const.Network(network)] = eoa
 	}
+	if secretConfig.FreeSponsorWhitelist != nil {
+		sponsorWhitelist.Append(secretConfig.FreeSponsorWhitelist...)
+	}
 }
-func IsSponsorWhitelist(address string) bool {
-
+func IsSponsorWhitelist(senderAddress string) bool {
 	//TODO
 	return true
 }

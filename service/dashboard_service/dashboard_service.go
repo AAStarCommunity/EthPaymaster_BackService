@@ -160,10 +160,10 @@ type StrategyExecuteRestrictionJson struct {
 	ChainIdWhiteList   []string `json:"chain_id_whitelist"`
 }
 
-// GetSuitableStrategy get suitable strategy by entryPointVersion, chain,
+// GetSuitableStrategyWithOutCode get suitable strategy by entryPointVersion, chain,
 //
 //	For Offical StrategyConfig,
-func GetSuitableStrategy(entryPointVersion global_const.EntrypointVersion, chain global_const.Network, gasUseToken global_const.TokenType) (*model.Strategy, error) {
+func GetSuitableStrategyWithOutCode(entryPointVersion global_const.EntrypointVersion, chain global_const.Network, gasUseToken global_const.TokenType) (*model.Strategy, error) {
 	if entryPointVersion == "" {
 		entryPointVersion = global_const.EntrypointV06
 	}
@@ -192,6 +192,9 @@ func GetSuitableStrategy(entryPointVersion global_const.EntrypointVersion, chain
 			PayMasterAddress:        paymasterAddress,
 			PayType:                 payType,
 			IsProjectErc20PayEnable: isPerc20Enable,
+		},
+		ExecuteRestriction: &model.StrategyExecuteRestriction{
+			Status: global_const.StrategyStatusAchieve,
 		},
 		Erc20TokenType: gasUseToken,
 	}

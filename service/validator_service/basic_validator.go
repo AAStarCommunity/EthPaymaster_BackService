@@ -31,7 +31,7 @@ func ValidateStrategy(strategy *model.Strategy, request *model.UserOpRequest) er
 	}
 
 	if strategy.ExecuteRestriction == nil {
-		return nil
+		return xerrors.Errorf("ExecuteRestriction is Empty")
 	}
 	if strategy.ExecuteRestriction.Status != global_const.StrategyStatusAchieve {
 		return xerrors.Errorf("strategy status is not active")
@@ -53,7 +53,7 @@ func ValidateStrategy(strategy *model.Strategy, request *model.UserOpRequest) er
 			return xerrors.Errorf("strategy not support erc20 token")
 		}
 	}
-	if strategy.ExecuteRestriction.GlobalMaxUSD != nil || strategy.ExecuteRestriction.GlobalMaxUSD.Sign() != 0 {
+	if strategy.ExecuteRestriction.GlobalMaxUSD != nil && strategy.ExecuteRestriction.GlobalMaxUSD.Sign() != 0 {
 		curGlobalUse, err := GetStrategyGlobalUse(strategy)
 		if err != nil {
 			return err
@@ -62,7 +62,7 @@ func ValidateStrategy(strategy *model.Strategy, request *model.UserOpRequest) er
 			return xerrors.Errorf("strategy global max usd use out of limit")
 		}
 	}
-	if strategy.ExecuteRestriction.DayMaxUSD != nil || strategy.ExecuteRestriction.DayMaxUSD.Sign() != 0 {
+	if strategy.ExecuteRestriction.DayMaxUSD != nil && strategy.ExecuteRestriction.DayMaxUSD.Sign() != 0 {
 		curDayUse, err := GetStrategyDayUse(strategy)
 		if err != nil {
 			return err
