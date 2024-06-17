@@ -59,6 +59,9 @@ func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {
 	res, _ := http.DefaultClient.Do(req)
 
 	defer func(Body io.ReadCloser) {
+		if Body == nil {
+			return
+		}
 		err := Body.Close()
 		if err != nil {
 			logrus.Error("close body error: ", err)

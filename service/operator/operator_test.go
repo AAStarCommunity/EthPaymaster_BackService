@@ -134,9 +134,10 @@ func TestOperator(t *testing.T) {
 			"Test_NoSpectCode_TryPayUserOpExecute",
 			func(t *testing.T) {
 				request := model.UserOpRequest{
-					StrategyCode: "3123124__7dtFu",
-					Network:      global_const.EthereumSepolia,
-					UserOp:       *utils.GenerateMockUservOperation(),
+					StrategyCode:      "8bced19b-505e-4d11-ae80-abbee3d3a38c",
+					Network:           global_const.EthereumSepolia,
+					UserOp:            *utils.GenerateMockUservOperation(),
+					UserPayErc20Token: global_const.TokenTypeUSDT,
 				}
 				testTryPayUserOpExecute(t, &request)
 			},

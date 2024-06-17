@@ -121,8 +121,7 @@
   },
   "support_paymaster": {
     "ethereum-sepolia": [
-      "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
-      "0x3Da96267B98a33267249734FD8FFeC75093D3085"
+      "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f"
     ],
     "optimism-sepolia": [
       "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
