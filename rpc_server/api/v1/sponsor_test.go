@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"testing"
 )
@@ -77,4 +78,12 @@ func TestValidateSignature(t *testing.T) {
 		return
 	}
 	t.Logf("ValidateSignature success")
+}
+func TestDemo(t *testing.T) {
+	t.Logf("Demo")
+	address := "0xFfDB071C2b58CCC10Ad386f9Bb4E8d3d664CE73c"
+	commonAddres := common.HexToAddress(address)
+	commonAddres.Hex()
+	t.Logf("commonAddres: %v", commonAddres.Hex())
+
 }

@@ -6,9 +6,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"math/big"
 	mapset "github.com/deckarep/golang-set/v2"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/sirupsen/logrus"
+	"math/big"
 	"os"
 	"sync"
 )
@@ -38,6 +39,7 @@ func GetPaymasterSponsorChainId(isTestNet bool) *big.Int {
 	}
 	return sponsorMainNetClientChainId
 }
+
 var sponsorWhitelist = mapset.NewSet[string]()
 
 type SignerConfigMap map[global_const.Network]*global_const.EOA
@@ -96,14 +98,16 @@ func secretConfigInit(secretConfigPath string) {
 		sponsorTestNetClient = paymasterSponsorTestNetClient
 		sponsorTestNetClientChainId = paymasterInnerClientChainId
 	})
-	if secretConfig.FreeSponsorWhitelist != nil {
-		sponsorWhitelist.Append(secretConfig.FreeSponsorWhitelist...)
+	logrus.Debugf("secretConfig [%v]", secretConfig)
+	if secretConfig.SponsorConfig.FreeSponsorWhitelist != nil {
+		sponsorWhitelist.Append(secretConfig.SponsorConfig.FreeSponsorWhitelist...)
 	}
 }
 
 func IsSponsorWhitelist(senderAddress string) bool {
-	//TODO
-	return true
+	logrus.Debugf("IsSponsorWhitelist [%s]", senderAddress)
+	logrus.Debugf("IsSponsorWhitelist [%v]", sponsorWhitelist)
+	return sponsorWhitelist.Contains(senderAddress)
 }
 func GetNetworkSecretConfig(network global_const.Network) model.NetWorkSecretConfig {
 	return secretConfig.NetWorkSecretConfigMap[string(network)]

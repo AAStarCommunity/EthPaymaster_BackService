@@ -4,6 +4,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/config"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 	"io"
 	"io/ioutil"
@@ -57,7 +58,12 @@ func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {
 
 	res, _ := http.DefaultClient.Do(req)
 
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			logrus.Error("close body error: ", err)
+		}
+	}(res.Body)
 	body, _ := io.ReadAll(res.Body)
 	bodystr := string(body)
 	strarr := strings.Split(bodystr, ":")
