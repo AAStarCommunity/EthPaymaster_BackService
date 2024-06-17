@@ -7,6 +7,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/config"
 	"encoding/json"
 	"errors"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -28,6 +29,7 @@ var (
 
 func Init() {
 	onlyOnce.Do(func() {
+		logrus.Info("Init Sponsor Manager")
 		relayDBDsn := config.GetRelayDBDSN()
 
 		relayDBVar, err := gorm.Open(postgres.Open(relayDBDsn), &gorm.Config{})
@@ -77,7 +79,7 @@ func LockUserBalance(userId string, userOpHash []byte, isTestNet bool,
 	availableBalance := new(big.Float).Sub(balanceModel.AvailableBalance.Float, lockAmount)
 	balanceModel.LockBalance = BigFloat{lockBalance}
 	balanceModel.AvailableBalance = BigFloat{availableBalance}
-	err = utils.DBTransactional(relayDB, func() error {
+	err = utils.DBTransactional(relayDB, func(tx *gorm.DB) error {
 		if updateErr := relayDB.Model(&UserSponsorBalanceDBModel{}).
 			Where("pay_user_id = ?", balanceModel.PayUserId).
 			Where("is_test_net = ?", isTestNet).Updates(balanceModel).Error; updateErr != nil {
@@ -91,7 +93,7 @@ func LockUserBalance(userId string, userOpHash []byte, isTestNet bool,
 			IsTestNet:  isTestNet,
 			UpdateType: global_const.UpdateTypeLock,
 		}
-		if createErr := relayDB.Create(changeModel).Error; createErr != nil {
+		if createErr := tx.Create(changeModel).Error; createErr != nil {
 			return err
 		}
 		return nil
@@ -109,13 +111,14 @@ func ReleaseBalanceWithActualCost(userId string, userOpHash []byte,
 		return nil, err
 	}
 	balanceModel, err := findUserSponsor(changeModel.PayUserId, changeModel.IsTestNet)
-
+	//TODO 10% Fee
 	lockBalance := changeModel.Amount
 	balanceModel.LockBalance = BigFloat{new(big.Float).Sub(balanceModel.LockBalance.Float, lockBalance.Float)}
 	refundBalance := new(big.Float).Sub(lockBalance.Float, actualGasCost)
 	balanceModel.AvailableBalance = BigFloat{new(big.Float).Add(balanceModel.AvailableBalance.Float, refundBalance)}
 
-	err = utils.DBTransactional(relayDB, func() error {
+	balanceModel.SponsoredBalance = BigFloat{new(big.Float).Add(balanceModel.SponsoredBalance.Float, actualGasCost)}
+	err = utils.DBTransactional(relayDB, func(tx *gorm.DB) error {
 		if updateErr := relayDB.Model(&UserSponsorBalanceDBModel{}).
 			Model(&UserSponsorBalanceDBModel{}).
 			Where("pay_user_id = ?", balanceModel.PayUserId).
@@ -159,7 +162,7 @@ func ReleaseUserOpHashLockWhenFail(userOpHash []byte, isTestNet bool) (*UserSpon
 	lockBalance := changeModel.Amount
 	balanceModel.LockBalance = BigFloat{new(big.Float).Sub(balanceModel.LockBalance.Float, lockBalance.Float)}
 	balanceModel.AvailableBalance = BigFloat{new(big.Float).Add(balanceModel.AvailableBalance.Float, lockBalance.Float)}
-	err = utils.DBTransactional(relayDB, func() error {
+	err = utils.DBTransactional(relayDB, func(tx *gorm.DB) error {
 		if updateErr := relayDB.Model(&UserSponsorBalanceDBModel{}).
 			Where("pay_user_id = ?", balanceModel.PayUserId).
 			Where("is_test_net = ?", isTestNet).Updates(balanceModel).Error; updateErr != nil {
@@ -184,76 +187,87 @@ func ReleaseUserOpHashLockWhenFail(userOpHash []byte, isTestNet bool) (*UserSpon
 	return balanceModel, nil
 }
 
-//----------Functions----------
-
-func DepositSponsor(input *model.DepositSponsorRequest) (*UserSponsorBalanceDBModel, error) {
-
-	balanceModel, err := FindUserSponsorBalance(input.PayUserId, input.IsTestNet)
+func GetLogByTxHash(txHash string, isTestNet bool) (*UserSponsorBalanceUpdateLogDBModel, error) {
+	changeModel := &UserSponsorBalanceUpdateLogDBModel{}
+	err := relayDB.Where("tx_hash = ?", txHash).Where("is_test_net = ?", isTestNet).First(changeModel).Error
 	if err != nil {
-		return nil, err
+		return changeModel, err
 	}
+	return changeModel, nil
+}
 
-	err = utils.DBTransactional(relayDB, func() error {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+// ----------Functions----------
+type DepositSponsorInput struct {
+	TxHash    string `json:"tx_hash"`
+	From      string `json:"from"`
+	To        string `json:"to"`
+	Amount    *big.Float
+	IsTestNet bool   `json:"is_test_net"`
+	PayUserId string `json:"pay_user_id"`
+	TxInfo    map[string]string
+	Source    string
+}
+
+func DepositSponsor(input *DepositSponsorInput) (*UserSponsorBalanceDBModel, error) {
+	balanceModel, findBalanceError := FindUserSponsorBalance(input.PayUserId, input.IsTestNet)
+	txErr := utils.DBTransactional(relayDB, func(tx *gorm.DB) error {
+		if errors.Is(findBalanceError, gorm.ErrRecordNotFound) {
 			//init Data
 			balanceModel = &UserSponsorBalanceDBModel{}
 			balanceModel.AvailableBalance = BigFloat{big.NewFloat(0)}
 			balanceModel.PayUserId = input.PayUserId
 			balanceModel.LockBalance = BigFloat{big.NewFloat(0)}
+			balanceModel.SponsoredBalance = BigFloat{big.NewFloat(0)}
 			balanceModel.IsTestNet = input.IsTestNet
-			err = relayDB.Create(balanceModel).Error
+			balanceModel.Source = input.Source
+			balanceModel.SponsorAddress = input.From
+			err := tx.Create(balanceModel).Error
 			if err != nil {
-
+				logrus.Info("Create Balance ERROR ")
 				return err
 			}
-		}
-		if err != nil {
-
-			return err
 		}
 		newAvailableBalance := BigFloat{new(big.Float).Add(balanceModel.AvailableBalance.Float, input.Amount)}
 		balanceModel.AvailableBalance = newAvailableBalance
 
-		if updateErr := relayDB.Model(balanceModel).
+		if updateErr := tx.Model(balanceModel).
 			Where("pay_user_id = ?", balanceModel.PayUserId).
 			Where("is_test_net = ?", input.IsTestNet).Updates(balanceModel).Error; updateErr != nil {
-
 			return updateErr
 		}
-
-		txInfoJSon, _ := json.Marshal(input.TxInfo)
 		changeModel := &UserSponsorBalanceUpdateLogDBModel{
 			PayUserId:  input.PayUserId,
 			Amount:     BigFloat{input.Amount},
-			Source:     "Deposit",
+			Source:     input.Source,
 			IsTestNet:  input.IsTestNet,
 			UpdateType: global_const.UpdateTypeDeposit,
 			TxHash:     input.TxHash,
-			TxInfo:     txInfoJSon,
 		}
-		if createErr := relayDB.Create(changeModel).Error; createErr != nil {
+		if input.TxInfo != nil {
+			txInfo, _ := json.Marshal(input.TxInfo)
+			changeModel.TxInfo = txInfo
+		}
+		if createErr := tx.Create(changeModel).Error; createErr != nil {
 			return createErr
 		}
 		return nil
 	})
-	if err != nil {
-		return nil, err
-	}
 
-	return balanceModel, nil
+	return balanceModel, txErr
 }
 
-func WithDrawSponsor(input *model.WithdrawSponsorRequest) (*UserSponsorBalanceDBModel, error) {
+func WithDrawSponsor(input *model.WithdrawSponsorRequest, txHash string) (*UserSponsorBalanceDBModel, error) {
+	amount := big.NewFloat(input.Amount)
 	balanceModel, err := FindUserSponsorBalance(input.PayUserId, input.IsTestNet)
 	if err != nil {
 		return nil, err
 	}
-	if balanceModel.AvailableBalance.Cmp(input.Amount) < 0 {
-		return nil, xerrors.Errorf("Insufficient balance [%s] not Enough to Withdraw [%s]", balanceModel.AvailableBalance.String(), input.Amount.String())
+	if balanceModel.AvailableBalance.Cmp(amount) < 0 {
+		return nil, xerrors.Errorf("Insufficient balance [%s] not Enough to Withdraw [%s]", balanceModel.AvailableBalance.String(), amount.String())
 	}
-	newAvailableBalance := new(big.Float).Sub(balanceModel.AvailableBalance.Float, input.Amount)
+	newAvailableBalance := new(big.Float).Sub(balanceModel.AvailableBalance.Float, amount)
 	balanceModel.AvailableBalance = BigFloat{newAvailableBalance}
-	err = utils.DBTransactional(relayDB, func() error {
+	err = utils.DBTransactional(relayDB, func(tx *gorm.DB) error {
 		if updateErr := relayDB.Model(&UserSponsorBalanceDBModel{}).
 			Where("pay_user_id = ?", balanceModel.PayUserId).
 			Where("is_test_net = ?", input.IsTestNet).Updates(balanceModel).Error; updateErr != nil {
@@ -261,11 +275,11 @@ func WithDrawSponsor(input *model.WithdrawSponsorRequest) (*UserSponsorBalanceDB
 		}
 		changeModel := &UserSponsorBalanceUpdateLogDBModel{
 			PayUserId:  input.PayUserId,
-			Amount:     BigFloat{input.Amount},
-			Source:     "Withdraw",
+			Amount:     BigFloat{amount},
+			Source:     input.WithdrawSource,
 			IsTestNet:  input.IsTestNet,
 			UpdateType: global_const.UpdateTypeWithdraw,
-			TxHash:     input.TxHash,
+			TxHash:     txHash,
 		}
 		if createErr := relayDB.Create(changeModel).Error; createErr != nil {
 			return createErr

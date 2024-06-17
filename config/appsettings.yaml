@@ -1,4 +1,0 @@
-jwt:
-  security: hello-ethereum-paymaster
-  realm: aastar
-  idkey: id
