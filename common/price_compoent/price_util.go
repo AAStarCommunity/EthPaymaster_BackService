@@ -65,6 +65,7 @@ func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {
 		err := Body.Close()
 		if err != nil {
 			logrus.Error("close body error: ", err)
+			return
 		}
 	}(res.Body)
 	body, _ := io.ReadAll(res.Body)
