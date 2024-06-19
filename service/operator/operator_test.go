@@ -26,6 +26,7 @@ func TestOperator(t *testing.T) {
 	config.InitConfig("../../config/basic_strategy_config.json", "../../config/basic_config.json", "../../config/secret_config.json")
 	logrus.SetLevel(logrus.DebugLevel)
 	immutableRequest := getMockTryPayUserOpRequest()
+	os.Setenv("Env", "unit")
 	mockRequestNotSupport1559 := getMockTryPayUserOpRequest()
 	mockRequestNotSupport1559.UserOp["maxPriorityFeePerGas"] = mockRequestNotSupport1559.UserOp["maxFeePerGas"]
 	sponsor_manager.Init()
@@ -227,7 +228,8 @@ func testTryPayUserOpExecute(t *testing.T, request *model.UserOpRequest) {
 
 func getMockTryPayUserOpRequest() *model.UserOpRequest {
 	return &model.UserOpRequest{
-		StrategyCode: "Ethereum_Sepolia_v06_verifyPaymaster",
+		StrategyCode: "123__GhhSA",
+		Network:      global_const.EthereumSepolia,
 		UserOp:       *utils.GenerateMockUservOperation(),
 	}
 }

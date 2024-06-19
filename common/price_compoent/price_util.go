@@ -57,6 +57,15 @@ func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {
 	req.Header.Add("x-cg-demo-api-key", config.GetPriceOracleApiKey())
 
 	res, _ := http.DefaultClient.Do(req)
+	logrus.Debugf("get price req: %v", req)
+	logrus.Debugf("get price response: %v", res)
+	if res == nil {
+		return 0, xerrors.Errorf("get price error: %w", "response is nil")
+	}
+	if res.StatusCode != 200 {
+		return 0, xerrors.Errorf("get price error: %w", res.Status)
+
+	}
 
 	defer func(Body io.ReadCloser) {
 		if Body == nil {

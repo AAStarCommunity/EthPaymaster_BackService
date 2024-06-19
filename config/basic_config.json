@@ -3,9 +3,6 @@
     "ethereum-sepolia": {
       "chain_id": "11155111",
       "is_test": true,
-      "rpc_url": "https://eth-sepolia.g.alchemy.com/v2",
-      "api_key": "wKeLycGxgYRykgf0aGfcpEkUtqyLQg4v",
-      "signer_key" : "752d81d71afd0b25a09f24718baf82c0846cc3b68122cfb3a1d41529c8a46b05",
       "v06_entrypoint_address" : "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
       "v07_entrypoint_address" : "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
       "v06_paymaster_address" : "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
@@ -19,9 +16,6 @@
     "optimism-sepolia": {
       "chain_id": "11155420",
       "is_test": true,
-      "rpc_url": "https://opt-sepolia.g.alchemy.com/v2",
-      "api_key": "_z0GaU6Zk8RfIR1guuli8nqMdb8RPdp0",
-      "signer_key" : "1d8a58126e87e53edc7b24d58d1328230641de8c4242c135492bf5560e0ff421",
       "v06_entrypoint_address" : "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
       "v07_entrypoint_address" : "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
       "v06_paymaster_address" : "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
@@ -35,9 +29,6 @@
     "arbitrum-sepolia": {
       "chain_id": "421614",
       "is_test": true,
-      "rpc_url": "https://arb-sepolia.g.alchemy.com/v2",
-      "api_key": "xSBkiidslrZmlcWUOSF3AluKx0A9g_kl",
-      "signer_key" : "752d81d71afd0b25a09f24718baf82c0846cc3b68122cfb3a1d41529c8a46b05",
       "v06_entrypoint_address" : "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
       "v07_entrypoint_address" : "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
       "v06_paymaster_address" : "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
@@ -51,9 +42,6 @@
     "scroll-sepolia": {
       "chain_id": "534351",
       "is_test": true,
-      "rpc_url": "https://sepolia-rpc.scroll.io",
-      "api_key": "9DGRNUARDVGDPZWN2G55I3Y5NG7HQJBUTH",
-      "signer_key" : "752d81d71afd0b25a09f24718baf82c0846cc3b68122cfb3a1d41529c8a46b05",
       "v06_entrypoint_address" : "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
       "v07_entrypoint_address" : "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
       "v06_paymaster_address" : "0x0Fa9ee28202F8602E9a4C99Af799C75C29AFbC89",
@@ -67,9 +55,6 @@
     "starknet-sepolia": {
       "chain_id": "534351",
       "is_test": true,
-      "rpc_url": "https://starknet-sepolia.infura.io/v3",
-      "api_key": "0284f5a9fc55476698079b24e2f97909",
-      "signer_key" : "752d81d71afd0b25a09f24718baf82c0846cc3b68122cfb3a1d41529c8a46b05",
       "v06_entrypoint_address" : "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
       "v07_entrypoint_address" : "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
       "v06_paymaster_address" : "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
@@ -83,9 +68,6 @@
     "base-sepolia": {
       "chain_id": "84532",
       "is_test": true,
-      "rpc_url": "https://base-sepolia.g.alchemy.com/v2",
-      "api_key": "zUhtd18b2ZOTIJME6rv2Uwz9q7PBnnsa",
-      "signer_key" : "752d81d71afd0b25a09f24718baf82c0846cc3b68122cfb3a1d41529c8a46b05",
       "v06_entrypoint_address" : "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
       "v07_entrypoint_address" : "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
       "v06_paymaster_address" : "0xa86cFf572E299B2704FBBCF77dcbbc7FEfFbcA06",
@@ -139,6 +121,5 @@
       "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
       "0x2"
     ]
-  },
-  "price_oracle_api_key": "CG-ioE6p8cmmSFBFwJnKECCbZ7U"
+  }
 }

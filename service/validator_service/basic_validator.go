@@ -70,8 +70,14 @@ func ValidateStrategy(strategy *model.Strategy, request *model.UserOpRequest) er
 		if strategy.ExecuteRestriction.DayMaxUSD.Cmp(curDayUse) < 0 {
 			return xerrors.Errorf("strategy day max usd use out of limit")
 		}
-
 	}
+	if strategy.ExecuteRestriction.ChainIdWhiteList != nil && !strategy.ExecuteRestriction.ChainIdWhiteList.IsEmpty() {
+		netWorkStr := string(request.Network)
+		if !strategy.ExecuteRestriction.ChainIdWhiteList.Contains(netWorkStr) {
+			return xerrors.Errorf("strategy not support chainId [%s]", netWorkStr)
+		}
+	}
+
 	return nil
 
 }

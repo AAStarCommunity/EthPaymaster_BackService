@@ -43,17 +43,20 @@ func DepositSponsor(ctx *gin.Context) {
 	response := model.GetResponse()
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		errStr := fmt.Sprintf("Request Error [%v]", err)
+		logrus.Errorf("Request Error [%v]", err)
 		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, errStr)
 		return
 	}
 	if request.DepositSource != "dashboard" {
 		errStr := fmt.Sprintf("not Support Source")
+		logrus.Errorf("Deposit Source Error :Not Support Source")
 		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, errStr)
 		return
 	}
 	//validate Signature
 	inputJson, err := json.Marshal(request)
 	if err != nil {
+		logrus.Errorf("Marshal Error [%v]", err)
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -62,17 +65,20 @@ func DepositSponsor(ctx *gin.Context) {
 	if request.DepositSource == "dashboard" {
 		signerAddress = config.GetSponsorConfig().DashBoardSignerAddress
 	} else {
+		logrus.Errorf("Deposit Source Error :Not Support Source")
 		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, "Deposit Source Error :Not Support Source")
 		return
 	}
 	err = ValidateSignature(ctx.GetHeader("relay_hash"), ctx.GetHeader("relay_signature"), inputJson, signerAddress)
 	if err != nil {
+		logrus.Errorf("Validate Signature Error [%v]", err)
 		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 	//validate Deposit
 	sender, amount, err := validateDeposit(&request)
 	if err != nil {
+		logrus.Errorf("Validate Deposit Error [%v]", err)
 		response.SetHttpCode(http.StatusBadRequest).FailCode(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -87,6 +93,7 @@ func DepositSponsor(ctx *gin.Context) {
 	}
 	result, err := sponsor_manager.DepositSponsor(&depositInput)
 	if err != nil {
+		logrus.Errorf("Deposit Sponsor Error [%v]", err)
 		response.SetHttpCode(http.StatusInternalServerError).FailCode(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -151,7 +158,7 @@ func validateDeposit(request *model.DepositSponsorRequest) (sender *common.Addre
 		if tx.To() == nil {
 			return nil, nil, xerrors.Errorf("Tx To Address is nil")
 		}
-		if tx.To().Hex() != config.GetDepositer().Address.String() {
+		if tx.To().Hex() != config.GetDepositerAddress().String() {
 			return nil, nil, xerrors.Errorf("Tx To Address is not Sponsor Address")
 		}
 		value := tx.Value()
@@ -253,7 +260,7 @@ func WithdrawSponsor(ctx *gin.Context) {
 	toAddress := common.HexToAddress(request.RefundAddress)
 	chainId := config.GetPaymasterSponsorChainId(request.IsTestNet)
 	// Execute transfer
-	tx, err := utils.TransEth(config.GetDepositer().PrivateKey, &toAddress, client, ethWeiValue, chainId)
+	tx, err := utils.TransEth(config.GetWithdrawerEoa().PrivateKey, &toAddress, client, ethWeiValue, chainId)
 	// WithDrawSponsor
 	result, err := sponsor_manager.WithDrawSponsor(&request, tx.Hash().Hex())
 	if err != nil {
