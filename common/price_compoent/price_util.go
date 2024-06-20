@@ -67,24 +67,14 @@ func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {
 
 	}
 
-	defer func(Body io.ReadCloser) {
-		if p := recover(); p != nil {
-			logrus.Error("panic: ", p)
-			return
-		}
-		if Body == nil {
-			return
-		}
-		err := Body.Close()
-		if err != nil {
-			logrus.Error("close body error: ", err)
-			return
-		}
-	}(res.Body)
 	body, _ := io.ReadAll(res.Body)
 	bodystr := string(body)
 	strarr := strings.Split(bodystr, ":")
 	usdstr := strings.TrimRight(strarr[2], "}}")
+	err := res.Body.Close()
+	if err != nil {
+		logrus.Errorf("close body error: %v", err)
+	}
 	return strconv.ParseFloat(usdstr, 64)
 }
 
