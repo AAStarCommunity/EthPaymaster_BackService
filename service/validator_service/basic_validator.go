@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func ValidateStrategy(strategy *model.Strategy, request *model.UserOpRequest) error {
+func ValidateStrategy(strategy *model.Strategy, request *model.UserOpRequest, keyModel *model.ApiKeyModel) error {
 	if strategy == nil {
 		return xerrors.Errorf("empty strategy")
 	}
@@ -75,6 +75,21 @@ func ValidateStrategy(strategy *model.Strategy, request *model.UserOpRequest) er
 		netWorkStr := string(request.Network)
 		if !strategy.ExecuteRestriction.ChainIdWhiteList.Contains(netWorkStr) {
 			return xerrors.Errorf("strategy not support chainId [%s]", netWorkStr)
+		}
+	}
+	payType := strategy.GetPayType()
+	switch payType {
+	case global_const.PayTypeERC20:
+		if !keyModel.Erc20PaymasterEnable {
+			return xerrors.Errorf("strategy pay type is erc20 but not enable")
+		}
+	case global_const.PayTypeUserSponsor:
+		if !keyModel.UserPayPaymasterEnable {
+			return xerrors.Errorf("strategy pay type is user sponsor but not enable")
+		}
+	case global_const.PayTypeProjectSponsor:
+		if !keyModel.ProjectSponsorPaymasterEnable {
+			return xerrors.Errorf("strategy pay type is project sponsor but not enable")
 		}
 	}
 

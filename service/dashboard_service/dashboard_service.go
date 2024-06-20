@@ -234,13 +234,52 @@ func (*ApiKeyDbModel) TableName() string {
 func (m *ApiKeyDbModel) GetRateLimit() rate.Limit {
 	return 10
 }
+
+type APiModelExtra struct {
+	NetWorkLimitEnable            bool     `json:"network_limit_enable"`
+	DomainWhitelist               []string `json:"domain_whitelist"`
+	IPWhiteList                   []string `json:"ip_white_list"`
+	PaymasterEnable               bool     `json:"paymaster_enable"`
+	Erc20PaymasterEnable          bool     `json:"erc20_paymaster_enable"`
+	ProjectSponsorPaymasterEnable bool     `json:"project_sponsor_paymaster_enable"`
+	UserPayPaymasterEnable        bool     `json:"user_pay_paymaster_enable"`
+}
+
 func convertApiKeyDbModelToApiKeyModel(apiKeyDbModel *ApiKeyDbModel) *model.ApiKeyModel {
-	return &model.ApiKeyModel{
+	apiKeyModel := &model.ApiKeyModel{
 		Disable:   apiKeyDbModel.Disable,
 		ApiKey:    apiKeyDbModel.ApiKey,
 		RateLimit: 10,
 		UserId:    apiKeyDbModel.UserId,
 	}
+	if apiKeyDbModel.Extra != nil {
+		// convert To map
+		eJson, _ := apiKeyDbModel.Extra.MarshalJSON()
+		apiKeyExtra := &APiModelExtra{}
+		err := json.Unmarshal(eJson, apiKeyExtra)
+		if err != nil {
+			return nil
+		}
+		apiKeyModel.NetWorkLimitEnable = apiKeyExtra.NetWorkLimitEnable
+		if apiKeyExtra.IPWhiteList != nil {
+			apiKeyModel.IPWhiteList = mapset.NewSetWithSize[string](len(apiKeyExtra.IPWhiteList))
+			for _, v := range apiKeyExtra.IPWhiteList {
+				apiKeyModel.IPWhiteList.Add(v)
+			}
+		}
+		if apiKeyExtra.DomainWhitelist != nil {
+			apiKeyModel.DomainWhitelist = mapset.NewSetWithSize[string](len(apiKeyExtra.DomainWhitelist))
+			for _, v := range apiKeyExtra.DomainWhitelist {
+				apiKeyModel.DomainWhitelist.Add(v)
+			}
+		}
+		apiKeyModel.PaymasterEnable = apiKeyExtra.PaymasterEnable
+		apiKeyModel.Erc20PaymasterEnable = apiKeyExtra.Erc20PaymasterEnable
+		apiKeyModel.ProjectSponsorPaymasterEnable = apiKeyExtra.ProjectSponsorPaymasterEnable
+		apiKeyModel.UserPayPaymasterEnable = apiKeyExtra.UserPayPaymasterEnable
+
+	}
+	return apiKeyModel
 }
 func GetAPiInfoByApiKey(apiKey string) (*model.ApiKeyModel, error) {
 	apikeyModel := &ApiKeyDbModel{}
