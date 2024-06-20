@@ -194,7 +194,7 @@ func GetSuitableStrategyWithOutCode(entryPointVersion global_const.EntrypointVer
 			IsProjectErc20PayEnable: isPerc20Enable,
 		},
 		ExecuteRestriction: &model.StrategyExecuteRestriction{
-			Status: global_const.StrategyStatusAchieve,
+			Status: global_const.StrategyStatusAchive,
 		},
 		Erc20TokenType: gasUseToken,
 	}

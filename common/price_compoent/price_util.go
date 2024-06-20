@@ -68,6 +68,10 @@ func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {
 	}
 
 	defer func(Body io.ReadCloser) {
+		if p := recover(); p != nil {
+			logrus.Error("panic: ", p)
+			return
+		}
 		if Body == nil {
 			return
 		}
