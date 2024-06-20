@@ -71,10 +71,8 @@ func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {
 	bodystr := string(body)
 	strarr := strings.Split(bodystr, ":")
 	usdstr := strings.TrimRight(strarr[2], "}}")
-	err := res.Body.Close()
-	if err != nil {
-		logrus.Errorf("close body error: %v", err)
-	}
+	defer res.Body.Close()
+
 	return strconv.ParseFloat(usdstr, 64)
 }
 
