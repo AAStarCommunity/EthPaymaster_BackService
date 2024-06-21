@@ -10,7 +10,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/sirupsen/logrus"
+	"os"
 	"testing"
 )
 
@@ -18,14 +21,15 @@ func TestValidateDeposit(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
+	logrus.SetLevel(logrus.DebugLevel)
+	os.Setenv(model.EnvKey, model.UnitEnv)
 	config.InitConfig("../../../config/basic_strategy_config.json", "../../../config/basic_config.json", "../../../config/secret_config.json")
 	sponsor_manager.Init()
 	request := &model.DepositSponsorRequest{
-		DepositAddress: "0xFD44DF0Fe211d5EFDBe1423483Fcb3FDeF84540f",
-		TxHash:         "0x367428ad744c2fd80054283f7143b934d630433f9c40a411d91e65893dbabdf1",
-		PayUserId:      "5",
-		DepositSource:  "dashboard",
-		IsTestNet:      true,
+		TxHash:        "0x9a4621f1f43be25b8c25480ea5fb86efe657161b67ef03474e16133ae63e0687",
+		PayUserId:     "5",
+		DepositSource: "dashboard",
+		IsTestNet:     true,
 	}
 	sender, amount, err := validateDeposit(request)
 	if err != nil {
@@ -41,11 +45,10 @@ func TestValidateSignature(t *testing.T) {
 	//publicKey: 0401e57b7947d19b224a98700dea8bcff3dd556980823aca6182e12eebe64e42ecee690d4c2d6eee6bbf9f82423e38314beec2be0a6833741a917a8abaebf66a76
 	//address: 0x3aCF4b1F443a088186Cbd66c5F81479C6e968eCA
 	request := &model.DepositSponsorRequest{
-		DepositAddress: "0xFD44DF0Fe211d5EFDBe1423483Fcb3FDeF84540f",
-		TxHash:         "0x367428ad744c2fd80054283f7143b934d630433f9c40a411d91e65893dbabdf1",
-		PayUserId:      "5",
-		DepositSource:  "dashboard",
-		IsTestNet:      true,
+		TxHash:        "0x367428ad744c2fd80054283f7143b934d630433f9c40a411d91e65893dbabdf1",
+		PayUserId:     "5",
+		DepositSource: "dashboard",
+		IsTestNet:     true,
 	}
 
 	jsonData, err := json.Marshal(request)
@@ -77,4 +80,12 @@ func TestValidateSignature(t *testing.T) {
 		return
 	}
 	t.Logf("ValidateSignature success")
+}
+func TestDemo(t *testing.T) {
+	t.Logf("Demo")
+	address := "0xFfDB071C2b58CCC10Ad386f9Bb4E8d3d664CE73c"
+	commonAddres := common.HexToAddress(address)
+	commonAddres.Hex()
+	t.Logf("commonAddres: %v", commonAddres.Hex())
+
 }

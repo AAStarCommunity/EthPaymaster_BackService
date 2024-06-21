@@ -7,6 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/sirupsen/logrus"
 	"math/big"
+	"time"
 )
 
 type PaymasterDataInput struct {
@@ -22,8 +23,9 @@ type PaymasterDataInput struct {
 }
 
 func NewPaymasterDataInput(strategy *model.Strategy) *PaymasterDataInput {
-	start := strategy.ExecuteRestriction.EffectiveStartTime
-	end := strategy.ExecuteRestriction.EffectiveEndTime
+	now := time.Now()
+	start := now.Add(-1 * time.Second)
+	end := now.Add(5 * time.Minute)
 	var tokenAddress string
 	if strategy.GetPayType() == global_const.PayTypeERC20 {
 		tokenAddress = config.GetTokenAddress(strategy.GetNewWork(), strategy.Erc20TokenType)
@@ -35,8 +37,8 @@ func NewPaymasterDataInput(strategy *model.Strategy) *PaymasterDataInput {
 
 	return &PaymasterDataInput{
 		Paymaster:                     *strategy.GetPaymasterAddress(),
-		ValidUntil:                    big.NewInt(end.Int64()),
-		ValidAfter:                    big.NewInt(start.Int64()),
+		ValidUntil:                    big.NewInt(end.Unix()),
+		ValidAfter:                    big.NewInt(start.Unix()),
 		ERC20Token:                    common.HexToAddress(tokenAddress),
 		ExchangeRate:                  big.NewInt(0),
 		PayType:                       strategy.GetPayType(),

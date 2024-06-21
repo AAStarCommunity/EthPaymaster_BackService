@@ -85,6 +85,9 @@ func estimateGas(userOp *user_op.UserOpInput, strategy *model.Strategy, paymaste
 
 func ValidateGas(userOp *user_op.UserOpInput, gasComputeResponse *model.ComputeGasResponse, strategy *model.Strategy) error {
 	validateFunc := gas_executor.GetGasValidateFunc(strategy.GetPayType())
+	if validateFunc == nil {
+		return xerrors.Errorf("ValidateGas Not Support PayType [%s]", strategy.GetPayType())
+	}
 	err := validateFunc(userOp, gasComputeResponse, strategy)
 	if err != nil {
 		return err
@@ -212,7 +215,7 @@ func StrategyGenerate(request *model.UserOpRequest) (*model.Strategy, error) {
 		strategyResult = strategy
 
 	} else {
-		suitableStrategy, err := dashboard_service.GetSuitableStrategy(request.EntryPointVersion, request.Network, request.UserPayErc20Token)
+		suitableStrategy, err := dashboard_service.GetSuitableStrategyWithOutCode(request.EntryPointVersion, request.Network, request.UserPayErc20Token)
 		if err != nil {
 			return nil, err
 		}

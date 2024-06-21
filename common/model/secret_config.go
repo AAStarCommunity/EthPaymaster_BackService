@@ -19,17 +19,15 @@ type SecretConfig struct {
 	RelayDBConfig           DBConfig      `json:"relay_db_config"`
 	ApiKeyTableName         string        `json:"api_key_table_name"`
 	StrategyConfigTableName string        `json:"strategy_config_table_name"`
-	FreeSponsorWhitelist    []string      `json:"free_sponsor_whitelist"`
 	SponsorConfig           SponsorConfig `json:"sponsor_config"`
 }
 type SponsorConfig struct {
-	SponsorDepositAddress    string `json:"sponsor_deposit_address"`
-	SponsorDepositPrivateKey string `json:"sponsor_deposit_private_key"`
-	DashBoardSignerAddress   string `json:"dashboard_signer_address"`
-	DepositTestNetUrl        string `json:"deposit_test_net_url"`
-	DepositMainNetUrl        string `json:"deposit_main_net_url"`
-	SponsorTestClientUrl     string `json:"sponsor_client_rpc_test_net"`
-	SponsorMainClientUrl     string `json:"sponsor_client_rpc_main_net"`
+	SponsorDepositAddress     string   `json:"sponsor_deposit_address"`
+	SponsorWithdrawPrivateKey string   `json:"sponsor_withdraw_private_key"`
+	DashBoardSignerAddress    string   `json:"dashboard_signer_address"`
+	SponsorTestClientUrl      string   `json:"sponsor_client_rpc_test_net"`
+	SponsorMainClientUrl      string   `json:"sponsor_client_rpc_main_net"`
+	FreeSponsorWhitelist      []string `json:"free_sponsor_whitelist"`
 }
 
 type NetWorkSecretConfig struct {

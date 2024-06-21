@@ -6,7 +6,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	mapset "github.com/deckarep/golang-set/v2"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/sirupsen/logrus"
 	"math/big"
 	"os"
 	"sync"
@@ -16,8 +19,8 @@ var dsnTemplate = "host=%s port=%v user=%s password=%s dbname=%s TimeZone=%s ssl
 
 var secretConfig *model.SecretConfig
 var signerConfig = make(SignerConfigMap)
-var depositer *global_const.EOA
-
+var withdrawer *global_const.EOA
+var depositerAddress common.Address
 var sponsorTestNetClient *ethclient.Client
 var sponsorTestNetClientChainId *big.Int
 var sponsorMainNetClient *ethclient.Client
@@ -38,10 +41,15 @@ func GetPaymasterSponsorChainId(isTestNet bool) *big.Int {
 	return sponsorMainNetClientChainId
 }
 
+var sponsorWhitelist = mapset.NewSet[string]()
+
 type SignerConfigMap map[global_const.Network]*global_const.EOA
 
-func GetDepositer() *global_const.EOA {
-	return depositer
+func GetWithdrawerEoa() *global_const.EOA {
+	return withdrawer
+}
+func GetDepositerAddress() common.Address {
+	return depositerAddress
 }
 func secretConfigInit(secretConfigPath string) {
 	if secretConfigPath == "" {
@@ -67,7 +75,8 @@ func secretConfigInit(secretConfigPath string) {
 
 		signerConfig[global_const.Network(network)] = eoa
 	}
-	depositer, err = global_const.NewEoa(secretConfig.SponsorConfig.SponsorDepositPrivateKey)
+	depositerAddress = common.HexToAddress(secretConfig.SponsorConfig.SponsorDepositAddress)
+	withdrawer, err = global_const.NewEoa(secretConfig.SponsorConfig.SponsorWithdrawPrivateKey)
 	if err != nil {
 		panic(fmt.Sprintf("signer key error: %s", err))
 	}
@@ -94,12 +103,14 @@ func secretConfigInit(secretConfigPath string) {
 		sponsorTestNetClient = paymasterSponsorTestNetClient
 		sponsorTestNetClientChainId = paymasterInnerClientChainId
 	})
+	logrus.Debugf("secretConfig [%v]", secretConfig)
+	if secretConfig.SponsorConfig.FreeSponsorWhitelist != nil {
+		sponsorWhitelist.Append(secretConfig.SponsorConfig.FreeSponsorWhitelist...)
+	}
 }
 
-func IsSponsorWhitelist(address string) bool {
-
-	//TODO
-	return true
+func IsSponsorWhitelist(senderAddress string) bool {
+	return sponsorWhitelist.Contains(senderAddress)
 }
 func GetNetworkSecretConfig(network global_const.Network) model.NetWorkSecretConfig {
 	return secretConfig.NetWorkSecretConfigMap[string(network)]

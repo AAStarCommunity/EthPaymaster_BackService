@@ -15,6 +15,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/config"
+	"AAStarCommunity/EthPaymaster_BackService/envirment"
 	"AAStarCommunity/EthPaymaster_BackService/schedulor"
 	"context"
 	"crypto/ecdsa"
@@ -96,28 +97,35 @@ func GetEthereumExecutor(network global_const.Network) *EthereumExecutor {
 	if !success {
 		panic(xerrors.Errorf("chainId %s is invalid", config.GetChainId(network)))
 	}
-	wsUrl := config.GetNewWorkClientURl(network)
-	wsUrl = strings.Replace(wsUrl, "https", "wss", 1)
-	webSocketClient, err := ethclient.Dial(wsUrl)
-	if err != nil {
-		panic(err)
-	}
 
-	eventListener, err := schedulor.NewEventListener(webSocketClient, network)
-	if err != nil {
-		panic(err)
-	}
-	go eventListener.Listen()
 	logrus.Debugf("after Lesten network :[%s]", network)
 	geth := gethclient.New(client.Client())
-	executorMap[network] = &EthereumExecutor{
-		network:         network,
-		Client:          client,
-		ChainId:         chainId,
-		GethClient:      geth,
-		eventListener:   eventListener,
-		webSocketClient: webSocketClient,
+	ethExecutor := &EthereumExecutor{
+		network:    network,
+		Client:     client,
+		ChainId:    chainId,
+		GethClient: geth,
 	}
+
+	if !envirment.Environment.IsUnit() {
+		logrus.Infof("Init EventListener network :[%s]", network)
+		wsUrl := config.GetNewWorkClientURl(network)
+		wsUrl = strings.Replace(wsUrl, "https", "wss", 1)
+		logrus.Debugf("wsUrl: %s", wsUrl)
+		webSocketClient, err := ethclient.Dial(wsUrl)
+		if err != nil {
+			panic(err)
+		}
+
+		eventListener, err := schedulor.NewEventListener(webSocketClient, network)
+		if err != nil {
+			panic(err)
+		}
+		go eventListener.Listen()
+		ethExecutor.eventListener = eventListener
+		ethExecutor.webSocketClient = webSocketClient
+	}
+	executorMap[network] = ethExecutor
 
 	return executorMap[network]
 }
@@ -493,7 +501,7 @@ func GetAuth(chainId *big.Int, privateKey *ecdsa.PrivateKey) (*bind.TransactOpts
 		Context: context.Background(),
 	}, nil
 }
-func (executor *EthereumExecutor) GetUserOpHash(userOp *user_op.UserOpInput, strategy *model.Strategy) ([]byte, string, error) {
+func (executor *EthereumExecutor) GetUserOpHash(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterDataInput) ([]byte, string, error) {
 	version := strategy.GetStrategyEntrypointVersion()
 	erc20Token := common.HexToAddress("0x")
 	payType := strategy.GetPayType()
@@ -523,7 +531,7 @@ func (executor *EthereumExecutor) GetUserOpHash(userOp *user_op.UserOpInput, str
 		}
 		jsonString, _ := json.Marshal(contractUserOp)
 		logrus.Debug("opString :", string(jsonString))
-		hash, err := contract.GetHash(&bind.CallOpts{}, contractUserOp, strategy.ExecuteRestriction.EffectiveEndTime, strategy.ExecuteRestriction.EffectiveStartTime, erc20Token, big.NewInt(0))
+		hash, err := contract.GetHash(&bind.CallOpts{}, contractUserOp, paymasterDataInput.ValidUntil, paymasterDataInput.ValidAfter, erc20Token, big.NewInt(0))
 		if err != nil {
 			return nil, "", err
 		}
@@ -547,7 +555,7 @@ func (executor *EthereumExecutor) GetUserOpHash(userOp *user_op.UserOpInput, str
 
 		jsonString, _ := json.Marshal(packUserOp)
 		logrus.Debug("opString:", string(jsonString))
-		hash, err := contract.GetHash(&bind.CallOpts{}, packUserOp, strategy.ExecuteRestriction.EffectiveEndTime, strategy.ExecuteRestriction.EffectiveStartTime, erc20Token, big.NewInt(0))
+		hash, err := contract.GetHash(&bind.CallOpts{}, packUserOp, paymasterDataInput.ValidUntil, paymasterDataInput.ValidAfter, erc20Token, big.NewInt(0))
 		if err != nil {
 			return nil, "", err
 		}
@@ -559,7 +567,7 @@ func (executor *EthereumExecutor) GetUserOpHash(userOp *user_op.UserOpInput, str
 
 }
 func (executor *EthereumExecutor) GetPaymasterData(userOp *user_op.UserOpInput, strategy *model.Strategy, paymasterDataInput *paymaster_data.PaymasterDataInput) (paymasterData []byte, userOpHash []byte, err error) {
-	userOpHash, _, hashErr := executor.GetUserOpHash(userOp, strategy)
+	userOpHash, _, hashErr := executor.GetUserOpHash(userOp, strategy, paymasterDataInput)
 	if hashErr != nil {
 		logrus.Errorf("GetUserOpHash error [%v]", err)
 		return nil, nil, err
@@ -570,6 +578,9 @@ func (executor *EthereumExecutor) GetPaymasterData(userOp *user_op.UserOpInput, 
 		return nil, nil, err
 	}
 	dataGenerateFunc := paymaster_pay_type.GetGenerateFunc(strategy.GetPayType())
+	if dataGenerateFunc == nil {
+		return nil, nil, xerrors.Errorf("payType [%s] not support", strategy.GetPayType())
+	}
 	paymasterData, generateDataErr := dataGenerateFunc(paymasterDataInput, signature)
 	if generateDataErr != nil {
 		return nil, nil, generateDataErr

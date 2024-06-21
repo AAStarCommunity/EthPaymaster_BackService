@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/sirupsen/logrus"
+	"math/big"
 	"testing"
 	"time"
 )
@@ -267,7 +268,13 @@ func testGetUserOpHash(t *testing.T, input user_op.UserOpInput, strategy *model.
 		input.AccountGasLimits = user_op.DummyAccountGasLimits
 		input.GasFees = user_op.DummyGasFees
 	}
-	res, _, err := executor.GetUserOpHash(&input, strategy)
+	now := time.Now()
+	start := now.Add(-1 * time.Second)
+	end := now.Add(5 * time.Minute)
+	res, _, err := executor.GetUserOpHash(&input, strategy, &paymaster_data.PaymasterDataInput{
+		ValidUntil: big.NewInt(end.Unix()),
+		ValidAfter: big.NewInt(start.Unix()),
+	})
 	if err != nil {
 		t.Error(err)
 		return

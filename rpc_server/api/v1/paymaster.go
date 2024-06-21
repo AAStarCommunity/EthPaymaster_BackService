@@ -37,15 +37,7 @@ func Paymaster(ctx *gin.Context) {
 
 	jsonRpcRequest := model.JsonRpcRequest{}
 	response := model.GetResponse()
-	//
-	//defer func() {
-	//	if r := recover(); r != nil {
-	//		errInfo := fmt.Sprintf("[panic]: err : [%v] , stack :[%v]", r, utils.GetCurrentGoroutineStack())
-	//		logrus.Error(errInfo)
-	//		response.SetHttpCode(http.StatusInternalServerError).FailCode(ctx, http.StatusInternalServerError, fmt.Sprintf("%v", r))
-	//	}
-	//
-	//}()
+
 	network := ctx.Param("network")
 	logrus.Debugf("Paymaster network: %s", network)
 	if network == "" {
@@ -188,6 +180,5 @@ func validateUserOpRequest(request *model.UserOpRequest) error {
 	if request.Network == "" {
 		return xerrors.Errorf("ForceNetwork is empty")
 	}
-
 	return nil
 }

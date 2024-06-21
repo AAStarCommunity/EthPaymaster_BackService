@@ -190,14 +190,14 @@ func UserOpEventComunicate(network global_const.Network, event ContractUserOpera
 		logrus.Debugf("Not Support Network %v", network)
 		return
 	}
-	//if !paymasterAddressSet.Contains(event.Paymaster) {
-	//	logrus.Debugf("UserOpEventComunicate: paymaster not support, %v", event.Paymaster)
-	//	return
-	//}
+	if !paymasterAddressSet.Contains(event.Paymaster.String()) {
+		logrus.Debugf("UserOpEventComunicate: paymaster Address not support, %v", event.Paymaster)
+		return
+	}
 	if !event.Success {
 		_, err := sponsor_manager.ReleaseUserOpHashLockWhenFail(event.UserOpHash[:], true)
 		if err != nil {
-			logrus.Errorf("ReleaseUserOpHashLockWhenFail failed: %v", err)
+			logrus.Errorf("ReleaseUserOpHashLockWhenFail paymaster:[%s] userOphash:[%s] Sender:[%s]  reason: [%v]", event.Paymaster, event.UserOpHash, event.Sender, err)
 		}
 		return
 	}
@@ -214,7 +214,7 @@ func UserOpEventComunicate(network global_const.Network, event ContractUserOpera
 	_, err = sponsor_manager.ReleaseBalanceWithActualCost(event.Sender.String(), event.UserOpHash[:], gasCostUsd, true)
 	if err != nil {
 		//TODO if is NetWorkError, need retry
-		logrus.Errorf("ReleaseBalanceWithActualCost failed: %v", err)
+		logrus.Errorf("ReleaseBalanceWithActualCost paymaster:[%s] userOphash:[%s] Sender:[%s]  reason: [%v]", event.Paymaster, event.UserOpHash, event.Sender, err)
 		return
 	}
 }

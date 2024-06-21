@@ -30,7 +30,13 @@ func testGetGasPrice(t *testing.T, chain global_const.Network) {
 		t.Error(err)
 		return
 	}
-	t.Logf("gasprice:%v", gasprice)
+	jsonStr, err := json.Marshal(gasprice)
+	if err != nil {
+		t.Error(err)
+		return
+
+	}
+	t.Logf("gasprice:%v", string(jsonStr))
 }
 
 func TestComputeGas(t *testing.T) {

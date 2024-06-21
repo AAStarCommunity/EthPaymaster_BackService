@@ -7,9 +7,13 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/user_op"
 	"AAStarCommunity/EthPaymaster_BackService/common/utils"
 	"AAStarCommunity/EthPaymaster_BackService/config"
+	"AAStarCommunity/EthPaymaster_BackService/envirment"
+	"AAStarCommunity/EthPaymaster_BackService/service/dashboard_service"
+	"AAStarCommunity/EthPaymaster_BackService/sponsor_manager"
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/sirupsen/logrus"
 	"os"
 	"testing"
@@ -22,8 +26,12 @@ func TestOperator(t *testing.T) {
 	config.InitConfig("../../config/basic_strategy_config.json", "../../config/basic_config.json", "../../config/secret_config.json")
 	logrus.SetLevel(logrus.DebugLevel)
 	immutableRequest := getMockTryPayUserOpRequest()
+	os.Setenv("Env", "unit")
 	mockRequestNotSupport1559 := getMockTryPayUserOpRequest()
 	mockRequestNotSupport1559.UserOp["maxPriorityFeePerGas"] = mockRequestNotSupport1559.UserOp["maxFeePerGas"]
+	sponsor_manager.Init()
+	dashboard_service.Init()
+	envirment.Environment.SetUnitEnv()
 	tests := []struct {
 		name string
 		test func(t *testing.T)
@@ -123,12 +131,21 @@ func TestOperator(t *testing.T) {
 				testTryPayUserOpExecute(t, mockRequest)
 			},
 		},
+		{
+			"Test_NoSpectCode_TryPayUserOpExecute",
+			func(t *testing.T) {
+				request := model.UserOpRequest{
+					StrategyCode:      "8bced19b-505e-4d11-ae80-abbee3d3a38c",
+					Network:           global_const.EthereumSepolia,
+					UserOp:            *utils.GenerateMockUservOperation(),
+					UserPayErc20Token: global_const.TokenTypeUSDT,
+				}
+				testTryPayUserOpExecute(t, &request)
+			},
+		},
 	}
 	for _, tt := range tests {
-		if os.Getenv("GITHUB_ACTIONS") != "" && global_const.GitHubActionWhiteListSet.Contains(tt.name) {
-			t.Logf("Skip test [%s] in GitHub Actions", tt.name)
-			continue
-		}
+
 		t.Run(tt.name, tt.test)
 	}
 
@@ -160,7 +177,9 @@ func testGetSupportEntrypointExecute(t *testing.T) {
 	t.Log(res)
 }
 func testTryPayUserOpExecute(t *testing.T, request *model.UserOpRequest) {
-	result, err := TryPayUserOpExecute(&model.ApiKeyModel{}, request)
+	result, err := TryPayUserOpExecute(&model.ApiKeyModel{
+		UserId: 5,
+	}, request)
 	if err != nil {
 		t.Fatal(err)
 		return
@@ -209,7 +228,22 @@ func testTryPayUserOpExecute(t *testing.T, request *model.UserOpRequest) {
 
 func getMockTryPayUserOpRequest() *model.UserOpRequest {
 	return &model.UserOpRequest{
-		StrategyCode: "Ethereum_Sepolia_v06_verifyPaymaster",
+		StrategyCode: "123__GhhSA",
+		Network:      global_const.EthereumSepolia,
 		UserOp:       *utils.GenerateMockUservOperation(),
 	}
+}
+
+func TestWSclient(t *testing.T) {
+	os.Setenv("Env", "unit")
+
+	t.Logf("Env: %v", os.Getenv("Env"))
+	//TODO
+	url := "wss://eth-sepolia.g.alchemy.com/v2/wKeLycGxgYRykgf0aGfcpEkUtqyLQg4v"
+	wsClient, err := ethclient.Dial(url)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(wsClient)
 }
