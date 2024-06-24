@@ -45,9 +45,9 @@ func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {
 	if global_const.IsStableToken(tokenType) {
 		return 1, nil
 	}
-	//if tokenType == global_const.ETH {
-	//	return 3100, nil
-	//}
+	if tokenType == global_const.TokenTypeETH {
+		return 3500, nil
+	}
 	tokenUrl, ok := URLMap[tokenType]
 	if !ok {
 		return 0, xerrors.Errorf("tokens type [%w] not found", tokenType)
@@ -57,30 +57,8 @@ func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {
 	req.Header.Add("x-cg-demo-api-key", config.GetPriceOracleApiKey())
 
 	res, _ := http.DefaultClient.Do(req)
-	logrus.Debugf("get price req: %v", req)
-	logrus.Debugf("get price response: %v", res)
-	if res == nil {
-		return 0, xerrors.Errorf("get price error: %w", "response is nil")
-	}
-	if res.StatusCode != 200 {
-		return 0, xerrors.Errorf("get price error: %w", res.Status)
 
-	}
-
-	defer func(Body io.ReadCloser) {
-		if p := recover(); p != nil {
-			logrus.Error("panic: ", p)
-			return
-		}
-		if Body == nil {
-			return
-		}
-		err := Body.Close()
-		if err != nil {
-			logrus.Error("close body error: ", err)
-			return
-		}
-	}(res.Body)
+	defer res.Body.Close()
 	body, _ := io.ReadAll(res.Body)
 	bodystr := string(body)
 	strarr := strings.Split(bodystr, ":")
@@ -88,7 +66,7 @@ func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {
 	return strconv.ParseFloat(usdstr, 64)
 }
 
-// GetToken Get The FromToken/ToToken Rate
+// GetToken Get The FromToken/ToToken Ratew
 func GetToken(fromToken global_const.TokenType, toToken global_const.TokenType) (float64, error) {
 	if toToken == global_const.TokenTypeUSDT {
 		return GetPriceUsd(fromToken)

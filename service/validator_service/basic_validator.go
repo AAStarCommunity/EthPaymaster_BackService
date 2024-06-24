@@ -31,7 +31,7 @@ func ValidateStrategy(strategy *model.Strategy, request *model.UserOpRequest, ke
 	}
 
 	if strategy.ExecuteRestriction == nil {
-		return xerrors.Errorf("ExecuteRestriction is Empty")
+		return nil
 	}
 	if strategy.ExecuteRestriction.Status != global_const.StrategyStatusAchive {
 		return xerrors.Errorf("strategy status is not active")

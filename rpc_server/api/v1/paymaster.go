@@ -165,10 +165,12 @@ func parseTryPayUserOperationParams(params []interface{}) (*model.UserOpRequest,
 	}
 
 	if extra["token"] != nil {
-		result.UserPayErc20Token = extra["token"].(global_const.TokenType)
+		tokenStr := extra["token"].(string)
+		result.UserPayErc20Token = global_const.TokenType(tokenStr)
 	}
 	if extra["version"] != nil {
-		result.EntryPointVersion = extra["version"].(global_const.EntrypointVersion)
+		versionStr := extra["version"].(string)
+		result.EntryPointVersion = global_const.EntrypointVersion(versionStr)
 	}
 	return &result, nil
 }
