@@ -4,7 +4,6 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/config"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 	"io"
 	"io/ioutil"

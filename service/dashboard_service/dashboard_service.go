@@ -301,8 +301,8 @@ type PaymasterRecallLogDbModel struct {
 	PaymasterMethod string         `gorm:"column:paymaster_method;type:varchar(25)" json:"paymaster_method"`
 	SendTime        string         `gorm:"column:send_time;type:varchar(50)" json:"send_time"`
 	Latency         int64          `gorm:"column:latency;type:integer" json:"latency"`
-	RequestBody     string         `gorm:"column:request_body;type:varchar(500)" json:"request_body"`
-	ResponseBody    string         `gorm:"column:response_body;type:varchar(1000)" json:"response_body"`
+	RequestBody     string         `gorm:"column:request_body;type:varchar(2000)" json:"request_body"`
+	ResponseBody    string         `gorm:"column:response_body;type:varchar(2000)" json:"response_body"`
 	NetWork         string         `gorm:"column:network;type:varchar(25)" json:"network"`
 	Status          int            `gorm:"column:status;type:integer" json:"status"`
 	Extra           datatypes.JSON `gorm:"column:extra" json:"extra"`
