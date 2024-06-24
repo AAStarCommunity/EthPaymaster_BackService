@@ -38,7 +38,9 @@ func TestValidatorService(t *testing.T) {
 }
 
 func testValidateStrategy(t *testing.T, strategy *model.Strategy, request *model.UserOpRequest) {
-	if err := ValidateStrategy(strategy, request); err != nil {
+	if err := ValidateStrategy(strategy, request, &model.ApiKeyModel{
+		UserId: 5,
+	}); err != nil {
 		t.Fatalf("ValidateStrategy error: %v", err)
 	}
 }

@@ -20,7 +20,7 @@ import (
 )
 
 func TryPayUserOpExecute(apiKeyModel *model.ApiKeyModel, request *model.UserOpRequest) (*model.TryPayUserOpResponse, error) {
-	userOp, strategy, paymasterDataInput, err := prepareExecute(request)
+	userOp, strategy, paymasterDataInput, err := prepareExecute(request, apiKeyModel)
 	if err != nil {
 		return nil, err
 	}
@@ -46,14 +46,14 @@ func TryPayUserOpExecute(apiKeyModel *model.ApiKeyModel, request *model.UserOpRe
 	return result, nil
 }
 
-func prepareExecute(request *model.UserOpRequest) (*user_op.UserOpInput, *model.Strategy, *paymaster_data.PaymasterDataInput, error) {
+func prepareExecute(request *model.UserOpRequest, apiKeyModel *model.ApiKeyModel) (*user_op.UserOpInput, *model.Strategy, *paymaster_data.PaymasterDataInput, error) {
 	var strategy *model.Strategy
 	strategy, generateErr := StrategyGenerate(request)
 	if generateErr != nil {
 		return nil, nil, nil, generateErr
 	}
 
-	if err := validator_service.ValidateStrategy(strategy, request); err != nil {
+	if err := validator_service.ValidateStrategy(strategy, request, apiKeyModel); err != nil {
 		return nil, nil, nil, err
 	}
 
