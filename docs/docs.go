@@ -132,13 +132,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/model.WithdrawSponsorRequest"
                         }
-                    },
-                    {
-                        "type": "boolean",
-                        "description": "Is Test Net",
-                        "name": "is_test_net",
-                        "in": "path",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -153,9 +146,6 @@ const docTemplate = `{
         "model.DepositSponsorRequest": {
             "type": "object",
             "properties": {
-                "deposit_address": {
-                    "type": "string"
-                },
                 "deposit_source": {
                     "type": "string"
                 },
@@ -200,10 +190,10 @@ const docTemplate = `{
                 "deposit_source": {
                     "type": "string"
                 },
-                "isTestNet": {
+                "is_test_net": {
                     "type": "boolean"
                 },
-                "payUserId": {
+                "pay_user_id": {
                     "type": "string"
                 },
                 "refund_address": {

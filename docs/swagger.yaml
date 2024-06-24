@@ -2,8 +2,6 @@ basePath: /api
 definitions:
   model.DepositSponsorRequest:
     properties:
-      deposit_address:
-        type: string
       deposit_source:
         type: string
       is_test_net:
@@ -33,9 +31,9 @@ definitions:
         type: number
       deposit_source:
         type: string
-      isTestNet:
+      is_test_net:
         type: boolean
-      payUserId:
+      pay_user_id:
         type: string
       refund_address:
         type: string
@@ -123,11 +121,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/model.WithdrawSponsorRequest'
-      - description: Is Test Net
-        in: path
-        name: is_test_net
-        required: true
-        type: boolean
       responses:
         "200":
           description: OK
