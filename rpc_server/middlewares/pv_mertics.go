@@ -69,7 +69,14 @@ func PvMetrics() gin.HandlerFunc {
 				metricsParam.ApiKey = apiKeyModel.ApiKey
 				metricsParam.ApiUserId = apiKeyModel.UserId
 			}
-			metricsPaymaster(c, metricsParam)
+
+			extraMap := make(map[string]any)
+			clientIp := c.ClientIP()
+			extraMap["client_ip"] = clientIp
+
+			domain := c.Request.Host
+			extraMap["client_domain"] = domain
+			metricsPaymaster(c, metricsParam, &extraMap)
 		} else {
 			return
 		}
@@ -86,7 +93,7 @@ func (w *CustomResponseWriter) Write(b []byte) (int, error) {
 	w.body.Write(b)
 	return w.ResponseWriter.Write(b)
 }
-func metricsPaymaster(c *gin.Context, metricsParam PayMasterParam) {
+func metricsPaymaster(c *gin.Context, metricsParam PayMasterParam, extraMap *map[string]any) {
 
 	recallModel := dashboard_service.PaymasterRecallLogDbModel{
 		ProjectApikey:   metricsParam.ApiKey,
@@ -98,6 +105,13 @@ func metricsPaymaster(c *gin.Context, metricsParam PayMasterParam) {
 		ResponseBody:    metricsParam.ResponseBody,
 		Status:          metricsParam.Status,
 		NetWork:         metricsParam.NetWork,
+	}
+	if extraMap != nil {
+		executeRestrictionJson, err := json.Marshal(extraMap)
+		if err != nil {
+			logrus.Error("executeRestrictionJson error:", err)
+		}
+		recallModel.Extra = executeRestrictionJson
 	}
 	err := dashboard_service.CreatePaymasterCall(&recallModel)
 	if err != nil {

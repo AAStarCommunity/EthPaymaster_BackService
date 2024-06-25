@@ -4,7 +4,6 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/config"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 	"io"
 	"io/ioutil"
@@ -57,22 +56,12 @@ func GetPriceUsd(tokenType global_const.TokenType) (float64, error) {
 	req.Header.Add("x-cg-demo-api-key", config.GetPriceOracleApiKey())
 
 	res, _ := http.DefaultClient.Do(req)
-	logrus.Debugf("get price req: %v", req)
-	logrus.Debugf("get price response: %v", res)
-	if res == nil {
-		return 0, xerrors.Errorf("get price error: %w", "response is nil")
-	}
-	if res.StatusCode != 200 {
-		return 0, xerrors.Errorf("get price error: %w", res.Status)
 
-	}
-
+	defer res.Body.Close()
 	body, _ := io.ReadAll(res.Body)
 	bodystr := string(body)
 	strarr := strings.Split(bodystr, ":")
 	usdstr := strings.TrimRight(strarr[2], "}}")
-	defer res.Body.Close()
-
 	return strconv.ParseFloat(usdstr, 64)
 }
 
