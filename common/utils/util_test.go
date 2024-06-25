@@ -44,6 +44,18 @@ func TestPackIntTo32Bytes(t *testing.T) {
 	resStr := EncodeToHexStringWithPrefix(bytes[:])
 	t.Logf("resStr: %s\n", resStr)
 }
+func TestConvertBigIntToHexWithPrefix(t *testing.T) {
+	bigInt := big.NewInt(1500000000)
+	resStr := ConvertBigIntToHexWithPrefix(bigInt)
+	t.Logf("resStr: %s\n", resStr)
+}
+func TestConvertHexToBigInt(t *testing.T) {
+	hexStr := "0x5a0c"
+	bigInt := ConvertHexToBigInt(hexStr)
+
+	t.Logf("bigInt: %d\n", bigInt)
+
+}
 
 //func TestEthereumSign(t *testing.T) {
 //	messageStr := "hello world"

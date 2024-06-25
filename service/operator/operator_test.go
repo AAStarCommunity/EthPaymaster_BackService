@@ -135,10 +135,9 @@ func TestOperator(t *testing.T) {
 			"Test_NoSpectCode_TryPayUserOpExecute",
 			func(t *testing.T) {
 				request := model.UserOpRequest{
-					StrategyCode:      "8bced19b-505e-4d11-ae80-abbee3d3a38c",
-					Network:           global_const.EthereumSepolia,
-					UserOp:            *utils.GenerateMockUservOperation(),
-					UserPayErc20Token: global_const.TokenTypeUSDT,
+					StrategyCode: "123__GhhSA",
+					Network:      global_const.EthereumSepolia,
+					UserOp:       *utils.GenerateMockUservOperation(),
 				}
 				testTryPayUserOpExecute(t, &request)
 			},
@@ -178,7 +177,10 @@ func testGetSupportEntrypointExecute(t *testing.T) {
 }
 func testTryPayUserOpExecute(t *testing.T, request *model.UserOpRequest) {
 	result, err := TryPayUserOpExecute(&model.ApiKeyModel{
-		UserId: 5,
+		UserId:                        5,
+		ProjectSponsorPaymasterEnable: true,
+		UserPayPaymasterEnable:        true,
+		Erc20PaymasterEnable:          true,
 	}, request)
 	if err != nil {
 		t.Fatal(err)
@@ -204,11 +206,11 @@ func testTryPayUserOpExecute(t *testing.T, request *model.UserOpRequest) {
 	if result.EntrypointVersion == global_const.EntrypointV07 {
 		//TODO
 	} else {
-		userOp.VerificationGasLimit = result.UserOpResponse.VerificationGasLimit
-		userOp.PreVerificationGas = result.UserOpResponse.PreVerificationGas
-		userOp.MaxFeePerGas = result.UserOpResponse.MaxFeePerGas
-		userOp.MaxPriorityFeePerGas = result.UserOpResponse.MaxPriorityFeePerGas
-		userOp.CallGasLimit = result.UserOpResponse.CallGasLimit
+		userOp.VerificationGasLimit = utils.ConvertHexToBigInt(result.UserOpResponse.VerificationGasLimit)
+		userOp.PreVerificationGas = utils.ConvertHexToBigInt(result.UserOpResponse.PreVerificationGas)
+		userOp.MaxFeePerGas = utils.ConvertHexToBigInt(result.UserOpResponse.MaxFeePerGas)
+		userOp.MaxPriorityFeePerGas = utils.ConvertHexToBigInt(result.UserOpResponse.MaxPriorityFeePerGas)
+		userOp.CallGasLimit = utils.ConvertHexToBigInt(result.UserOpResponse.CallGasLimit)
 		address := common.HexToAddress(result.EntryPointAddress)
 		jsonUserOP, err := json.Marshal(userOp)
 		if err != nil {

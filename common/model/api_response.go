@@ -15,17 +15,17 @@ type TryPayUserOpResponse struct {
 	UserOpResponse    *UserOpResponse                `json:"userOpResponse"`
 }
 type UserOpResponse struct {
-	PayMasterAndData     string   `json:"paymasterAndData"`
-	PreVerificationGas   *big.Int `json:"preVerificationGas"`
-	VerificationGasLimit *big.Int `json:"verificationGasLimit"`
-	CallGasLimit         *big.Int `json:"callGasLimit"`
-	MaxFeePerGas         *big.Int `json:"maxFeePerGas"`
-	MaxPriorityFeePerGas *big.Int `json:"maxPriorityFeePerGas"`
+	PayMasterAndData     string `json:"paymasterAndData"`
+	PreVerificationGas   string `json:"preVerificationGas"`
+	VerificationGasLimit string `json:"verificationGasLimit"`
+	CallGasLimit         string `json:"callGasLimit"`
+	MaxFeePerGas         string `json:"maxFeePerGas"`
+	MaxPriorityFeePerGas string `json:"maxPriorityFeePerGas"`
 	//v0.7
-	AccountGasLimit               string   `json:"accountGasLimit" binding:"required"`
-	PaymasterVerificationGasLimit *big.Int `json:"paymasterVerificationGasLimit" binding:"required"`
-	PaymasterPostOpGasLimit       *big.Int `json:"paymasterPostOpGasLimit" binding:"required"`
-	GasFees                       string   `json:"gasFees" binding:"required"`
+	AccountGasLimit               string `json:"accountGasLimit" binding:"required"`
+	PaymasterVerificationGasLimit string `json:"paymasterVerificationGasLimit" binding:"required"`
+	PaymasterPostOpGasLimit       string `json:"paymasterPostOpGasLimit" binding:"required"`
+	GasFees                       string `json:"gasFees" binding:"required"`
 }
 
 type ComputeGasResponse struct {

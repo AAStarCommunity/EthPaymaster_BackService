@@ -183,19 +183,19 @@ func postExecute(apiKeyModel *model.ApiKeyModel, userOp *user_op.UserOpInput, st
 
 		UserOpResponse: &model.UserOpResponse{
 			PayMasterAndData:     utils.EncodeToHexStringWithPrefix(paymasterData),
-			PreVerificationGas:   gasResponse.OpEstimateGas.PreVerificationGas,
-			MaxFeePerGas:         gasResponse.OpEstimateGas.MaxFeePerGas,
-			MaxPriorityFeePerGas: gasResponse.OpEstimateGas.MaxPriorityFeePerGas,
-			VerificationGasLimit: gasResponse.OpEstimateGas.VerificationGasLimit,
-			CallGasLimit:         gasResponse.OpEstimateGas.CallGasLimit,
+			PreVerificationGas:   utils.ConvertBigIntToHexWithPrefix(gasResponse.OpEstimateGas.PreVerificationGas),
+			MaxFeePerGas:         utils.ConvertBigIntToHexWithPrefix(gasResponse.OpEstimateGas.MaxFeePerGas),
+			MaxPriorityFeePerGas: utils.ConvertBigIntToHexWithPrefix(gasResponse.OpEstimateGas.MaxPriorityFeePerGas),
+			VerificationGasLimit: utils.ConvertBigIntToHexWithPrefix(gasResponse.OpEstimateGas.VerificationGasLimit),
+			CallGasLimit:         utils.ConvertBigIntToHexWithPrefix(gasResponse.OpEstimateGas.CallGasLimit),
 		},
 	}
 
 	if strategy.GetStrategyEntrypointVersion() == global_const.EntrypointV07 {
 		result.UserOpResponse.AccountGasLimit = utils.EncodeToHexStringWithPrefix(gasResponse.OpEstimateGas.AccountGasLimit[:])
 		result.UserOpResponse.GasFees = utils.EncodeToHexStringWithPrefix(gasResponse.OpEstimateGas.GasFees[:])
-		result.UserOpResponse.PaymasterVerificationGasLimit = gasResponse.OpEstimateGas.PaymasterVerificationGasLimit
-		result.UserOpResponse.PaymasterPostOpGasLimit = gasResponse.OpEstimateGas.PaymasterPostOpGasLimit
+		result.UserOpResponse.PaymasterVerificationGasLimit = utils.ConvertBigIntToHexWithPrefix(gasResponse.OpEstimateGas.PaymasterVerificationGasLimit)
+		result.UserOpResponse.PaymasterPostOpGasLimit = utils.ConvertBigIntToHexWithPrefix(gasResponse.OpEstimateGas.PaymasterPostOpGasLimit)
 	}
 
 	return result, nil

@@ -93,7 +93,12 @@ func PackIntTo32Bytes(left *big.Int, right *big.Int) [32]byte {
 
 	return result
 }
+func ConvertHexToBigInt(hex string) *big.Int {
+	bigInt := new(big.Int)
+	bigInt.SetString(hex, 0)
+	return bigInt
 
+}
 func GetGasEntryPointGasPrice(maxFeePerGas *big.Int, maxPriorityFeePerGas *big.Int, baseFee *big.Int) *big.Int {
 	if maxFeePerGas == maxPriorityFeePerGas {
 		// is 1559 not support
@@ -108,6 +113,10 @@ func EncodeToHexStringWithPrefix(data []byte) string {
 	if res[:2] != "0x" {
 		return "0x" + res
 	}
+	return res
+}
+func ConvertBigIntToHexWithPrefix(data *big.Int) string {
+	res := fmt.Sprintf("0x%x", data)
 	return res
 }
 
