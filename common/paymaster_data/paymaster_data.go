@@ -31,7 +31,7 @@ func NewPaymasterDataInput(strategy *model.Strategy) *PaymasterDataInput {
 		tokenAddress = config.GetTokenAddress(strategy.GetNewWork(), strategy.Erc20TokenType)
 
 	} else {
-		tokenAddress = global_const.DummyAddress.String()
+		tokenAddress = global_const.EmptyAddress.String()
 		logrus.Debug("token address ", tokenAddress)
 	}
 
