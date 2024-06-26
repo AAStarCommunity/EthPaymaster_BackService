@@ -275,7 +275,7 @@ func GetPreVerificationGas(userOp *user_op.UserOpInput, strategy *model.Strategy
 		return nil, err
 	}
 	// add 10% buffer
-	preGas = preGas.Mul(preGas, global_const.HundredPlusTwoBigint)
+	preGas = preGas.Mul(preGas, global_const.HundredPlusFiveBigint)
 	preGas = preGas.Div(preGas, global_const.HundredBigint)
 	logrus.Debugf("GetPreVerificationGas preVerificationGas: %v", preGas)
 	return preGas, nil
