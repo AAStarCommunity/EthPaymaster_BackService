@@ -37,6 +37,7 @@ var (
 	TwoBigint                              = big.NewInt(2)
 	HundredPlusOneBigint                   = big.NewInt(110)
 	HundredPlusTwoBigint                   = big.NewInt(120)
+	HundredFiveTwoBigint                   = big.NewInt(150)
 	DummyPrivateKey                        *ecdsa.PrivateKey
 	DummyAddress                           common.Address
 	DummyPaymasterDataByte                 []byte
