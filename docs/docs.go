@@ -114,6 +114,22 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/paymaster_sponsor/token_price": {
+            "get": {
+                "description": "Get Token Price",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sponsor"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/v1/paymaster_sponsor/withdraw": {
             "post": {
                 "description": "Withdraw Sponsor",

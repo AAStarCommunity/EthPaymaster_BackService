@@ -1,6 +1,7 @@
 package main
 
 import (
+	"AAStarCommunity/EthPaymaster_BackService/common/price_compoent"
 	"AAStarCommunity/EthPaymaster_BackService/config"
 	"AAStarCommunity/EthPaymaster_BackService/envirment"
 	"AAStarCommunity/EthPaymaster_BackService/rpc_server/routers"
@@ -52,7 +53,6 @@ func main() {
 	}
 	initEngine(strategyPath, basicConfigPath, secretPath)
 	port := runMode()
-	os.Getenv("secret_config_path")
 	_ = Engine.Run(port)
 }
 
@@ -68,5 +68,6 @@ func initEngine(strategyPath string, basicConfigPath string, secretPath string) 
 	sponsor_manager.Init()
 	logrus.Infof("Environment: %s", envirment.Environment.Name)
 	logrus.Infof("Debugger: %v", envirment.Environment.Debugger)
+	price_compoent.Init()
 	Engine = routers.SetRouters()
 }

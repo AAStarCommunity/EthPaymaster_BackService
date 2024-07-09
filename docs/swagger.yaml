@@ -109,6 +109,16 @@ paths:
           description: OK
       tags:
       - DepositSponsor
+  /api/v1/paymaster_sponsor/token_price:
+    get:
+      consumes:
+      - application/json
+      description: Get Token Price
+      responses:
+        "200":
+          description: OK
+      tags:
+      - Sponsor
   /api/v1/paymaster_sponsor/withdraw:
     post:
       consumes:
