@@ -23,8 +23,8 @@ type Price struct {
 func init() {
 	URLMap = make(map[global_const.TokenType]string)
 	template := "https://api.coingecko.com/api/v3/simple/price?ids=%s&vs_currencies=usd"
-	for token, tokenSymple := range TokenSymbolMap {
-		URLMap[token] = fmt.Sprintf(template, tokenSymple)
+	for token, tokenSymbol := range TokenSymbolMap {
+		URLMap[token] = fmt.Sprintf(template, tokenSymbol)
 	}
 
 }
