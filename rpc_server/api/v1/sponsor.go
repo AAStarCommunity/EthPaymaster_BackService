@@ -192,6 +192,19 @@ func GetInfoByHash(txHash string, client *ethclient.Client) (*types.Transaction,
 	return tx, nil
 }
 
+// GetTokenPrice
+// @Tags Sponsor
+// @Description Get Token Price
+// @Accept json
+// @Product json
+// @Router /api/v1/paymaster_sponsor/token_price [get]
+// @Success 200
+func GetTokenPrice(ctx *gin.Context) {
+	response := model.GetResponse()
+	result := price_compoent.GetGlobalPriceMap()
+	response.WithDataSuccess(ctx, result)
+}
+
 // WithdrawSponsor
 // @Tags Sponsor
 // @Description Withdraw Sponsor

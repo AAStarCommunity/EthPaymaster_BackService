@@ -3,8 +3,6 @@ package price_compoent
 import (
 	"AAStarCommunity/EthPaymaster_BackService/common/global_const"
 	"AAStarCommunity/EthPaymaster_BackService/config"
-	"fmt"
-	"strconv"
 	"testing"
 )
 
@@ -43,11 +41,6 @@ func testGetPriceUsd(t *testing.T, tokenType global_const.TokenType) {
 	t.Logf("price:%v", price)
 }
 
-func TestDemo(t *testing.T) {
-	str := "0000000000000000000000000000000000000000000000000000000000000002"
-	fmt.Printf(strconv.Itoa(len(str)))
-}
-
-func TestGetCoinMarketPrice(t *testing.T) {
-	GetCoinMarketPrice()
+func TestGetCoinGeckoPrice(t *testing.T) {
+	GetConfigTokenPrice()
 }
