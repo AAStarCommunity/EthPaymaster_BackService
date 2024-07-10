@@ -1,6 +1,6 @@
 module AAStarCommunity/EthPaymaster_BackService
 
-go 1.22.4
+go 1.22.5
 
 require (
 	github.com/NethermindEth/starknet.go v0.7.0

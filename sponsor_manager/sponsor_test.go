@@ -77,6 +77,12 @@ func TestSponsor(t *testing.T) {
 				testReleaseBalanceWithActualCost(t, "test", mockUserOpHash2, true, big.NewFloat(0.5))
 			},
 		},
+		{
+			"TestLockBalanceRelease",
+			func(t *testing.T) {
+				ReleaseExpireLockBalance()
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, tt.test)
