@@ -74,7 +74,7 @@ func ReleaseExpireLockBalance() {
 			if err != nil {
 				logrus.Errorf("ReleaseUserOpHashLockWhenFail Error [%v]", err)
 			}
-			logrus.Info("Release Expire Lock Balance [%s]", userOpHash)
+			logrus.Infof("Release Expire Lock Balance [%s]", userOpHash)
 			continue
 		} else {
 			continue
