@@ -1,5 +1,5 @@
 ## build
-FROM golang:1.22.4-alpine3.19 AS build-env
+FROM golang:1.22.5-alpine3.19 AS build-env
 
 RUN apk add build-base
 
