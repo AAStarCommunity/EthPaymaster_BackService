@@ -48,7 +48,7 @@ func Init() {
 }
 func ReleaseExpireLockBalance() {
 	// Get All Lock Balance
-	logList, err := GetBalanceChangeLogByTimePeriod(time.Now().Add(-15*time.Minute), time.Now().Add(-5*time.Minute))
+	logList, err := GetBalanceChangeLogByTimePeriod(time.Now().Add(-20*time.Minute), time.Now().Add(-5*time.Minute))
 	if err != nil {
 		logrus.Errorf("ReleaseExpireLockBalance Error [%v]", err)
 	}
