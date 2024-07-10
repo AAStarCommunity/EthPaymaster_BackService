@@ -13,6 +13,7 @@ import (
 	"gorm.io/gorm"
 	"math/big"
 	"sync"
+	"time"
 )
 
 type Source string
@@ -38,6 +39,47 @@ func Init() {
 		}
 		relayDB = relayDBVar
 	})
+	go func() {
+		for {
+			time.Sleep(10 * time.Minute)
+			ReleaseExpireLockBalance()
+		}
+	}()
+}
+func ReleaseExpireLockBalance() {
+	// Get All Lock Balance
+	logList, err := GetBalanceChangeLogByTimePeriod(time.Now().Add(-15*time.Minute), time.Now().Add(-5*time.Minute))
+	if err != nil {
+		logrus.Errorf("ReleaseExpireLockBalance Error [%v]", err)
+	}
+	if len(logList) == 0 {
+		logrus.Info("[ReleaseExpireLockBalance] No Lock Balance")
+		return
+	}
+	lockMap := make(map[string]*UserSponsorBalanceUpdateLogDBModel)
+	releaseMap := make(map[string]*UserSponsorBalanceUpdateLogDBModel)
+	for _, changModel := range logList {
+		if changModel.UpdateType == global_const.UpdateTypeLock {
+			lockMap[changModel.UserOpHash] = changModel
+		} else if changModel.UpdateType == global_const.UpdateTypeRelease {
+			releaseMap[changModel.UserOpHash] = changModel
+		}
+	}
+
+	for userOpHash, lockModel := range lockMap {
+		_, ok := releaseMap[userOpHash]
+		if !ok {
+			userOpHashByte, _ := utils.DecodeStringWithPrefix(userOpHash)
+			_, err := ReleaseUserOpHashLockWhenFail(userOpHashByte, lockModel.IsTestNet)
+			if err != nil {
+				logrus.Errorf("ReleaseUserOpHashLockWhenFail Error [%v]", err)
+			}
+			logrus.Info("Release Expire Lock Balance [%s]", userOpHash)
+			continue
+		} else {
+			continue
+		}
+	}
 }
 
 //----------Functions----------

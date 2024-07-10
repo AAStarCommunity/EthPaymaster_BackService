@@ -5,6 +5,7 @@ import (
 	"AAStarCommunity/EthPaymaster_BackService/common/model"
 	"gorm.io/datatypes"
 	"math/big"
+	"time"
 )
 
 type UserSponsorBalanceUpdateLogDBModel struct {
@@ -25,6 +26,13 @@ func (UserSponsorBalanceUpdateLogDBModel) TableName() string {
 
 func AddBalanceChangeLog(changeDbModel *UserSponsorBalanceUpdateLogDBModel) error {
 	return relayDB.Create(changeDbModel).Error
+}
+func GetBalanceChangeLogByTimePeriod(startTime, endTime time.Time) (models []*UserSponsorBalanceUpdateLogDBModel, err error) {
+	tx := relayDB.Model(&UserSponsorBalanceUpdateLogDBModel{}).Where("created_at >= ?", startTime).Where("created_at <= ?", endTime).Where("update_type in (?)", []global_const.UpdateType{global_const.UpdateTypeLock, global_const.UpdateTypeRelease}).Find(&models)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return models, nil
 }
 
 func GetDepositAndWithDrawLog(userId string, IsTestNet bool) (models []*UserSponsorBalanceUpdateLogDBModel, err error) {
@@ -63,5 +71,14 @@ func GetChangeModel(updateType global_const.UpdateType, payUserId string, txHash
 		}
 	} else {
 		return nil, nil
+	}
+}
+
+func GetChangeModelByUserOpHash(userOpHash string, isTestNet bool) (ChangeModel *UserSponsorBalanceUpdateLogDBModel, err error) {
+	tx := relayDB.Model(ChangeModel).Where("user_op_hash = ?", userOpHash).Where("is_test_net", isTestNet).First(&ChangeModel)
+	if tx.Error != nil {
+		return nil, tx.Error
+	} else {
+		return ChangeModel, nil
 	}
 }
