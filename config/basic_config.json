@@ -26,6 +26,18 @@
         "USDC": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B"
       }
     },
+    "optimism-mainnet": {
+      "chain_id": "10",
+      "is_test": false,
+      "v06_entrypoint_address" : "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+      "v07_entrypoint_address" : "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
+      "v06_paymaster_address" : "0x38ADA9913e916a2BEbB5b5c1Bbbe0d6d4fFcBbF1",
+      "gas_token": "ETH",
+      "token_config": {
+        "USDT": "0x94b008aa00579c1307b0ef2c499ad98a8ce58e58",
+        "USDC": "0x0b2c639c533813f4aa9d7837caf62653d097ff85"
+      }
+    },
     "arbitrum-sepolia": {
       "chain_id": "421614",
       "is_test": true,
@@ -99,6 +111,10 @@
     "base-sepolia": [
       "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
       "0x0000000071727De22E5E9d8BAf0edAc6f37da032"
+    ],
+    "optimism-mainnet": [
+      "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+      "0x0000000071727De22E5E9d8BAf0edAc6f37da032"
     ]
   },
   "support_paymaster": {
@@ -120,6 +136,10 @@
     "base-sepolia": [
       "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
       "0x2"
+    ],
+    "optimism-mainnet": [
+      "0xF2147CA7f18e8014b76e1A98BaffC96ebB90a29f",
+      ""
     ]
   }
 }
