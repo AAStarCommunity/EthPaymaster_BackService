@@ -3,6 +3,7 @@ module AAStarCommunity/EthPaymaster_BackService
 go 1.22.4
 
 require (
+	github.com/InfluxCommunity/influxdb3-go v0.8.0
 	github.com/NethermindEth/starknet.go v0.7.0
 	github.com/deckarep/golang-set/v2 v2.6.0
 	github.com/ethereum/go-ethereum v1.14.3
@@ -24,15 +25,17 @@ require (
 
 require (
 	github.com/NethermindEth/juno v0.3.1 // indirect
+	github.com/apache/arrow/go/v15 v15.0.2 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.4.0 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/golang/snappy v0.0.5-0.20220116011046-fa5810519dcb // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
+	github.com/google/flatbuffers v24.3.7+incompatible // indirect
 	github.com/holiman/uint256 v1.2.4 // indirect
 	github.com/huin/goupnp v1.3.0 // indirect
+	github.com/influxdata/line-protocol/v2 v2.2.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/pgx/v5 v5.5.5 // indirect
@@ -41,11 +44,15 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
-	github.com/klauspost/compress v1.17.0 // indirect
+	github.com/klauspost/compress v1.17.7 // indirect
 	github.com/onsi/gomega v1.29.0 // indirect
+	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 // indirect
 	github.com/test-go/testify v1.1.4 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
+	github.com/zeebo/xxh3 v1.0.2 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240318140521-94a12d6c2237 // indirect
+	google.golang.org/grpc v1.64.0 // indirect
 	gorm.io/driver/mysql v1.4.7 // indirect
 )
 

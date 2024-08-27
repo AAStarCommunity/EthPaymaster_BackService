@@ -37,6 +37,7 @@ var TokenSymbolMap = map[global_const.TokenType]string{
 }
 
 func Init() {
+
 	go func() {
 		for {
 			GetConfigTokenPrice()
