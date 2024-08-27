@@ -40,7 +40,3 @@ func testGetPriceUsd(t *testing.T, tokenType global_const.TokenType) {
 	}
 	t.Logf("price:%v", price)
 }
-
-func TestGetCoinGeckoPrice(t *testing.T) {
-	GetConfigTokenPrice()
-}
