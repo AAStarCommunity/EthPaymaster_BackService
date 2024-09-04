@@ -104,6 +104,11 @@ func executePay(input *ExecutePayInput) (*model.PayResponse, error) {
 		logrus.Debugf("Not Need ExecutePay In SponsorWhitelist [%s]", input.UserOpSender)
 		return nil, nil
 	}
+	if config.IsSponsorWhiteApiList(input.ApiKey) {
+		logrus.Debugf("Not Need ExecutePay In SponsorWhiteKeylist [%s]", input.ApiKey)
+		return nil, nil
+	}
+
 	// TODO
 	//if config.IsTestNet(input.Network) {
 	//	logrus.Debugf("Not Need ExecutePay In TestNet [%s]", input.Network)
@@ -141,6 +146,7 @@ func executePay(input *ExecutePayInput) (*model.PayResponse, error) {
 }
 
 type ExecutePayInput struct {
+	ApiKey              string
 	ProjectUserId       string
 	PayType             global_const.PayType
 	ProjectSponsor      bool
@@ -161,6 +167,7 @@ func postExecute(apiKeyModel *model.ApiKeyModel, userOp *user_op.UserOpInput, st
 	logrus.Debug("postExecute paymasterData:", paymasterData)
 
 	_, err = executePay(&ExecutePayInput{
+		ApiKey:              apiKeyModel.ApiKey,
 		ProjectUserId:       strconv.FormatInt(apiKeyModel.UserId, 10),
 		PayType:             strategy.GetPayType(),
 		ProjectSponsor:      strategy.ProjectSponsor,

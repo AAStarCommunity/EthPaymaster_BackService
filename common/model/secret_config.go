@@ -28,6 +28,7 @@ type SponsorConfig struct {
 	SponsorTestClientUrl      string   `json:"sponsor_client_rpc_test_net"`
 	SponsorMainClientUrl      string   `json:"sponsor_client_rpc_main_net"`
 	FreeSponsorWhitelist      []string `json:"free_sponsor_whitelist"`
+	FreeSponsorAPIList        []string `json:"free_sponsor_white_api_list"`
 }
 
 type NetWorkSecretConfig struct {

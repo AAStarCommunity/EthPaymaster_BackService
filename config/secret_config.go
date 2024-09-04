@@ -42,6 +42,7 @@ func GetPaymasterSponsorChainId(isTestNet bool) *big.Int {
 }
 
 var sponsorWhitelist = mapset.NewSet[string]()
+var sponsorWhiteApiList = mapset.NewSet[string]()
 
 type SignerConfigMap map[global_const.Network]*global_const.EOA
 
@@ -107,10 +108,16 @@ func secretConfigInit(secretConfigPath string) {
 	if secretConfig.SponsorConfig.FreeSponsorWhitelist != nil {
 		sponsorWhitelist.Append(secretConfig.SponsorConfig.FreeSponsorWhitelist...)
 	}
+	if secretConfig.SponsorConfig.FreeSponsorAPIList != nil {
+		sponsorWhiteApiList.Append(secretConfig.SponsorConfig.FreeSponsorAPIList...)
+	}
 }
 
 func IsSponsorWhitelist(senderAddress string) bool {
 	return sponsorWhitelist.Contains(senderAddress)
+}
+func IsSponsorWhiteApiList(apiKey string) bool {
+	return sponsorWhiteApiList.Contains(apiKey)
 }
 func GetNetworkSecretConfig(network global_const.Network) model.NetWorkSecretConfig {
 	return secretConfig.NetWorkSecretConfigMap[string(network)]
